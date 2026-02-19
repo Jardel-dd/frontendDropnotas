@@ -7,7 +7,6 @@ import { Calendar } from 'primereact/calendar';
 import { useRef, useState, ReactNode } from 'react';
 import type { Calendar as CalendarRef } from 'primereact/calendar';
 import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
-import { Divider } from 'antd';
 
 type Periodo = Date[] | null;
 export type DateRangeValue = [Dayjs | null, Dayjs | null];

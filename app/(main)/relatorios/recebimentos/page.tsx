@@ -1,6 +1,5 @@
 'use client';
 import './styled.css';
-import dayjs from 'dayjs';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import React, { useEffect, useState } from 'react';
@@ -15,7 +14,6 @@ import { fetchRelatorioRecebimentos, mapDateRangeToIso } from './controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
 import { fetchFilteredPessoas, listThePessoas } from '@/app/components/fetchAll/listAllPessoas/controller';
-import { Divider } from 'antd';
 import { Button } from 'primereact/button';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
@@ -262,7 +260,6 @@ const RelatoriosRecebimentos: React.FC = () => {
                                     <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalNaoCancelados)}</strong>
                                 </div>
                             </div>
-                            <Divider />
                         </>
                     )}
                     {isDesktop && (
