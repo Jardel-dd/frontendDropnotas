@@ -1,0 +1,108 @@
+import React from 'react';
+
+export const IconReal = ({ isDarkMode }: { isDarkMode: boolean }) => {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="currentColor"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ color: isDarkMode ? '#FFFFFF99' : '#6c757d' }}
+        >
+            <text x="2" y="18" fontSize="16" fontWeight="bold" fill="currentColor">
+                R$
+            </text>
+        </svg>
+    );
+};
+
+export const IconPorcentagem = ({ isDarkMode }: { isDarkMode: boolean }) => {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="currentColor"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ color: isDarkMode ? '#FFFFFF99' : '#6c757d' }}
+        >
+            <text x="2" y="18" fontSize="16" fontWeight="bold" fill="currentColor">
+                %
+            </text>
+        </svg>
+    );
+};
+export const IconNumero = ({ isDarkMode }: { isDarkMode: boolean }) => {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="currentColor"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ color: isDarkMode ? '#FFFFFF99' : '#6c757d' }}
+        >
+            <text x="2" y="18" fontSize="16" fontWeight="bold" fill="currentColor">
+                N°
+            </text>
+        </svg>
+    );
+};
+
+export const IconDollar = ({ isDarkMode }: { isDarkMode: boolean }) => {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="currentColor"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ color: isDarkMode ? '#FFFFFF99' : '#6c757d' }}
+        >
+            <text x="2" y="18" fontSize="16" fontWeight="bold" fill="currentColor">
+                $
+            </text>
+        </svg>
+    );
+};
+export const IconCNPJ = () => (
+    <svg
+        id="Layer_1"
+        style={{ color: '#FFF' }}
+        fill="#FFF"
+        height="16"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <g>
+            <path d="m5 17c-.6 0-1-.4-1-1v-5.6l-.3.3c-.4.4-1 .4-1.4 0s-.4-1 0-1.4l2-2c.3-.3.7-.4 1.1-.2.4.1.6.5.6.9v8c0 .6-.4 1-1 1z" />
+        </g>
+        <g>
+            <path d="m13 17h-3c-.5 0-1-.2-1.4-.6s-.6-.9-.6-1.4v-2c0-.5.2-1 .6-1.4s.9-.6 1.4-.6h2v-2h-3c-.6 0-1-.4-1-1s.4-1 1-1h3c.5 0 1 .2 1.4.6s.6.9.6 1.4v2c0 .5-.2 1-.6 1.4s-.9.6-1.4.6h-2v2h3c.6 0 1 .4 1 1s-.4 1-1 1z" />
+        </g>
+        <g>
+            <path d="m19.5 17h-2.5c-.6 0-1-.4-1-1s.4-1 1-1h2.5c.1 0 .3-.1.4-.1s.1-.2.1-.4v-1c0-.1-.1-.3-.1-.4s-.3-.1-.4-.1h-1.5c-.6 0-1-.4-1-1s.4-1 1-1h1.5c.1 0 .3-.1.4-.1.1-.1.1-.2.1-.4v-1c0-.1-.1-.3-.1-.4-.1 0-.3-.1-.4-.1h-2.5c-.6 0-1-.4-1-1s.4-1 1-1h2.5c.7 0 1.3.3 1.8.7.4.5.7 1.1.7 1.8v1c0 .5-.2 1.1-.5 1.5.3.4.5 1 .5 1.5v1c0 .7-.3 1.3-.7 1.8s-1.1.7-1.8.7z" />
+        </g>
+    </svg>
+);
+export const IconSearch = () => (
+    <i className="pi pi-search" style={{ color: '#FFF' }}></i>
+);

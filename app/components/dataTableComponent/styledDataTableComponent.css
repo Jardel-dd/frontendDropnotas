@@ -1,0 +1,7 @@
+.p-dialog-footer {
+  display: flex !important;
+  flex-direction: row-reverse; 
+  justify-content: space-between !important; 
+  box-shadow: none;
+
+}

@@ -1,0 +1,15 @@
+/* styles.css */
+.button-icon {
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.icon-dark {
+    color: white;
+}
+
+.icon-light {
+    color: black;
+}

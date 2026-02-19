@@ -1,0 +1,12 @@
+.divMainForm{
+overflow:auto;
+width: 100%;
+min-height: 12,5rem;
+height: 100%;
+}
+
+.divBtnCreated{
+position: sticky;
+bottom: 0;
+z-index: 99;
+}

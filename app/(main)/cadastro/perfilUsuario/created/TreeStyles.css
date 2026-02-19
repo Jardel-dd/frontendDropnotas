@@ -1,0 +1,14 @@
+.tree-error {
+  border: 1px solid #FCA5A5 !important;
+  box-shadow: none !important;  /* Remove o box-shadow */
+}
+.p-tree .p-tree-container .p-treenode .p-treenode-content {
+  border-radius: 6px;
+  transition: box-shadow 0.2s;
+  padding: 0.5rem;
+  box-shadow: none !important;
+}
+.p-checkbox:not(.p-highlight) .p-checkbox-box {
+  border-color: var(--unchecked-border-color); 
+  background-color: var(--unchecked-background-color); 
+}

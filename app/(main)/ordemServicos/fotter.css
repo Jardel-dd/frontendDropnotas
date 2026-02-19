@@ -1,0 +1,9 @@
+.footer-flex > .flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  width: 100%;
+}
+.p-inputswitch.p-highlight .p-inputswitch-slider {
+    background-color: var(--primary-color);
+}

@@ -1,0 +1,88 @@
+.menu-item {
+    transition: background-color, color 0.3s;
+}
+
+.icon-large {
+    font-size: 2rem;
+}
+
+.logo-container {
+    max-width: 10rem;
+    width: 100%;
+}
+
+.logo-container-slim-plus {
+    max-width: 6rem;
+    width: 100%;
+}
+
+.menu-item-light {
+    color: black;
+}
+
+.menu-item-dark {
+    color: white;
+}
+
+.menu-item:hover,
+.menu-item:focus {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.menu-item:hover .layout-menuitem-icon,
+.menu-item:focus .layout-menuitem-icon {
+    color: white;
+}
+
+.menu-item-active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.menu-item-active .layout-menuitem-icon {
+    color: white;
+}
+
+.menu-item:hover,
+.menu-item:focus {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.menu-item:hover .layout-menuitem-text,
+.menu-item:focus .layout-menuitem-text {
+    color: white;
+}
+
+.menu-item-active {
+    background-color: var(--primary-color);
+    border-radius: 1rem;
+    padding: 0.5rem;
+}
+
+.menu-item-active .layout-menuitem-text {
+    color: white;
+}
+
+
+.topbar-menubutton {
+    display: inline-block; 
+}
+@media (max-width: 768px) {
+    .topbar-menubutton {
+    }
+}
+
+.custom-button {
+    display: inline-block;
+}
+
+@media only screen and (max-width: 992px) {
+    .custom-button {
+        display: none;
+    }
+}
+
+
+

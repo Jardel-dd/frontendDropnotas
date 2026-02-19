@@ -1,0 +1,10 @@
+.p-dialog-footer {
+  display: flex !important;
+  justify-content: space-between !important;
+  flex-direction: row-reverse !important;
+  box-shadow: none;
+}
+.btn-sim:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}

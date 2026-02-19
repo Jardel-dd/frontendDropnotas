@@ -1,0 +1,17 @@
+.p-multiselect.p-invalid {
+    border: 1px solid #FCA5A5 !important; 
+}
+.p-multiselect-panel {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+.p-multiselect-panel .p-component .p-ripple-disabled .p-connected-overlay-enter-done{
+
+
+    background-color: red;
+}
+@media (max-width: 768px) {
+    .p-multiselect-panel {
+        max-height: 60vh;
+    }
+}

@@ -1,0 +1,189 @@
+.custom-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    width: 10rem;
+    align-items: center;
+    display: flex;
+}
+.custom-container {
+    height: 100%;
+}
+.custom-flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.custom-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.p-fileupload-basic.p-fileupload-valid,
+.p-fileupload-basic:focus,
+.p-fileupload-basic.p-fileupload-valid:focus {
+    border-color: none !important;
+    box-shadow: none !important;
+}
+.p-fileupload-basic.p-invalid {
+    border: 2px solid #fca5a5;
+    border-radius: 6px;
+}
+.dark-mode .p-fileupload-basic.p-invalid {
+    border: 1px solid #fca5a5;
+}
+.light-mode .p-fileupload-basic.p-invalid {
+    border: 1px solid #fca5a5;
+}
+
+.button-Imagem-Logo-top-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    box-shadow: none;
+}
+.flex-Img-Logo-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+.img-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.image-icon {
+    color: #777;
+    font-size: 5rem;
+}
+.hidden {
+    display: none;
+}
+.styled-container-main-all-routes {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 4.375rem - 3.8rem);
+}
+
+.p-dialog .styled-container-main-all-routes {
+    height: auto;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 1rem;
+    padding: 0;
+}
+
+.p-dialog .styled-container-main-all-routes .scrollable-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+/* mantém o botão fixo visível mesmo quando há rolagem */
+.p-dialog .styled-container-main-all-routes .custom-flex-bottom {
+    position: sticky;
+    bottom: 0;
+    background-color: #fff;
+    z-index: 10;
+    border-top: 1px solid #e0e0e0;
+    padding: 1rem;
+}
+.image-upload-containerDeskTop {
+    max-width: 180px;
+    max-height: 220px;
+    width: 100%;
+    height: 205px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-left: 1rem;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    position: relative;
+}
+.image-upload-containerMobile {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    position: relative;
+    height: 110px;
+    overflow: hidden;
+}
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight.p-focus {
+    outline: none;
+}
+.p-checkbox.p-highlight .p-checkbox-box {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.p-checkbox .p-checkbox-box {
+    border-color: var(--primary-color);
+}
+.p-checkbox .p-checkbox-box .p-checkbox-icon {
+    color: var(--checkbox-icon-color);
+}
+.p-checkbox:not(.p-highlight) .p-checkbox-box {
+    border-color: var(--unchecked-border-color);
+    background-color: var(--unchecked-background-color);
+}
+.custom-multiselect .p-multiselect-panel .p-multiselect-item:hover {
+    background-color: var(--hover-background-color);
+    color: var(--hover-text-color);
+}
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+    background: rgba(var(--primary-color), 0.5);
+}
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+    background-color: rgba(var(--primary-color), 0.5);
+}
+
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled).p-focus {
+    background-color: var(--hover-background-color);
+    color: var(--text-color);
+}
+/* .p-invalid .p-inputtext { 
+    border: 1px solid #FCA5A5;
+} */
+.p-calendar input:focus {
+    outline: none;
+    box-shadow: none;
+}
+.p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext {
+    box-shadow: none;
+    border-color: var(--primary-color);
+}
+.p-fileupload-choose {
+    width: 100%;
+    height: 40px;
+}
+
+.p-fileupload-basic .p-button:hover {
+    background-color: transparent !important;
+    color: white !important;
+}
+.custom-multiselect.p-invalid {
+    border: 1px solid #fca5a5 !important;
+}
+.p-fileupload-basic .p-fileupload-choose {
+    background-color: transparent;
+      box-shadow: none !important;
+}
+.p-fileupload-basic .p-button{
+   color: #6c757d !important;
+}
+.p-fileupload-basic .p-fileupload-choose .p-button-label {
+    color:#6c757d;
+    box-shadow: none !important;
+}

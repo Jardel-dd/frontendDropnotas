@@ -1,0 +1,33 @@
+export const getStatusClass = (status: string) => {
+  switch (status) {
+    case "ABERTA":
+      return "bg-blue-100 text-blue-700 border border-blue-300";
+    case "PENDENTE":
+      return "bg-yellow-100 text-yellow-700 border border-yellow-300";
+    case "PROCESSANDO":
+      return "bg-purple-100 text-purple-700 border border-purple-300";
+    case "AUTORIZADA":
+      return "bg-green-100 text-green-700 border border-green-300";
+    case "REJEITADA":
+      return "bg-red-100 text-red-700 border border-red-300";
+    case "CANCELADA":
+      return "bg-gray-200 text-gray-700 border border-gray-300";
+    default:
+      return "bg-gray-100 text-gray-600 border border-gray-200";
+  }
+};
+export const getStatusClassOs = (status: string) => {
+  const normalized = status?.toUpperCase() || "";
+  switch (normalized) {
+    case "EM ANDAMENTO":
+      return "bg-gray-200 text-gray-700 border border-gray-300";
+    case "ORCADA":
+      return "bg-purple-100 text-purple-700 border border-purple-300";
+    case "FINALIZADA":
+      return "bg-green-100 text-green-700 border border-green-300";
+    case "CANCELADA":
+      return "bg-red-100 text-red-700 border border-red-300";
+    default:
+      return "bg-gray-100 text-gray-600 border border-gray-200";
+  }
+};

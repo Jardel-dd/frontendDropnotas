@@ -1,0 +1,117 @@
+
+.p-checkbox.p-highlight .p-checkbox-box {
+
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight.p-focus {
+    outline: none; 
+}
+.p-checkbox .p-checkbox-box {
+    border-color: var(--primary-color); 
+}
+.p-checkbox .p-checkbox-box .p-checkbox-icon {
+    color: var(--checkbox-icon-color); 
+}
+.p-checkbox:not(.p-highlight) .p-checkbox-box {
+    border-color: var(--unchecked-border-color); 
+    background-color: var(--unchecked-background-color); 
+}
+.custom-multiselect .p-multiselect-panel .p-multiselect-item:hover {
+    background-color: var(--hover-background-color); 
+    color: var(--hover-text-color); 
+}
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight { 
+    background: rgba(var(--primary-color), 0.5); }
+     .p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+     background-color: rgba(var(--primary-color), 0.5); 
+    }
+
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled).p-focus {
+    background-color: var(--hover-background-color);
+    color: var(--text-color);
+}
+.p-invalid .p-inputtext { border: 1px solid #FCA5A5;
+}
+.p-fileupload-choose .p-button-icon {
+    display: none;
+}
+.centered-container {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+  }
+  .img-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .custom-textUser {
+    font-size: 3rem;
+    color: gray;
+  }
+.image-upload-containerMobileFotoUserConta {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    position: relative;
+    height: 110px; 
+    overflow: hidden;
+}
+.image-upload-containerDeskTopFotoUserConta {
+    max-width:130px;
+    max-height:130px;
+    width: 120px;
+    height: 120px;
+    padding: 0.2rem;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    overflow: hidden,
+}
+.button-Imagem-Logo-top-right {
+    position: absolute;
+    top: 4;
+    right: 0;
+    box-shadow: none;
+}
+.flex-Img-Logo-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+.img-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.image-icon {
+    color: #777;
+    font-size: 5rem;
+}
+.hidden {
+    display: none;
+}
+
+.input-error {
+    border: 1px solid #FCA5A5; 
+    border-radius:6px ;
+}
+
+.p-inputswitch.p-highlight .p-inputswitch-slider{
+  background: var(--primary-color);
+}

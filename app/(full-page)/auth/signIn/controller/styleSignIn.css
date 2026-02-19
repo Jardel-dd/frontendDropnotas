@@ -1,0 +1,23 @@
+.containerRecuperarSenha {
+    width: 100%;
+    max-width: 50rem;
+  }
+  .input-container {
+    width: 100%;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .input-icon-left {
+  
+    padding-left: 2rem;
+  }
+  .mb-4 {
+    margin-bottom: 1rem;
+  }
+  .center-contentStyleBtnRecuperar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
