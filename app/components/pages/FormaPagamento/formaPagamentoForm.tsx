@@ -53,6 +53,7 @@ const FormaPagamentoForm = forwardRef<FormaPagamentoFormRef, FormaPagamentoFormP
     const [isLoading, setIsLoading] = useState(true);
     const [isEditMode, setIsEditMode] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoEntity>(
         new FormaPagamentoEntity({
             ativo: true,
@@ -90,7 +91,8 @@ const FormaPagamentoForm = forwardRef<FormaPagamentoFormRef, FormaPagamentoFormP
     };
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        setStateDisableBtnCreatedFormaPagamento(true);
+       if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
         try {
             if (isEditMode && formaPagamentoId) {
                 await updateFormaPagamento(

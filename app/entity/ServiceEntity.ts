@@ -295,6 +295,8 @@ export class ServiceEntity {
     codigo_nbs?: string;
     codigo_inter_contr?: string;
 
+    aliquota_deducoes?: number;
+
     codigo_indicador_operacao?: string;
 
     tipo_operacao?: number;
@@ -346,7 +348,8 @@ export class ServiceEntity {
         percentual_diferencial_municipal,
         percentual_diferencial_cbs,
         valor_servico,
-        valor_desconto
+        valor_desconto,
+        aliquota_deducoes
     }: {
         ativo?: boolean;
         id_servico?: string;
@@ -361,6 +364,7 @@ export class ServiceEntity {
         iss_retido?: string;
 
         observacoes?: string;
+     aliquota_deducoes?: number;
 
         codigo_municipio?: string;
         numero_processo?: string;
@@ -421,7 +425,8 @@ export class ServiceEntity {
             percentual_diferencial_municipal,
             percentual_diferencial_cbs,
             valor_servico,
-            valor_desconto
+            valor_desconto,
+            aliquota_deducoes
         });
     }
 
@@ -456,12 +461,14 @@ export class ServiceEntity {
         percentual_diferencial_municipal,
         percentual_diferencial_cbs,
         valor_servico,
-        valor_desconto
+        valor_desconto,
+        aliquota_deducoes
     }: {
         ativo?: boolean;
         id?: number;
         id_servico?: string;
         descricao?: string;
+        aliquota_deducoes?: number;
         descricao_completa?: string;
         codigo?: string;
         item_lista_servico?: string;
@@ -497,6 +504,8 @@ export class ServiceEntity {
             descricao: descricao ?? this.descricao,
             descricao_completa: descricao_completa ?? this.descricao_completa,
             codigo: codigo ?? this.codigo,
+                        aliquota_deducoes: aliquota_deducoes ?? this.aliquota_deducoes,
+
             item_lista_servico: item_lista_servico ?? this.item_lista_servico,
             exigibilidade_iss: exigibilidade_iss ?? this.exigibilidade_iss,
             iss_retido: iss_retido ?? this.iss_retido,

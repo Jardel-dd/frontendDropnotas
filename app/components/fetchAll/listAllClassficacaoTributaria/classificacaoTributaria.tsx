@@ -37,7 +37,7 @@ export default function ClassificacaoTributariaEDropdownField({ selectedClassifi
                 fetchAllItems={fetchAllClassificacaoTributaria}
                 fetchFilteredItems={fetchFilteredClassificacaoTributaria}
                 optionValue="codigo"
-                placeholder="Selecione o código CNAE"
+                placeholder="Selecione uma opção"
                 optionLabel={'descricao' as keyof TableCNAEEntity}
                 hasError={hasError}
                 errorMessage={errorMessage}

@@ -22,7 +22,6 @@ export type LoginResponse = {
 function SignUp() {
     const router = useRouter();
     const msgs = useRef<Messages>(null);
-    const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [cnpjBuscado, setCnpjBuscado] = useState<string>('');
     const [loadingCnpj, setLoadingCnpj] = useState<boolean>(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -42,6 +41,7 @@ function SignUp() {
         })
     );
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
     const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
     const handleAllChanges = (event: {
@@ -75,16 +75,15 @@ function SignUp() {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         msgs.current?.clear();
-        console.log(' userConta1:', userConta);
-        console.log('✅ Validação passou! Enviando para o endpoint...');
-        setIsLoggingIn(true);
+        if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
         try {
             await create(userConta, router, msgs);
             console.log('Requisição enviada com sucesso.');
         } catch (error) {
             console.error('Erro ao criar conta:', error);
         } finally {
-            setIsLoggingIn(false);
+            setIsLoadingBtnCreated(false);
         }
     };
     useEffect(() => {
@@ -110,7 +109,7 @@ function SignUp() {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                {isLoggingIn && <LoadingScreen loadingText="Criando sua conta, por favor, aguarde..." />}
+                {isLoadingBtnCreated && <LoadingScreen loadingText="Criando sua conta, por favor, aguarde..." />}
                 <div className="styled-containerSignUp-SignIn">
                     <Messages ref={msgs} className="custom-messages" />
                     <div className="card styled-container-login-register">
@@ -249,11 +248,11 @@ function SignUp() {
                             </div>
                         </div>
                         <Button
-                            label={isLoggingIn ? 'Criando conta...' : 'Criar conta'}
-                            icon={isLoggingIn ? 'pi pi-spin pi-spinner' : undefined}
+                            label={isLoadingBtnCreated ? 'Criando conta...' : 'Criar conta'}
+                            icon={isLoadingBtnCreated ? 'pi pi-spin pi-spinner' : undefined}
                             className="mb-4"
                             disabled={
-                                isLoggingIn ||
+                                isLoadingBtnCreated ||
                                 Object.keys(errors).length > 0 ||
                                 !userConta.cnpj ||
                                 !userConta.razao_social ||

@@ -20,7 +20,6 @@ export const IconReal = ({ isDarkMode }: { isDarkMode: boolean }) => {
         </svg>
     );
 };
-
 export const IconPorcentagem = ({ isDarkMode }: { isDarkMode: boolean }) => {
     return (
         <svg

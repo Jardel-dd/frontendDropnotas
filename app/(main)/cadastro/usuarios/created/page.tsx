@@ -141,7 +141,6 @@ export default function CriarUserConta() {
                    nfseTipoVisualizacao:''
                }));
    
-   
     const [userConta, setUserConta] = useState<UsuarioContaEntity>(
         new UsuarioContaEntity({
             ativo: true,
@@ -158,6 +157,7 @@ export default function CriarUserConta() {
     const [confirmPassword, setConfirmPassword] = useState<string>('');
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showModalUserConta, setShowModalUserConta] = useState(false);
+    const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [showModalPerfilUser, setShowModalPerfilUser] = useState(false);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity[]>([]);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
@@ -225,6 +225,8 @@ export default function CriarUserConta() {
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         msgs.current?.clear();
+         if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
         const isValid = validateFieldsUserConta(userConta, confirmPassword, selectedPerfilUser, selectedEmpresa, setErrors, msgs);
         if (!isValid) return;
         {

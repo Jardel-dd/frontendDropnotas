@@ -1,7 +1,7 @@
 'use client';
-import { useRef, useState } from 'react';
 import 'primeicons/primeicons.css';
 import '@/app/styles/styledGlobal.css';
+import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
 import { useSearchParams } from 'next/navigation';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';

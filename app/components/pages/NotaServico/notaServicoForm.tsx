@@ -116,6 +116,7 @@ const NotaServicoForm = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(
                 })
             })
         );
+        const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
         const [dateRange, setDateRange] = useState<Date[] | null>([new Date(), new Date()]);
         const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity | null>(null);
         const [selectedCliente, setSelectedCliente] = useState<PessoaEntity | null>(null);
@@ -146,6 +147,8 @@ const NotaServicoForm = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(
         const handleSubmit = async (event: React.FormEvent) => {
             event.preventDefault();
             msgs.current?.clear();
+             if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
             const validationErrors: { [key: string]: string } = {};
             if (!gerarNfse.competencia) validationErrors.competencia = 'Competência é obrigatória';
             if (Object.keys(validationErrors).length > 0) {

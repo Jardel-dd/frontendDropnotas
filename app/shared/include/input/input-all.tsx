@@ -74,7 +74,6 @@ function Input({
     const { layoutConfig } = useContext(LayoutContext);
     const [isLoading, setIsLoading] = useState(false);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
-
     const debounced = useDebouncedCallback(async (event: ChangeEvent<HTMLInputElement>) => {
         console.log('debounce:', event.target.value);
         if (onChange) {
@@ -107,7 +106,6 @@ function Input({
                         {typeof iconLeft === 'string' ? <i className={`pi ${iconLeft}`} style={{ color: isDarkMode ? '#E3E6E8' : '#495057' }}></i> : iconLeft}
                     </span>
                 )}
-
                 <div className="w-full">
                     <InputText
                         id={id}

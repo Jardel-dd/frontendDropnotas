@@ -12,38 +12,37 @@ export const validateFieldsServicos = (
     if (!service.descricao || service.descricao.trim().length < 2) {
         newErrors.descricao = 'A descrição deve ter pelo menos 2 caracteres.';
         valid = false;
-    } else if (!service.item_lista_servico) {
-        newErrors.item_lista_servico = 'Este Campo deve ser selecionado.';
-        valid = false;
-    } else if (
-        service.valor_servico === null ||
-        service.valor_servico === undefined ||
-        isNaN(service.valor_servico) ||
-        service.valor_servico <= 0
-    ) {
+    } else if ( service.valor_servico === null ||service.valor_servico === undefined ||isNaN(service.valor_servico) ||service.valor_servico <= 0) {
         newErrors.valor_servico = 'Informe um valor válido.';
         valid = false;
-    } else if (service.iss_retido === null || service.iss_retido === undefined || service.iss_retido === '') {
+    } else if (!service.iss_retido || service.iss_retido.trim().length < 2) {
         newErrors.iss_retido = 'Este Campo deve ser selecionado.';
         valid = false;
     } else if (!service.exigibilidade_iss || service.exigibilidade_iss.trim().length < 2) {
         newErrors.exigibilidade_iss = 'Este Campo deve ser selecionado.';
         valid = false;
+   
     } else if (!service.codigo_situacao_tributaria || service.codigo_situacao_tributaria.trim().length < 2) {
         newErrors.codigo_situacao_tributaria = 'Este Campo deve ser selecionado.';
         valid = false;
+    } else if (!service.codigo_classificacao_tributaria || service.codigo_classificacao_tributaria.trim().length < 2) {
+        newErrors.codigo_classificacao_tributaria = 'Este Campo deve ser selecionado.';
+        valid = false;
+    } else if (!service.codigo_situacao_tributaria_regular || service.codigo_situacao_tributaria_regular.trim().length < 2) {
+        newErrors.codigo_situacao_tributaria_regular = 'Este Campo deve ser selecionado.';
+        valid = false;
+    } else if (!service.item_lista_servico) {
+        newErrors.item_lista_servico = 'Este Campo deve ser selecionado.';
+        valid = false;
+
+
     } else if (!service.responsavel_retencao || service.responsavel_retencao.trim().length < 2) {
         newErrors.responsavel_retencao = 'Este Campo deve ser selecionado.';
         valid = false;
-    } else if (!service.codigo_municipio || service.codigo_municipio.length < 2) {
-        newErrors.codigo_municipio = 'Campo deve ter no mínimo 2 números.';
+    } else if (!service.codigo_indicador_operacao || service.codigo_indicador_operacao.trim().length < 2) {
+        newErrors.codigo_indicador_operacao = 'Este Campo deve ser selecionado.';
         valid = false;
-    } else if (!service.codigo_cnae) {
-        newErrors.codigo_cnae = 'Este Campo deve ser selecionado.';
-        valid = false;
-         } else if (!service.codigo_cnae) {
-        newErrors.codigo_cnae = 'Este Campo deve ser selecionado.';
-        valid = false;
+
     } else {
         valid = true;
     }

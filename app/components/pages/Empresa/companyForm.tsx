@@ -118,6 +118,8 @@ const EmpresaForm = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initialId, m
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [userConta, setUserConta] = useState<UsuarioContaEntity[]>([]);
+    const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
+
     const [loadingFileUpload, setLoadingFileUpload] = useState<boolean>(false);
     const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
     const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
@@ -218,7 +220,8 @@ const EmpresaForm = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initialId, m
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         msgs.current?.clear();
-        setStateDisableBtnCreatedCompany(true);
+        if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
         try {
             const data = { ...empresa };
             if (data.cnpj) {

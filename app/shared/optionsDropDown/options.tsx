@@ -180,6 +180,42 @@ export const responsavelRetencao = [
     { label: 'Tomador', value: 'TOMADOR' },
     { label: 'Intermediário ', value: 'INTERMEDIARIO ' }
 ];
+export const codigoIndicadorOperacao = [
+  { label: 'Operação Bem Imóvel', value: 'OPERACAO_BEM_IMOVEL' },
+  { label: 'Serviço Prestado Sobre Bem Imóvel', value: 'SERVICO_PRESTADO_SOBRE_BEM_IMOVEL' },
+  { label: 'Serviço de Administração / Intermediação de Bem Imóvel', value: 'SERVICO_ADMINISTRACAO_INTERMEDIACAO_BEM_IMOVEL' },
+  { label: 'Serviço Prestado Sobre Pessoa', value: 'SERVICO_PRESTADO_SOBRE_PESSOA' },
+  { label: 'Planejamento, Organização e Administração de Eventos', value: 'PLANEJAMENTO_ORGANIZACAO_ADMINISTRACAO_EVENTOS' },
+  { label: 'Serviço Prestado Sobre Bem Móvel', value: 'SERVICO_PRESTADO_SOBRE_BEM_MOVEL' },
+  { label: 'Serviços Portuários', value: 'SERVICOS_PORTUARIOS' },
+  { label: 'Transporte de Passageiros', value: 'TRANSPORTE_PASSAGEIROS' },
+  { label: 'Transporte de Carga', value: 'TRANSPORTE_CARGA' },
+  { label: 'Exploração de Via', value: 'EXPLORACAO_VIA' },
+  { label: 'Cessão de Espaço para Serviços Publicitários Onerosas', value: 'CESSAO_ESPACO_SERVICOS_PUBLICITARIOS_ONEROSAS' },
+  { label: 'Cessão de Espaço para Serviços Publicitários Não Onerosas', value: 'CESSAO_ESPACO_SERVICOS_PUBLICITARIOS_NAO_ONEROSAS' },
+  { label: 'Demais Serviços Onerosas', value: 'DEMAIS_SERVICOS_ONEROSAS' },
+  { label: 'Demais Serviços Não Onerosas', value: 'DEMAIS_SERVICOS_NAO_ONEROSAS' },
+  { label: 'Demais Bens Móveis Imateriais Onerosas', value: 'DEMAIS_BENS_MOVEIS_IMATERIAIS_ONEROSAS' },
+  { label: 'Demais Bens Móveis Imateriais Não Onerosas', value: 'DEMAIS_BENS_MOVEIS_IMATERIAIS_NAO_ONEROSAS' },
+];
+export const codigoSituacaoTributariaRegular = [
+  { label: 'Integral', value: 'INTEGRAL' },
+  { label: 'Alíquotas Uniformes', value: 'ALIQUOTAS_UNIFORMES' },
+  { label: 'Alíquotas Uniformes Reduzidas', value: 'ALIQUOTAS_UNIFORMES_REDUZIDAS' },
+  { label: 'Alíquota Reduzida', value: 'ALIQUOTA_REDUZIDA' },
+  { label: 'Alíquota Fixa Proporcional', value: 'ALIQUOTA_FIXA_PROPORCIONAL' },
+  { label: 'Isenção', value: 'ISENCAO' },
+  { label: 'Imunidade / Não Incidência', value: 'IMUNIDADE_NAO_INCIDENCIA' },
+  { label: 'Diferimento', value: 'DIFERIMENTO' },
+  { label: 'Diferimento com Redução de Alíquota', value: 'DIFERIMENTO_COM_REDUCAO_ALIQUOTA' },
+  { label: 'Suspensão', value: 'SUSPENSAO' },
+  { label: 'Tributação Monofásica', value: 'TRIBUTACAO_MONOFASICA' },
+  { label: 'Transferência de Crédito', value: 'TRANSFERENCIA_CREDITO' },
+  { label: 'Ajuste IBS ZFM', value: 'AJUSTE_IBS_ZFM' },
+  { label: 'Ajustes', value: 'AJUSTES' },
+  { label: 'Tributação Regime Específico', value: 'TRIBUTACAO_REGIME_ESPECIFICO' },
+  { label: 'Exclusão da Base de Cálculo', value: 'EXCLUSAO_BASE_CALCULO' }
+];
 export const regimeTributarioOptions = [
     { label: 'Simples Nacional', value: 'SIMPLES_NACIONAL' },
     { label: 'Simples Nacional Excesso Sublimite', value: 'SIMPLES_NACIONAL_EXCESSO_SUBLIMITE' },

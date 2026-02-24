@@ -119,6 +119,7 @@ const PerfilUserChangeForm = forwardRef<PermissoesFormRef, PermissoesFormProps>(
             nfseTipoVisualizacao:""
         }));
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [selectedPerfilUser, setSelectedPerfilUser] = useState<PerfilUser>();
     const [selectedKeys, setSelectedKeys] = useState<TreeCheckboxSelectionKeys>({});
     const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
@@ -136,7 +137,8 @@ const PerfilUserChangeForm = forwardRef<PermissoesFormRef, PermissoesFormProps>(
     };
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        setStateDisableBtnCreatedPerfilUser(true);
+         if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
         try {
             if (isEditMode && perfilUserId) {
                 await updatePerfilUser(

@@ -184,6 +184,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
     const [showModalServico, setShowModalServico] = useState(false);
     const [showModalEmpresa, setShowModalEmpresa] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity[]>([]);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity[]>([]);
     const [reloadKeyFormaPagamento, setReloadKeyFormaPagamento] = useState(0);
@@ -344,6 +345,8 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
     };
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
+        if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
         msgs.current?.clear();
         const isValid = validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
         if (isValid) {
@@ -450,11 +453,10 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="card styled-container-main-all-routes">
                     <div className="scrollable-container">
-                        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
                             <div className="custom-flex-row">
                                 <div className="w-full">
                                     <div className="grid formgrid ">
-                                        <div className="col-12 mb-1 lg:col-9 lg:mb-0 ">
+                                        <div className="col-12 lg:col-10 mt-1">
                                             <Input
                                                 id="descricao"
                                                 value={contrato.descricao || ''}
@@ -472,7 +474,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                                                 required
                                             />
                                         </div>
-                                        <div className="col-12 mb-1 lg:col-3 lg:mb-0">
+                                        <div className="col-12 lg:col-2 mt-1">
                                             <CustomInputNumber
                                                 id="valor_servico"
                                                 value={contrato.valor_servico || 0}
@@ -488,7 +490,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                                                 required
                                             />
                                         </div>
-                                        <div className="col-12 mb-1 lg:col-3 lg:mb-0">
+                                        <div className="col-12 lg:col-3 mt-1">
                                             <Dropdown
                                                 id="periodicidade"
                                                 value={contrato.periodicidade ?? ''}
@@ -502,7 +504,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                                                 required
                                             />
                                         </div>
-                                        <div className="col-12 mb-1 lg:col-3 lg:mb-0 ">
+                                        <div className="col-12 lg:col-3 mt-1">
                                             <DropdownSearch<CompanyEntity>
                                                 id="selectedCompany"
                                                 selectedItem={selectedCompany}
@@ -523,7 +525,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                                                 required
                                             />
                                         </div>
-                                        <div className="col-12 mb-1 lg:col-3 lg:mb-0 ">
+                                        <div className="col-12 lg:col-3 mt-1">
                                             <DropdownSearch<ServiceEntity>
                                                 id="selectedService"
                                                 key={reloadKeyServico}
@@ -544,7 +546,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                                                 required
                                             />
                                         </div>
-                                        <div className="col-12 mb-1 lg:col-3 lg:mb-0 ">
+                                        <div className="col-12 lg:col-3 mt-1">
                                             <DropdownSearch<CategoryContratosEntity>
                                                 id="selectedCategoriaContrato"
                                                 key={reloadKeyCategoriaContrato}
@@ -565,7 +567,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                                                 required
                                             />
                                         </div>
-                                        <div className="col-12 mb-1 lg:col-3 lg:mb-0 ">
+                                        <div className="col-12 lg:col-3 mt-1">
                                             <DropdownSearch<FormaPagamentoEntity>
                                                 id="selectedFormadePagamento"
                                                 key={reloadKeyFormaPagamento}
@@ -586,7 +588,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                                                 required
                                             />
                                         </div>
-                                        <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
+                                        <div className="col-12 lg:col-6 mt-1">
                                             <CustomMultiSelect
                                                 id="selectedPessoa"
                                                 selectedItems={selectedPessoa}
@@ -649,7 +651,6 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                                     </div>
                                 </div>
                             </div>
-                        </form>
                     </div>
                     <div className="StyleContainer-btn-Created">
                         {showBTNPGCreatedAll && (

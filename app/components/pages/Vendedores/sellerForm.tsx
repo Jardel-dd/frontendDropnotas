@@ -44,7 +44,6 @@ interface VendedorFormProps {
 const VendedorForm = forwardRef<VendedorFormRef, VendedorFormProps>(({ initialId, msgs, onVendedorChange, onErrorsChange, redirectAfterSave, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }: VendedorFormProps, ref) => {
     const router = useRouter();
     const vendedorId = initialId;
-    const { isDarkMode } = useTheme();
     const [isLoading, setIsLoading] = useState(true);
     const [hasFocused, setHasFocused] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -52,10 +51,9 @@ const VendedorForm = forwardRef<VendedorFormRef, VendedorFormProps>(({ initialId
     const [loadingCep, setLoadingCep] = useState<boolean>(false);
     const [loadingCnpj, setLoadingCnpj] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [userConta, setUserConta] = useState<UsuarioContaEntity[]>([]);
+    const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
     const [stateDisableBtnCreatedVendedor, setStateDisableBtnCreatedVendedor] = useState(false);
-    const [selectedUserConta, setSelectedUserConta] = useState<UsuarioContaEntity | null>(null);
     const [vendedor, setVendedor] = useState<VendedorEntity>(
         new VendedorEntity({
             id: 0,
@@ -117,7 +115,8 @@ const VendedorForm = forwardRef<VendedorFormRef, VendedorFormProps>(({ initialId
     };
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        setStateDisableBtnCreatedVendedor(true);
+         if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
         try {
             if (isEditMode && vendedorId) {
                 await updateVendedor(vendedorId, vendedor, setErrors, msgs, router, setVendedor, redirectAfterSave ?? true);

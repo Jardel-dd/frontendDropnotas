@@ -4,13 +4,13 @@ import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
-import { IconReal } from '@/app/utils/icons/icons';
 import Input from '@/app/shared/include/input/input-all';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { forwardRef, RefObject, useEffect, useState } from 'react';
+import { IconPorcentagem, IconReal } from '@/app/utils/icons/icons';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import CNAEDropdownField from '../../fetchAll/listAllCnae/cnaeFiscal';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
@@ -23,7 +23,7 @@ import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created
 import { validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
 import { createServico, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { fetchAllCnae, fetchFilteredCnae, findCNAEByCodigo } from '../../fetchAll/listAllCnae/controller';
-import { exigibilidadeISSServico, issRetido, responsavelRetencao, situacaoTributaria } from '@/app/shared/optionsDropDown/options';
+import { codigoIndicadorOperacao, codigoSituacaoTributariaRegular, exigibilidadeISSServico, issRetido, responsavelRetencao, situacaoTributaria } from '@/app/shared/optionsDropDown/options';
 import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
 import ClassificacaoTributariaEDropdownField from '../../fetchAll/listAllClassficacaoTributaria/classificacaoTributaria';
 import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria } from '../../fetchAll/listAllClassficacaoTributaria/controller';
@@ -82,10 +82,12 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
             percentual_diferencial_municipal: 0,
             percentual_diferencial_cbs: 0,
             valor_servico: null,
-            valor_desconto: 0
+            valor_desconto: 0, 
+            aliquota_deducoes:0
         })
     );
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
     const [selectedClassificacaoTributaria, setSelectedClassificacaoTributaria] = useState<TableClassificacaoTributariaEntity | null>(null);
     const [selectedService, setSelectedService] = useState<ServiceEntity | null>(null);
@@ -93,8 +95,9 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
     const [stateDisableBtnCreatedService, setStateDisableBtnCreatedService] = useState(false);
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        setStateDisableBtnCreatedService(true);
-
+       if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
+        console.log("servico",servico)
         try {
             if (isEditMode && servicoId) {
                 await updateServico(servicoId, servico, setErrors, msgs, router, setServico, redirectAfterSave ?? true);
@@ -119,16 +122,7 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
         const _servicos = servico!.copyWith({ [event.target.id]: value });
         setServico(_servicos);
     };
-    const handleCNAEChange = (cnae: TableCNAEEntity | null) => {
-        setSelectedCNAE(cnae);
-        const updatedService = servico.copyWith({ codigo_cnae: cnae?.codigo || '' });
-        setServico(updatedService);
-        setErrors((prevErrors) => {
-            const newErrors = { ...prevErrors };
-            delete newErrors.codigo_cnae;
-            return newErrors;
-        });
-    };
+   
     const handleClassificacaoTributariaChange = (classificacaoTributaria: TableClassificacaoTributariaEntity | null) => {
         setSelectedClassificacaoTributaria(classificacaoTributaria);
         const updatedService = servico.copyWith({ codigo_classificacao_tributaria: classificacaoTributaria?.codigo || '' });
@@ -229,7 +223,7 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
             <div className="scrollable-container">
                 <div className="custom-flex-col">
                     <div className="grid formgrid">
-                        <div className="col-12 mt-1  lg:col-12 ">
+                        <div className="col-12 mt-1  lg:col-10 ">
                             <Input
                                 value={servico.descricao || ''}
                                 onChange={handleAllChanges}
@@ -247,23 +241,7 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 required
                             />
                         </div>
-                        <div className="col-12 mt-1  lg:col-4 ">
-                            <DropdownSearch<ServiceEntity>
-                                id="item_lista_servico"
-                                selectedItem={selectedService}
-                                onItemChange={handleServicoChange}
-                                fetchAllItems={searchServiceTable}
-                                fetchFilteredItems={searchServiceTable}
-                                optionLabel={'descricao' as keyof ServiceEntity}
-                                placeholder="Selecione um serviço"
-                                hasError={!!errors.item_lista_servico}
-                                errorMessage={errors.item_lista_servico}
-                                topLabel="Descrição da Atividade do Serviço::"
-                                showTopLabel
-                                required
-                            />
-                        </div>
-                        <div className="col-12 mt-1  lg:col-2 ">
+                        <div className="col-12 mt-1  lg:col-2">
                             <CustomInputNumber
                                 id="valor_servico"
                                 value={servico.valor_servico || 0}
@@ -279,7 +257,72 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 required
                             />
                         </div>
-                        <div className="col-12 mt-1  lg:col-2 ">
+                        <div className="col-12 mt-1 lg:col-4">
+                        <CustomInputNumber
+                                                        id="percentual_diferencial_municipal"
+                                                        value={servico.percentual_diferencial_municipal || 0}
+                                                        onChange={handleNumberChange}
+                                                        label="Percentual diferencial UF"
+                                                        useRightButton={true}
+                                                        outlined={true}
+                                                        hasError={!!errors.percentual_diferencial_municipal}
+                                                        errorMessage={errors.percentual_diferencial_municipal}
+                                                        topLabel="Diferencial UF:"
+                                                        showTopLabel
+                                                        required
+                                                        iconLeft={<IconPorcentagem isDarkMode={false} />}
+                                                    />
+                        </div>
+                        <div className="col-12 mt-1 lg:col-4">
+                        <CustomInputNumber
+                                                        id="aliquota_deducoes"
+                                                        value={servico.aliquota_deducoes || 0}
+                                                        onChange={handleNumberChange}
+                                                        label="Aliquota Deduções"
+                                                        useRightButton={true}
+                                                        outlined={true}
+                                                        hasError={!!errors.aliquota_deducoes}
+                                                        errorMessage={errors.aliquota_deducoes}
+                                                        topLabel="Aliquota Deduções:"
+                                                        showTopLabel
+                                                        required
+                                                                                                                iconLeft={<IconPorcentagem isDarkMode={false} />}
+
+                                                    />
+                        </div>
+                        <div className="col-12 mt-1 lg:col-4">
+                        <CustomInputNumber
+                                                        id="percentual_diferencial_cbs"
+                                                        value={servico.percentual_diferencial_cbs || 0}
+                                                        onChange={handleNumberChange}
+                                                        label="Percentual diferencial CBS"
+                                                        useRightButton={true}
+                                                        outlined={true}
+                                                        hasError={!!errors.percentual_diferencial_cbs}
+                                                        errorMessage={errors.percentual_diferencial_cbs}
+                                                        topLabel="Diferencial CBS:"
+                                                        showTopLabel
+                                                        required
+                                                        iconLeft={<IconPorcentagem isDarkMode={false} />}
+                                                    />
+                        </div>
+                        <div className="col-12 mt-1 lg:col-4">
+                        <CustomInputNumber
+                                                        id="percentual_diferencial_uf"
+                                                        value={servico.percentual_diferencial_uf || 0}
+                                                        onChange={handleNumberChange}
+                                                        label="Percentual diferencial UF"
+                                                        useRightButton={true}
+                                                        outlined={true}
+                                                        hasError={!!errors.percentual_diferencial_uf}
+                                                        errorMessage={errors.percentual_diferencial_uf}
+                                                        topLabel="Diferencial UF:"
+                                                        showTopLabel
+                                                        required
+                                                        iconLeft={<IconPorcentagem isDarkMode={false} />}
+                                                    />
+                        </div>
+                        <div className="col-12 mt-1 lg:col-4">
                             <Dropdown
                                 value={servico.iss_retido ?? ''}
                                 onChange={handleDropdownChange}
@@ -293,7 +336,7 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 required
                             />
                         </div>
-                        <div className="col-12 mt-1  lg:col-4 ">
+                        <div className="col-12 mt-1 lg:col-4">
                             <Dropdown
                                 id="exigibilidade_iss"
                                 value={servico.exigibilidade_iss ?? ''}
@@ -308,7 +351,7 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 required
                             />
                         </div>
-                        <div className="col-12 mt-1  lg:col-4 ">
+                        <div className="col-12 mt-1  lg:col-4">
                             <Dropdown
                                 id="codigo_situacao_tributaria"
                                 value={servico.codigo_situacao_tributaria ?? ''}
@@ -318,12 +361,69 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 filterBy={false}
                                 hasError={!!errors.codigo_situacao_tributaria}
                                 errorMessage={errors.codigo_situacao_tributaria}
-                                topLabel="Situação Tributário:"
+                                topLabel="Situação Tributária:"
                                 showTopLabel
                                 required
                             />
                         </div>
-                        <div className="col-12 mt-1  lg:col-4 ">
+                        <div className="col-12 mt-1  lg:col-4">
+                            <ClassificacaoTributariaEDropdownField
+                                selectedClassificacaoTributaria={selectedClassificacaoTributaria}
+                                onClassificacaoTributariaChange={handleClassificacaoTributariaChange}
+                                fetchAllClassificacaoTributaria={fetchAllClassificacaoTributaria}
+                                fetchFilteredClassificacaoTributaria={fetchFilteredClassificacaoTributaria}
+                                hasError={!!errors.codigo_classificacao_tributaria}
+                                errorMessage={errors.codigo_classificacao_tributaria}
+                                topLabel="Classificação Tributária:"
+                                showTopLabel
+                                required
+                            />
+                        </div>
+                        <div className="col-12 mt-1  lg:col-4">
+                             <Dropdown
+                                id="codigo_situacao_tributaria_regular"
+                                value={servico.codigo_situacao_tributaria_regular || ''}
+                                options={codigoSituacaoTributariaRegular}
+                                onChange={handleDropdownChange}
+                                label="Selecione uma opção"
+                                filterBy={false}
+                                hasError={!!errors.codigo_situacao_tributaria_regular}
+                                errorMessage={errors.codigo_situacao_tributaria_regular}
+                                topLabel="Classificação Tributária Regular"
+                                showTopLabel
+                                required
+                            />
+                        </div>
+                           <div className="col-12 mt-1  lg:col-4">
+                            <DropdownSearch<ServiceEntity>
+                                id="item_lista_servico"
+                                selectedItem={selectedService}
+                                onItemChange={handleServicoChange}
+                                fetchAllItems={searchServiceTable}
+                                fetchFilteredItems={searchServiceTable}
+                                optionLabel={'descricao' as keyof ServiceEntity}
+                                placeholder="Selecione um serviço"
+                                hasError={!!errors.item_lista_servico}
+                                errorMessage={errors.item_lista_servico}
+                                topLabel="Descrição da Atividade do Serviço:"
+                                showTopLabel
+                                required
+                            />
+                        </div>
+                         <div className="col-12 mt-1  lg:col-4">
+                            <Input
+                                value={servico.codigo_credito_presumido || ''}
+                                onChange={handleAllChanges}
+                                label="Codígo do crédito presumido"
+                                id="codigo_credito_presumido"
+                                hasError={!!errors.codigo_credito_presumido}
+                                errorMessage={errors.codigo_credito_presumido}
+                                topLabel="Crédito presumido:"
+                                maxLength={20}
+                                showTopLabel
+                            />
+                        </div>
+                        <div className="col-12 mt-1  lg:col-4">
                             <Dropdown
                                 id="responsavel_retencao"
                                 value={servico.responsavel_retencao ?? ''}
@@ -339,6 +439,21 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                             />
                         </div>
                         <div className="col-12 mt-1  lg:col-4">
+                              <Dropdown
+                                id="codigo_indicador_operacao"
+                                value={servico.codigo_indicador_operacao ?? ''}
+                                options={codigoIndicadorOperacao}
+                                onChange={handleDropdownChange}
+                                label="Selecione uma opção"
+                                filterBy={false}
+                                hasError={!!errors.codigo_indicador_operacao}
+                                errorMessage={errors.codigo_indicador_operacao}
+                                topLabel="Indicador de Operação:"
+                                showTopLabel
+                                required
+                            />
+                        </div>
+                          <div className="col-12 mt-1  lg:col-4">
                             <Input
                                 value={servico.codigo_municipio || ''}
                                 onChange={handleAllChanges}
@@ -350,86 +465,15 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 showTopLabel
                             />
                         </div>
-                        <div className="col-12 mt-1  lg:col-4 ">
-                            <CNAEDropdownField
-                                selectedCNAE={selectedCNAE}
-                                onCNAEChange={handleCNAEChange}
-                                fetchAllCnae={fetchAllCnae}
-                                fetchFilteredCnae={fetchFilteredCnae}
-                                hasError={!!errors.codigo_cnae}
-                                errorMessage={errors.codigo_cnae}
-                                topLabel="CNAE Fiscal:"
-                                showTopLabel
-                                required
-                            />
-                        </div>
-                        <div className="col-12 mt-1  lg:col-4 ">
-                            <ClassificacaoTributariaEDropdownField
-                                selectedClassificacaoTributaria={selectedClassificacaoTributaria}
-                                onClassificacaoTributariaChange={handleClassificacaoTributariaChange}
-                                fetchAllClassificacaoTributaria={fetchAllClassificacaoTributaria}
-                                fetchFilteredClassificacaoTributaria={fetchFilteredClassificacaoTributaria}
-                                hasError={!!errors.codigo_classificacao_tributaria}
-                                errorMessage={errors.codigo_classificacao_tributaria}
-                                topLabel="Classificação Tributária:"
-                                showTopLabel
-                                required
-                            />
-                        </div>
-                        <div className="col-12 mt-1  lg:col-4">
-                            <Input value={servico.numero_processo || ''} onChange={handleAllChanges} label="Numéro do Processo" id="numero_processo" topLabel="Numéro do Processo:" showTopLabel required />
-                        </div>
-                        <div className="col-12 mt-1  lg:col-4">
-                            <Input
-                                value={servico.codigo_credito_presumido || ''}
-                                onChange={handleAllChanges}
-                                label="Codígo do crédito presumido"
-                                id="codigo_credito_presumido"
-                                hasError={!!errors.codigo_credito_presumido}
-                                errorMessage={errors.codigo_credito_presumido}
-                                topLabel="Crédito presumido:"
-                                showTopLabel
-                                required
-                            />
-                        </div>
-                        <div className="col-12 mt-1  lg:col-4">
-                            <Input
-                                value={servico.codigo_classificacao_tributaria || ''}
-                                onChange={handleAllChanges}
-                                label="Codígo de classificação tributária:"
-                                id="codigo_classificacao_tributaria"
-                                hasError={!!errors.codigo_classificacao_tributaria}
-                                errorMessage={errors.codigo_classificacao_tributaria}
-                                topLabel="Classificação Tributária"
-                                showTopLabel
-                                required
-                            />
-                        </div>
-                        <div className="col-12 mt-1  lg:col-4">
-                            <Input
-                                value={servico.codigo_situacao_tributaria_regular || ''}
-                                onChange={handleAllChanges}
-                                label="Codígo de classificação tributária regular:"
-                                id="codigo_situacao_tributaria_regular"
-                                hasError={!!errors.codigo_situacao_tributaria_regular}
-                                errorMessage={errors.codigo_situacao_tributaria_regular}
-                                topLabel="Classificação Tributária"
-                                showTopLabel
-                                required
-                            />
-                        </div>
-                        <div className="col-12 mt-1  lg:col-4">
-                            <Input
-                                value={servico.codigo_indicador_operacao || ''}
-                                onChange={handleAllChanges}
-                                label="Codígo indicador de Operação"
-                                id="codigo_indicador_operacao"
-                                hasError={!!errors.codigo_indicador_operacao}
-                                errorMessage={errors.codigo_indicador_operacao}
-                                topLabel="Indicador de Operação:"
-                                showTopLabel
-                                required
-                            />
+                           <div className="col-12 mt-1  lg:col-4">
+                            <Input 
+                            value={servico.numero_processo || ''} 
+                            onChange={handleAllChanges} 
+                            label="Numéro do Processo" 
+                            id="numero_processo" 
+                            topLabel="Numéro do Processo:" 
+                            showTopLabel 
+                             />
                         </div>
                         <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-full">
                             <InputTextarea value={servico.descricao_completa || ''} onChange={handleAllChanges} rows={5} cols={30} label={''} id="descricao_completa" topLabel="Descrição Complementar:" showTopLabel />
@@ -446,12 +490,15 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                             stateDisableBtnCreatedService ||
                             Object.keys(errors).length > 0 ||
                             !servico.descricao?.trim() ||
+                            !servico.valor_servico ||
+                            !servico.codigo_situacao_tributaria ||
+                            !servico.codigo_classificacao_tributaria ||
+                            !servico.codigo_situacao_tributaria_regular ||
                             !servico.item_lista_servico ||
                             !servico.iss_retido ||
                             !servico.exigibilidade_iss ||
-                            !servico.responsavel_retencao ||
-                            !servico.codigo_municipio ||
-                            !servico.codigo_cnae
+                            !servico.responsavel_retencao  ||
+                            !servico.codigo_indicador_operacao 
                         }
                     />
                 )}
@@ -465,12 +512,15 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                             stateDisableBtnCreatedService ||
                             Object.keys(errors).length > 0 ||
                             !servico.descricao?.trim() ||
+                            !servico.valor_servico ||
+                            !servico.codigo_situacao_tributaria ||
+                            !servico.codigo_classificacao_tributaria ||
+                            !servico.codigo_situacao_tributaria_regular ||
                             !servico.item_lista_servico ||
                             !servico.iss_retido ||
                             !servico.exigibilidade_iss ||
-                            !servico.responsavel_retencao ||
-                            !servico.codigo_municipio ||
-                            !servico.codigo_cnae
+                            !servico.responsavel_retencao  ||
+                            !servico.codigo_indicador_operacao 
                         }
                     />
                 )}

@@ -93,6 +93,7 @@ const PessoaForm = forwardRef<PessoaFormRef, PessoaFormProps>(({
     const [showModalVendedor, setShowModalVendedor] = useState(false);
     const [selectedContato, setSelectedContato] = useState<any[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
     const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
     const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
@@ -150,6 +151,8 @@ const PessoaForm = forwardRef<PessoaFormRef, PessoaFormProps>(({
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         msgs.current?.clear();
+         if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
         try {
             if (isEditMode && pessoaId) {
                 await updatePessoa(pessoaId, pessoa, setErrors, msgs, router, setPessoa);

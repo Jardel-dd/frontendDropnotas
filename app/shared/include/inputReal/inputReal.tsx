@@ -1,8 +1,9 @@
-import './styleInpuReal.css';
 import { ReactNode, useContext, useRef } from 'react';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { Mandatory } from '../../mandatory/InputMandatory';
+
+import "./sytles.css"
 
 type CustomInputNumberProps = {
     value: number | string;
@@ -47,26 +48,23 @@ export function CustomInputNumber({
 }: CustomInputNumberProps) {
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
-
     const inputRef = useRef<HTMLInputElement>(null);
-
     return (
-        <div className="p-field" style={{ width: '100%', height: '71px' }}>
+        <div className="p-field" style={{ width: '100%' }}>
             {showTopLabel && topLabel && (
-                <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
+                <div style={{ height:25, display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
                     </label>
                 </div>
             )}
-            <div className={`p-inputgroup flex-1 ${className}`}>
+           <div className="p-inputgroup flex-1 custom-input-number styled-on-focus styled-on-hover" style={{ border: '1px solid rgb(62, 79, 98)', borderRadius: '6px' }}>
                 {iconLeft && (
-                    <span className="p-inputgroup-addon" style={{ background: isDarkMode ? '#293B51' : '#FFFFFF' }}>
-                        {typeof iconLeft === 'string' ? <i className={`pi ${iconLeft}`} style={{ color: isDarkMode ? '#E3E6E8' : '#495057' }} /> : iconLeft}
+                    <span className="p-inputgroup-addon" style={{ background: isDarkMode ? '#293B51' : '#FFFFFF', border: 'none' }}>
+                        {typeof iconLeft === 'string' ? <i className={`pi ${iconLeft}`} style={{ color: isDarkMode ? '#E3E6E8' : '#495057' }}></i> : iconLeft}
                     </span>
                 )}
-                <div className="w-full">
                     <InputNumber
                         inputRef={inputRef}
                         id={id}
@@ -90,12 +88,12 @@ export function CustomInputNumber({
                         currencyDisplay="code"
                         readOnly={readOnly}
                         placeholder={placeholder}
-                        className={`w-full ${hasError ? 'p-invalid' : ''} remove-ltb-borders themable-input`}
+                       
                     />
-                </div>
             </div>
-            {errorMessage && <small className="p-error">{errorMessage}</small>}
+           <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
         </div>
+        </div> 
     );
 }
 

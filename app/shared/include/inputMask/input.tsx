@@ -61,7 +61,6 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
 }) => {
     const { isDarkMode } = useTheme();
     const inputMaskRef = useRef<InputMask | null>(null);
-
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
         setTimeout(() => {
             const nativeInput = (inputMaskRef.current as any)?.inputElement as HTMLInputElement | undefined;

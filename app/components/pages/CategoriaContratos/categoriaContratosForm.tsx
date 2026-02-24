@@ -8,7 +8,7 @@ import { RefObject, useEffect, useState, forwardRef } from 'react';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { fetchAllCategoriaContrato, fetchCategoriaContratoByID } from '../../fetchAll/listAllCategoriaContrato/controller';
+import { fetchCategoriaContratoByID } from '../../fetchAll/listAllCategoriaContrato/controller';
 import { validateFieldsCategoriaContrato } from '@/app/(main)/cadastro/categoriaContratos/controller/validate';
 import { createdCategoriaContrato, updateCategoriaContrato } from '@/app/(main)/cadastro/categoriaContratos/controller/controller';
 export interface CategoriaContratoFormRef {
@@ -35,6 +35,7 @@ const CategoriaContratoForm = forwardRef<CategoriaContratoFormRef, CategoriaCont
         const categoriaContratoId = initialId;
         const [isLoading, setIsLoading] = useState(true);
         const [isEditMode, setIsEditMode] = useState(false);
+        const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
         const [errors, setErrors] = useState<{ [key: string]: string }>({});
         const [categoriaContrato, setCategoriaContrato] = useState<CategoryContratosEntity>(
             new CategoryContratosEntity({
@@ -54,8 +55,9 @@ const CategoriaContratoForm = forwardRef<CategoriaContratoFormRef, CategoriaCont
         };
         const handleSubmit = async (e?: React.FormEvent) => {
             if (e) e.preventDefault();
+          if (isLoadingBtnCreated) return;
+        setIsLoadingBtnCreated(true);
             setStateDisableBtnCreatedCategoriaContrato(true);
-            setIsLoading(true);
             try {
                 if (isEditMode && categoriaContratoId) {
                     await updateCategoriaContrato(
