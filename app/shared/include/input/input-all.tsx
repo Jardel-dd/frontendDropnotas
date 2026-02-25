@@ -100,7 +100,8 @@ function Input({
                     </label>
                 </div>
             )}
-            <div className="p-inputgroup flex-1 styled-on-focus styled-on-hover" style={{ border: '1px solid rgb(62, 79, 98)', borderRadius: '6px' }}>
+            <div className={`p-inputgroup flex-1 styled-on-focus styled-on-hover custom-input ${hasError ? 'input-error' : ''}`}
+            style={{ border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da', borderRadius: '6px' }}>
                 {iconLeft && (
                     <span className="p-inputgroup-addon" style={{ background: isDarkMode ? '#293B51' : '#FFFFFF', border: 'none' }}>
                         {typeof iconLeft === 'string' ? <i className={`pi ${iconLeft}`} style={{ color: isDarkMode ? '#E3E6E8' : '#495057' }}></i> : iconLeft}

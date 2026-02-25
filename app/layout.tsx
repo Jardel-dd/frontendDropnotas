@@ -10,6 +10,7 @@ import 'primereact/resources/themes/saga-blue/theme.css';
 import { LayoutProvider } from '../layout/context/layoutcontext';
 import { LoadingContext, LoadingProvider } from '@/layout/context/LoadingContext';
 import LoadingScreen from './loading';
+import { UserProvider } from './routes/protected/UserContext';
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     const { loading } = React.useContext(LoadingContext);
     return (
@@ -22,9 +23,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <body style={{ overflow: "hidden" }}>
                 <PrimeReactProvider>
                     <LoadingProvider>
+                        <UserProvider>
                         <LayoutProvider>
                             {loading ? <LoadingScreen loadingText={'Carregando...'} /> : children}
                         </LayoutProvider>
+                        </UserProvider>
                     </LoadingProvider>
                 </PrimeReactProvider>
             </body>

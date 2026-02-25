@@ -4,10 +4,6 @@ import { useUserContext } from '@/app/routes/protected/userUserContext';
 
 const AppMenu = () => {
     const { userConta } = useUserContext();
-    // console.log('Permissão empresa:', userConta?.perfilUsuario?.empresa);  
-    // console.log('dadosUsuario:', userConta);
-    // console.log('perfilUsuario:', userConta?.perfilUsuario);
-
     const model: MenuModel[] = [
         userConta?.perfilUsuario?.empresa ? {
             label: 'Dashboard',

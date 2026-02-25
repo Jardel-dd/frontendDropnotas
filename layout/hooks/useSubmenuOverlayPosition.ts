@@ -8,7 +8,6 @@ import { MenuContext } from '../context/menucontext';
 export const useSubmenuOverlayPosition = ({ target, overlay, container, when }: UseSubmenuOverlayPositionProps) => {
     const { isSlim, isSlimPlus, isHorizontal, setLayoutState } = useContext(LayoutContext);
     const { activeMenu } = useContext(MenuContext);
-
     const handleScroll = () => {
         setLayoutState((prevLayoutState) => ({
             ...prevLayoutState,
@@ -19,7 +18,6 @@ export const useSubmenuOverlayPosition = ({ target, overlay, container, when }: 
             resetMenu: true
         }));
     };
-
     const [bindScrollListener, unbindScrollListener] = useEventListener({
         type: 'scroll',
         target: container as React.Ref<HTMLElement>,

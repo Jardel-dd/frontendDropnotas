@@ -6,9 +6,7 @@ import { Mandatory } from '../../mandatory/InputMandatory';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import LoadingScreenComponent from '@/app/loading/loadingComponent';
-
 import React, { useState, useEffect, useContext, useRef, ChangeEvent, ReactNode } from 'react';
-
 interface SearchDropdownProps<T> {
     selectedItem: T | null;
     onItemChange: (item: T | null) => void;
@@ -232,7 +230,9 @@ export const DropdownSearch = <T extends Record<string, any>>({
                     style={{
                         width: '100%',
                         background: isDarkMode ? '#293B51' : '#FFFFFF',
-                        boxShadow: 'none'
+                        boxShadow: 'none',
+                        border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da'
+                        
                     }}
                     filterTemplate={() => (
                         <div className="p-2 flex align-items-center gap-2" style={{ width: '100%' }}>

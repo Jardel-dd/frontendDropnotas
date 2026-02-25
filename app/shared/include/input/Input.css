@@ -8,3 +8,6 @@
 .styled-on-hover:hover{
      border-color:var(--primary-color) !important;
 }
+.custom-input.input-error {
+    border-color: #fca5a5 !important; 
+}

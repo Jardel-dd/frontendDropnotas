@@ -13,6 +13,7 @@ export const authLogin = async (
       email: userConta.email.trim(),
       senha: userConta.senha.trim(),
     });
+    console.log("Login sucesso dados",response)
     const { token, refreshToken, dadosUsuario } = response.data;
     saveToken(token);
     saveRefreshToken(refreshToken);

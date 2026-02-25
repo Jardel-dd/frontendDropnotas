@@ -8,15 +8,15 @@
 .styled-on-hover:hover{
      border-color:var(--primary-color) !important;
 }
-
 .p-inputnumber-input .p-inputtext .p-component .p-filled{
 border: none !important;
 box-shadow: none !important;
-
 }
-
 .custom-input-number .p-inputnumber,
 .custom-input-number .p-inputnumber .p-inputtext {
     border: none !important;
     box-shadow: none !important;
+}
+.custom-input-number.input-error {
+    border-color: #fca5a5 !important; 
 }

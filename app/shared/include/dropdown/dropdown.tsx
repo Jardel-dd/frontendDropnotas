@@ -1,3 +1,4 @@
+import './styles.css'
 import { JSX, ReactNode, useContext } from 'react';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { SelectItemOptionsType } from 'primereact/selectitem';
@@ -57,7 +58,7 @@ function Dropdown({
     const isDarkMode = layoutConfig.colorScheme === 'dark';
 
     return (
-        <div className="p-field" style={{ width: '100%',height: '71px'  }}>
+        <div className="p-field" style={{ width: '100%',height: '71px',   }}>
             {showTopLabel && (topLabel 
             || topRightElement) && (
                 <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
@@ -86,7 +87,8 @@ function Dropdown({
                     style={{
                         width: '100%',
                         background: isDarkMode ? '#293B51' : '#FFFFFF',
-                        boxShadow: 'none'
+                        boxShadow: 'none',
+                        border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da', 
                     }}
                 />
             </div>

@@ -1,0 +1,22 @@
+.p-dropdown {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    transition: border-color 0.2s ease;
+}
+
+.dark .p-dropdown {
+    border: 1px solid #3e4f62;
+}
+
+.p-dropdown:hover {
+    border-color: var(--primary-color) !important;
+}
+
+.p-dropdown.p-focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: none !important;
+}
+
+.p-dropdown.p-invalid {
+    border-color: #fca5a5 !important;
+}
