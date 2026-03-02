@@ -66,10 +66,25 @@ export default function BlocoPrestador({
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-5">
-                    <Input id="razao_social" value={nfseGerada.prestador?.razao_social || ''} label="Razão Social:" onChange={(e) => handleAllChanges(e, 'prestador')} showTopLabel required topLabel="Razão Social do Prestador:" />
+                    <Input 
+                    id="razao_social" 
+                    value={nfseGerada.prestador?.razao_social || ''} 
+                    label="Razão Social:" 
+                    onChange={(e) => handleAllChanges(e, 'prestador')} 
+                    showTopLabel 
+                    required 
+                    topLabel="Razão Social do Prestador:" />
                 </div>
                 <div className="col-12 mb-1 lg:col-4">
-                    <Input id="nome_fantasia" value={nfseGerada.prestador?.nome_fantasia || ''} label="Nome Fantasia:" onChange={(e) => handleAllChanges(e, 'prestador')} showTopLabel required topLabel="Nome Fantasia do Prestador:" />
+                    <Input 
+                    id="nome_fantasia" 
+                    value={nfseGerada.prestador?.nome_fantasia || ''} 
+                    label="Nome Fantasia" 
+                    onChange={(e) => handleAllChanges(e, 'prestador')} 
+                    showTopLabel 
+                    required 
+                    topLabel="Nome Fantasia do Prestador:" 
+                    />
                 </div>
                 <div className="col-12 mb-1 lg:col-3 lg:mb-0">
                     <Input
@@ -124,7 +139,15 @@ export default function BlocoPrestador({
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-12 lg:mb-0">
-                    <Input value={nfseGerada.prestador?.email || ''} onChange={(e) => handleAllChanges(e, 'prestador')} label="E-mail" id="email" type="email" showTopLabel topLabel="E-mail:" />
+                    <Input 
+                    value={nfseGerada.prestador?.email || ''} 
+                    onChange={(e) => handleAllChanges(e, 'prestador')} 
+                    label="E-mail" 
+                    id="email" 
+                    type="email" 
+                    showTopLabel 
+                    topLabel="E-mail:" 
+                    />
                 </div>
             </div>
             <div className="grid formgrid ">

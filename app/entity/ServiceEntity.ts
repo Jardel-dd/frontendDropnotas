@@ -3,20 +3,21 @@ export class DetalServiceEntity {
     codigo?: string;
     codigo_cnae?: string;
     descricao!: string;
-    descricao_completa?: string;
-    codigo_municipio?: string;
+    valores!: DetalPrestadorValoresEntity;
     iss_retido!: string;
-    valor_total!: number;
     item_lista_servico!: string;
+    codigo_municipio?: string;
     numero_processo?: string;
     exigibilidade_iss!: string;
     responsavel_retencao!: string;
     municipio_incidencia?: string;
-    valores!: DetalPrestadorValoresEntity;
+    codigo_nbs?: string;
+    codigo_tributacao_municipio?: string;
+    tributacao_issqn?: string;
+    valor_total!: number;
     constructor({
         id_servico,
         descricao,
-        descricao_completa,
         codigo,
         codigo_municipio,
         iss_retido,
@@ -27,11 +28,13 @@ export class DetalServiceEntity {
         codigo_cnae,
         exigibilidade_iss,
         responsavel_retencao,
-        municipio_incidencia
+        municipio_incidencia,
+        codigo_nbs,
+    codigo_tributacao_municipio,
+    tributacao_issqn,
     }: {
         descricao: string;
         id_servico: number;
-        descricao_completa?: string;
         codigo?: string;
         codigo_municipio?: string;
         iss_retido?: string;
@@ -43,11 +46,13 @@ export class DetalServiceEntity {
         responsavel_retencao?: string;
         municipio_incidencia?: string;
         valores?: DetalPrestadorValoresEntity;
+        codigo_nbs?: string;
+    codigo_tributacao_municipio?: string;
+    tributacao_issqn?: string;
     }) {
         Object.assign(this, {
             descricao,
             id_servico,
-            descricao_completa,
             codigo,
             codigo_municipio,
             iss_retido,
@@ -58,13 +63,15 @@ export class DetalServiceEntity {
             codigo_cnae,
             exigibilidade_iss,
             responsavel_retencao,
-            municipio_incidencia
+            municipio_incidencia,
+        codigo_nbs,
+    codigo_tributacao_municipio,
+    tributacao_issqn,
         });
     }
     copyWith({
         descricao,
         id_servico,
-        descricao_completa,
         codigo,
         codigo_municipio,
         iss_retido,
@@ -75,11 +82,13 @@ export class DetalServiceEntity {
         numero_processo,
         exigibilidade_iss,
         responsavel_retencao,
-        municipio_incidencia
+        municipio_incidencia,
+        codigo_nbs,
+    codigo_tributacao_municipio,
+    tributacao_issqn,
     }: {
         descricao?: string;
         id_servico?: number;
-        descricao_completa?: string;
         codigo?: string;
         codigo_municipio?: string;
         iss_retido?: string;
@@ -91,11 +100,13 @@ export class DetalServiceEntity {
         municipio_incidencia?: string;
         valores?: DetalPrestadorValoresEntity;
         codigo_cnae?: string;
+        codigo_nbs?: string;
+    codigo_tributacao_municipio?: string;
+    tributacao_issqn?: string;
     }): DetalServiceEntity {
         return new DetalServiceEntity({
             descricao: descricao ?? this.descricao,
             id_servico: id_servico ?? this.id_servico,
-            descricao_completa: descricao_completa ?? this.descricao_completa,
             codigo: codigo ?? this.codigo,
             codigo_municipio: codigo_municipio ?? this.codigo_municipio,
             valor_total: valor_total ?? this.valor_total,
@@ -106,7 +117,11 @@ export class DetalServiceEntity {
             numero_processo: numero_processo ?? this.numero_processo,
             exigibilidade_iss: exigibilidade_iss ?? this.exigibilidade_iss,
             responsavel_retencao: responsavel_retencao ?? this.responsavel_retencao,
-            municipio_incidencia: municipio_incidencia ?? this.municipio_incidencia
+            municipio_incidencia: municipio_incidencia ?? this.municipio_incidencia,
+            codigo_nbs: codigo_nbs ?? this.codigo_nbs,
+            codigo_tributacao_municipio: codigo_tributacao_municipio ?? this.codigo_tributacao_municipio,
+            tributacao_issqn: tributacao_issqn ?? this.tributacao_issqn,
+
         });
     }
 }
@@ -276,44 +291,33 @@ export class ServiceEntity {
     id_servico?: string;
     ativo?: boolean;
     id?: number;
-
     descricao!: string;
     descricao_completa?: string;
     codigo!: string;
     item_lista_servico!: string;
-
     exigibilidade_iss!: string;
     iss_retido!: string;
-
     observacoes?: string;
-
     codigo_municipio!: string;
     numero_processo?: string;
     responsavel_retencao!: string;
-
     codigo_cnae?: string;
     codigo_nbs?: string;
     codigo_inter_contr?: string;
-
     aliquota_deducoes?: number;
-
     codigo_indicador_operacao?: string;
-
     tipo_operacao?: number;
     finalidade_nfse?: number;
     indicador_finalidade?: number;
     indicador_destinatario?: number;
-
     codigo_situacao_tributaria?: string;
     codigo_classificacao_tributaria?: string;
     codigo_situacao_tributaria_regular?: string;
     codigo_classificacao_tributaria_regular?: string;
     codigo_credito_presumido?: string;
-
     percentual_diferencial_uf?: number;
     percentual_diferencial_municipal?: number;
     percentual_diferencial_cbs?: number;
-
     valor_servico!: number | null;
     valor_desconto?: number;
 

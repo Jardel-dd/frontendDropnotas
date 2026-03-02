@@ -1,20 +1,22 @@
 import api from '@/app/services/api';
 import LoadingScreen from '@/app/loading';
+import { getToken } from '@/app/services/token';
 import { PrimeReactContext } from 'primereact/api';
 import React, { useContext, useState } from 'react';
 import type { AppConfigProps, ColorScheme } from '@/types';
+import { useUser } from '@/app/routes/protected/UserContext';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
-import { getToken } from '@/app/services/token';
 
 const BtnDarkLigth = (props: AppConfigProps) => {
     const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
     const { changeTheme } = useContext(PrimeReactContext);
+    const { userConta, setUserData } = useUser();
     const [loading, setLoading] = useState(false);
-   const toggleColorScheme = async () => {
+    const toggleColorScheme = async () => {
     const newColorScheme: ColorScheme =
-        layoutConfig.colorScheme === 'light' ? 'dark' : 'light';
-    console.log('🔄 Tema atual:', layoutConfig.colorScheme);
-    console.log('🆕 Novo tema:', newColorScheme);
+    layoutConfig.colorScheme === 'light' ? 'dark' : 'light';
+    console.log(' Tema atual:', layoutConfig.colorScheme);
+    console.log(' Novo tema:', newColorScheme);
     changeTheme?.(layoutConfig.colorScheme, newColorScheme, 'theme-link');
     setLayoutConfig((prevState) => ({
         ...prevState,
@@ -28,14 +30,20 @@ const BtnDarkLigth = (props: AppConfigProps) => {
     };
     console.log('Enviando para /configuracao/tema:', payload);
     try {
-        const response = await api.patch('/configuracao/tema', payload, {
-    headers: {
-        Authorization: `Bearer ${await getToken()}`
+    const response = await api.patch('/configuracao/tema', payload, {
+        headers: {
+            Authorization: `Bearer ${await getToken()}`
+        }
+    });
+    console.log('Resposta status:', response.status);
+    if (userConta) {
+        setUserData(
+            userConta.copyWith({
+                tema_componente: newColorScheme
+            })
+        );
     }
-});
-        console.log(' Resposta status:', response.status);
-        console.log(' Dados retornados:', response.data);
-    } catch (error: any) {
+} catch (error: any) {
         console.error('Erro ao atualizar o esquema de cor:', error);
         if (error.response) {
             console.error(error.response.status);

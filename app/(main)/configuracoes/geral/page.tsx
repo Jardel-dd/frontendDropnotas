@@ -31,7 +31,6 @@ const AppConfig = () => {
     const _changeTheme = (componentTheme: string) => {
         setIsLoading(true);
         setIsThemeChanging(true);
-
         changeTheme?.(
             layoutConfig.componentTheme,
             componentTheme,
@@ -41,7 +40,6 @@ const AppConfig = () => {
                     ...prevState,
                     componentTheme
                 }));
-
                 setTimeout(() => {
                     setIsLoading(false);
                     setIsThemeChanging(false);
@@ -71,14 +69,12 @@ const AppConfig = () => {
             layoutConfig.layoutTheme === 'primaryColor';
             console.log('layoutTheme atual:', layoutConfig.layoutTheme);
             console.log('usarCorPrimaria calculado:', usarCorPrimaria);
-
             const payload = {
                 esquema_cor: layoutConfig.componentTheme,
                 usarCorPrimaria: usarCorPrimaria
             };
-
             console.log(
-                '📤 Enviando para /configuracao/tema:',
+                ' Enviando tema:',
                 payload
             );
             const response = await api.patch(

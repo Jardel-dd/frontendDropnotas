@@ -1,12 +1,11 @@
 'use client'
 import React, {useState } from 'react';
-import { UserProvider, useUser } from '@/app/routes/protected/UserContext';
+import { UserProvider } from '@/app/routes/protected/UserContext';
 import type { ChildContainerProps, LayoutContextProps, LayoutConfig, LayoutState, Breadcrumb } from '@/types';
 
 export const LayoutContext = React.createContext({} as LayoutContextProps);
 
 export const LayoutProvider = (props: ChildContainerProps) => {
-     const { userConta } = useUser();
     const [tabs, setTabs] = useState<any[]>([]);
     const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]);
     const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
@@ -14,9 +13,9 @@ export const LayoutProvider = (props: ChildContainerProps) => {
         inputStyle: 'outlined',
         menuMode: 'slim-plus',  
         colorScheme: 'dark',
-        componentTheme: 'green',
+        componentTheme: 'pink',
         scale: 14,
-        theme: 'green',
+        theme: 'pink',
         menuTheme: 'dark',
         layoutTheme: 'colorScheme',
         topBarTheme: 'colorScheme'
@@ -42,16 +41,6 @@ export const LayoutProvider = (props: ChildContainerProps) => {
             menuProfileActive: !prevLayoutState.menuProfileActive
         }));
     };
-    React.useEffect(() => {
-    if (!userConta?.tema_componente) return;
-    const tema = userConta.tema_componente.toLowerCase();
-    const colorScheme: 'light' | 'dark' = tema === 'light' ? 'light' : 'dark'; 
-    setLayoutConfig(prev => ({
-        ...prev,
-        theme: tema,       
-        colorScheme,   
-    }));
-}, [userConta]);
     const isSidebarActive = () => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive || layoutState.overlaySubmenuActive;
     const onMenuToggle = () => {
         if (isOverlay()) {
@@ -84,6 +73,7 @@ export const LayoutProvider = (props: ChildContainerProps) => {
             topbarMenuActive: !prevLayoutState.topbarMenuActive
         }));
     };
+    
     const showRightSidebar = () => {
         setLayoutState((prevLayoutState) => ({
             ...prevLayoutState,

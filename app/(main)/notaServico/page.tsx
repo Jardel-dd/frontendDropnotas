@@ -126,7 +126,6 @@ const NotaServico: React.FC = () => {
             servico: new DetalServiceEntity({
                 id_servico: 0,
                 descricao: '',
-                descricao_completa: '',
                 codigo: '',
                 codigo_municipio: '',
                 valor_total: 0,

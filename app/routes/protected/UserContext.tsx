@@ -17,10 +17,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (stored) setUserData(JSON.parse(stored));
   }, []);
 
-  useEffect(() => {
-    if (userConta) localStorage.setItem('userConta', JSON.stringify(userConta));
-    else localStorage.removeItem('userConta');
-  }, [userConta]);
 
   return (
     <UserContext.Provider value={{ userConta, setUserData }}>

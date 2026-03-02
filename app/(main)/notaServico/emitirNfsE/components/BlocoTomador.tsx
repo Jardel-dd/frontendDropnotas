@@ -52,7 +52,26 @@ export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropd
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-9">
-                    <Input id="razao_social" value={nfseGerada.tomador?.razao_social || ''} label="Razão Social" onChange={(e) => handleAllChanges(e, 'tomador')} showTopLabel required topLabel="Razão Social::" />
+                    <Input 
+                    id="razao_social" 
+                    value={nfseGerada.tomador?.razao_social || ''} 
+                    label="Razão Social" 
+                    onChange={(e) => handleAllChanges(e, 'tomador')} 
+                    showTopLabel 
+                    required 
+                    topLabel="Razão Social:"
+                     />
+                </div>
+                 <div className="col-12 mb-1 lg:col-12 lg:mb-0">
+                    <Input 
+                    value={nfseGerada.tomador?.contato.email || ''} 
+                    onChange={(e) => handleAllChanges(e, 'prestador')} 
+                    label="E-mail" 
+                    id="email" 
+                    type="email" 
+                    showTopLabel 
+                    topLabel="E-mail:" 
+                    />
                 </div>
                 <div className="col-12 mb-1 lg:col-12">
                     <EnderecoForm

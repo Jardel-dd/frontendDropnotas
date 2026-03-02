@@ -58,7 +58,7 @@ function Dropdown({
     const isDarkMode = layoutConfig.colorScheme === 'dark';
 
     return (
-        <div className="p-field" style={{ width: '100%',height: '71px',   }}>
+        <div className="p-field" style={{ width: '100%'}}>
             {showTopLabel && (topLabel 
             || topRightElement) && (
                 <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
@@ -88,15 +88,13 @@ function Dropdown({
                         width: '100%',
                         background: isDarkMode ? '#293B51' : '#FFFFFF',
                         boxShadow: 'none',
-                        border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da', 
+                        border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da',  
+                        height:40
                     }}
                 />
             </div>
-            {errorMessage && (
-                <small className="p-error block" style={{ height: '24px' }}>
-                    {errorMessage}
-                </small>
-            )}
+             <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
+        </div>
         </div>
     );
 }

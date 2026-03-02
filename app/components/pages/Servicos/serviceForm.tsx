@@ -12,17 +12,16 @@ import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { forwardRef, RefObject, useEffect, useState } from 'react';
 import { IconPorcentagem, IconReal } from '@/app/utils/icons/icons';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
-import CNAEDropdownField from '../../fetchAll/listAllCnae/cnaeFiscal';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { fetchServicesByID } from '../../fetchAll/listAllService/controller';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { searchServiceTable } from '../../fetchAll/listAllTableService/controller';
 import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-all';
+import { fetchAllCnae, findCNAEByCodigo } from '../../fetchAll/listAllCnae/controller';
 import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
 import { createServico, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
-import { fetchAllCnae, fetchFilteredCnae, findCNAEByCodigo } from '../../fetchAll/listAllCnae/controller';
 import { codigoIndicadorOperacao, codigoSituacaoTributariaRegular, exigibilidadeISSServico, issRetido, responsavelRetencao, situacaoTributaria } from '@/app/shared/optionsDropDown/options';
 import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
 import ClassificacaoTributariaEDropdownField from '../../fetchAll/listAllClassficacaoTributaria/classificacaoTributaria';
@@ -163,7 +162,6 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
             delete newErrors.item_lista_servico;
             return newErrors;
         });
-
         setTouchedFields((prev) => ({
             ...prev,
             item_lista_servico: true

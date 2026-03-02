@@ -52,8 +52,7 @@ export class NfsEntity {
     regime_especial_tributacao?: string;
     prestador!: DetalPrestadorEntity;
     servico!: DetalServiceEntity;
-            status_nota?: string;
-
+    status_nota?: string;
     tomador!: DetalTomadorEntity;
     constructor({
         id,

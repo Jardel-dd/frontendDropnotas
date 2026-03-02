@@ -186,16 +186,17 @@ export const DropdownSearch = <T extends Record<string, any>>({
     }, [selectedItem, optionValue, items.length]);
 
     return (
-        <div ref={wrapperRef} className="p-field" style={{ width: '100%', height: '71px' }}>
+        <div ref={wrapperRef} className="p-field" style={{ width: '100%' }}>
             {showTopLabel && topLabel && (
-                <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
+                <div style={{ height:25, display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
                     </label>
                 </div>
             )}
-            <div className="flex gap-2 align-items-center w-full">
+            <div className={`p-inputgroup flex-1 custom-input-number styled-on-focus styled-on-hover ${hasError ? 'input-error' : ''}`}
+                  style={{ border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da' , borderRadius: '6px' }}>
                 <Dropdown
                     id={id}
                     onShow={handleShow}
@@ -228,10 +229,11 @@ export const DropdownSearch = <T extends Record<string, any>>({
                     panelStyle={{ maxWidth: '350px', width: '100%' }}
                     className={`${hasError ? 'p-invalid' : ''}`}
                     style={{
-                        width: '100%',
-                        background: isDarkMode ? '#293B51' : '#FFFFFF',
                         boxShadow: 'none',
-                        border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da'
+                            background: isDarkMode ? '#293B51' : '#FFFFFF',
+                            width: '100%',
+                            border: 'none',
+                            height:40
                         
                     }}
                     filterTemplate={() => (
@@ -253,11 +255,8 @@ export const DropdownSearch = <T extends Record<string, any>>({
                     )}
                 />
             </div>
-            {errorMessage && (
-                <small className="p-error block" style={{ height: '24px' }}>
-                    {errorMessage}
-                </small>
-            )}
+            <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
+        </div>
         </div>
     );
 };

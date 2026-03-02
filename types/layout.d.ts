@@ -168,10 +168,9 @@ export interface MenuModel {
     badgeClassName?: string;
     badgeStyle?: CSSProperties;
     className?: string;
-    visible?: boolean; // Adicionado
+    visible?: boolean; 
     class?: string;
-    command?: (e: { originalEvent: React.MouseEvent<HTMLAnchorElement>, item: MenuModel }) => void; // Adicionado
-
+    command?: (e: { originalEvent: React.MouseEvent<HTMLAnchorElement>, item: MenuModel }) => void; 
 }
 
 export interface UseSubmenuOverlayPositionProps {

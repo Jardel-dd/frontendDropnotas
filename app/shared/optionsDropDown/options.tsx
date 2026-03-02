@@ -156,6 +156,12 @@ export const exigibilidadeISSServico = [
     { label: 'Exibilidade Suspensa por Decisão Judicial', value: 'EXIGIBILIDADE_SUSPENSA_POR_DECISAO_JUDICIAL' },
     { label: 'Exibilidade Suspensa por Processo Administrativo', value: 'EXIGIBILIDADE_SUSPENSA_POR_PROCESSO_ADMINISTRATIVO ' }
 ];
+export const tributacaoISSQN = [
+    { label: 'Operação Tributável', value: 'OPERACAO_TRIBUTAVEL' },
+    { label: 'Imunidade', value: 'IMUNIDADE' },
+    { label: 'Exportação de Serviço', value: 'EXPORTACAO_DE_SERVICO' },
+    { label: 'Não Incidência', value: 'NAO_INCIDENCIA ' },
+];
 export const situacaoTributaria = [
     { label: 'Integral', value: 'INTEGRAL' },
     { label: 'Alíquotas Uniformes', value: 'ALIQUOTAS_UNIFORMES' },
