@@ -257,7 +257,7 @@ const OrdemServicos: React.FC = () => {
                                             showTopLabel
                                         />
                                     </div>
-                                    <div className="col-4 mb-0 lg:col-2 p-0 ">
+                                    <div className="col-4 mb-0 lg:col-2 p-0 " style={{ marginTop: '3px' }}>
                                         <div className="container-BTN-Filter-Created">
                                             <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
                                                 <div className="col-12 lg:col-12 w-full">

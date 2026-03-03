@@ -215,7 +215,7 @@ const ClientesFornecedores: React.FC = () => {
                                         showTopLabel
                                     />
                                 </div>
-                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-0 ">
+                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-0 " style={{ marginTop: '3px' }}>
                                     <div className="container-BTN-Filter-Created mt-2">
                                         <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
                                             <div className="col-12 lg:col-12 ">

@@ -56,7 +56,6 @@ const NotaServico: React.FC = () => {
     const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [selectedStatusNotaServico, setSelectedStatusNotaServico] = useState<string>('');
     const [stateDisableBtnPrepararNfse, setStateDisableBtnPrepararNfse] = useState(false);
-
     const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>({
         pageable: {
             pageNumber: 0,
@@ -73,7 +72,7 @@ const NotaServico: React.FC = () => {
         totalPages: 1,
         totalElements: 2,
         last: true,
-        size: 20,
+        size: 10,
         number: 0,
         sort: {
             empty: true,
@@ -322,7 +321,16 @@ const NotaServico: React.FC = () => {
                 status: selectedStatusNotaServico ?? null,
                 ...mapDateRangeToParams(dateRange)
             };
-            const resultado = await fetchNotaServico(params);
+            const resultado = await listNotaServico({
+    page: 0,
+    size: pageSize,
+    termo: searchTerm,
+    status: selectedStatusNotaServico,
+    dateRange,
+    id_empresa: selectedEmpresa?.id,
+    id_cliente: selectedPessoa?.id,
+    id_vendedor: selectedVendedor?.id
+});
             setListPaginationNotaServico(resultado);
         } finally {
             setLoading(false);
@@ -498,7 +506,7 @@ const NotaServico: React.FC = () => {
                 {isDesktop && (
                     <>
                         <div className="card styled-container-main-all-routes">
-                            <div className="scrollable-container">
+                            <div style={{padding:"0.5rem"}}>
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input

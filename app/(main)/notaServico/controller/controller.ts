@@ -46,7 +46,6 @@ export const fetchNotaServico = async (params: NotaFiscalParams) => {
 };
 export const listNotaServico = async (params: ListNotaServicoParams) => {
     const dateParams = mapDateRangeToParams(params.dateRange);
-
     const query: NotaFiscalQueryParams = {
         page: params.page,
         size: params.size,
@@ -85,72 +84,6 @@ export const deletarNotaServico = async (nfsId: number, msgs: any, listPaginatio
         ]);
     }
 };
-// export const fetchEmpresaController = async (): Promise<CompanyEntity[]> => {
-//     try {
-//         const response = await api.get('/empresa', {
-//             params: { ativo: true }
-//         });
-//         let empresa = [];
-//         if (Array.isArray(response.data)) {
-//             empresa = response.data;
-//         } else if (response.data && Array.isArray(response.data.content)) {
-//             empresa = response.data.content;
-//         }
-//         const idsData: CompanyEntity[] = empresa.map((user: any) => ({
-//             id: user.id,
-//             nome: user.razao_social
-//         }));
-//         console.log('Empresa carregados para o seleção:', idsData);
-//         return idsData;
-//     } catch (error) {
-//         console.error('Erro ao carregar empresa :', error);
-//         return [];
-//     }
-// };
-// export const fetchServiceController = async (): Promise<ServiceEntity[]> => {
-//     try {
-//         const response = await api.get('/servico/', {
-//             params: { ativo: true }
-//         });
-//         let servico = [];
-//         if (Array.isArray(response.data)) {
-//             servico = response.data;
-//         } else if (response.data && Array.isArray(response.data.content)) {
-//             servico = response.data.content;
-//         }
-//         const idsDataServico: ServiceEntity[] = servico.map((user: any) => ({
-//             id: user.id,
-//             nome: user.descricao
-//         }));
-//         console.log('Servico carregados para o seleção:', idsDataServico);
-//         return idsDataServico;
-//     } catch (error) {
-//         console.error('Erro ao carregar Servico :', error);
-//         return [];
-//     }
-// };
-// export const fetchPessoaController = async (): Promise<PessoaEntity[]> => {
-//     try {
-//         const response = await api.get('/pessoa', {
-//             params: { ativo: true }
-//         });
-//         let pessoa = [];
-//         if (Array.isArray(response.data)) {
-//             pessoa = response.data;
-//         } else if (response.data && Array.isArray(response.data.content)) {
-//             pessoa = response.data.content;
-//         }
-//         const idsDataPessoa: PessoaEntity[] = pessoa.map((user: any) => ({
-//             id: user.id,
-//             nome: user.razao_social
-//         }));
-//         console.log('Pessoa carregados para o seleção:', idsDataPessoa);
-//         return idsDataPessoa;
-//     } catch (error) {
-//         console.error('Erro ao carregar Pessoa :', error);
-//         return [];
-//     }
-// };
 export const prepararNotaServico = async (
     prepararNfs: PrepararNfs,
     selectedEmpresa: CompanyEntity | null,

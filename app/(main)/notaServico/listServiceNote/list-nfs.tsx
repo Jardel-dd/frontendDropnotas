@@ -55,17 +55,17 @@ export function ListarNotaServico({
                                 {
                                     field: 'numero_rps',
                                     header: 'Número',
-                                    body: (data) => (loading ? <Skeleton /> : <span>{highlightSearchTerm(limitarText(data.numero_rps, 25), searchTerm)}</span>)
+                                    body: (data) => (loading ? <Skeleton /> : <span>{highlightSearchTerm(limitarText(data.numero_rps,10), searchTerm)}</span>)
                                 },
                                 {
                                     field: 'razao_social_cliente',
                                     header: 'Nome Cliente',
-                                    body: (data) => <span>{highlightSearchTerm(limitarText(data.razao_social_cliente, 25), searchTerm)}</span>
+                                    body: (data) => <span>{highlightSearchTerm(limitarText(data.razao_social_cliente, 15), searchTerm)}</span>
                                 },
                                 {
                                     field: 'razao_social_empresa',
                                     header: 'Nome Empresa',
-                                    body: (data) => <span>{highlightSearchTerm(limitarText(data.razao_social_empresa, 25), searchTerm)}</span>
+                                    body: (data) => <span>{highlightSearchTerm(limitarText(data.razao_social_empresa, 15), searchTerm)}</span>
                                 },
                                 {
                                     field: 'data_emissao',

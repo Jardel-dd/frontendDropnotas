@@ -15,6 +15,7 @@ import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarContrato, deletarContrato, listContrato } from './controller/controller';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 
 const Contratos: React.FC = () => {
     const router = useRouter();
@@ -131,16 +132,38 @@ const Contratos: React.FC = () => {
         setSearchTerm(value);
         debouncedSearch(value);
     };
-    const handleSalvarFiltro = () => {
-        handleListContratos(0, searchTerm, listarInativos);
-        setVisible(false);
-    };
+   const handleSalvarFiltro = () => {
+    handleListContratos(0, searchTerm, listarInativos);
+    setVisible(false);
+};
     const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
-    const handleCancelarFiltro = () => {
-        setVisible(false);
-    };
+   const handleClearFilters = () => {
+    setSearchTerm('');
+    setListarInativos(false);
+    setContrato(
+        new ContratoEntity({
+            ativo: true,
+            id: 0,
+            descricao: '',
+            valor_servico: null,
+            periodicidade: '',
+            emitir_boleto: false,
+            enviar_email: false,
+            enviar_whatsapp: false,
+            id_servico: 0,
+            id_empresa: 0,
+            id_categoria_contrato: null,
+            id_forma_pagamento: null,
+            id_clientes_contrato: [0]
+        })
+    );
+
+    handleListContratos(0, '', false);
+
+    setVisible(false);
+};
     useEffect(() => {
         handleListContratos();
     }, []);
@@ -149,6 +172,8 @@ const Contratos: React.FC = () => {
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <>
+                <div className="card styled-container-main-all-routes p-2">
+                    <div className="scrollable-container">
                     <div className="grid formgrid" style={{ maxHeight: '74px' }}>
                         <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                             <Input
@@ -165,14 +190,9 @@ const Contratos: React.FC = () => {
                                 showTopLabel
                             />
                         </div>
-                        <div className="col-4 mb-0 lg:col-2 p-0 ">
+                        <div className="col-4 mb-0 lg:col-2 p-0 " style={{marginTop:"4px"}}>
                             <div className="container-BTN-Filter-Created ">
-                                <Button className="height-2-8rem-ml-1rem" icon="pi pi-filter" onClick={() => setVisible(true)} outlined />
-                                <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                            </div>
-                        </div>
-                    </div>
-                    <DialogFilter visible={visible} header="Filtro" onHide={() => setVisible(false)} onSave={handleSalvarFiltro} onCancel={handleCancelarFiltro}>
+                                 <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
                         <div className="checkBoxMobile-width-max-10rem">
                             <div className="checkbox-container">
                                 <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
@@ -181,8 +201,14 @@ const Contratos: React.FC = () => {
                                 </label>
                             </div>
                         </div>
-                    </DialogFilter>
-                    <div className="mt-1">
+                    </FilterOverlay>
+                                <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                            </div>
+                        </div>
+                    </div>
+                   
+                    </div>
+                     <div className="mt-1">
                         <ListarContratos
                             loading={loading}
                             listPaginationContratos={listPaginationContratos}
@@ -214,6 +240,7 @@ const Contratos: React.FC = () => {
                                 }}
                             />
                         </div>
+                    </div>
                     </div>
                 </>
             )}

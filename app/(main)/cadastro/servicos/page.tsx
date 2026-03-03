@@ -184,8 +184,8 @@ function Usuarios() {
                                         showTopLabel
                                     />
                                 </div>
-                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-0 ">
-                                    <div className="container-BTN-Filter-Created mt-2">
+                                <div className="col-4  lg:col-3 p-0" style={{marginTop:"4px"}}>
+                                    <div className="container-BTN-Filter-Created ">
                                         <Button className="height-2-8rem-ml-1rem" icon="pi pi-filter" onClick={() => setVisible(true)} outlined />
                                         <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                     </div>
