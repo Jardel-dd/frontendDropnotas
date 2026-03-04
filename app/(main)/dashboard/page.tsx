@@ -225,6 +225,7 @@ const ComponentDashboard: React.FC = () => {
                     <>
                         <div className="card styled-container-main-all-routes">
                             <div className="scrollable-container">
+                                <div className="p-0">
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <DateRangePicker
@@ -267,6 +268,7 @@ const ComponentDashboard: React.FC = () => {
                                             </div>
                                         </FilterOverlay>
                                     </div>
+                                </div>
                                 </div>
                                 <div className="grid formgrid relatorio-cards p-2">
                                     <div className="card relatorio-card">

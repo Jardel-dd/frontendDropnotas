@@ -21,12 +21,14 @@ export const validateFieldsServicos = (
     } else if (!service.exigibilidade_iss || service.exigibilidade_iss.trim().length < 2) {
         newErrors.exigibilidade_iss = 'Este Campo deve ser selecionado.';
         valid = false;
-   
     } else if (!service.codigo_situacao_tributaria || service.codigo_situacao_tributaria.trim().length < 2) {
         newErrors.codigo_situacao_tributaria = 'Este Campo deve ser selecionado.';
         valid = false;
     } else if (!service.codigo_classificacao_tributaria || service.codigo_classificacao_tributaria.trim().length < 2) {
         newErrors.codigo_classificacao_tributaria = 'Este Campo deve ser selecionado.';
+        valid = false;
+   } else if (!service.codigo_nbs || service.codigo_nbs.trim().length < 2) {
+        newErrors.codigo_nbs = 'Este Campo deve ser selecionado.';
         valid = false;
     } else if (!service.codigo_situacao_tributaria_regular || service.codigo_situacao_tributaria_regular.trim().length < 2) {
         newErrors.codigo_situacao_tributaria_regular = 'Este Campo deve ser selecionado.';
@@ -34,15 +36,12 @@ export const validateFieldsServicos = (
     } else if (!service.item_lista_servico) {
         newErrors.item_lista_servico = 'Este Campo deve ser selecionado.';
         valid = false;
-
-
     } else if (!service.responsavel_retencao || service.responsavel_retencao.trim().length < 2) {
         newErrors.responsavel_retencao = 'Este Campo deve ser selecionado.';
         valid = false;
     } else if (!service.codigo_indicador_operacao || service.codigo_indicador_operacao.trim().length < 2) {
         newErrors.codigo_indicador_operacao = 'Este Campo deve ser selecionado.';
         valid = false;
-
     } else {
         valid = true;
     }

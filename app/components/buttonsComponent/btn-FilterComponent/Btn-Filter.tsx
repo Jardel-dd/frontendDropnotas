@@ -41,7 +41,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
         hide();
     };
     return (
-        <div>
+        <>
             <Button label={isMobile ? undefined : buttonLabel} icon={buttonIcon} outlined onClick={toggle} className={buttonClassName} style={{ boxShadow: 'None' }} />
             {!isMobile && (
                 <OverlayPanel ref={op} dismissable className="filter-overlay">
@@ -63,6 +63,6 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                     </div>
                 </Dialog>
             )}
-        </div>
+        </>
     );
 };

@@ -22,10 +22,11 @@ import { fetchAllCnae, findCNAEByCodigo } from '../../fetchAll/listAllCnae/contr
 import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
 import { createServico, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
-import { codigoIndicadorOperacao, codigoSituacaoTributariaRegular, exigibilidadeISSServico, issRetido, responsavelRetencao, situacaoTributaria } from '@/app/shared/optionsDropDown/options';
 import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
-import ClassificacaoTributariaEDropdownField from '../../fetchAll/listAllClassficacaoTributaria/classificacaoTributaria';
 import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria } from '../../fetchAll/listAllClassficacaoTributaria/controller';
+import { codigoIndicadorOperacao, codigoSituacaoTributariaRegular, exigibilidadeISSServico, issRetido, responsavelRetencao, situacaoTributaria } from '@/app/shared/optionsDropDown/options';
+import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
+import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '../../fetchAll/listAllCodigoNBS/controller';
 
 export interface ServiceFormRef {
     handleSave: () => Promise<void>;
@@ -81,22 +82,24 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
             percentual_diferencial_municipal: 0,
             percentual_diferencial_cbs: 0,
             valor_servico: null,
-            valor_desconto: 0, 
-            aliquota_deducoes:0
+            valor_desconto: 0,
+            aliquota_deducoes: 0
         })
     );
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
-    const [selectedClassificacaoTributaria, setSelectedClassificacaoTributaria] = useState<TableClassificacaoTributariaEntity | null>(null);
     const [selectedService, setSelectedService] = useState<ServiceEntity | null>(null);
     const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
     const [stateDisableBtnCreatedService, setStateDisableBtnCreatedService] = useState(false);
+    const [selectedCodigoNBS, setSelectedCodigoNBS] = useState<TableCodigoNBSEntity | null>(null);
+    const [selectedClassificacaoTributaria, setSelectedClassificacaoTributaria] = useState<TableClassificacaoTributariaEntity | null>(null);
+
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-       if (isLoadingBtnCreated) return;
+        if (isLoadingBtnCreated) return;
         setIsLoadingBtnCreated(true);
-        console.log("servico",servico)
+        console.log("servico", servico)
         try {
             if (isEditMode && servicoId) {
                 await updateServico(servicoId, servico, setErrors, msgs, router, setServico, redirectAfterSave ?? true);
@@ -121,14 +124,23 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
         const _servicos = servico!.copyWith({ [event.target.id]: value });
         setServico(_servicos);
     };
-   
     const handleClassificacaoTributariaChange = (classificacaoTributaria: TableClassificacaoTributariaEntity | null) => {
         setSelectedClassificacaoTributaria(classificacaoTributaria);
-        const updatedService = servico.copyWith({ codigo_classificacao_tributaria: classificacaoTributaria?.codigo || '' });
-        setServico(updatedService);
+        const updatedClassificacaoTributaria = servico.copyWith({ codigo_classificacao_tributaria: classificacaoTributaria?.codigo || '' });
+        setServico(updatedClassificacaoTributaria);
         setErrors((prevErrors) => {
             const newErrors = { ...prevErrors };
             delete newErrors.codigo_classificacao_tributaria;
+            return newErrors;
+        });
+    };
+    const handleCodigoNBSChange = (codigoNBS: TableCodigoNBSEntity | null) => {
+        setSelectedCodigoNBS(codigoNBS);
+        const updatedCodigoNBS = servico.copyWith({ codigo_nbs: codigoNBS?.codigo || '' });
+        setServico(updatedCodigoNBS);
+        setErrors((prevErrors) => {
+            const newErrors = { ...prevErrors };
+            delete newErrors.codigoNBS;
             return newErrors;
         });
     };
@@ -178,9 +190,6 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                     item_lista_servico: entidade.item_lista_servico ? entidade.item_lista_servico.split(' - ')[0].trim() : ''
                 })
             );
-            const allCnaes = await fetchAllCnae();
-            const selected = findCNAEByCodigo(entidade.codigo_cnae, allCnaes);
-            setSelectedCNAE(selected ?? null);
             const allServices = await searchServiceTable();
             const itemCodigo = entidade.item_lista_servico?.split(' - ')[0];
             const matchedServico = allServices.find((option: ServiceEntity) => option.codigo === itemCodigo);
@@ -256,69 +265,69 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                             />
                         </div>
                         <div className="col-12 mt-1 lg:col-4">
-                        <CustomInputNumber
-                                                        id="percentual_diferencial_municipal"
-                                                        value={servico.percentual_diferencial_municipal || 0}
-                                                        onChange={handleNumberChange}
-                                                        label="Percentual diferencial UF"
-                                                        useRightButton={true}
-                                                        outlined={true}
-                                                        hasError={!!errors.percentual_diferencial_municipal}
-                                                        errorMessage={errors.percentual_diferencial_municipal}
-                                                        topLabel="Diferencial UF:"
-                                                        showTopLabel
-                                                        required
-                                                        iconLeft={<IconPorcentagem isDarkMode={false} />}
-                                                    />
+                            <CustomInputNumber
+                                id="percentual_diferencial_municipal"
+                                value={servico.percentual_diferencial_municipal || 0}
+                                onChange={handleNumberChange}
+                                label="Percentual diferencial UF"
+                                useRightButton={true}
+                                outlined={true}
+                                hasError={!!errors.percentual_diferencial_municipal}
+                                errorMessage={errors.percentual_diferencial_municipal}
+                                topLabel="Diferencial UF:"
+                                showTopLabel
+                                required
+                                iconLeft={<IconPorcentagem isDarkMode={false} />}
+                            />
                         </div>
                         <div className="col-12 mt-1 lg:col-4">
-                        <CustomInputNumber
-                                                        id="aliquota_deducoes"
-                                                        value={servico.aliquota_deducoes || 0}
-                                                        onChange={handleNumberChange}
-                                                        label="Aliquota Deduções"
-                                                        useRightButton={true}
-                                                        outlined={true}
-                                                        hasError={!!errors.aliquota_deducoes}
-                                                        errorMessage={errors.aliquota_deducoes}
-                                                        topLabel="Aliquota Deduções:"
-                                                        showTopLabel
-                                                        required
-                                                                                                                iconLeft={<IconPorcentagem isDarkMode={false} />}
+                            <CustomInputNumber
+                                id="aliquota_deducoes"
+                                value={servico.aliquota_deducoes || 0}
+                                onChange={handleNumberChange}
+                                label="Aliquota Deduções"
+                                useRightButton={true}
+                                outlined={true}
+                                hasError={!!errors.aliquota_deducoes}
+                                errorMessage={errors.aliquota_deducoes}
+                                topLabel="Aliquota Deduções:"
+                                showTopLabel
+                                required
+                                iconLeft={<IconPorcentagem isDarkMode={false} />}
 
-                                                    />
+                            />
                         </div>
                         <div className="col-12 mt-1 lg:col-4">
-                        <CustomInputNumber
-                                                        id="percentual_diferencial_cbs"
-                                                        value={servico.percentual_diferencial_cbs || 0}
-                                                        onChange={handleNumberChange}
-                                                        label="Percentual diferencial CBS"
-                                                        useRightButton={true}
-                                                        outlined={true}
-                                                        hasError={!!errors.percentual_diferencial_cbs}
-                                                        errorMessage={errors.percentual_diferencial_cbs}
-                                                        topLabel="Diferencial CBS:"
-                                                        showTopLabel
-                                                        required
-                                                        iconLeft={<IconPorcentagem isDarkMode={false} />}
-                                                    />
+                            <CustomInputNumber
+                                id="percentual_diferencial_cbs"
+                                value={servico.percentual_diferencial_cbs || 0}
+                                onChange={handleNumberChange}
+                                label="Percentual diferencial CBS"
+                                useRightButton={true}
+                                outlined={true}
+                                hasError={!!errors.percentual_diferencial_cbs}
+                                errorMessage={errors.percentual_diferencial_cbs}
+                                topLabel="Diferencial CBS:"
+                                showTopLabel
+                                required
+                                iconLeft={<IconPorcentagem isDarkMode={false} />}
+                            />
                         </div>
                         <div className="col-12 mt-1 lg:col-4">
-                        <CustomInputNumber
-                                                        id="percentual_diferencial_uf"
-                                                        value={servico.percentual_diferencial_uf || 0}
-                                                        onChange={handleNumberChange}
-                                                        label="Percentual diferencial UF"
-                                                        useRightButton={true}
-                                                        outlined={true}
-                                                        hasError={!!errors.percentual_diferencial_uf}
-                                                        errorMessage={errors.percentual_diferencial_uf}
-                                                        topLabel="Diferencial UF:"
-                                                        showTopLabel
-                                                        required
-                                                        iconLeft={<IconPorcentagem isDarkMode={false} />}
-                                                    />
+                            <CustomInputNumber
+                                id="percentual_diferencial_uf"
+                                value={servico.percentual_diferencial_uf || 0}
+                                onChange={handleNumberChange}
+                                label="Percentual diferencial UF"
+                                useRightButton={true}
+                                outlined={true}
+                                hasError={!!errors.percentual_diferencial_uf}
+                                errorMessage={errors.percentual_diferencial_uf}
+                                topLabel="Diferencial UF:"
+                                showTopLabel
+                                required
+                                iconLeft={<IconPorcentagem isDarkMode={false} />}
+                            />
                         </div>
                         <div className="col-12 mt-1 lg:col-4">
                             <Dropdown
@@ -364,12 +373,15 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 required
                             />
                         </div>
-                        <div className="col-12 mt-1  lg:col-4">
-                            <ClassificacaoTributariaEDropdownField
-                                selectedClassificacaoTributaria={selectedClassificacaoTributaria}
-                                onClassificacaoTributariaChange={handleClassificacaoTributariaChange}
-                                fetchAllClassificacaoTributaria={fetchAllClassificacaoTributaria}
-                                fetchFilteredClassificacaoTributaria={fetchFilteredClassificacaoTributaria}
+                        <div className="col-12 mt-1 lg:col-4">
+                            <DropdownSearch<TableClassificacaoTributariaEntity>
+                                id="codigo_classificacao_tributaria"
+                                selectedItem={selectedClassificacaoTributaria}
+                                onItemChange={handleClassificacaoTributariaChange}
+                                fetchAllItems={fetchAllClassificacaoTributaria}
+                                fetchFilteredItems={fetchFilteredClassificacaoTributaria}
+                                optionValue="codigo"
+                                optionLabel="descricao"
                                 hasError={!!errors.codigo_classificacao_tributaria}
                                 errorMessage={errors.codigo_classificacao_tributaria}
                                 topLabel="Classificação Tributária:"
@@ -377,8 +389,24 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 required
                             />
                         </div>
+                          <div className="col-12 mt-1 lg:col-4">
+                            <DropdownSearch<TableCodigoNBSEntity>
+                                id="codigo_nbs"
+                                selectedItem={selectedCodigoNBS}
+                                onItemChange={handleCodigoNBSChange}
+                                fetchAllItems={fetchAllCodigoNBS}
+                                fetchFilteredItems={fetchFilteredCodigoNBS}
+                                optionValue="codigo"
+                                optionLabel="descricao"
+                                hasError={!!errors.codigo_nbs}
+                                errorMessage={errors.codigo_nbs}
+                                topLabel="Codígo NBS:"
+                                showTopLabel
+                                required
+                            />
+                        </div>
                         <div className="col-12 mt-1  lg:col-4">
-                             <Dropdown
+                            <Dropdown
                                 id="codigo_situacao_tributaria_regular"
                                 value={servico.codigo_situacao_tributaria_regular || ''}
                                 options={codigoSituacaoTributariaRegular}
@@ -392,7 +420,7 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 required
                             />
                         </div>
-                           <div className="col-12 mt-1  lg:col-4">
+                        <div className="col-12 mt-1  lg:col-4">
                             <DropdownSearch<ServiceEntity>
                                 id="item_lista_servico"
                                 selectedItem={selectedService}
@@ -408,7 +436,7 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 required
                             />
                         </div>
-                         <div className="col-12 mt-1  lg:col-4">
+                        <div className="col-12 mt-1  lg:col-4">
                             <Input
                                 value={servico.codigo_credito_presumido || ''}
                                 onChange={handleAllChanges}
@@ -437,7 +465,7 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                             />
                         </div>
                         <div className="col-12 mt-1  lg:col-4">
-                              <Dropdown
+                            <Dropdown
                                 id="codigo_indicador_operacao"
                                 value={servico.codigo_indicador_operacao ?? ''}
                                 options={codigoIndicadorOperacao}
@@ -451,7 +479,7 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 required
                             />
                         </div>
-                          <div className="col-12 mt-1  lg:col-4">
+                        <div className="col-12 mt-1  lg:col-4">
                             <Input
                                 value={servico.codigo_municipio || ''}
                                 onChange={handleAllChanges}
@@ -463,15 +491,15 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                                 showTopLabel
                             />
                         </div>
-                           <div className="col-12 mt-1  lg:col-4">
-                            <Input 
-                            value={servico.numero_processo || ''} 
-                            onChange={handleAllChanges} 
-                            label="Numéro do Processo" 
-                            id="numero_processo" 
-                            topLabel="Numéro do Processo:" 
-                            showTopLabel 
-                             />
+                        <div className="col-12 mt-1  lg:col-4">
+                            <Input
+                                value={servico.numero_processo || ''}
+                                onChange={handleAllChanges}
+                                label="Numéro do Processo"
+                                id="numero_processo"
+                                topLabel="Numéro do Processo:"
+                                showTopLabel
+                            />
                         </div>
                         <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-full">
                             <InputTextarea value={servico.descricao_completa || ''} onChange={handleAllChanges} rows={5} cols={30} label={''} id="descricao_completa" topLabel="Descrição Complementar:" showTopLabel />
@@ -495,8 +523,8 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                             !servico.item_lista_servico ||
                             !servico.iss_retido ||
                             !servico.exigibilidade_iss ||
-                            !servico.responsavel_retencao  ||
-                            !servico.codigo_indicador_operacao 
+                            !servico.responsavel_retencao ||
+                            !servico.codigo_indicador_operacao
                         }
                     />
                 )}
@@ -517,8 +545,8 @@ const ServicoForm = forwardRef<ServiceFormRef, ServiceFormProps>(({ initialId, m
                             !servico.item_lista_servico ||
                             !servico.iss_retido ||
                             !servico.exigibilidade_iss ||
-                            !servico.responsavel_retencao  ||
-                            !servico.codigo_indicador_operacao 
+                            !servico.responsavel_retencao ||
+                            !servico.codigo_indicador_operacao
                         }
                     />
                 )}

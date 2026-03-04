@@ -88,9 +88,9 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
     );
 
     return (
-        <div className="periodo-calendar-wrapper w-full" style={{ height: '71px' }}>
+        <div className="periodo-calendar-wrapper w-full" style={{ width:"100%"}}>
             {showTopLabel && (topLabel || topRightElement) && (
-                <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
+                <div style={{ height:25, display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -98,6 +98,8 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
                     {topRightElement}
                 </div>
             )}
+             <div className={`p-inputgroup flex-1 styled-on-focus styled-on-hover custom-input`}
+           >
             <Calendar
                 ref={calendarRef}
                 value={periodo}
@@ -106,13 +108,15 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
                 numberOfMonths={1}
                 locale="pt"
                 dateFormat="dd/mm/yy"
-                style={{ boxShadow: 'none', borderColor: 'none', width: '100%' }}
+                style={{ boxShadow: 'none', borderColor: 'none', width: '100%', height:40 }}
                 readOnlyInput
                 placeholder="Data inicio      ↔︎      Data final"
                 showIcon
                 panelClassName="periodo-calendar-panel"
                 footerTemplate={footerTemplate}
             />
+             </div>
+            <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}></div>
         </div>
     );
 };

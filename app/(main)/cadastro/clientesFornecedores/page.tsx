@@ -59,7 +59,6 @@ const ClientesFornecedores: React.FC = () => {
     );
     const [visible, setVisible] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [filterType, setFilterType] = useState<string | null>(null);
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [isClientesFornecedoresCreated, setIsClientesFornecedoresCreated] = useState(false);
@@ -287,7 +286,7 @@ const ClientesFornecedores: React.FC = () => {
                     <div className="card styled-container-main-all-routes p-2">
                         <div className="scrollable-container">
                             <div className="p-0">
-                                <div className="grid formgrid" style={{ maxHeight: '74px' }}>
+                                <div className="grid formgrid">
                                     <div className="col-12 lg:col-12 container-input-search-all">
                                         <Input
                                             label="Buscar"

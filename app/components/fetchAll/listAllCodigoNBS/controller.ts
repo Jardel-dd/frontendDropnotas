@@ -1,9 +1,9 @@
 import api from "@/app/services/api";
-import { TableClassificacaoTributariaEntity } from "@/app/entity/TableClassificacaoTributariaEntity";
+import { TableCodigoNBSEntity } from "@/app/entity/TableCodigoNBS";
 
-export const fetchFilteredClassificacaoTributaria= async (searchTerm: string) => {
+export const fetchFilteredCodigoNBS= async (searchTerm: string) => {
     try {
-        const response = await api.get(`/tabela-classificacao-tributaria/buscar?termo=${searchTerm}`);
+        const response = await api.get(`/tabela-nbs/buscar?termo=${searchTerm}`);
         if (Array.isArray(response.data.content)) {
             return response.data.content.map((item: { codigo: any; descricao: any; }) => ({
                 ...item,
@@ -13,13 +13,13 @@ export const fetchFilteredClassificacaoTributaria= async (searchTerm: string) =>
             return [];
         }
     } catch (error) {
-        console.error("Erro ao buscar CNAE filtrados:", error);
+        console.error("Erro ao buscar Codigo NBS filtrados:", error);
         return [];
     }
 };
-export const fetchAllClassificacaoTributaria = async () => {
+export const fetchAllCodigoNBS = async () => {
     try {
-        const response = await api.get("/tabela-classificacao-tributaria/buscar");
+        const response = await api.get("/tabela-nbs/buscar");
         if (response.data && Array.isArray(response.data.content)) {
             return response.data.content.map((item: { codigo: any; descricao: any; }) => ({
                 ...item,
@@ -30,30 +30,27 @@ export const fetchAllClassificacaoTributaria = async () => {
             return [];
         }
     } catch (error) {
-        console.error("Erro ao buscar :", error);
+        console.error("Erro ao buscar Codigo NB :", error);
         return [];
     }
 };
-export function findClassificacaoTributariaByCodigo(
+export function findCodigoNBS (
   codigo: string | undefined | null,
-  classificacaoTributariaList: TableClassificacaoTributariaEntity[]
-): TableClassificacaoTributariaEntity | null {
-  if (!codigo || !classificacaoTributariaList?.length) {
+  codigoNBSList: TableCodigoNBSEntity[]
+): TableCodigoNBSEntity | null {
+  if (!codigo || !codigoNBSList?.length) {
     return null;
   }
-
   const codigoNormalizado = String(codigo).replace(/\D/g, ""); 
-
-  const found = classificacaoTributariaList.find(classificacao => {
-    const codigoClassificacaoTributariaNormalizado = String(classificacao.codigo).replace(/\D/g, "");
-    return codigoClassificacaoTributariaNormalizado === codigoNormalizado;
+  const found = codigoNBSList.find(classificacao => {
+    const codigoNBSNormalizado = String(classificacao.codigo).replace(/\D/g, "");
+    return codigoNBSNormalizado === codigoNormalizado;
   });
-
   return found ?? null;
 }
-export const listTheClassificacaoTributaria = async (searchTerm: string): Promise<TableClassificacaoTributariaEntity[]> => {
+export const listTheCodigoNBS  = async (searchTerm: string): Promise<TableCodigoNBSEntity[]> => {
     try {
-        const response = await api.get(`/classificacao-tributaria/buscar?termo=${searchTerm}`);
+        const response = await api.get(`/tabela-nbs/buscar?termo=${searchTerm}`);
         if (Array.isArray(response.data.content)) {
             return response.data.content.map((item: { codigo: any; descricao: any }) => ({
                 ...item,

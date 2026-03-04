@@ -7,7 +7,7 @@ export const useIsMobileOrTablet = () => {
 };
 
 export const useIsMobile = () => {
-    return useMediaQuery({ query: '(max-width: 480px)' });
+    return useMediaQuery({ query: '(max-width: 768px)' });
 };
 
 export const useIsDesktop = () => {
