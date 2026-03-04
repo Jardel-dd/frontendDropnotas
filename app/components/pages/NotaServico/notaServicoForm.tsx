@@ -132,22 +132,27 @@ const NotaServicoForm = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(
                 });
             });
         };
-        const handleNumberChange = (e: any) => {
-            const { id, value } = e.target;
-            const _gerarNfse = gerarNfse.copyWith({
-                servico: gerarNfse.servico.copyWith({
-                    valores: gerarNfse.servico.valores.copyWith({
-                        [id]: Number(value)
-                    })
-                })
-            });
-            setGerarNfse(_gerarNfse);
-        };
+   const handleNumberChange = (
+    e: any,
+    bloco: 'prestador' | 'tomador' | 'servico' = 'servico'
+) => {
+    const { id, value } = e.target;
+    const _gerarNfse = gerarNfse.copyWith({
+        [bloco]: (gerarNfse[bloco] as any).copyWith({
+            valores: (gerarNfse[bloco] as any).valores.copyWith({
+                [id]: Number(value)
+            })
+        })
+    });
+    console.log('evento', e);
+    console.log('bloco', bloco);
+    setGerarNfse(_gerarNfse);
+};
         const handleSubmit = async (event: React.FormEvent) => {
             event.preventDefault();
             msgs.current?.clear();
-             if (isLoadingBtnCreated) return;
-        setIsLoadingBtnCreated(true);
+            if (isLoadingBtnCreated) return;
+            setIsLoadingBtnCreated(true);
             const validationErrors: { [key: string]: string } = {};
             if (!gerarNfse.competencia) validationErrors.competencia = 'Competência é obrigatória';
             if (Object.keys(validationErrors).length > 0) {
@@ -175,14 +180,19 @@ const NotaServicoForm = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(
                 setLoading(false);
             }
         };
-        const handleDropdownChange = (e: DropdownChangeEvent) => {
+        const handleDropdownChange = (
+            e: DropdownChangeEvent,
+            bloco: 'prestador' | 'tomador' | 'servico' = 'prestador'
+        ) => {
             const { id, value } = e.target;
             const _gerarNfse = gerarNfse.copyWith({
-                prestador: {
-                    ...gerarNfse.prestador,
+                [bloco]: {
+                    ...gerarNfse[bloco],
                     [id]: value
                 }
             });
+            console.log('evento', e);
+            console.log('bloco', bloco);
             setGerarNfse(_gerarNfse);
         };
         const handleDropdownChangeRegime = (e: DropdownChangeEvent) => {
@@ -325,9 +335,9 @@ const NotaServicoForm = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(
                         handleDropdownChange={handleDropdownChange}
                         handleSubmit={handleSubmit}
                         errors={errors}
-                        handleSearchCep={() => {}}
+                        handleSearchCep={() => { }}
                         setLoadingCep={setLoadingCep}
-                        setNfs={() => {}}
+                        setNfs={() => { }}
                         setError={setErrors}
                         msgs={msgs}
                         router={router}

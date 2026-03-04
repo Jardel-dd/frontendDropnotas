@@ -46,7 +46,6 @@ export default function CriarNotaServico() {
             servico: new DetalServiceEntity({
                 id_servico: 0,
                 codigo: '',
-                codigo_cnae:'',
                 descricao: '',
                 iss_retido:'',
                 item_lista_servico:'',
