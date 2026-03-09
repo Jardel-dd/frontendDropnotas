@@ -28,7 +28,6 @@ import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { VendedorFormRef } from '@/app/components/pages/Vendedores/sellerForm';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { validateFieldsContrato } from '@/app/(main)/contrato/controller/validation';
-import { CreatedDialog } from '@/app/components/dialogs/dialogCreatedComponent/dialog';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
 import FormaPagamentoForm from '@/app/components/pages/FormaPagamento/formaPagamentoForm';
 import { fetchContratosById } from '@/app/components/fetchAll/listAllContratos/controller';
@@ -41,6 +40,7 @@ import { fetchFilteredService, listTheService } from '@/app/components/fetchAll/
 import { fetchAllPessoas, fetchFilteredPessoas } from '@/app/components/fetchAll/listAllPessoas/controller';
 import { fetchFilteredFormaPagamento, listTheFormaPagamento } from '@/app/components/fetchAll/listAllFormaPagamentos/controller';
 import { fetchFilteredCategoriaContrato, listTheCategoriaContrato } from '@/app/components/fetchAll/listAllCategoriaContrato/controller';
+import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
 export interface ContratoFormRef {
     handleSave: () => Promise<void>;
 }
@@ -693,7 +693,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                             />
                         )}
                     </div>
-                    <CreatedDialog header="Adicionar Serviço" visible={showModalServico} onHide={() => setShowModalServico(false)}>
+                    <DialogFilter header="Adicionar Serviço" visible={showModalServico} onHide={() => setShowModalServico(false)}>
                         <ServiceForm
                             msgs={msgs}
                             ref={formRef}
@@ -708,8 +708,8 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                             showBTNPGCreatedDialog={true}
                             onBackClick={() => setShowModalServico(false)}
                         />
-                    </CreatedDialog>
-                    <CreatedDialog header="Adicionar Forma de Pagamento" visible={showModalFormaPagamento} onHide={() => setShowModalFormaPagamento(false)}>
+                    </DialogFilter>
+                    <DialogFilter header="Adicionar Forma de Pagamento" visible={showModalFormaPagamento} onHide={() => setShowModalFormaPagamento(false)}>
                         <FormaPagamentoForm
                             msgs={msgs}
                             ref={formRef}
@@ -724,8 +724,8 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                             showBTNPGCreatedDialog={true}
                             onBackClick={() => setShowModalFormaPagamento(false)}
                         />
-                    </CreatedDialog>
-                    <CreatedDialog header="Adicionar Categoria de Contratos" visible={showModalCategoriaContrato} onHide={() => setShowModalCategoriaContrato(false)}>
+                    </DialogFilter>
+                    <DialogFilter header="Adicionar Categoria de Contratos" visible={showModalCategoriaContrato} onHide={() => setShowModalCategoriaContrato(false)}>
                         <CategoriaContratoForm
                             msgs={msgs}
                             ref={formRef}
@@ -740,8 +740,8 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                             showBTNPGCreatedDialog={true}
                             onBackClick={() => setShowModalCategoriaContrato(false)}
                         />
-                    </CreatedDialog>
-                    <CreatedDialog header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
+                    </DialogFilter>
+                    <DialogFilter header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
                         <PessoaForm
                             msgs={msgs}
                             ref={formRef}
@@ -756,8 +756,8 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                             showBTNPGCreatedDialog={true}
                             onBackClick={() => setShowModalPessoa(false)}
                         />
-                    </CreatedDialog>
-                    <CreatedDialog header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
+                    </DialogFilter>
+                    <DialogFilter header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
                         <EmpresaForm
                             msgs={msgs}
                             ref={formRef}
@@ -772,7 +772,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                             onClose={() => setShowModalEmpresa(false)}
                             onBackClick={() => setShowModalEmpresa(false)}
                         />
-                    </CreatedDialog>
+                    </DialogFilter>
                 </div>
             </div>
         </>

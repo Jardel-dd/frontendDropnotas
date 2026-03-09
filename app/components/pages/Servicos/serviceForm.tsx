@@ -18,7 +18,6 @@ import { fetchServicesByID } from '../../fetchAll/listAllService/controller';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { searchServiceTable } from '../../fetchAll/listAllTableService/controller';
 import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-all';
-import { fetchAllCnae, findCNAEByCodigo } from '../../fetchAll/listAllCnae/controller';
 import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
 import { createServico, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';

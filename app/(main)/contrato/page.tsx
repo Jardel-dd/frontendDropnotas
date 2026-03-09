@@ -173,7 +173,7 @@ const Contratos: React.FC = () => {
             {isMobile && (
                 <>
                 <div className="card styled-container-main-all-routes p-2">
-                    <div className="scrollable-container">
+                    <div className='p-2'>
                     <div className="grid formgrid" style={{ maxHeight: '74px' }}>
                         <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                             <Input
@@ -206,7 +206,6 @@ const Contratos: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                   
                     </div>
                      <div className="mt-1">
                         <ListarContratos

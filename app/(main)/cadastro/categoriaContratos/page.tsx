@@ -13,7 +13,6 @@ import { validateFieldsCategoriaContrato } from './controller/validate';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
-import { CreatedDialog } from '@/app/components/dialogs/dialogCreatedComponent/dialog';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
@@ -309,7 +308,7 @@ const CategoriaContrato: React.FC = () => {
                     </div>
                 </>
             )}
-            <CreatedDialog
+            <DialogFilter
                 header={selectedCategoriaId ? 'Editar Categoria de Contrato' : 'Adicionar Categoria de Contratos'}
                 visible={showModalCategoriaContrato}
                 onHide={() => {
@@ -336,7 +335,7 @@ const CategoriaContrato: React.FC = () => {
                     onBackClick={() => setShowModalCategoriaContrato(false)}
                     categoriaContrato={categoriaContrato}
                 />
-            </CreatedDialog>
+            </DialogFilter>
         </div>
     );
 };

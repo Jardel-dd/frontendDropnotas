@@ -20,12 +20,12 @@ import EmpresaForm from '@/app/components/pages/Empresa/companyForm';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { convertProfileUserToBase64, create, update } from '../controller/controller';
-import { CreatedDialog } from '@/app/components/dialogs/dialogCreatedComponent/dialog';
 import { fetchUserContaCreated } from '@/app/components/fetchAll/listUsersConta/controller';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import PerfilUserChangeForm, { PermissoesFormRef } from '@/app/components/pages/Permissoes/permissoesForm';
 import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
 import { fetchAllPerfilUsuarios, fetchFilteredPerfilUsuarios } from '@/app/components/fetchAll/listAllPerfilUsuarios/controller';
+import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 
 export default function CriarUserConta() {
     const router = useRouter();
@@ -515,7 +515,7 @@ export default function CriarUserConta() {
                             icon=""
                         />
                     </div>
-                    <CreatedDialog header="Adicionar Perfil deste Usuário" visible={showModalPerfilUser} onHide={() => setShowModalPerfilUser(false)}>
+                    <DialogFilter header="Adicionar Perfil deste Usuário" visible={showModalPerfilUser} onHide={() => setShowModalPerfilUser(false)}>
                         <PerfilUserChangeForm
                             msgs={msgs}
                             ref={formRef}
@@ -530,8 +530,8 @@ export default function CriarUserConta() {
                             showBTNPGCreatedDialog={true}
                             onBackClick={() => setShowModalPerfilUser(false)}
                         />
-                    </CreatedDialog>
-                    <CreatedDialog header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
+                    </DialogFilter>
+                    <DialogFilter header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
                         <EmpresaForm
                             msgs={msgs}
                             ref={formRef}
@@ -546,7 +546,7 @@ export default function CriarUserConta() {
                             onClose={() => setShowModalEmpresa(false)}
                             onBackClick={() => setShowModalEmpresa(false)}
                         />
-                    </CreatedDialog>
+                    </DialogFilter>
                 </div>
             </div>
         </>

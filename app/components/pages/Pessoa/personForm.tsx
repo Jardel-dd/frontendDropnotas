@@ -21,7 +21,6 @@ import CNAEDropdownField from '../../fetchAll/listAllCnae/cnaeFiscal';
 import VendedorForm, { VendedorFormRef } from '../Vendedores/sellerForm';
 import { RefObject, useEffect, useState, forwardRef, useRef } from 'react';
 import { fetchPessoasById } from '../../fetchAll/listAllPessoas/controller';
-import { CreatedDialog } from '../../dialogs/dialogCreatedComponent/dialog';
 import EnderecoForm from '../../enderecos/enderecoFormComponent/enderecoForm';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-all';
@@ -31,6 +30,7 @@ import { validateFieldsPessoa } from '@/app/(main)/cadastro/clientesFornecedores
 import { fetchAllVendedores, fetchFilteredVendedor } from '../../fetchAll/listAllVendedores/controller';
 import { createdPessoa, updatePessoa } from '@/app/(main)/cadastro/clientesFornecedores/controller/controller';
 import { contribuinteOptions, DropDownTipoPessoa, OptionsTipoContrato, regimeTributarioPessoaOptions } from '@/app/shared/optionsDropDown/options';
+import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
 export interface PessoaFormRef {
     handleSave: () => Promise<void>;
 }
@@ -694,7 +694,7 @@ const PessoaForm = forwardRef<PessoaFormRef, PessoaFormProps>(({
                     />
                 )}
             </div>
-            <CreatedDialog header="Adicionar Vendedor" visible={showModalVendedor} onHide={() => setShowModalVendedor(false)}>
+            <DialogFilter header="Adicionar Vendedor" visible={showModalVendedor} onHide={() => setShowModalVendedor(false)}>
                 <VendedorForm
                     msgs={msgs}
                     ref={formRef}
@@ -709,7 +709,7 @@ const PessoaForm = forwardRef<PessoaFormRef, PessoaFormProps>(({
                     showBTNPGCreatedDialog={true}
                     onBackClick={() => setShowModalVendedor(false)}
                 />
-            </CreatedDialog>
+            </DialogFilter>
         </>
     );
     

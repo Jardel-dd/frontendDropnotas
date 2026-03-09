@@ -18,7 +18,6 @@ import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import FormaPagamentoForm from '../FormaPagamento/formaPagamentoForm';
 import { forwardRef, RefObject, useEffect, useRef, useState } from 'react';
 import VendedorForm, { VendedorFormRef } from '../Vendedores/sellerForm';
-import { CreatedDialog } from '../../dialogs/dialogCreatedComponent/dialog';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
@@ -34,6 +33,7 @@ import { fetchOrdemServiceByID } from '@/app/components/fetchAll/listAllOrdemSer
 import { fetchAllVendedores, fetchFilteredVendedor } from '../../fetchAll/listAllVendedores/controller';
 import { FormaPagamentoEntity, Formas_recebimento, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
 import { fetchFilteredFormaPagamento, listTheFormaPagamento } from '../../fetchAll/listAllFormaPagamentos/controller';
+import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
 
 export interface OrdemServicoFormRef {
     handleSave: () => Promise<void>;
@@ -667,10 +667,10 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
                         />
                     )}
                 </div>
-                <CreatedDialog header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
+                <DialogFilter header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
                     <EmpresaForm msgs={msgs} ref={formRef} empresa={empresa} initialId={empresaId} setEmpresa={setEmpresa} onEmpresaChange={handleEmpresa} onErrorsChange={handleErrorsChange} redirectAfterSave={true} showBTNPGCreatedAll={true} />
-                </CreatedDialog>
-                <CreatedDialog header="Adicionar Serviço" visible={showModalServico} onHide={() => setShowModalServico(false)}>
+                </DialogFilter>
+                <DialogFilter header="Adicionar Serviço" visible={showModalServico} onHide={() => setShowModalServico(false)}>
                     <ServiceForm
                         msgs={msgs}
                         ref={formRef}
@@ -685,8 +685,8 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
                         showBTNPGCreatedDialog={true}
                         onBackClick={() => setShowModalServico(false)}
                     />
-                </CreatedDialog>
-                <CreatedDialog header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
+                </DialogFilter>
+                <DialogFilter header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
                     <PessoaForm
                         msgs={msgs}
                         ref={formRef}
@@ -701,8 +701,8 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
                         showBTNPGCreatedDialog={true}
                         onBackClick={() => setShowModalPessoa(false)}
                     />
-                </CreatedDialog>
-                <CreatedDialog header="Adicionar Forma de Pagamento" visible={showModalFormaPagamento} onHide={() => setShowModalFormaPagamento(false)}>
+                </DialogFilter>
+                <DialogFilter header="Adicionar Forma de Pagamento" visible={showModalFormaPagamento} onHide={() => setShowModalFormaPagamento(false)}>
                     <FormaPagamentoForm
                         msgs={msgs}
                         ref={formRef}
@@ -717,8 +717,8 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
                         showBTNPGCreatedDialog={true}
                         onBackClick={() => setShowModalFormaPagamento(false)}
                     />
-                </CreatedDialog>
-                <CreatedDialog header="Adicionar Vendedor" visible={showModalVendedor} onHide={() => setShowModalVendedor(false)}>
+                </DialogFilter>
+                <DialogFilter header="Adicionar Vendedor" visible={showModalVendedor} onHide={() => setShowModalVendedor(false)}>
                     <VendedorForm
                         msgs={msgs}
                         ref={formRef}
@@ -733,7 +733,7 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
                         showBTNPGCreatedDialog={true}
                         onBackClick={() => setShowModalVendedor(false)}
                     />
-                </CreatedDialog>
+                </DialogFilter>
             </>
         );
     }
