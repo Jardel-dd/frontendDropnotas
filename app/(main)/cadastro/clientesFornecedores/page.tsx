@@ -197,9 +197,8 @@ const ClientesFornecedores: React.FC = () => {
             {isMobile && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                        <div className="scrollable-container">
-                            <div className="grid formgrid p-0">
-                                <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
+                            <div className="grid formgrid p-2">
+                                <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
                                     <Input
                                         label="Buscar"
                                         outlined={true}
@@ -214,8 +213,8 @@ const ClientesFornecedores: React.FC = () => {
                                         showTopLabel
                                     />
                                 </div>
-                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-0 " style={{ marginTop: '3px' }}>
-                                    <div className="container-BTN-Filter-Created mt-2">
+                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
+                                    <div className="container-BTN-Filter-Created">
                                         <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
                                             <div className="col-12 lg:col-12 ">
                                                 <Dropdown
@@ -239,7 +238,6 @@ const ClientesFornecedores: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         <div>
                             <ListarClientesFornecedores
                                 loading={loading}

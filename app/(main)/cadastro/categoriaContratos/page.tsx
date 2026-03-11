@@ -17,6 +17,7 @@ import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialog
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
 import CategoriaContratoForm, { CategoriaContratoFormRef } from '@/app/components/pages/CategoriaContratos/categoriaContratosForm';
+import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 
 const CategoriaContrato: React.FC = () => {
     const pageSize = usePageSize();
@@ -156,11 +157,14 @@ const CategoriaContrato: React.FC = () => {
         setCategoriaContrato(categoria);
         setShowModalCategoriaContrato(true);
     };
-    const handleSalvarFiltro = () => {
+    const handleClearFilters = () => {
+        setListarInativos(false);
         handleListCategoriaContrato(0, searchTerm, listarInativos);
+
         setVisible(false);
     };
-    const handleCancelarFiltro = () => {
+    const handleApplyFilters = () => {
+        handleListCategoriaContrato(0, searchTerm, listarInativos);
         setVisible(false);
     };
     useEffect(() => {
@@ -173,45 +177,45 @@ const CategoriaContrato: React.FC = () => {
     }, [categoriaContrato]);
     return (
         <div className="w-full">
-                <Messages ref={msgs} className="custom-messages" />
+            <Messages ref={msgs} className="custom-messages" />
 
             {isMobile && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                        <div className="scrollable-container">
-                            <div className="grid formgrid p-0">
-                                <div className="col-12 mb-0 lg:col-6 lg:mb-0 p-0 ">
-                                    <Input
-                                        label="Buscar "
-                                        outlined={true}
-                                        id="descricao"
-                                        useRightButton={true}
-                                        iconRight={'pi pi-search'}
-                                        onChange={handleSearchChange}
-                                        value={searchTerm}
-                                        loading={loading}
-                                        onClickSearch={() => searchNow(searchTerm)}
-                                        topLabel="Categoria:"
-                                        showTopLabel
-                                    />
-                                </div>
-                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-0 ">
-                                    <div className="container-BTN-Filter-Created mt-2">
-                                        <Button className="height-2-8rem-ml-1rem" icon="pi pi-filter" onClick={() => setVisible(true)} outlined />
-                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                    </div>
+                        <div className="grid formgrid p-2" >
+                            <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
+                                <Input
+                                    label="Buscar "
+                                    outlined={true}
+                                    id="descricao"
+                                    useRightButton={true}
+                                    iconRight={'pi pi-search'}
+                                    onChange={handleSearchChange}
+                                    value={searchTerm}
+                                    loading={loading}
+                                    onClickSearch={() => searchNow(searchTerm)}
+                                    topLabel="Categoria:"
+                                    showTopLabel
+                                />
+                            </div>
+                            <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
+                                <div className="container-BTN-Filter-Created">
+                                    <FilterOverlay
+                                        onApply={handleApplyFilters}
+                                        onClear={handleClearFilters}
+                                        buttonClassName="height-2-8rem-ml-1rem">
+                                        <div className="checkBox-width-max-10rem">
+                                            <div className="checkbox-container">
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                <label htmlFor="listarInativos" className="ml-2">
+                                                    Listar Desativadas
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </FilterOverlay>
+                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
                             </div>
-                            <DialogFilter visible={visible} header="Filtro" onHide={() => setVisible(false)} onSave={handleSalvarFiltro} onCancel={handleCancelarFiltro}>
-                                <div className="checkBox-width-max-10rem">
-                                    <div className="checkbox-container">
-                                        <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                        <label htmlFor="listarInativos" className="ml-2">
-                                            Listar Desativadas
-                                        </label>
-                                    </div>
-                                </div>
-                            </DialogFilter>
                         </div>
                         <div>
                             <ListarCategoriaContrato

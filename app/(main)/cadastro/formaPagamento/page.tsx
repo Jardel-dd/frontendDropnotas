@@ -15,7 +15,6 @@ import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { tipo_forma_pagamento } from '@/app/shared/optionsDropDown/options';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
-import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { ativarFormaPagamento, deletarFormaPagamento, listFormaPagamento } from './controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
@@ -162,51 +161,52 @@ const CategoriaContrato: React.FC = () => {
             {isMobile && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                        <div className="scrollable-container">
-                            <div className="grid formgrid p-0">
-                                <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
-                                    <Input
-                                        label="Buscar"
-                                        outlined={true}
-                                        useRightButton={true}
-                                        iconRight={'pi pi-search'}
-                                        id="descricao"
-                                        onChange={handleSearchChange}
-                                        value={searchTerm}
-                                        loading={loading}
-                                        onClickSearch={() => searchNow(searchTerm)}
-                                        topLabel="Descrição:"
-                                        showTopLabel
-                                    />
-                                </div>
-                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-0 ">
-                                    <div className="container-BTN-Filter-Created mt-2">
-                                        <Button className="height-2-8rem-ml-1rem" icon="pi pi-filter" onClick={() => setVisible(true)} outlined />
-                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                    </div>
+                        <div className="grid formgrid p-2" >
+                            <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
+                                <Input
+                                    label="Buscar"
+                                    outlined={true}
+                                    useRightButton={true}
+                                    iconRight={'pi pi-search'}
+                                    id="descricao"
+                                    onChange={handleSearchChange}
+                                    value={searchTerm}
+                                    loading={loading}
+                                    onClickSearch={() => searchNow(searchTerm)}
+                                    topLabel="Descrição:"
+                                    showTopLabel
+                                />
+                            </div>
+                           <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
+                                <div className="container-BTN-Filter-Created">
+                                    <FilterOverlay 
+                                    onClear={handleClearFilters} 
+                                    onApply={handleApplyFilters}
+                                    buttonClassName="height-2-8rem-ml-1rem"
+                                     >
+                                        <div className="col-12 lg:col-12 ">
+                                            <Dropdown
+                                                value={selectedFormaPagamento}
+                                                options={tipo_forma_pagamento}
+                                                onChange={handleTipoFormaPagamentoChange}
+                                                placeholder="Selecione o tipo"
+                                                optionLabel="label"
+                                                optionValue="value"
+                                                topLabel="Cliente ou Fornecedor:"
+                                                showTopLabel
+                                                label=""
+                                            />
+                                        </div>
+                                        <div className="col-12 lg:col-12 mt-3">
+                                            <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
+                                            <label htmlFor="listarInativos" className="ml-2">
+                                                Listar Desativadas
+                                            </label>
+                                        </div>
+                                    </FilterOverlay>
+                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
                             </div>
-                            <FilterOverlay onClear={handleClearFilters} onApply={handleApplyFilters} buttonClassName="Btn-Filter-Desktop">
-                                <div className="col-12 lg:col-12 ">
-                                    <Dropdown
-                                        value={selectedFormaPagamento}
-                                        options={tipo_forma_pagamento}
-                                        onChange={handleTipoFormaPagamentoChange}
-                                        placeholder="Selecione o tipo"
-                                        optionLabel="label"
-                                        optionValue="value"
-                                        topLabel="Cliente ou Fornecedor:"
-                                        showTopLabel
-                                        label=""
-                                    />
-                                </div>
-                                <div className="col-12 lg:col-12 mt-3">
-                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                    <label htmlFor="listarInativos" className="ml-2">
-                                        Listar Desativadas
-                                    </label>
-                                </div>
-                            </FilterOverlay>
                         </div>
                         <div>
                             <ListarFormaPagamento

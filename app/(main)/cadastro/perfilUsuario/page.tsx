@@ -13,9 +13,9 @@ import ListarPerfilUsers from './listUserProfile/list-permis-user';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
-import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { ativarPerfilUser, deletarPerfilUser, listPerfilUser } from './controller/controller';
+import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 
 const PerfilUsuarios: React.FC = () => {
     const pageSize = usePageSize();
@@ -30,64 +30,64 @@ const PerfilUsuarios: React.FC = () => {
     const [visible, setVisible] = useState<boolean>(false);
     const [perfilUser, setPerfilUser] = useState<PerfilUser>(
         new PerfilUser({
-                   ativo: true,
-                   id: 0,
-                   nome: '',
-                   perfilUsuario: false,
-                   perfilUsuarioCadastrar: false,
-                   perfilUsuarioAlterar: false,
-                   perfilUsuarioDesativar: false,
-                   perfilUsuarioPesquisar: false,
-                   usuarioConta: false,
-                   usuarioContaCadastrar: false,
-                   usuarioContaAlterar: false,
-                   usuarioContaDesativar: false,
-                   usuarioContaPesquisar: false,
-                   empresa: false,
-                   empresaCadastrar: false,
-                   empresaAlterar: false,
-                   empresaDesativar: false,
-                   empresaPesquisar: false,
-                   pessoa: false,
-                   pessoaCadastrar: false,
-                   pessoaAlterar: false,
-                   pessoaDesativar: false,
-                   pessoaPesquisar: false,
-                   vendedor: false,
-                   vendedorCadastrar: false,
-                   vendedorAlterar: false,
-                   vendedorDesativar: false,
-                   vendedorPesquisar: false,
-                   servico: false,
-                   servicoCadastrar: false,
-                   servicoAlterar: false,
-                   servicoDesativar: false,
-                   servicoPesquisar: false,
-                   ordemServico: false,
-                   ordemServicoCadastrar: false,
-                   ordemServicoAlterar: false,
-                   ordemServicoDesativar: false,
-                   ordemServicoPesquisar: false,
-                   ordemServicoTipoVisualizacao: '',
-                   contrato: false,
-                   contratoCadastrar: false,
-                   contratoAlterar: false,
-                   contratoDesativar: false,
-                   contratoPesquisar: false,
-                   contratoTipoVisualizacao: '',
-                   categoriaContrato: false,
-                   categoriaContratoCadastrar: false,
-                   categoriaContratoAlterar: false,
-                   categoriaContratoDesativar: false,
-                   categoriaContratoPesquisar: false,
-                   formaPagamento: false,
-                   formaPagamentoCadastrar: false,
-                   formaPagamentoAlterar: false,
-                   formaPagamentoDesativar: false,
-                   formaPagamentoPesquisar: false,
-                   nfseTipoVisualizacao:''
-               }));
-   
+            ativo: true,
+            id: 0,
+            nome: '',
+            perfilUsuario: false,
+            perfilUsuarioCadastrar: false,
+            perfilUsuarioAlterar: false,
+            perfilUsuarioDesativar: false,
+            perfilUsuarioPesquisar: false,
+            usuarioConta: false,
+            usuarioContaCadastrar: false,
+            usuarioContaAlterar: false,
+            usuarioContaDesativar: false,
+            usuarioContaPesquisar: false,
+            empresa: false,
+            empresaCadastrar: false,
+            empresaAlterar: false,
+            empresaDesativar: false,
+            empresaPesquisar: false,
+            pessoa: false,
+            pessoaCadastrar: false,
+            pessoaAlterar: false,
+            pessoaDesativar: false,
+            pessoaPesquisar: false,
+            vendedor: false,
+            vendedorCadastrar: false,
+            vendedorAlterar: false,
+            vendedorDesativar: false,
+            vendedorPesquisar: false,
+            servico: false,
+            servicoCadastrar: false,
+            servicoAlterar: false,
+            servicoDesativar: false,
+            servicoPesquisar: false,
+            ordemServico: false,
+            ordemServicoCadastrar: false,
+            ordemServicoAlterar: false,
+            ordemServicoDesativar: false,
+            ordemServicoPesquisar: false,
+            ordemServicoTipoVisualizacao: '',
+            contrato: false,
+            contratoCadastrar: false,
+            contratoAlterar: false,
+            contratoDesativar: false,
+            contratoPesquisar: false,
+            contratoTipoVisualizacao: '',
+            categoriaContrato: false,
+            categoriaContratoCadastrar: false,
+            categoriaContratoAlterar: false,
+            categoriaContratoDesativar: false,
+            categoriaContratoPesquisar: false,
+            formaPagamento: false,
+            formaPagamentoCadastrar: false,
+            formaPagamentoAlterar: false,
+            formaPagamentoDesativar: false,
+            formaPagamentoPesquisar: false,
+            nfseTipoVisualizacao: ''
+        }));
+
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [isPerfilUsuarioCreated, setIsPerfilUsuarioCreated] = useState(false);
     const [selectedPerfilUser, setSelectedPerfilUser] = useState<PerfilUser | null>(null);
@@ -193,10 +193,9 @@ const PerfilUsuarios: React.FC = () => {
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <>
-                    <div className="card styled-container-main-all-routes">
-                        <div className="scrollable-container">
-                            <div className="grid formgrid p-0">
-                                <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
+                    <div className="card styled-container-main-all-routes p-2">
+                              <div className="grid formgrid p-2">
+                                <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                     <Input
                                         label="Buscar"
                                         outlined={true}
@@ -211,24 +210,22 @@ const PerfilUsuarios: React.FC = () => {
                                         showTopLabel
                                     />
                                 </div>
-                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-0 ">
-                                    <div className="container-BTN-Filter-Created mt-2">
-                                        <Button className="height-2-8rem-ml-1rem" icon="pi pi-filter" onClick={() => setVisible(true)} outlined />
-                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                    </div>
+                            <div className="col-4 mb-0 lg:col-2 p-1">
+                                <div className="container-BTN-Filter-Created  ">
+                                    <FilterOverlay onApply={handleSalvarFiltro} onClear={handleCancelarFiltro} buttonClassName="height-2-8rem-ml-1rem">
+                                        <div className="checkBoxMobile-width-max-10rem">
+                                            <div className="checkbox-container">
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                <label htmlFor="listarInativos" className="ml-2">
+                                                    Listar Desativadas
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </FilterOverlay>
+                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
                             </div>
-                            <DialogFilter visible={visible} header="Filtro" onHide={() => setVisible(false)} onSave={handleSalvarFiltro} onCancel={handleCancelarFiltro}>
-                                <div className="checkBoxMobile-width-max-10rem">
-                                    <div className="checkbox-container">
-                                        <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                        <label htmlFor="listarInativos" className="ml-2">
-                                            Listar Desativadas
-                                        </label>
-                                    </div>
-                                </div>
-                            </DialogFilter>
-                        </div>
+                            </div>
                         <div>
                             <ListarPerfilUsers
                                 loading={loading}

@@ -89,7 +89,7 @@ export function ListarPerfilUsers(
                                                     <Skeleton />
                                                 ) : (
                                                     <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
-                                                        {highlightSearchTerm(limitarText(data.nome, 20), searchTerm)}
+                                                        {highlightSearchTerm(limitarText(data.nome, 15), searchTerm)}
                                                     </span>
                                                 );
                                             },

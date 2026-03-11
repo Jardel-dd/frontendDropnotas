@@ -389,7 +389,7 @@ const NotaServico: React.FC = () => {
                                         showTopLabel
                                     />
                                 </div>
-                                <div className="actions-wrapper">
+                                <div className="actions-wrapper" style={{ marginTop: '3px' }}>
                                     <div className="container-BTN-Filter-Created w-full">
                                         <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
                                             <div className="col-12 lg:col-12 ">

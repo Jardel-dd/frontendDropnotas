@@ -13,8 +13,8 @@ import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarServico, deletarServico, listServico } from './controller/controller';
-import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 
 function Usuarios() {
     const router = useRouter();
@@ -152,7 +152,9 @@ function Usuarios() {
         handleListServicos(0, searchTerm, listarInativos);
         setVisible(false);
     };
-    const handleCancelarFiltro = () => {
+     const handleClearFilters = () => {
+        setListarInativos(false);
+        handleListServicos(0, searchTerm, listarInativos);
         setVisible(false);
     };
     const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
@@ -167,9 +169,8 @@ function Usuarios() {
             {isMobile && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                        <div className="scrollable-container">
-                            <div className="grid formgrid p-0">
-                                <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
+                            <div className="grid formgrid p-2">
+                              <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
                                     <Input
                                         label="Buscar"
                                         outlined={true}
@@ -184,15 +185,10 @@ function Usuarios() {
                                         showTopLabel
                                     />
                                 </div>
-                                <div className="col-4  lg:col-3 p-0" style={{marginTop:"4px"}}>
-                                    <div className="container-BTN-Filter-Created ">
-                                        <Button className="height-2-8rem-ml-1rem" icon="pi pi-filter" onClick={() => setVisible(true)} outlined />
-                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                    </div>
-                                </div>
-                            </div>
-                            <DialogFilter visible={visible} header="Filtro" onHide={() => setVisible(false)} onSave={handleSalvarFiltro} onCancel={handleCancelarFiltro}>
-                                <div className="checkBoxMobile-width-max-10rem">
+                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
+                                     <div className="container-BTN-Filter-Created">
+                                        <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
+                                            <div className="checkBoxMobile-width-max-10rem">
                                     <div className="checkbox-container">
                                         <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
                                         <label htmlFor="listarInativos" className="ml-2">
@@ -200,8 +196,12 @@ function Usuarios() {
                                         </label>
                                     </div>
                                 </div>
-                            </DialogFilter>
-                        </div>
+                                        </FilterOverlay>
+                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    </div>
+                                 
+                                </div>
+                            </div>
                         <div>
                             <ListarServicos
                                 loading={loading}

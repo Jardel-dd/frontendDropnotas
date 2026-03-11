@@ -86,7 +86,6 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
             </div>
         </div>
     );
-
     return (
         <div className="periodo-calendar-wrapper w-full" style={{ width:"100%"}}>
             {showTopLabel && (topLabel || topRightElement) && (
@@ -108,7 +107,7 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
                 numberOfMonths={1}
                 locale="pt"
                 dateFormat="dd/mm/yy"
-                style={{ boxShadow: 'none', borderColor: 'none', width: '100%', height:40 }}
+                style={{ boxShadow: 'none', borderColor: 'none', width: '100%', height:40, border:0 }}
                 readOnlyInput
                 placeholder="Data inicio      ↔︎      Data final"
                 showIcon

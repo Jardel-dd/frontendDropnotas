@@ -2,7 +2,6 @@
 import '@/app/styles/styledGlobal.css'
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
 import { useRouter } from 'next/navigation';
 import ListarUserConta from './listUser/list';
 import { Messages } from 'primereact/messages';
@@ -16,6 +15,7 @@ import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
+import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 
 const Usuarios: React.FC = () => {
     const router = useRouter();
@@ -136,8 +136,17 @@ const Usuarios: React.FC = () => {
     const handleCancelarFiltro = () => {
         setVisible(false);
     };
+    const handleClearFilters = () => {
+        setListarInativos(false);
+        handleListUsersConta(0, searchTerm, listarInativos);
+        setVisible(false);
+    };
     const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
+    };
+    const handleApplyFilters = () => {
+        handleListUsersConta(0, searchTerm, listarInativos);
+        setVisible(false);
     };
     useEffect(() => {
         handleListUsersConta();
@@ -145,11 +154,10 @@ const Usuarios: React.FC = () => {
     return (
         <div className='w-full'>
             <Messages ref={msgs} className="custom-messages" />
-                {isMobile &&
-                    <>
-            <div className="card styled-container-main-all-routes">
-                        <div className="scrollable-container">
-                             <div className="grid formgrid p-0">
+            {isMobile &&
+                <>
+                    <div className="card styled-container-main-all-routes p-2">
+                        <div className="grid formgrid p-2">
                             <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                 <Input
                                     label="Buscar"
@@ -164,34 +172,26 @@ const Usuarios: React.FC = () => {
                                     topLabel="Usuário:"
                                     showTopLabel
                                 />
-                                 </div>
-                                 <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-0" style={{marginTop:"4px"}}>
-                                    <div className="container-BTN-Filter-Created">
-                                    <Button className='height-2-8rem-ml-1rem' icon="pi pi-filter" onClick={() => setVisible(true)} outlined />
-                                    <Button icon="pi pi-plus" className='ml-1rem' onClick={handleNavigate} />
-                                </div>
-                                 </div>
                             </div>
-                             <DialogFilter
-                                visible={visible}
-                                header="Filtro"
-                                onHide={() => setVisible(false)}
-                                onSave={handleSalvarFiltro}
-                                onCancel={handleCancelarFiltro}
-                            >
-                                <div className='checkBoxMobile-width-max-10rem'>
-                                    <div className="checkbox-container">
-                                        <Checkbox
-                                            inputId="listarInativos"
-                                            onChange={handleCheckboxChangeMobile}
-                                            checked={listarInativos}
-                                        />
-                                        <label htmlFor="listarInativos" className="ml-2">
-                                            Listar Desativadas
-                                        </label>
-                                    </div>
+                            <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1">
+                                <div className="container-BTN-Filter-Created">
+                                    <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
+                                        <div className='checkBoxMobile-width-max-10rem'>
+                                            <div className="checkbox-container">
+                                                <Checkbox
+                                                    inputId="listarInativos"
+                                                    onChange={handleCheckboxChangeMobile}
+                                                    checked={listarInativos}
+                                                />
+                                                <label htmlFor="listarInativos" className="ml-2">
+                                                    Listar Desativadas
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </FilterOverlay>
+                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
-                            </DialogFilter>
+                            </div>
                         </div>
                         <div>
                             <ListarUserConta
@@ -226,64 +226,64 @@ const Usuarios: React.FC = () => {
                                 />
                             </div>
                         </div>
-                        </div>
-                    </>
-                }
-                {isDesktop &&
-                    <>
-                        <div className="card styled-container-main-all-routes p-2">
-                            <div className="scrollable-container">
-                             <div className="p-0">
-                                 <div className="grid formgrid">
-                                <div className="col-12 lg:col-3 container-input-search-all" >
-                                <Input
-                                    label="Buscar"
-                                    outlined={true}
-                                    useRightButton={true}
-                                    iconRight={'pi pi-search'}
-                                    id="nome"
-                                    onChange={handleSearchChange}
-                                    value={searchTerm}
-                                    loading={loading}
-                                    onClickSearch={() => searchNow(searchTerm)} 
-                                    topLabel="Usuário:"
-                                    showTopLabel/>
-                            </div>
-                            <div className='checkBox-width-max-10rem'>
-                                <div className="checkbox-container">
-                                    <Checkbox
-                                        inputId="listarInativos"
-                                        onChange={handleCheckboxChange}
-                                        checked={listarInativos}
+                    </div>
+                </>
+            }
+            {isDesktop &&
+                <>
+                    <div className="card styled-container-main-all-routes p-2">
+                        <div className="scrollable-container">
+                            <div className="p-0">
+                                <div className="grid formgrid">
+                                    <div className="col-12 lg:col-3 container-input-search-all" >
+                                        <Input
+                                            label="Buscar"
+                                            outlined={true}
+                                            useRightButton={true}
+                                            iconRight={'pi pi-search'}
+                                            id="nome"
+                                            onChange={handleSearchChange}
+                                            value={searchTerm}
+                                            loading={loading}
+                                            onClickSearch={() => searchNow(searchTerm)}
+                                            topLabel="Usuário:"
+                                            showTopLabel />
+                                    </div>
+                                    <div className='checkBox-width-max-10rem'>
+                                        <div className="checkbox-container">
+                                            <Checkbox
+                                                inputId="listarInativos"
+                                                onChange={handleCheckboxChange}
+                                                checked={listarInativos}
+                                            />
+                                            <label htmlFor="listarInativos" className="ml-2">
+                                                Listar Desativadas
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className='container-button-primary-novo'>
+                                        <Button
+                                            label="Novo"
+                                            icon="pi pi-plus"
+                                            onClick={handleNavigate}
+                                            className="p-button-primary-novo"
+                                        />
+                                    </div>
+                                </div>
+                                <div className='mt-3'>
+                                    <ListarUserConta
+                                        loading={loading}
+                                        listPaginationUserConta={listPaginationUsersConta}
+                                        setLoading={setLoading}
+                                        searchTerm={searchTerm}
+                                        listarInativos={listarInativos}
+                                        setListPaginationUserConta={setListPaginationUsersConta}
+                                        deletar={(id) => deletar(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
+                                        ativar={(id) => ativar(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
                                     />
-                                    <label htmlFor="listarInativos" className="ml-2">
-                                        Listar Desativadas
-                                    </label>
                                 </div>
                             </div>
-                            <div className='container-button-primary-novo'>
-                                <Button
-                                    label="Novo"
-                                    icon="pi pi-plus"
-                                    onClick={handleNavigate}
-                                    className="p-button-primary-novo"
-                                />
-                            </div>
                         </div>
-                        <div className='mt-3'>
-                            <ListarUserConta
-                                loading={loading}
-                                listPaginationUserConta={listPaginationUsersConta}
-                                setLoading={setLoading}
-                                searchTerm={searchTerm}
-                                listarInativos={listarInativos}
-                                setListPaginationUserConta={setListPaginationUsersConta}
-                                deletar={(id) => deletar(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => ativar(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
-                            />
-                        </div>
-                        </div>
-                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <Paginator
                                 first={listPaginationUsersConta.pageable.pageNumber * listPaginationUsersConta.pageable.pageSize}
@@ -292,9 +292,9 @@ const Usuarios: React.FC = () => {
                                 onPageChange={onPageChange}
                             />
                         </div>
-                         </div>
-                    </>
-                }
+                    </div>
+                </>
+            }
         </div>
     );
 };

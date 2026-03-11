@@ -13,7 +13,6 @@ import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarContrato, deletarContrato, listContrato } from './controller/controller';
-import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 
@@ -132,38 +131,38 @@ const Contratos: React.FC = () => {
         setSearchTerm(value);
         debouncedSearch(value);
     };
-   const handleSalvarFiltro = () => {
-    handleListContratos(0, searchTerm, listarInativos);
-    setVisible(false);
-};
+    const handleSalvarFiltro = () => {
+        handleListContratos(0, searchTerm, listarInativos);
+        setVisible(false);
+    };
     const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
-   const handleClearFilters = () => {
-    setSearchTerm('');
-    setListarInativos(false);
-    setContrato(
-        new ContratoEntity({
-            ativo: true,
-            id: 0,
-            descricao: '',
-            valor_servico: null,
-            periodicidade: '',
-            emitir_boleto: false,
-            enviar_email: false,
-            enviar_whatsapp: false,
-            id_servico: 0,
-            id_empresa: 0,
-            id_categoria_contrato: null,
-            id_forma_pagamento: null,
-            id_clientes_contrato: [0]
-        })
-    );
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setListarInativos(false);
+        setContrato(
+            new ContratoEntity({
+                ativo: true,
+                id: 0,
+                descricao: '',
+                valor_servico: null,
+                periodicidade: '',
+                emitir_boleto: false,
+                enviar_email: false,
+                enviar_whatsapp: false,
+                id_servico: 0,
+                id_empresa: 0,
+                id_categoria_contrato: null,
+                id_forma_pagamento: null,
+                id_clientes_contrato: [0]
+            })
+        );
 
-    handleListContratos(0, '', false);
+        handleListContratos(0, '', false);
 
-    setVisible(false);
-};
+        setVisible(false);
+    };
     useEffect(() => {
         handleListContratos();
     }, []);
@@ -172,74 +171,74 @@ const Contratos: React.FC = () => {
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <>
-                <div className="card styled-container-main-all-routes p-2">
-                    <div className='p-2'>
-                    <div className="grid formgrid" style={{ maxHeight: '74px' }}>
-                        <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
-                            <Input
-                                label="Buscar"
-                                outlined={true}
-                                id="descricao"
-                                useRightButton={true}
-                                iconRight={'pi pi-search'}
-                                onChange={handleSearchChange}
-                                value={searchTerm}
+                    <div className="card styled-container-main-all-routes p-2">
+                        <div className='p-2'>
+                            <div className="grid formgrid" style={{ maxHeight: '74px' }}>
+                                <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
+                                    <Input
+                                        label="Buscar"
+                                        outlined={true}
+                                        id="descricao"
+                                        useRightButton={true}
+                                        iconRight={'pi pi-search'}
+                                        onChange={handleSearchChange}
+                                        value={searchTerm}
+                                        loading={loading}
+                                        onClickSearch={() => searchNow(searchTerm)}
+                                        topLabel="Contratos:"
+                                        showTopLabel
+                                    />
+                                </div>
+                                <div className="col-4 mb-0 lg:col-2 p-0 " style={{ marginTop: "4px" }}>
+                                    <div className="container-BTN-Filter-Created">
+                                        <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
+                                            <div className="checkBoxMobile-width-max-10rem">
+                                                <div className="checkbox-container">
+                                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                    <label htmlFor="listarInativos" className="ml-2">
+                                                        Listar Desativadas
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </FilterOverlay>
+                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-1">
+                            <ListarContratos
                                 loading={loading}
-                                onClickSearch={() => searchNow(searchTerm)}
-                                topLabel="Contratos:"
-                                showTopLabel
+                                listPaginationContratos={listPaginationContratos}
+                                setLoading={setLoading}
+                                searchTerm={searchTerm}
+                                listarInativos={listarInativos}
+                                setListPaginationContratos={setListPaginationContratos}
+                                deletar={(id) => deletarContrato(id, msgs, listPaginationContratos, listarInativos, setLoading, searchTerm)}
+                                ativar={(id) => ativarContrato(id, msgs, listPaginationContratos, listarInativos, setLoading, searchTerm)}
                             />
                         </div>
-                        <div className="col-4 mb-0 lg:col-2 p-0 " style={{marginTop:"4px"}}>
-                            <div className="container-BTN-Filter-Created ">
-                                 <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
-                        <div className="checkBoxMobile-width-max-10rem">
-                            <div className="checkbox-container">
-                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                <label htmlFor="listarInativos" className="ml-2">
-                                    Listar Desativadas
-                                </label>
+                        <div style={{ marginTop: 'auto' }}>
+                            <div className="custom-paginator">
+                                <Paginator
+                                    first={listPaginationContratos.pageable.pageNumber * listPaginationContratos.pageable.pageSize}
+                                    rows={listPaginationContratos.pageable.pageSize}
+                                    totalRecords={listPaginationContratos.totalElements}
+                                    onPageChange={onPageChange}
+                                    template={{
+                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
+                                        CurrentPageReport: (options) => {
+                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
+                                            return (
+                                                <span>
+                                                    Página {pageNumber} de {options.totalPages}
+                                                </span>
+                                            );
+                                        }
+                                    }}
+                                />
                             </div>
                         </div>
-                    </FilterOverlay>
-                                <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                     <div className="mt-1">
-                        <ListarContratos
-                            loading={loading}
-                            listPaginationContratos={listPaginationContratos}
-                            setLoading={setLoading}
-                            searchTerm={searchTerm}
-                            listarInativos={listarInativos}
-                            setListPaginationContratos={setListPaginationContratos}
-                            deletar={(id) => deletarContrato(id, msgs, listPaginationContratos, listarInativos, setLoading, searchTerm)}
-                            ativar={(id) => ativarContrato(id, msgs, listPaginationContratos, listarInativos, setLoading, searchTerm)}
-                        />
-                    </div>
-                    <div style={{ marginTop: 'auto' }}>
-                        <div className="custom-paginator">
-                            <Paginator
-                                first={listPaginationContratos.pageable.pageNumber * listPaginationContratos.pageable.pageSize}
-                                rows={listPaginationContratos.pageable.pageSize}
-                                totalRecords={listPaginationContratos.totalElements}
-                                onPageChange={onPageChange}
-                                template={{
-                                    layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                    CurrentPageReport: (options) => {
-                                        const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                        return (
-                                            <span>
-                                                Página {pageNumber} de {options.totalPages}
-                                            </span>
-                                        );
-                                    }
-                                }}
-                            />
-                        </div>
-                    </div>
                     </div>
                 </>
             )}

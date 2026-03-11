@@ -240,7 +240,7 @@ const OrdemServicos: React.FC = () => {
                 {isMobile && (
                     <>
                         <div className="card styled-container-main-all-routes">
-                            <div className="scrollable-container">
+                            <div style={{padding:"8px"}}>
                                 <div className="grid formgrid" style={{ maxHeight: '74px' }}>
                                     <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                         <Input

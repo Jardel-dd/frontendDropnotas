@@ -3,14 +3,11 @@
     border-color: none !important;
     outline: none !important;
 }
-
 .p-calendar .p-inputtext.p-focus {
     box-shadow: none !important;
     border-color: none !important;
     outline: none !important;
 }
-
-
 .p-calendar .p-inputtext.p-focus,
 .p-calendar.p-focus .p-inputtext,
 .p-calendar.p-inputwrapper.p-focus input {
@@ -18,18 +15,15 @@
     border-color: var(--primary-color);
     outline: none !important;
 }
-
 .p-calendar .p-datepicker-trigger {
     background-color: transparent !important;
     border-color: var(--primary-color);
-    color: var(--primary-color);;
+    color: var(--primary-color);
 }
-
 .p-calendar .p-datepicker-trigger:focus {
     box-shadow: none !important;
     outline: none !important;
 }
-
 .calendar-footer-ok{
     display: flex;
     width: 100%;
