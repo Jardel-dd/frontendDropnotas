@@ -1,7 +1,6 @@
+import { getCitiesFromState } from '@/app/entity/maps';
 import Input from '@/app/shared/include/input/input-all';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
-import { getCitiesFromState } from '@/app/entity/maps';
-import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
 

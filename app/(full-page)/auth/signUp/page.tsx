@@ -127,7 +127,7 @@ function SignUp() {
                                     onChange={(e) => {
                                         handleAllChanges({
                                             target: {
-                                                id: e.target.id,
+                                                id: e.target.id!,
                                                 value: e.value,
                                                 type: 'text'
                                             }

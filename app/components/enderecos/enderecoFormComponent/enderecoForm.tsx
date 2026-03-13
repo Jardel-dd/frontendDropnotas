@@ -151,10 +151,10 @@ export default function EnderecoForm({
                     <div className="col-12 mt-1 lg:col-3 ">
                         <InputMaskDrop
                             id="telefone"
-                            mask="55+ (99) 9999-99999"
+                            mask="(99) 99999-9999"
                             value={telefone || ''}
                             onChange={onDropdownChange}
-                            placeholder="Digite o Telefone"
+                            placeholder="(55) 99999-9999"
                             outlined={false}
                             iconRight=""
                             onClickSearch={() => {}}

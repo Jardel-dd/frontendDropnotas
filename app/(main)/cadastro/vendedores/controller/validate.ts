@@ -8,7 +8,6 @@ export const validateFieldsVendedor = (
     const newErrors: { [key: string]: string } = {};
     msgs.current?.clear();
     let valid = true;
-
     if (vendedor.tipo_pessoa === 'PESSOA_JURIDICA') {
         if (!vendedor.cnpj || vendedor.cnpj.replace(/\D/g, '').length < 14) {
             newErrors.cnpj = 'Campo deve ter no mínimo 14 caracteres.';
@@ -16,11 +15,15 @@ export const validateFieldsVendedor = (
         else if (!vendedor.razao_social || vendedor.razao_social.trim().length < 2) {
             newErrors.razao_social = 'Campo deve ter no mínimo 2 caracteres.';
             valid = false;
-
-        } else if (vendedor.percentual_comissao === undefined || vendedor.percentual_comissao === null || String(vendedor.percentual_comissao).trim() === '') {
+        } 
+        else if (vendedor.percentual_comissao === undefined || vendedor.percentual_comissao === null || String(vendedor.percentual_comissao).trim() === '') {
             newErrors.percentual_comissao = 'Informe um valor válido.';
             valid = false;
-        }
+        } 
+        else if (!vendedor.telefone || vendedor.telefone.replace(/\D/g, '').length < 10) {
+                newErrors.telefone = "Preencha um Telefone válido."
+                valid = false;
+        } 
         else if (!vendedor.endereco?.cep || vendedor.endereco.cep.replace(/\D/g, '').length < 8) {
             newErrors.cep = "Campo deve ter no mínimo 8 dígitos.";
             valid = false;

@@ -1,14 +1,14 @@
 'use client';
-import React, { useRef, ReactNode, RefObject } from 'react';
+import React, { useRef, ReactNode } from 'react';
 import { Button } from 'primereact/button';
-import { InputMask, InputMaskChangeEvent } from 'primereact/inputmask';
 import './style.css';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Mandatory } from '../../mandatory/InputMandatory';
+import { InputText } from 'primereact/inputtext';
 
 interface InputMaskDropProps {
     value: string | undefined;
-    onChange: (e: InputMaskChangeEvent) => void;
+    onChange: (e: { value: string; target: { value: string; id?: string } }) => void;
     iconRight?: string | ReactNode;
     useRightButton?: boolean;
     onBlur?: () => void;
@@ -21,10 +21,8 @@ interface InputMaskDropProps {
     iconLeft?: string | ReactNode;
     id: string;
     loading?: boolean;
-    inputRef?: RefObject<InputMask>;
     autoFocus?: boolean;
     className?: string;
-    icon?: string;
     hasError?: boolean;
     errorMessage?: string;
     readOnly?: boolean;
@@ -48,11 +46,9 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
     useRightButton,
     onClickSearch,
     disabledRightButton,
-    inputRef,
     readOnly = false,
     className,
     autoFocus,
-    icon,
     hasError,
     errorMessage,
     showTopLabel,
@@ -60,35 +56,62 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
     required
 }) => {
     const { isDarkMode } = useTheme();
-    const inputMaskRef = useRef<InputMask | null>(null);
-    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-        setTimeout(() => {
-            const nativeInput = (inputMaskRef.current as any)?.inputElement as HTMLInputElement | undefined;
-            if (nativeInput) {
-                nativeInput.setSelectionRange(0, 0);
-            }
-        }, 0);
-        if (onFocus) {
-            onFocus();
-        }
-    };
-    const handleChange = (e: InputMaskChangeEvent) => {
-        const onlyDigits = e.value?.replace(/\D/g, '') || '';
-        const syntheticEvent = {
-            ...e,
-            target: {
-                ...e.target,
-                value: onlyDigits
-            },
-            value: onlyDigits
-        };
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const [displayValue, setDisplayValue] = React.useState('');
 
-        onChange(syntheticEvent);
+    // Conta o número máximo de dígitos baseado na máscara
+    const maxDigits = mask.split('').filter(char => char === '9').length;
+
+    const applyDynamicMask = (value: string, mask: string) => {
+        let masked = '';
+        let valueIndex = 0;
+
+        for (let i = 0; i < mask.length && valueIndex < value.length; i++) {
+            if (mask[i] === '9') {
+                masked += value[valueIndex];
+                valueIndex++;
+            } else {
+                if (valueIndex < value.length) {
+                    masked += mask[i];
+                }
+            }
+        }
+        return masked;
     };
+
+    React.useEffect(() => {
+        setDisplayValue(applyDynamicMask(value || '', mask));
+    }, [value, mask]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let onlyDigits = e.target.value.replace(/\D/g, '');
+
+        // Limita os dígitos ao máximo da máscara
+        if (onlyDigits.length > maxDigits) {
+            onlyDigits = onlyDigits.slice(0, maxDigits);
+        }
+
+        const masked = applyDynamicMask(onlyDigits, mask);
+        setDisplayValue(masked);
+        onChange({ value: onlyDigits, target: { value: onlyDigits, id } });
+    };
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        // Mantém o cursor no início
+        setTimeout(() => {
+            inputRef.current?.setSelectionRange(0, 0);
+        }, 0);
+
+        if (onFocus) onFocus();
+    };
+
+    const onlyDigits = (value || '').replace(/\D/g, '');
+    const rightButtonDisabled = disabledRightButton ?? (onlyDigits.length !== maxDigits);
+
     return (
         <div className="p-field" style={{ width: '100%', height: '71px' }}>
             {showTopLabel && topLabel && (
-               <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
+                <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -96,32 +119,33 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
                 </div>
             )}
             <div className={`p-inputgroup flex-1`} style={{ width: '100%' }}>
-                {iconLeft && <span className="p-inputgroup-addon">{typeof iconLeft === 'string' ? <i className={`pi ${iconLeft}`} style={{ color: '#FFF' }}></i> : iconLeft}</span>}
-                <InputMask
-                    mask={mask}
-                    value={value}
-                    onBlur={onBlur}
-                    onChange={handleChange}
-                    onFocus={handleFocus}
+                {iconLeft && (
+                    <span className="p-inputgroup-addon">
+                        {typeof iconLeft === 'string' ? <i className={`pi ${iconLeft}`} style={{ color: '#FFF' }}></i> : iconLeft}
+                    </span>
+                )}
+                <InputText
+                    type="text"
+                    value={displayValue}
                     placeholder={placeholder}
-                    id={id}
-                    ref={inputMaskRef}
+                    onFocus={handleFocus}
+                    onBlur={onBlur}
+                    onChange={handleInputChange}
+                    ref={inputRef}
                     readOnly={readOnly}
+                    className={`p-inputtext p-component ${hasError ? 'p-invalid' : ''}`}
                     autoFocus={autoFocus}
-                    className={`p-inputtext p-component ${hasError ? 'p-invalid' : ''} no-border-on-focus`}
                     style={{
                         boxShadow: 'none',
                         background: isDarkMode ? '#293B51' : '#FFFFFF'
                     }}
-                    autoClear={false}
-                    slotChar={''}
                 />
                 {useRightButton && (
                     <Button
                         icon={loading ? 'pi pi-spin pi-spinner' : iconRight}
                         outlined={outlined}
                         onClick={onClickSearch}
-                        disabled={disabledRightButton || loading}
+                        disabled={rightButtonDisabled || loading}
                         className="p-button p-component"
                         style={{
                             background: isDarkMode ? '#293B51' : '#FFFFFF',

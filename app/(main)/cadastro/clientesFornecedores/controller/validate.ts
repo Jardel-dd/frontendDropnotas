@@ -12,7 +12,7 @@ export const validateFieldsPessoa = (
     let valid = true;
     if (pessoa.tipo_pessoa === 'PESSOA_JURIDICA') {
 
-        if (!pessoa.cnpj || pessoa.cnpj.replace(/\D/g, '').length < 2) {
+        if (!pessoa.cnpj || pessoa.cnpj.replace(/\D/g, '').length < 14) {
             newErrors.cnpj = 'Campo deve ter no mínimo 14 caracteres.';
         }
         else if (!pessoa.razao_social || pessoa.razao_social.trim().length < 2) {

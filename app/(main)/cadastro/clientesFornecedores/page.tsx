@@ -215,7 +215,10 @@ const ClientesFornecedores: React.FC = () => {
                                 </div>
                                 <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
                                     <div className="container-BTN-Filter-Created">
-                                        <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
+                                        <FilterOverlay 
+                                        onApply={handleApplyFilters}
+                                         onClear={handleClearFilters} 
+                                         buttonClassName="height-2-8rem-ml-1rem">
                                             <div className="col-12 lg:col-12 ">
                                                 <Dropdown
                                                     value={selectedClienteFornecedor}

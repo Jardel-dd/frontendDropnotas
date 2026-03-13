@@ -199,6 +199,7 @@ const VendedorForm = forwardRef<VendedorFormRef, VendedorFormProps>(({ initialId
                                         }}
                                         onClickSearch={async () => {
                                             setLoadingCnpj(true);
+                                            setTouchedFields 
                                             await handleSearchCNPJ(vendedor?.cnpj ?? '', setVendedor, setErrors, msgs);
                                             setLoadingCnpj(false);
                                         }}
@@ -267,6 +268,10 @@ const VendedorForm = forwardRef<VendedorFormRef, VendedorFormProps>(({ initialId
                                         onClickSearch={function (): void {}}
                                         showTopLabel
                                         topLabel="Telefone:"
+                                        onBlur={() => {
+                                            setTouchedFields((prev) => ({ ...prev, telefone: true }));
+                                            validateFieldsVendedor(vendedor, setErrors, msgs);
+                                        }}
                                     />
                                 </div>
                             </>

@@ -21,6 +21,7 @@ import CNAEDropdownField from '../../fetchAll/listAllCnae/cnaeFiscal';
 import VendedorForm, { VendedorFormRef } from '../Vendedores/sellerForm';
 import { RefObject, useEffect, useState, forwardRef, useRef } from 'react';
 import { fetchPessoasById } from '../../fetchAll/listAllPessoas/controller';
+import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
 import EnderecoForm from '../../enderecos/enderecoFormComponent/enderecoForm';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-all';
@@ -30,7 +31,6 @@ import { validateFieldsPessoa } from '@/app/(main)/cadastro/clientesFornecedores
 import { fetchAllVendedores, fetchFilteredVendedor } from '../../fetchAll/listAllVendedores/controller';
 import { createdPessoa, updatePessoa } from '@/app/(main)/cadastro/clientesFornecedores/controller/controller';
 import { contribuinteOptions, DropDownTipoPessoa, OptionsTipoContrato, regimeTributarioPessoaOptions } from '@/app/shared/optionsDropDown/options';
-import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
 export interface PessoaFormRef {
     handleSave: () => Promise<void>;
 }
@@ -417,7 +417,7 @@ const PessoaForm = forwardRef<PessoaFormRef, PessoaFormProps>(({
                                         topLabel="Atividade Principal:"
                                     />
                                 </div>
-                                <div className="col-12 lg:col-3 mt-1">
+                                {/* <div className="col-12 lg:col-3 mt-1">
                                     <CNAEDropdownField
                                         selectedCNAE={selectedCNAE}
                                         onCNAEChange={handleCNAEChange}
@@ -429,7 +429,7 @@ const PessoaForm = forwardRef<PessoaFormRef, PessoaFormProps>(({
                                         topLabel="CNAE Fiscal:"
                                         required
                                     />
-                                </div>
+                                </div> */}
                             </>
                         )}
                         {pessoa?.tipo_pessoa === 'PESSOA_FISICA' && (

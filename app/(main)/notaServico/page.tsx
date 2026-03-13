@@ -33,6 +33,7 @@ import { fetchFilteredPessoas, listThePessoas } from '@/app/components/fetchAll/
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/components/fetchAll/listAllVendedores/controller';
 import { fetchFilteredService, listTheService } from '@/app/components/fetchAll/listAllService/controller';
+import LoadingScreen from '@/app/loading';
 
 const NotaServico: React.FC = () => {
     const router = useRouter();
@@ -83,6 +84,7 @@ const NotaServico: React.FC = () => {
         first: true,
         empty: false
     });
+    const [loadingPrepararNfs, setLoadingPrepararNfs] = useState(false);
     const [prepararNfs, setPrepararNfs] = useState<PrepararNfs>(
         new PrepararNfs({
             id_cliente: 0,
@@ -365,7 +367,9 @@ const NotaServico: React.FC = () => {
     useEffect(() => {
         handleListNotaServico();
     }, []);
-
+if (loadingPrepararNfs) {
+    return <LoadingScreen loadingText={'Preparando NFS-E...'} />;
+}
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
@@ -634,7 +638,11 @@ const NotaServico: React.FC = () => {
                                         label="Confirmar"
                                         style={{ boxShadow: 'none' }}
                                         disabled={stateDisableBtnPrepararNfse || Object.keys(errors).length > 0 || !prepararNfs.id_empresa || !prepararNfs.id_servico}
-                                        onClick={handleConfirmPreparaNfs}
+                                        onClick={async () => {
+    setLoadingPrepararNfs(true);
+    await handleConfirmPreparaNfs();
+    setLoadingPrepararNfs(false);
+}}
                                         outlined
                                     />
 

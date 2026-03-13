@@ -1,3 +1,4 @@
+import { validateFieldsVendedor } from "@/app/(main)/cadastro/vendedores/controller/validate";
 import { UsuarioContaEntity } from "@/app/entity/UsuarioContaEntity";
 import { searchByCNPJ } from "@/app/utils/search/searchCNPJ/controller";
 
@@ -23,12 +24,13 @@ export const handleSearchCNPJ = async <
   setState: React.Dispatch<React.SetStateAction<T>>,
   setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
   msgs: any,
-  selectedUserConta?: UsuarioContaEntity[]
+  selectedUserConta?: UsuarioContaEntity[],
+  setTouchedFields?: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>
+
 ) => {
   try {
     const cnpjOnlyNumbers = cnpj.replace(/\D/g, '');
     const data = await searchByCNPJ(cnpjOnlyNumbers);
-
     if (data) {
       setState((prevState) => ({
         ...prevState,
@@ -63,6 +65,20 @@ export const handleSearchCNPJ = async <
         }
 
       }));
+      if (setTouchedFields) {
+        setTouchedFields(prev => ({
+          ...prev,
+          telefone: true,
+          cnpj: true,
+        }));
+      }
+      if (setTouchedFields) {
+        validateFieldsVendedor({
+          ...data,
+          telefone: data.telefone || '',
+          cnpj: data.cnpj || ''
+        }, setErrors, msgs);
+      }
     }
   } catch (error) {
     if (msgs?.current?.show) {

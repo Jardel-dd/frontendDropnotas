@@ -1,6 +1,5 @@
-import Input from '@/app/shared/include/input/input-all';
 import { getCitiesFromState } from '@/app/entity/maps';
-import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
+import Input from '@/app/shared/include/input/input-all';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
 
@@ -18,7 +17,6 @@ type Props = {
 
     loadingCep: boolean;
 };
-
 export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropdownChange, handleSearchCep, setLoadingCep, setNfs, setError, msgs, errors, handleDropdownChangeEnderecoTomador, loadingCep }: Props) {
     return (
         <div >
