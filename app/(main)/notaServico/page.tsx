@@ -29,10 +29,10 @@ import { fetchNotaServico, listNotaServico, NotaFiscalParams } from './controlle
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { DateRangePicker, DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
 import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/components/fetchAll/listAllPessoas/controller';
+import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { fetchFilteredVendedor, listTheVendedor } from '@/app/components/fetchAll/listAllVendedores/controller';
-import { fetchFilteredService, listTheService } from '@/app/components/fetchAll/listAllService/controller';
+import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import { fetchFilteredService, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
 import LoadingScreen from '@/app/loading';
 
 const NotaServico: React.FC = () => {

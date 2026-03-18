@@ -10,7 +10,11 @@ api.interceptors.request.use(async (request) => {
     if (request.url === '/refresh-token') {
         return request;
     }
+        console.log('Request:', request.url);
+
     const token = await getToken();
+        console.log(' Token:', token);
+
     if (token) {
         request.headers.Authorization = `Bearer ${token}`;
     }

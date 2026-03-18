@@ -13,7 +13,7 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import ListarClientesFornecedores from './listCustommerSupplier/list';
+import ListarPessoa from './tabelaListagemPessoas/list';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarPessoa, deletarPessoa, listPessoa } from './controller/controller';
@@ -97,7 +97,7 @@ const ClientesFornecedores: React.FC = () => {
         empty: false
     });
     const handleNavigate = () => {
-        router.push('/cadastro/clientesFornecedores/created');
+        router.push('/cadastro/pessoas/created');
         setIsClientesFornecedoresCreated(true);
     };
     const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
@@ -242,7 +242,7 @@ const ClientesFornecedores: React.FC = () => {
                                 </div>
                             </div>
                         <div>
-                            <ListarClientesFornecedores
+                            <ListarPessoa
                                 loading={loading}
                                 listPaginationClientesFornecedores={listPaginationClientesFornecedores}
                                 deletar={(id) => deletarPessoa(id, msgs, listPaginationClientesFornecedores, listarInativos, cliente, fornecedor, setLoading, searchTerm)}
@@ -329,7 +329,7 @@ const ClientesFornecedores: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="mt-2">
-                                    <ListarClientesFornecedores
+                                    <ListarPessoa
                                         loading={loading}
                                         listPaginationClientesFornecedores={listPaginationClientesFornecedores}
                                         deletar={(id) => deletarPessoa(id, msgs, listPaginationClientesFornecedores, listarInativos, cliente, fornecedor, setLoading, searchTerm)}

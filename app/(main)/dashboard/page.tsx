@@ -2,24 +2,27 @@
 import './styled.css';
 import dayjs from 'dayjs';
 import '@/app/styles/styledGlobal.css';
-import React, { useEffect, useState } from 'react';
+import { fetchDashboard } from './controller';
+import { Messages } from 'primereact/messages';
+import { RelatorioDashboardParams } from './types';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
+import React, { useEffect, useRef, useState } from 'react';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import PieChart from '@/app/components/chartsComponent/charts';
-import { fetchDashboard, RelatorioDashboardParams } from './controller';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/components/fetchAll/listAllPessoas/controller';
+import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 
 const ComponentDashboard: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(false);
     const [relatorio, setRelatorio] = useState<any | null>(null);
     const [filterType, setFilterType] = useState<string | null>(null);
@@ -119,6 +122,7 @@ const ComponentDashboard: React.FC = () => {
         if (!inicio || !fim) return;
         setLoading(true);
         try {
+            msgs.current?.clear();
             const { data_hora_inicio, data_hora_fim } = mapDateRangeToParams([inicio, fim]);
             const params: RelatorioDashboardParams = {
                 idEmpresa: selectedCompany?.id ?? null,
@@ -128,6 +132,13 @@ const ComponentDashboard: React.FC = () => {
             };
             const resultado = await fetchDashboard(params);
             setRelatorio(resultado);
+        } catch (error) {
+            setRelatorio(null);
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Erro',
+                detail: error instanceof Error ? error.message : 'Não foi possível carregar os dados do dashboard.'
+            });
         } finally {
             setLoading(false);
         }
@@ -137,6 +148,7 @@ const ComponentDashboard: React.FC = () => {
     }, [dateRange, selectedCompany, selectedPessoa]);
     return (
         <div className="p-fluid">
+            <Messages ref={msgs} className="custom-messages" />
             <div className="p-0">
                 {isMobile && (
                     <>

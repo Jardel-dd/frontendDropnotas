@@ -180,12 +180,3 @@ export const fetchFilteredUserConta = async (query: string): Promise<UsuarioCont
         return [];
     }
 };
-export const fetchAllVendedores = async (): Promise<UsuarioContaEntity[]> => {
-    try {
-        const response = await api.get('/usuario-conta');
-        return response.data.content || [];
-    } catch (error) {
-        console.error("Erro ao buscar todas as vendedor:", error);
-        return [];
-    }
-};

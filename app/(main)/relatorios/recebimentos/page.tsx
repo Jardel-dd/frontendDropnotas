@@ -13,7 +13,7 @@ import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
 import { fetchRelatorioRecebimentos, mapDateRangeToIso } from './controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/components/fetchAll/listAllPessoas/controller';
+import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { Button } from 'primereact/button';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';

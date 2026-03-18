@@ -1,5 +1,6 @@
 'use client';
 import "./style.css";
+import '@/app/styles/styledGlobal.css';
 import LoadingScreen from "@/app/loading";
 import { useRouter } from "next/navigation";
 import { Messages } from "primereact/messages";
@@ -206,10 +207,17 @@ const PerfilUserChangeForm = forwardRef<PermissoesFormRef, PermissoesFormProps>(
     if (isLoading && perfilUserId) {
         return <LoadingScreen loadingText="Carregando informações da Categoria de Contrato selecionada..." />;
     };
+    const isDialogMode = Boolean(showBTNPGCreatedDialog || onClose || onBackClick);
+    const isSubmitDisabled =
+        stateDisableBtnCreatedPerfilUser ||
+        Object.keys(errors).length > 0 ||
+        !perfilUser.nome ||
+        !perfilUser.ordemServicoTipoVisualizacao ||
+        !perfilUser.contratoTipoVisualizacao;
     return (
-        <>
+        <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
             <Messages ref={msgs} className="custom-messages" />
-            <div className="scrollable-container" >
+            <div className="scrollable-container shared-form-content" >
                 <div className="grid formgrid">
                     <div className="col-12  lg:col-4 mt-1">
                         <Input
@@ -297,37 +305,25 @@ const PerfilUserChangeForm = forwardRef<PermissoesFormRef, PermissoesFormProps>(
                     </div>
                 </div>
             </div>
-            <div className="StyleContainer-btn-Created" >
+            <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
                 {showBTNPGCreatedAll && (
                     <BTNPGCreatedAll
                         label="Salvar"
-                        disabled={
-                            stateDisableBtnCreatedPerfilUser ||
-                            Object.keys(errors).length > 0 ||
-                            !perfilUser.nome ||
-                            !perfilUser.ordemServicoTipoVisualizacao ||
-                            !perfilUser.contratoTipoVisualizacao
-                        }
+                        disabled={isSubmitDisabled}
                         onClick={handleSubmit}
                     />
                 )}
                 {showBTNPGCreatedDialog && (
                     <BTNPGCreatedDialog
                         label="Salvar"
-                        disabled={
-                            stateDisableBtnCreatedPerfilUser ||
-                            Object.keys(errors).length > 0 ||
-                            !perfilUser.nome ||
-                            !perfilUser.ordemServicoTipoVisualizacao ||
-                            !perfilUser.contratoTipoVisualizacao
-                        }
+                        disabled={isSubmitDisabled}
                         onClick={handleSubmit}
                         onBackClick={onBackClick}
                         onClose={onClose}
                     />
                 )}
             </div>
-        </>
+        </div>
     );
 }
 );

@@ -8,7 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { validateFieldsVendedor } from '../controller/validate';
-import VendedorForm, { VendedorFormRef } from '@/app/components/pages/Vendedores/sellerForm';
+import { VendedorFormRef } from '../typesVendedor/typesVendedor';
+import VendedorForm from '../formComponentVendedor/FormCreatedVendedor';
 
 export default function Vendedores() {
     const searchParams = useSearchParams();

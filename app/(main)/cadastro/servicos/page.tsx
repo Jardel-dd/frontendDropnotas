@@ -4,9 +4,9 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
-import ListarServicos from './listService/list';
 import Input from '@/app/shared/include/input/input-all';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
+import ListarServicos from './tabelaListagemServicos/list';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
@@ -16,7 +16,7 @@ import { ativarServico, deletarServico, listServico } from './controller/control
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 
-function Usuarios() {
+function Servicos() {
     const router = useRouter();
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
@@ -294,4 +294,4 @@ function Usuarios() {
         </div>
     );
 }
-export default Usuarios;
+export default Servicos;

@@ -299,12 +299,20 @@ export default function CriarUserConta() {
     if (isLoading && userContaID) {
         return <LoadingScreen loadingText={'Carregando informações do usuário selecionado...'} />;
     }
+    const isSubmitDisabled =
+        stateDisableBtnCreatedUseConta ||
+        Object.keys(errors).length > 0 ||
+        !userConta.nome ||
+        !userConta.email ||
+        (!userContaID && !userConta.senha) ||
+        !selectedPerfilUser ||
+        !selectedEmpresa;
     return (
         <>
             <div className="p-fluid">
                 <Messages ref={msgs} className="custom-messages" />
-                <div className="card styled-container-main-all-routes">
-                    <div className="scrollable-container">
+                <div className="card styled-container-main-all-routes shared-form-layout shared-form-page-layout">
+                    <div className="scrollable-container shared-form-content">
                         <div className="custom-flex-row">
                             <div className="w-full">
                                 <div className="centered-container">
@@ -507,11 +515,11 @@ export default function CriarUserConta() {
                             </div>
                         </div>
                     </div>
-                    <div className="custom-flex-bottom">
+                    <div className="StyleContainer-btn-Created shared-form-footer">
                         <BTNPGCreatedAll
                             onClick={async () => await handleSubmit()}
                             label="Salvar"
-                            disabled={stateDisableBtnCreatedUseConta || Object.keys(errors).length > 0 || !userConta.nome || !userConta.email || (!userContaID && !userConta.senha) || !selectedPerfilUser || !selectedEmpresa}
+                            disabled={isSubmitDisabled}
                             icon=""
                         />
                     </div>

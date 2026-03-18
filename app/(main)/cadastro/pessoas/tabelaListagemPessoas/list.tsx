@@ -77,7 +77,7 @@ export function ListarClientesFornecedores(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/clientesFornecedores/created", router)}
+                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/pessoas/created", router)}
                                     toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
@@ -119,7 +119,7 @@ export function ListarClientesFornecedores(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/clientesFornecedores/created", router)}
+                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/pessoas/created", router)}
                                     toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,

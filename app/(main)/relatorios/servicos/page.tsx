@@ -15,7 +15,7 @@ import { filterOptions } from '@/app/shared/optionsDropDown/options';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
 import { fetchRelatorioRecebimentos } from '../recebimentos/controller';
 import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/components/fetchAll/listAllPessoas/controller';
+import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 const RelatoriosServicos: React.FC = () => {

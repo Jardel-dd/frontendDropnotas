@@ -16,16 +16,15 @@ import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
-import PessoaForm from '@/app/components/pages/Pessoa/personForm';
 import EmpresaForm from '@/app/components/pages/Empresa/companyForm';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
-import ServiceForm from '@/app/components/pages/Servicos/serviceForm';
+import ServiceForm from '@/app/(main)/cadastro/servicos/formComponentServico/formCreatedServico';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { useRef, useState, useEffect, RefObject, forwardRef } from 'react';
 import { OptionsPeriodicidade } from '@/app/shared/optionsDropDown/options';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
-import { VendedorFormRef } from '@/app/components/pages/Vendedores/sellerForm';
+import { VendedorFormRef } from '@/app/(main)/cadastro/vendedores/typesVendedor/typesVendedor';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { validateFieldsContrato } from '@/app/(main)/contrato/controller/validation';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
@@ -36,11 +35,12 @@ import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import CategoriaContratoForm from '@/app/components/pages/CategoriaContratos/categoriaContratosForm';
 import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
-import { fetchFilteredService, listTheService } from '@/app/components/fetchAll/listAllService/controller';
-import { fetchAllPessoas, fetchFilteredPessoas } from '@/app/components/fetchAll/listAllPessoas/controller';
+import { fetchFilteredService, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
+import { fetchAllPessoas, fetchFilteredPessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { fetchFilteredFormaPagamento, listTheFormaPagamento } from '@/app/components/fetchAll/listAllFormaPagamentos/controller';
 import { fetchFilteredCategoriaContrato, listTheCategoriaContrato } from '@/app/components/fetchAll/listAllCategoriaContrato/controller';
 import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
+import FormPessoaCreated from '@/app/(main)/cadastro/pessoas/formComponentPessoa/FormCreatedPessoa';
 export interface ContratoFormRef {
     handleSave: () => Promise<void>;
 }
@@ -742,7 +742,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                         />
                     </DialogFilter>
                     <DialogFilter header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
-                        <PessoaForm
+                        <FormPessoaCreated
                             msgs={msgs}
                             ref={formRef}
                             pessoa={pessoa}

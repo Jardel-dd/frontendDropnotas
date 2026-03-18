@@ -1,18 +1,17 @@
 'use client';
-import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
+import './perfilStyles.css'
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import './perfilStyles.css'
+import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
+import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import { limitarText } from '@/app/utils/limitTextDataCompany';
+import { handleActiveOrInativeVendedor } from '../controller/controller';
+import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, highlightSearchTerm, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
-import { limitarText } from '@/app/utils/limitTextDataCompany';
-import { Skeleton } from 'primereact/skeleton';
-import { handleActiveOrInativeVendedor } from '../controller/controller';
-import { VendedorEntity } from '@/app/entity/VendedorEntity';
-
 export function ListarVendedores(
     {
         listPaginationVendedores,

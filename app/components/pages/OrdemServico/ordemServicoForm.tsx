@@ -1,10 +1,10 @@
 'use client';
 
 import LoadingScreen from '@/app/loading';
-import PessoaForm from '../Pessoa/personForm';
+import FormPessoaCreated from '../../../(main)/cadastro/pessoas/formComponentPessoa/FormCreatedPessoa';
 import { Messages } from 'primereact/messages';
 import EmpresaForm from '../Empresa/companyForm';
-import ServiceForm from '../Servicos/serviceForm';
+import ServiceForm from '../../../(main)/cadastro/servicos/formComponentServico/formCreatedServico';
 import { IconNumero } from '@/app/utils/icons/icons';
 import { InputSwitch } from 'primereact/inputswitch';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
@@ -17,7 +17,8 @@ import { DatePicker } from '../../calendarComponent/datePicker';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import FormaPagamentoForm from '../FormaPagamento/formaPagamentoForm';
 import { forwardRef, RefObject, useEffect, useRef, useState } from 'react';
-import VendedorForm, { VendedorFormRef } from '../Vendedores/sellerForm';
+import VendedorForm from '../../../(main)/cadastro/vendedores/formComponentVendedor/FormCreatedVendedor';
+import { VendedorFormRef } from '../../../(main)/cadastro/vendedores/typesVendedor/typesVendedor';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
@@ -26,11 +27,11 @@ import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-al
 import { createdOrdemServico } from '@/app/(main)/ordemServicos/controller/controller';
 import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { validateFieldsOrdemServico } from '@/app/(main)/ordemServicos/controller/validation';
-import { fetchFilteredService, listTheService } from '../../fetchAll/listAllService/controller';
-import { fetchFilteredPessoas, listThePessoas } from '../../fetchAll/listAllPessoas/controller';
+import { fetchFilteredService, listTheService } from '../../../(main)/cadastro/servicos/controller/controller';
+import { fetchFilteredPessoas, listThePessoas } from '../../../(main)/cadastro/pessoas/controller/controller';
 import { fetchFilteredCompany, listTheCompany } from '../../fetchAll/listAllCompany/controller';
 import { fetchOrdemServiceByID } from '@/app/components/fetchAll/listAllOrdemServices/controller';
-import { fetchAllVendedores, fetchFilteredVendedor } from '../../fetchAll/listAllVendedores/controller';
+import { fetchAllVendedores, fetchFilteredVendedor } from '../../../(main)/cadastro/vendedores/controller/controller';
 import { FormaPagamentoEntity, Formas_recebimento, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
 import { fetchFilteredFormaPagamento, listTheFormaPagamento } from '../../fetchAll/listAllFormaPagamentos/controller';
 import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
@@ -687,7 +688,7 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
                     />
                 </DialogFilter>
                 <DialogFilter header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
-                    <PessoaForm
+                    <FormPessoaCreated
                         msgs={msgs}
                         ref={formRef}
                         pessoa={pessoa}

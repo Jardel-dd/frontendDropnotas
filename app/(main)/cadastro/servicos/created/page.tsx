@@ -5,7 +5,8 @@ import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
 import { useSearchParams } from 'next/navigation';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import ServiceForm, { ServiceFormRef } from '@/app/components/pages/Servicos/serviceForm';
+import ServiceForm from '../formComponentServico/formCreatedServico';
+import { ServiceFormRef } from '../typesServico/typesServico';
 
 export default function CriarServicos() {
     const searchParams = useSearchParams();

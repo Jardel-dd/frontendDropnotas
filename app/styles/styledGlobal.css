@@ -223,6 +223,15 @@ height: 66px;
         width: 90%;
         max-width: none;
     }
+
+    .shared-form-dialog-layout {
+        height: min(74vh, calc(100vh - 6rem));
+        max-height: min(74vh, calc(100vh - 6rem));
+    }
+}
+
+.p-dialog-content {
+    padding: 12px;
 }
 
 .scrollable-container {
@@ -231,6 +240,54 @@ height: 66px;
     padding: 0.5rem;
     width: 100%;
     overflow: auto;
+}
+
+.shared-form-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+}
+
+.shared-form-page-layout {
+    min-height: 0;
+}
+
+.shared-form-dialog-layout {
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+.shared-form-dialog-layout,
+.shared-form-page-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.shared-form-dialog-layout {
+    height: min(78vh, calc(100vh - 8rem));
+    max-height: min(78vh, calc(100vh - 8rem));
+}
+
+.scrollable-container.shared-form-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.shared-form-footer {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.shared-form-dialog-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    background: var(--surface-overlay, var(--surface-card, #fff));
 }
 
 .styled-container-login-register {
@@ -620,12 +677,23 @@ height: 66px;
     }
 }
 
+.divMainForm{
+overflow:auto;
+width: 100%;
+min-height: 12,5rem;
+height: 100%;
+}
+.divBtnCreated{
+position: sticky;
+bottom: 0;
+z-index: 99;
+}
 .StyleContainer-btn-Created {
     flex-direction: column;
     padding: 0.5rem;
     margin-top: auto;
+    height: 6rem;
 }
-
 .StyleDiv-DateRangeField-all {
     display:flex;
     max-width: 20rem;

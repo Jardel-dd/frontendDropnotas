@@ -36,7 +36,7 @@ export class PessoaEntity {
     inscricao_estadual?: string;
     inscricao_municipal?: string;
     atividade_principal?: string;
-    cnae_fiscal?: string;
+    cnae_fiscal?: string | null;
     data_fundacao?: string;
     pessoa_cliente?: boolean;
     pessoa_fornecedor?: boolean;
@@ -87,7 +87,7 @@ export class PessoaEntity {
         inscricao_estadual?: string;
         inscricao_municipal?: string;
         atividade_principal?: string;
-        cnae_fiscal?: string;
+        cnae_fiscal?: string | null;
         data_fundacao?: string;
         pessoa_cliente?: boolean;
         pessoa_fornecedor?: boolean;
@@ -166,7 +166,7 @@ export class PessoaEntity {
         inscricao_estadual?: string;
         inscricao_municipal?: string;
         atividade_principal?: string;
-        cnae_fiscal?: string;
+        cnae_fiscal?: string | null;
         data_fundacao?: string;
         pessoa_cliente?: boolean;
         pessoa_fornecedor?: boolean;
@@ -192,7 +192,7 @@ export class PessoaEntity {
             inscricao_estadual: inscricao_estadual ?? this.inscricao_estadual,
             inscricao_municipal: inscricao_municipal ?? this.inscricao_municipal,
             atividade_principal: atividade_principal ?? this.atividade_principal,
-            cnae_fiscal: cnae_fiscal ?? this.cnae_fiscal,
+            cnae_fiscal: cnae_fiscal === '' ? null : (cnae_fiscal ?? this.cnae_fiscal),
             data_fundacao: data_fundacao ?? this.data_fundacao,
             pessoa_cliente: pessoa_cliente ?? this.pessoa_cliente,
             pessoa_fornecedor: pessoa_fornecedor ?? this.pessoa_fornecedor,

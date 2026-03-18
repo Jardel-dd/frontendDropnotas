@@ -11,8 +11,8 @@ const BackButtonVisib: React.FC = () => {
 
     const routesWithBackButton: Record<string, string> = {
         '/dashboard': 'Dashboard',
-        '/cadastro/clientesFornecedores': 'Clientes e Fornecedores',
-        '/cadastro/clientesFornecedores/created': 'Novo Cliente ou Fornecedor',
+        '/cadastro/pessoas': 'Clientes e Fornecedores',
+        '/cadastro/pessoas/created': 'Novo Cliente ou Fornecedor',
         '/cadastro/servicos': 'Serviços',
         '/cadastro/servicos/created': 'Novo Serviço',
         '/cadastro/vendedores': 'Vendedores',

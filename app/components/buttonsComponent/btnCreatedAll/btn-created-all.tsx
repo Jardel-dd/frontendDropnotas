@@ -38,7 +38,6 @@ function BTNPGCreatedAll({
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          height: '2rem',
           width: '100%',
         }}
       >

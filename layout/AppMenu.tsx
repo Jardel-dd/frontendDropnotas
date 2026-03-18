@@ -17,7 +17,7 @@ const AppMenu = () => {
                 userConta?.perfilUsuario?.pessoa ? {
                     label: 'Clientes e Fornecedores',
                     icon: 'pi pi-users',
-                    to: '/cadastro/clientesFornecedores',
+                    to: '/cadastro/pessoas',
                 } : null,
                 userConta?.perfilUsuario?.servico ? {
                     label: 'Serviços',

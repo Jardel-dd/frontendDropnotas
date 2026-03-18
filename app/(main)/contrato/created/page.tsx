@@ -8,7 +8,7 @@ import { Messages } from 'primereact/messages';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ContratoForm from '@/app/components/pages/Contratos/contrato';
-import { VendedorFormRef } from '@/app/components/pages/Vendedores/sellerForm';
+import { VendedorFormRef } from '@/app/(main)/cadastro/vendedores/typesVendedor/typesVendedor';
 
 
 export default function CriarContrato() {

@@ -4,6 +4,12 @@ import api from "@/app/services/api";
 import { PessoaEntity } from "@/app/entity/PessoaEntity";
 import { searchByCep } from "@/app/utils/searchCEP/controller";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
+import { VendedorEntity } from "@/app/entity/VendedorEntity";
+
+const nullableString = (value?: string | null) => {
+    if (value === undefined || value === null) return null;
+    return value.trim().length > 0 ? value : null;
+};
 
 export const listPessoa = async (
     listPaginationClientesFornecedores: Record<string, any>,
@@ -37,18 +43,19 @@ export const updatePessoa = async (
     router: AppRouterInstance,
     setPessoa: React.Dispatch<React.SetStateAction<PessoaEntity>>,
 ) => {
-    console.log('Dados pessoa):', pessoa);
     try {
         const pessoaDataToUpdate = {
             ...pessoa,
+            cnae_fiscal: nullableString(pessoa.cnae_fiscal),
         };
+        console.log('Dados pessoa):', pessoaDataToUpdate);
         await api.put(`/pessoa`, pessoaDataToUpdate);
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso',
             detail: 'Pessoa atualizado com sucesso!',
         });
-        router.push('/cadastro/clientesFornecedores');
+        router.push('/cadastro/pessoas');
     } catch (error: any) {
         if (axios.isAxiosError(error) && error.response) {
             const { status, data } = error.response;
@@ -124,6 +131,7 @@ export const deletarPessoa = async (
         msgs.current?.clear();
         msgs.current?.show([
             {
+                life: 3000,
                 severity: 'success',
                 summary: 'Sucesso',
                 detail: 'Cliente ou Fornecedor excluído com sucesso.'
@@ -138,7 +146,6 @@ export const deletarPessoa = async (
                 detail: 'Houve um erro ao tentar excluir o Cliente ou Fornecedor, tente novamente.'
             },
         ]);
-        await listPessoa(listPaginationClientesFornecedoresId, listarInativos, cliente, fornecedor, setLoading, searchTerm);
     }
 };
 export const createdPessoa = async (
@@ -154,7 +161,9 @@ export const createdPessoa = async (
             ...pessoa,
             cnpj: pessoa.cnpj && pessoa.cnpj.replace(/\D/g, '').length > 0 ? pessoa.cnpj : null,
             cpf: pessoa.cpf && pessoa.cpf.replace(/\D/g, '').length > 0 ? pessoa.cpf : null,
+            cnae_fiscal: nullableString(pessoa.cnae_fiscal),
         };
+        console.log('Dados pessoa):', pessoaData);
         const response = await api.post('/pessoa', pessoaData);
         const created = new PessoaEntity(response.data?.pessoa ?? response.data);
         console.log(response);
@@ -163,7 +172,7 @@ export const createdPessoa = async (
             detail: 'Cliente ou Fornecedor criado com sucesso!',
         });
         if (redirectAfterSave) {
-        router.push('/cadastro/clientesFornecedores');
+        router.push('/cadastro/pessoas');
         }
         setPessoa(created);
         return created;
@@ -231,10 +240,10 @@ export const handleSearchCepPessoa = async (
         setLoading(false);
     }
 };
-export const handleActiveOrInativeClientesFornecedores = async (
+export const handleActiveOrInativePessoa = async (
     rowData: PessoaEntity,
     msgs: any,
-    listPaginationClientesFornecedoresId: Record<string, any>,
+    listPaginationPessoaId: Record<string, any>,
     listarInativos: boolean,
     cliente: boolean,
     fornecedor: boolean,
@@ -244,15 +253,92 @@ export const handleActiveOrInativeClientesFornecedores = async (
 ) => {
     try {
         if (rowData.ativo) {
-            await deletarPessoa(rowData.id!, msgs, listPaginationClientesFornecedoresId, listarInativos, cliente, fornecedor, setLoading, searchTerm);
+            await deletarPessoa(rowData.id!, msgs, listPaginationPessoaId, listarInativos, cliente, fornecedor, setLoading, searchTerm);
         } else {
-            await ativarPessoa(rowData.id!, msgs, listPaginationClientesFornecedoresId, listarInativos, cliente, fornecedor, setLoading, searchTerm);
-
+            await ativarPessoa(rowData.id!, msgs, listPaginationPessoaId, listarInativos, cliente, fornecedor, setLoading, searchTerm);
         }
-        const refreshList = await listPessoa(listPaginationClientesFornecedoresId, listarInativos, cliente, fornecedor, setLoading, searchTerm);
+        const refreshList = await listPessoa(listPaginationPessoaId, listarInativos, cliente, fornecedor, setLoading, searchTerm);
         setListPaginationClientesFornecedores(refreshList);
     } catch (error) {
         console.error("Erro ao ativar/desativar Cliente ou fornecedor:", error);
     }
 };
-
+export const fetchAllPessoas = async (): Promise<PessoaEntity[]> => {
+    try {
+        const idsResponse = await api.get('/pessoa');
+                console.log('[fetchAllPessoas] response.data:', idsResponse.data);
+        let pessoas = [];
+        if (Array.isArray(idsResponse.data)) {
+            pessoas = idsResponse.data;
+        } else if (idsResponse.data && Array.isArray(idsResponse.data.content)) {
+            pessoas = idsResponse.data.content;
+        } else {
+            throw new Error("Dados recebidos");
+        }
+        return pessoas.map((user: any) => ({
+            id: user.id,
+            razao_social: user.razao_social || 'Nome não disponível',
+        }));
+    } catch (error) {
+        console.error('Erro ao buscar pessoas do endpoint /pessoas:', error);
+        return [];
+    }
+};
+export const fetchFilteredPessoas = async (termo: string) => {
+    try {
+        const response = await api.get(`/pessoa`, {
+            params: {
+                termo: termo
+            }
+        });
+        if (response.data && Array.isArray(response.data.content)) {
+            return response.data.content.map((user: any) => ({
+                id: user.id,
+                razao_social: user.razao_social || 'Nome não disponível',
+            }));
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error("Erro ao filtrar clientes:", error);
+        return [];
+    }
+};
+export const fetchPessoasById = async (pessoaId: string) => {
+    try {
+        const { data: dataPessoa } = await api.get(`/pessoa/${pessoaId}`);
+        console.log("Pessoa selecionada:", dataPessoa);
+        const pessoaInstanciada = new PessoaEntity(dataPessoa);
+        const { data: VendedorResponse } = await api.get("/vendedor");
+        const empresaList = Array.isArray(VendedorResponse.content) ? VendedorResponse.content : [];
+        const VendedorListFormatada: VendedorEntity[] = empresaList.map((vendedor: any) => ({
+            id: vendedor.id,
+            nome: vendedor.razao_social,
+        }));
+        const selectedVendedor: VendedorEntity | null = VendedorListFormatada.find(
+            (vendedor: any) => vendedor.id === dataPessoa.id_vendedor_padrao
+        ) || null;
+        return {
+            dataPessoa: pessoaInstanciada,
+            vendedor: VendedorListFormatada,
+            selectedVendedor,
+        };
+    } catch (error) {
+        console.error(" Erro ao buscar cliente/fornecedor:", error);
+        throw error;
+    }
+};
+export const listThePessoas = async () => {
+    try {
+        const response = await api.get("/pessoa");
+        if (response.data && Array.isArray(response.data.content)) {
+            return response.data.content;
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error("Erro ao buscar serviços:", error);
+        return [];
+    }
+};
+export const handleActiveOrInativeClientesFornecedores = handleActiveOrInativePessoa;

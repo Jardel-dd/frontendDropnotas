@@ -298,10 +298,34 @@ const EmpresaForm = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initialId, m
     if (isLoading && empresaId) {
         return <LoadingScreen loadingText="Carregando informações da Empresa selecionada..." />;
     }
+    const isDialogMode = Boolean(showBTNPGCreatedDialog || onClose || onBackClick);
+    const isSubmitDisabled =
+        stateDisableBtnCreatedCompany ||
+        Object.keys(errors).length > 0 ||
+        !empresa.cnpj ||
+        !empresa.razao_social ||
+        !empresa.nome_fantasia ||
+        !empresa.atividade_principal ||
+        !empresa.inscricao_municipal ||
+        !empresa.codigo_regime_tributario ||
+        !empresa.endereco ||
+        !empresa.serie_emissao_nfse ||
+        !empresa.proximo_numero_rps ||
+        !empresa.proximo_numero_lote ||
+        empresa.aliquota_iss === null ||
+        empresa.aliquota_iss === undefined ||
+        !empresa.cnae_fiscal ||
+        typeof empresa.prestacao_sus !== 'boolean' ||
+        !empresa.regime_especial_tributacao ||
+        typeof empresa.incentivo_fiscal !== 'boolean' ||
+        !empresa.tipo_rps ||
+        (!empresa.certificado_digital && !empresa.nome_certificado_digital) ||
+        !empresa.senha_certificado_digital ||
+        !selectedUserConta;
     return (
-        <>
+        <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
             <Messages ref={msgs} className="custom-messages" />
-            <div className="scrollable-container">
+            <div className="scrollable-container shared-form-content">
                 <div className="mb-4 lg:mb-0 custom-container">
                     <div className="custom-flex-row">
                         <div className="w-full">
@@ -865,71 +889,25 @@ const EmpresaForm = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initialId, m
                     </div>
                 </div>
             </div>
-            <div className="StyleContainer-btn-Created">
+            <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
                 {showBTNPGCreatedAll && (
                     <BTNPGCreatedAll
                         label="Salvar"
-                        disabled={
-                            stateDisableBtnCreatedCompany ||
-                            Object.keys(errors).length > 0 ||
-                            !empresa.cnpj ||
-                            !empresa.razao_social ||
-                            !empresa.nome_fantasia ||
-                            !empresa.atividade_principal ||
-                            !empresa.inscricao_municipal ||
-                            !empresa.codigo_regime_tributario ||
-                            !empresa.endereco ||
-                            !empresa.serie_emissao_nfse ||
-                            !empresa.proximo_numero_rps ||
-                            !empresa.proximo_numero_lote ||
-                            empresa.aliquota_iss === null ||
-                            empresa.aliquota_iss === undefined ||
-                            !empresa.cnae_fiscal ||
-                            typeof empresa.prestacao_sus !== 'boolean' ||
-                            !empresa.regime_especial_tributacao ||
-                            typeof empresa.incentivo_fiscal !== 'boolean' ||
-                            !empresa.tipo_rps ||
-                            (!empresa.certificado_digital && !empresa.nome_certificado_digital) ||
-                            !empresa.senha_certificado_digital ||
-                            !selectedUserConta
-                        }
+                        disabled={isSubmitDisabled}
                         onClick={handleSubmit}
                     />
                 )}
                 {showBTNPGCreatedDialog && (
                     <BTNPGCreatedDialog
                         label="Salvar"
-                        disabled={
-                            stateDisableBtnCreatedCompany ||
-                            Object.keys(errors).length > 0 ||
-                            !empresa.cnpj ||
-                            !empresa.razao_social ||
-                            !empresa.nome_fantasia ||
-                            !empresa.atividade_principal ||
-                            !empresa.inscricao_municipal ||
-                            !empresa.codigo_regime_tributario ||
-                            !empresa.endereco ||
-                            !empresa.serie_emissao_nfse ||
-                            !empresa.proximo_numero_rps ||
-                            !empresa.proximo_numero_lote ||
-                            empresa.aliquota_iss === null ||
-                            empresa.aliquota_iss === undefined ||
-                            !empresa.cnae_fiscal ||
-                            typeof empresa.prestacao_sus !== 'boolean' ||
-                            !empresa.regime_especial_tributacao ||
-                            typeof empresa.incentivo_fiscal !== 'boolean' ||
-                            !empresa.tipo_rps ||
-                            (!empresa.certificado_digital && !empresa.nome_certificado_digital) ||
-                            !empresa.senha_certificado_digital ||
-                            !selectedUserConta
-                        }
+                        disabled={isSubmitDisabled}
                         onClick={handleSubmit}
                         onBackClick={onBackClick}
                         onClose={onClose}
                     />
                 )}
             </div>
-        </>
+        </div>
     );
 });
 EmpresaForm.displayName = 'EmpresaForm';
