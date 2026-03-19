@@ -15,9 +15,10 @@ import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll'
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
+import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
 import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
+import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 
 const ComponentDashboard: React.FC = () => {
     const isMobile = useIsMobile();
@@ -26,6 +27,7 @@ const ComponentDashboard: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [relatorio, setRelatorio] = useState<any | null>(null);
     const [filterType, setFilterType] = useState<string | null>(null);
+    const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [dateRange, setDateRange] = useState<DateRangeValue>(todayRange);
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
@@ -145,7 +147,7 @@ const ComponentDashboard: React.FC = () => {
     };
     useEffect(() => {
         buscar();
-    }, [dateRange, selectedCompany, selectedPessoa]);
+    }, []);
     return (
         <div className="p-fluid">
             <Messages ref={msgs} className="custom-messages" />
@@ -182,18 +184,13 @@ const ComponentDashboard: React.FC = () => {
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<PessoaEntity>
-                                                        id="selectedPessoa"
-                                                        selectedItem={selectedPessoa}
-                                                        onItemChange={handlePessoaChange}
-                                                        fetchAllItems={listThePessoas}
-                                                        fetchFilteredItems={fetchFilteredPessoas}
-                                                        optionLabel="razao_social"
-                                                        optionValue="id"
-                                                        topLabel="Cliente ou Fornecedor:"
-                                                        showTopLabel
-                                                        placeholder=" Selecione o Cliente ou Fornecedor"
-                                                    />
+                                                  <PessoaDropdownField
+    selectedPessoa={selectedPessoa}
+    onPessoaChange={handlePessoaChange}
+    reloadKey={reloadKeyPessoa}
+    hasError={!!errors.selectedPessoa}
+    errorMessage={errors.selectedPessoa}
+/>
                                                 </div>
                                             </FilterOverlay>
                                         </div>
@@ -265,18 +262,13 @@ const ComponentDashboard: React.FC = () => {
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
-                                                <DropdownSearch<PessoaEntity>
-                                                    id="selectedPessoa"
-                                                    selectedItem={selectedPessoa}
-                                                    onItemChange={handlePessoaChange}
-                                                    fetchAllItems={listThePessoas}
-                                                    fetchFilteredItems={fetchFilteredPessoas}
-                                                    optionLabel="razao_social"
-                                                    optionValue="id"
-                                                    topLabel="Cliente ou Fornecedor:"
-                                                    showTopLabel
-                                                    placeholder=" Selecione o Cliente ou Fornecedor"
-                                                />
+                                              <PessoaDropdownField
+    selectedPessoa={selectedPessoa}
+    onPessoaChange={handlePessoaChange}
+    reloadKey={reloadKeyPessoa}
+    hasError={!!errors.selectedPessoa}
+    errorMessage={errors.selectedPessoa}
+/>
                                             </div>
                                         </FilterOverlay>
                                     </div>

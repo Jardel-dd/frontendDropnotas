@@ -13,7 +13,7 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import ListarPessoa from './tabelaListagemPessoas/list';
+import ListarPessoa from './tabela/pessoaListagem';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarPessoa, deletarPessoa, listPessoa } from './controller/controller';

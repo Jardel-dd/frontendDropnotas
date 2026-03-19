@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import ListarServicos from './tabelaListagemServicos/list';
+import ListarServicos from './tabela/servicoListagem';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';

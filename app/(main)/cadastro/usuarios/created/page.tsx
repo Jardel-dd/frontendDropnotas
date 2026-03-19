@@ -18,14 +18,15 @@ import { validateFieldsUserConta } from '../controller/validation';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import EmpresaForm from '@/app/components/pages/Empresa/companyForm';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
-import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { convertProfileUserToBase64, create, update } from '../controller/controller';
-import { fetchUserContaCreated } from '@/app/components/fetchAll/listUsersConta/controller';
+import { convertProfileUserToBase64, createUsuario, fetchUserContaCreated, updateUsuario } from '../controller/controller';
+
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import PerfilUserChangeForm, { PermissoesFormRef } from '@/app/components/pages/Permissoes/permissoesForm';
-import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
-import { fetchAllPerfilUsuarios, fetchFilteredPerfilUsuarios } from '@/app/components/fetchAll/listAllPerfilUsuarios/controller';
+
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
+import { fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { fetchAllPerfilUsuarios } from '../../perfilUsuario/controller/controller';
+import PerfilUserDropdownField from '../../perfilUsuario/dropdown/perfilUsuario';
 
 export default function CriarUserConta() {
     const router = useRouter();
@@ -151,19 +152,17 @@ export default function CriarUserConta() {
         })
     );
     const [reloadKeyEmpresa, setReloadKeyEmpresa] = useState(0);
-    const [reloadKeyUserConta, setReloadKeyUserConta] = useState(0);
+    const [reloadKeyPerfilUser, setReloadKeyPerfilUser] = useState(0);
     const [showModalEmpresa, setShowModalEmpresa] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState<string>('');
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [showModalUserConta, setShowModalUserConta] = useState(false);
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [showModalPerfilUser, setShowModalPerfilUser] = useState(false);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity[]>([]);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
-    const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
+    const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});    
     const [selectedPerfilUser, setSelectedPerfilUser] = useState<PerfilUser | null>(null);
-    const [selectedUserConta, setSelectedUserConta] = useState<PerfilUser | null>(null);
     const [stateDisableBtnCreatedUseConta, setStateDisableBtnCreatedUserConta] = useState(false);
     const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
         const id = event.target.id;
@@ -179,9 +178,17 @@ export default function CriarUserConta() {
         });
     };
     const handlePerfilUserSaved = (created: PerfilUser) => {
-        setShowModalUserConta(false);
-        setSelectedUserConta(created);
-        setReloadKeyUserConta((k) => k + 1);
+        setShowModalPerfilUser(false);
+        setSelectedPerfilUser(created);
+        handleAllChanges({
+            target: { id: 'id_perfil_usuario', value: created.id, type: 'input' }
+        });
+        setErrors((prevErrors) => {
+            const newErrors = { ...prevErrors };
+            delete newErrors.selectedPerfilUser;
+            return newErrors;
+        });
+        setReloadKeyPerfilUser((k) => k + 1);
     };
     const handleCompanyChange = (e: MultiSelectChangeEvent) => {
         console.log('Empresa selecionado:', e.value);
@@ -231,9 +238,9 @@ export default function CriarUserConta() {
         if (!isValid) return;
         {
             if (isEditMode && userContaID) {
-                update(userContaID, userConta, confirmPassword, selectedEmpresa, selectedPerfilUser, setErrors, msgs, router, setUserConta, setSelectedEmpresa, setSelectedPerfilUser);
+                updateUsuario(userContaID, userConta, confirmPassword, selectedEmpresa, selectedPerfilUser, setErrors, msgs, router, setUserConta, setSelectedEmpresa, setSelectedPerfilUser);
             } else {
-                create(userConta, selectedEmpresa, selectedPerfilUser, setErrors, msgs, router, setUserConta, setSelectedEmpresa, setSelectedPerfilUser);
+                createUsuario(userConta, selectedEmpresa, selectedPerfilUser, setErrors, msgs, router, setUserConta, setSelectedEmpresa, setSelectedPerfilUser);
             }
         }
     };
@@ -472,23 +479,16 @@ export default function CriarUserConta() {
                                     </>
                                 )}
                                 <div className="col-12 lg:col-12 mt-1">
-                                        <DropdownSearch<PerfilUser>
-                                            id="selectedPerfilUser"
-                                            selectedItem={selectedPerfilUser}
-                                            onItemChange={handlePerfilUserChange}
-                                            fetchAllItems={fetchAllPerfilUsuarios}
-                                            fetchFilteredItems={fetchFilteredPerfilUsuarios}
-                                            optionLabel="nome"
-                                            placeholder="Selecione a permissão"
-                                            hasError={!!errors.selectedPerfilUser}
-                                            errorMessage={errors.selectedPerfilUser}
-                                            autoSelectSingle
-                                            showAddButton
-                                            onAddClick={() => setShowModalPerfilUser(true)}
-                                            topLabel="Permissões deste Usuário:"
-                                            showTopLabel
-                                            required
-                                        />
+                                      <PerfilUserDropdownField
+    selectedPerfilUser={selectedPerfilUser}
+    onPerfilUserChange={handlePerfilUserChange}
+    reloadKey={reloadKeyPerfilUser}
+    hasError={!!errors.selectedPerfilUser}
+    errorMessage={errors.selectedPerfilUser}
+    showAddButton
+    onAddClick={() => setShowModalPerfilUser(true)}
+    autoSelectSingle
+/>
                                 </div>
                                 <div className="col-12 lg:col-12 mt-1">
                                         <CustomMultiSelect

@@ -4,12 +4,13 @@ import dayjs from 'dayjs';
 import api from '@/app/services/api';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
+import LoadingScreen from '@/app/loading';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
-import ListarNotaServico from './listServiceNote/list-nfs';
+import ListarNotaServico from './tabela/notaServicoListagem';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
@@ -19,21 +20,22 @@ import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { validateFieldsPrepararNfs } from './controller/validation';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
+import { listNotaServico, NotaFiscalParams } from './controller/controller';
 import { DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import { DropDownFilterNotaServico } from '@/app/shared/optionsDropDown/options';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { fetchNotaServico, listNotaServico, NotaFiscalParams } from './controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { DateRangePicker, DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
-import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
+import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
 import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 import { fetchFilteredService, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
-import LoadingScreen from '@/app/loading';
+import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
+import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
 
 const NotaServico: React.FC = () => {
     const router = useRouter();
@@ -45,6 +47,7 @@ const NotaServico: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
+    const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [dateRange, setDateRange] = useState<DateRangeValue>([null, null]);
@@ -324,15 +327,15 @@ const NotaServico: React.FC = () => {
                 ...mapDateRangeToParams(dateRange)
             };
             const resultado = await listNotaServico({
-    page: 0,
-    size: pageSize,
-    termo: searchTerm,
-    status: selectedStatusNotaServico,
-    dateRange,
-    id_empresa: selectedEmpresa?.id,
-    id_cliente: selectedPessoa?.id,
-    id_vendedor: selectedVendedor?.id
-});
+                page: 0,
+                size: pageSize,
+                termo: searchTerm,
+                status: selectedStatusNotaServico,
+                dateRange,
+                id_empresa: selectedEmpresa?.id,
+                id_cliente: selectedPessoa?.id,
+                id_vendedor: selectedVendedor?.id
+            });
             setListPaginationNotaServico(resultado);
         } finally {
             setLoading(false);
@@ -367,9 +370,9 @@ const NotaServico: React.FC = () => {
     useEffect(() => {
         handleListNotaServico();
     }, []);
-if (loadingPrepararNfs) {
-    return <LoadingScreen loadingText={'Preparando NFS-E...'} />;
-}
+    if (loadingPrepararNfs) {
+        return <LoadingScreen loadingText={'Preparando NFS-E...'} />;
+    }
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
@@ -420,17 +423,12 @@ if (loadingPrepararNfs) {
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
-                                                <DropdownSearch<PessoaEntity>
-                                                    id="selectedPessoa"
-                                                    selectedItem={selectedPessoa}
-                                                    onItemChange={handlePessoaChange}
-                                                    fetchAllItems={listThePessoas}
-                                                    fetchFilteredItems={fetchFilteredPessoas}
-                                                    optionLabel="razao_social"
-                                                    optionValue="id"
-                                                    topLabel="Cliente ou Fornecedor:"
-                                                    showTopLabel
-                                                    placeholder=" Selecione o Cliente ou Fornecedor"
+                                                <PessoaDropdownField
+                                                    selectedPessoa={selectedPessoa}
+                                                    onPessoaChange={handlePessoaChange}
+                                                    reloadKey={reloadKeyPessoa}
+                                                    hasError={!!errors.selectedPessoa}
+                                                    errorMessage={errors.selectedPessoa}
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12">
@@ -510,7 +508,7 @@ if (loadingPrepararNfs) {
                 {isDesktop && (
                     <>
                         <div className="card styled-container-main-all-routes">
-                            <div style={{padding:"0.5rem"}}>
+                            <div style={{ padding: "0.5rem" }}>
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input
@@ -553,17 +551,12 @@ if (loadingPrepararNfs) {
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
-                                                <DropdownSearch<PessoaEntity>
-                                                    id="selectedPessoa"
-                                                    selectedItem={selectedPessoa}
-                                                    onItemChange={handlePessoaChange}
-                                                    fetchAllItems={listThePessoas}
-                                                    fetchFilteredItems={fetchFilteredPessoas}
-                                                    optionLabel="razao_social"
-                                                    optionValue="id"
-                                                    topLabel="Cliente ou Fornecedor:"
-                                                    showTopLabel
-                                                    placeholder=" Selecione o Cliente ou Fornecedor"
+                                                <PessoaDropdownField
+                                                    selectedPessoa={selectedPessoa}
+                                                    onPessoaChange={handlePessoaChange}
+                                                    reloadKey={reloadKeyPessoa}
+                                                    hasError={!!errors.selectedPessoa}
+                                                    errorMessage={errors.selectedPessoa}
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12">
@@ -639,10 +632,10 @@ if (loadingPrepararNfs) {
                                         style={{ boxShadow: 'none' }}
                                         disabled={stateDisableBtnPrepararNfse || Object.keys(errors).length > 0 || !prepararNfs.id_empresa || !prepararNfs.id_servico}
                                         onClick={async () => {
-    setLoadingPrepararNfs(true);
-    await handleConfirmPreparaNfs();
-    setLoadingPrepararNfs(false);
-}}
+                                            setLoadingPrepararNfs(true);
+                                            await handleConfirmPreparaNfs();
+                                            setLoadingPrepararNfs(false);
+                                        }}
                                         outlined
                                     />
 
@@ -674,43 +667,29 @@ if (loadingPrepararNfs) {
                                     hasError={!!errors.selectedEmpresa}
                                     errorMessage={errors.selectedEmpresa}
                                     placeholder="Selecione a Empresa"
-                                    onBlur={() => validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs)}
                                 />
                             </div>
                             <div className="col-12 lg:col-12 ">
-                                <DropdownSearch<PessoaEntity>
+                                <PessoaDropdownField
                                     id="selectedCliente"
-                                    selectedItem={selectedPessoaDialog}
-                                    onItemChange={handlePessoaChangeDialog}
-                                    fetchAllItems={listThePessoas}
-                                    fetchFilteredItems={fetchFilteredPessoas}
-                                    optionLabel="razao_social"
-                                    optionValue="id"
-                                    topLabel="Cliente ou Fornecedor:"
-                                    showTopLabel
-                                    required
+                                    selectedPessoa={selectedPessoaDialog}
+                                    onPessoaChange={handlePessoaChangeDialog}
                                     hasError={!!errors.selectedCliente}
                                     errorMessage={errors.selectedCliente}
-                                    placeholder="Selecione o Cliente ou Fornecedor"
-                                    onBlur={() => validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs)}
                                 />
                             </div>
                             <div className="col-12 lg:col-12">
-                                <DropdownSearch<ServiceEntity>
-                                    id="selectedServico"
-                                    selectedItem={selectedServicoDialog}
-                                    onItemChange={handleServicoChangeDialog}
-                                    fetchAllItems={listTheService}
-                                    fetchFilteredItems={fetchFilteredService}
-                                    optionLabel="descricao"
-                                    topLabel="Serviço:"
-                                    placeholder="Selecione o serviço"
-                                    showTopLabel
-                                    required
-                                    hasError={!!errors.selectedServico}
-                                    errorMessage={errors.selectedServico}
-                                    onBlur={() => validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs)}
-                                />
+                               <ServicoDropdownField
+    id="selectedServico"
+    selectedService={selectedServicoDialog}
+    onServiceChange={handleServicoChangeDialog}
+    placeholder="Selecione o serviço"
+    topLabel="Serviço:"
+    showTopLabel
+    required
+    hasError={!!errors.selectedServico}
+    errorMessage={errors.selectedServico}
+/>
                             </div>
                         </Dialog>
                     </>

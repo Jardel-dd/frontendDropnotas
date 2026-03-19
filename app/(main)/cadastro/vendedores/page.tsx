@@ -4,7 +4,7 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
-import ListarVendedores from './tabelaListagemVendedores/list-vendedores';
+import ListarVendedores from './tabela/vendedorListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';

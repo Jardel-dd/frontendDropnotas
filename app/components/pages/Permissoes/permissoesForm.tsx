@@ -12,11 +12,10 @@ import Dropdown from "@/app/shared/include/dropdown/dropdown";
 import { Tree, TreeCheckboxSelectionKeys } from "primereact/tree";
 import { RefObject, useEffect, useState, forwardRef } from "react";
 import BTNPGCreatedAll from "../../buttonsComponent/btnCreatedAll/btn-created-all";
-import { fetchPerfilUserByID } from "../../fetchAll/listAllPerfilUsuarios/controller";
 import BTNPGCreatedDialog from "../../buttonsComponent/btnCreatedAll/btn-created-dialog";
 import { permissoes, tiposVisualizacaoPermissoes } from '@/app/shared/optionsDropDown/options';
 import { validateFieldsPerfilUser } from "@/app/(main)/cadastro/perfilUsuario/controller/validate";
-import { createdPerfilUser, updatePerfilUser } from "@/app/(main)/cadastro/perfilUsuario/controller/controller";
+import { createdPerfilUser, fetchPerfilUserByID, updatePerfilUser } from "@/app/(main)/cadastro/perfilUsuario/controller/controller";
 export interface PermissoesFormRef {
     handleSave: () => Promise<void>;
 };

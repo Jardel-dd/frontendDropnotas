@@ -1,10 +1,7 @@
 'use client';
-
 import LoadingScreen from '@/app/loading';
-import FormPessoaCreated from '../../../(main)/cadastro/pessoas/formComponentPessoa/FormCreatedPessoa';
 import { Messages } from 'primereact/messages';
 import EmpresaForm from '../Empresa/companyForm';
-import ServiceForm from '../../../(main)/cadastro/servicos/formComponentServico/formCreatedServico';
 import { IconNumero } from '@/app/utils/icons/icons';
 import { InputSwitch } from 'primereact/inputswitch';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
@@ -16,44 +13,30 @@ import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { DatePicker } from '../../calendarComponent/datePicker';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import FormaPagamentoForm from '../FormaPagamento/formaPagamentoForm';
+import ServiceForm from '../../../(main)/cadastro/servicos/form/servico';
 import { forwardRef, RefObject, useEffect, useRef, useState } from 'react';
-import VendedorForm from '../../../(main)/cadastro/vendedores/formComponentVendedor/FormCreatedVendedor';
-import { VendedorFormRef } from '../../../(main)/cadastro/vendedores/typesVendedor/typesVendedor';
+import FormPessoaCreated from '../../../(main)/cadastro/pessoas/form/pessoa';
+import VendedorForm from '../../../(main)/cadastro/vendedores/form/vendedor';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
+import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
+import PessoaDropdownField from '@/app/(main)/cadastro/pessoas/dropDown/pessoa';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { DetalServiceOSEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
+import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-all';
-import { createdOrdemServico } from '@/app/(main)/ordemServicos/controller/controller';
+import { VendedorFormRef } from '../../../(main)/cadastro/vendedores/types/vendedor';
 import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { validateFieldsOrdemServico } from '@/app/(main)/ordemServicos/controller/validation';
-import { fetchFilteredService, listTheService } from '../../../(main)/cadastro/servicos/controller/controller';
-import { fetchFilteredPessoas, listThePessoas } from '../../../(main)/cadastro/pessoas/controller/controller';
-import { fetchFilteredCompany, listTheCompany } from '../../fetchAll/listAllCompany/controller';
-import { fetchOrdemServiceByID } from '@/app/components/fetchAll/listAllOrdemServices/controller';
-import { fetchAllVendedores, fetchFilteredVendedor } from '../../../(main)/cadastro/vendedores/controller/controller';
+import { fetchFilteredFormaPagamento, listTheFormaPagamento } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
 import { FormaPagamentoEntity, Formas_recebimento, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
-import { fetchFilteredFormaPagamento, listTheFormaPagamento } from '../../fetchAll/listAllFormaPagamentos/controller';
-import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
+import { OrdemServicoFormProps, OrdemServicoFormRef } from '@/app/(main)/ordemServicos/types/ordemServico';
+import { fetchFilteredService, listTheService } from '../../../(main)/cadastro/servicos/controller/controller';
+import { createdOrdemServico, fetchOrdemServiceByID } from '@/app/(main)/ordemServicos/controller/controller';
+import { fetchAllVendedores, fetchFilteredVendedor } from '../../../(main)/cadastro/vendedores/controller/controller';
+import { fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
 
-export interface OrdemServicoFormRef {
-    handleSave: () => Promise<void>;
-}
-interface OrdemServicoFormProps {
-    ordemServico: ServiceOrderEntity;
-    initialId?: string | null;
-    onSuccess?: () => void;
-    msgs: RefObject<Messages | null>;
-    onOrdemServicoChange?: (servico: ServiceOrderEntity) => void;
-    onErrorsChange?: (errors: Record<string, string>) => void;
-    setOrdemServico: React.Dispatch<React.SetStateAction<ServiceOrderEntity>>;
-    redirectAfterSave?: boolean;
-    onClose?: () => void;
-    onSaved?: (created: ServiceOrderEntity) => void;
-    showBTNPGCreatedDialog?: boolean;
-    showBTNPGCreatedAll?: boolean;
-    onBackClick?: () => void;
-}
+
 const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
     ({ ordemServico, initialId, msgs, onOrdemServicoChange, onErrorsChange, setOrdemServico, redirectAfterSave = true, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
         const router = useRouter();
@@ -503,25 +486,20 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
                             />
                         </div>
                         <div className="col-12 lg:col-6 mt-1">
-                            <DropdownSearch<PessoaEntity>
+                            <PessoaDropdownField
                                 id="selectedCliente"
-                                key={reloadKeyPessoa}
-                                selectedItem={selectedCliente}
-                                onItemChange={handlePessoaChange}
-                                fetchAllItems={listThePessoas}
-                                fetchFilteredItems={fetchFilteredPessoas}
-                                optionLabel="razao_social"
-                                optionValue="id"
-                                placeholder="Selecione o Cliente"
+                                selectedPessoa={selectedCliente}
+                                onPessoaChange={handlePessoaChange}
+                                reloadKey={reloadKeyPessoa}
                                 hasError={!!errors.selectedCliente}
                                 errorMessage={errors.selectedCliente}
+                                placeholder="Selecione o Cliente"
                                 autoSelectSingle
                                 showAddButton
                                 onAddClick={() => setShowModalPessoa(true)}
-                                showTopLabel
-                                required
                                 topLabel="Cliente ou Fornecedor:"
                             />
+
                         </div>
                         <div className="col-12 lg:col-6 mt-1">
                             <DropdownSearch<VendedorEntity>
@@ -564,14 +542,12 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
                             />
                         </div>
                         <div className="col-12 lg:col-6 mt-1">
-                            <DropdownSearch<ServiceEntity>
+                            <ServicoDropdownField
                                 id="selectedService"
-                                selectedItem={selectedServico}
-                                onItemChange={handleServicoChange}
+                                selectedService={selectedServico}
+                                onServiceChange={handleServicoChange}
                                 fetchAllItems={listTheService}
                                 fetchFilteredItems={fetchFilteredService}
-                                optionLabel="descricao"
-                                optionValue="id"
                                 placeholder="Selecione o Serviço"
                                 hasError={!!errors.selectedService}
                                 errorMessage={errors.selectedService}
@@ -582,6 +558,7 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
                                 required
                                 topLabel="Serviço:"
                             />
+
                         </div>
                         <div className="col-12 lg:col-4 mt-1">
                             <Input
@@ -739,7 +716,6 @@ const OrdemServicoForm = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
         );
     }
 );
-
 OrdemServicoForm.displayName = 'OrdemServicoForm';
 
 export default OrdemServicoForm;

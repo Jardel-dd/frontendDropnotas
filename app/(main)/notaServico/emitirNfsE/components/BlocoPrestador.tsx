@@ -4,7 +4,7 @@ import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
 
-type Props = {
+ type Props = {
     nfseGerada: any;
     handleAllChanges: (e: any, bloco?: 'prestador' | 'tomador' | 'servico') => void;
     handleDropdownChange: (e: any) => void;

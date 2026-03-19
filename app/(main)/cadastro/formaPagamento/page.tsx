@@ -5,20 +5,20 @@ import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
+import { DropdownChangeEvent } from 'primereact/dropdown';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
-import { ListarFormaPagamento } from './listPaymentMethod/list';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
+import ListarFormaPagamento from './tabela/formaPagamentoListagem';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { tipo_forma_pagamento } from '@/app/shared/optionsDropDown/options';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { ativarFormaPagamento, deletarFormaPagamento, listFormaPagamento } from './controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { DropdownChangeEvent } from 'primereact/dropdown';
+import { ativarFormaPagamento, deletarFormaPagamento, listFormaPagamento } from './controller/controller';
 
 const CategoriaContrato: React.FC = () => {
     const router = useRouter();

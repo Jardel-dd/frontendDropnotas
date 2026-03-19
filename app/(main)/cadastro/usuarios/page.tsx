@@ -3,11 +3,11 @@ import '@/app/styles/styledGlobal.css'
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import ListarUserConta from './listUser/list';
+import ListarUserConta from './tabela/usuarioListagem';
 import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
-import { ativar, deletar, list } from './controller/controller';
+import { ativarUsuario, deletarUsuario, listUsuario } from './controller/controller';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
@@ -76,7 +76,7 @@ const Usuarios: React.FC = () => {
     ) => {
         setLoading(true);
         try {
-            const userContas = await list(
+            const userContas = await listUsuario(
                 {
                     ...listPaginationUsersConta,
                     pageable: {
@@ -201,8 +201,8 @@ const Usuarios: React.FC = () => {
                                 searchTerm={searchTerm}
                                 listarInativos={listarInativos}
                                 setListPaginationUserConta={setListPaginationUsersConta}
-                                deletar={(id) => deletar(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => ativar(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
+                                deletar={(id) => deletarUsuario(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
+                                ativar={(id) => ativarUsuario(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
                             />
                         </div>
                         <div style={{ marginTop: 'auto' }}>
@@ -278,8 +278,8 @@ const Usuarios: React.FC = () => {
                                         searchTerm={searchTerm}
                                         listarInativos={listarInativos}
                                         setListPaginationUserConta={setListPaginationUsersConta}
-                                        deletar={(id) => deletar(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
-                                        ativar={(id) => ativar(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
+                                        deletar={(id) => deletarUsuario(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
+                                        ativar={(id) => ativarUsuario(id, msgs, listPaginationUsersConta, listarInativos, setLoading, searchTerm)}
                                     />
                                 </div>
                             </div>

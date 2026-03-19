@@ -15,7 +15,7 @@ import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { DetalServiceOSEntity } from '@/app/entity/ServiceEntity';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
-import ListarOrdemServico from './listServiceNote/list-ordemService';
+import ListarOrdemServico from './tabela/ordemServicoListagem';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
@@ -23,10 +23,12 @@ import { mapDateRangeToParams } from '@/app/components/calendarComponent/control
 import { DropDownFilterOrdemOrdemServico } from '@/app/shared/optionsDropDown/options';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
 import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
-import { deletar, fetchOrdemServico, list, OrdemServicoParams, preparar } from './controller/controller';
+import { deletar, fetchOrdemServico, list,  preparar } from './controller/controller';
+import { OrdemServicoParams } from './types/ordemServico';
+import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
+import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 const OrdemServicos: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
@@ -37,6 +39,7 @@ const OrdemServicos: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
+    const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0); 
     const [emitirOS, setEmitirOS] = useState<ServiceOrderEntity>(
         new ServiceOrderEntity({
             id: 0,
@@ -284,18 +287,13 @@ const OrdemServicos: React.FC = () => {
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<PessoaEntity>
-                                                        id="selectedPessoa"
-                                                        selectedItem={selectedPessoa}
-                                                        onItemChange={handlePessoaChange}
-                                                        fetchAllItems={listThePessoas}
-                                                        fetchFilteredItems={fetchFilteredPessoas}
-                                                        optionLabel="razao_social"
-                                                        optionValue="id"
-                                                        topLabel="Cliente ou Fornecedor:"
-                                                        showTopLabel
-                                                        placeholder=" Selecione o Cliente ou Fornecedor"
-                                                    />
+                                                  <PessoaDropdownField
+    selectedPessoa={selectedPessoa}
+    onPessoaChange={handlePessoaChange}
+    reloadKey={reloadKeyPessoa}
+    hasError={!!errors.selectedPessoa}
+    errorMessage={errors.selectedPessoa}
+/>
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <Dropdown
@@ -409,18 +407,13 @@ const OrdemServicos: React.FC = () => {
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<PessoaEntity>
-                                                        id="selectedPessoa"
-                                                        selectedItem={selectedPessoa}
-                                                        onItemChange={handlePessoaChange}
-                                                        fetchAllItems={listThePessoas}
-                                                        fetchFilteredItems={fetchFilteredPessoas}
-                                                        optionLabel="razao_social"
-                                                        optionValue="id"
-                                                        topLabel="Cliente ou Fornecedor:"
-                                                        showTopLabel
-                                                        placeholder=" Selecione o Cliente ou Fornecedor"
-                                                    />
+                                                 <PessoaDropdownField
+    selectedPessoa={selectedPessoa}
+    onPessoaChange={handlePessoaChange}
+    reloadKey={reloadKeyPessoa}
+    hasError={!!errors.selectedPessoa}
+    errorMessage={errors.selectedPessoa}
+/>
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <Dropdown

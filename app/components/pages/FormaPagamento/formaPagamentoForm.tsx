@@ -15,9 +15,8 @@ import BTNPGCreatedAll from "../../buttonsComponent/btnCreatedAll/btn-created-al
 import { FormaPagamentoEntity, TipoFormaPagamento } from "@/app/entity/FormaPagamento";
 import { tipo_forma_pagamento, valor_taxa } from "@/app/shared/optionsDropDown/options";
 import BTNPGCreatedDialog from "../../buttonsComponent/btnCreatedAll/btn-created-dialog";
-import { fetchFormaPagamentoByID } from "../../fetchAll/listAllFormaPagamentos/controller";
 import { validateFieldsFormaPagamento } from "@/app/(main)/cadastro/formaPagamento/controller/validation";
-import { createdFormaPagamento, updateFormaPagamento } from "@/app/(main)/cadastro/formaPagamento/controller/controller";
+import { createdFormaPagamento, fetchFormaPagamentoByID, updateFormaPagamento } from "@/app/(main)/cadastro/formaPagamento/controller/controller";
 export interface FormaPagamentoFormRef {
     handleSave: () => Promise<void>;
 };

@@ -12,11 +12,11 @@ import { filterOptions } from '@/app/shared/optionsDropDown/options';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
 import { fetchRelatorioRecebimentos, mapDateRangeToIso } from './controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
 import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { Button } from 'primereact/button';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import { fetchFilteredCompany, listTheCompany } from '../../configuracoes/empresas/controller/controller';
 const RelatoriosRecebimentos: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -215,19 +215,16 @@ const RelatoriosRecebimentos: React.FC = () => {
                         )}
                         {(filterType === 'CLIENTES_FORNECEDORES' || filterType === 'AMBOS') && (
                             <>
-                                <div className="col-12 lg:col-3 w-2 mt-2">
+                                {/* <div className="col-12 lg:col-3 w-2 mt-2">
                                     <label htmlFor="">Cliente ou Fornecedor:</label>
-                                    <DropdownSearch<PessoaEntity>
-                                        id="selectedPessoa"
-                                        selectedItem={selectedPessoa}
-                                        onItemChange={handlePessoaChange}
-                                        fetchAllItems={listThePessoas}
-                                        fetchFilteredItems={fetchFilteredPessoas}
-                                        optionLabel="razao_social"
-                                        optionValue="id"
-                                        placeholder=" Selecione o Cliente ou Fornecedor"
-                                    />
-                                </div>
+                                   <PessoaDropdownField
+    selectedPessoa={selectedPessoa}
+    onPessoaChange={handlePessoaChange}
+    reloadKey={reloadKeyPessoa}
+    hasError={!!errors.selectedPessoa}
+    errorMessage={errors.selectedPessoa}
+/>
+                                </div> */}
                             </>
                         )}
                     </div>

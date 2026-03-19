@@ -4,7 +4,7 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
-import ListarContratos from './listContract/list';
+import ListarContratos from './tabela/contratoListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';

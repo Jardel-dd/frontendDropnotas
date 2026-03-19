@@ -16,49 +16,32 @@ import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
+import { useRef, useState, useEffect, forwardRef } from 'react';
 import EmpresaForm from '@/app/components/pages/Empresa/companyForm';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
-import ServiceForm from '@/app/(main)/cadastro/servicos/formComponentServico/formCreatedServico';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
-import { useRef, useState, useEffect, RefObject, forwardRef } from 'react';
+import FormPessoaCreated from '@/app/(main)/cadastro/pessoas/form/pessoa';
 import { OptionsPeriodicidade } from '@/app/shared/optionsDropDown/options';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
-import { VendedorFormRef } from '@/app/(main)/cadastro/vendedores/typesVendedor/typesVendedor';
-import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
+import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import { validateFieldsContrato } from '@/app/(main)/contrato/controller/validation';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
 import FormaPagamentoForm from '@/app/components/pages/FormaPagamento/formaPagamentoForm';
-import { fetchContratosById } from '@/app/components/fetchAll/listAllContratos/controller';
-import { createContrato, updateContrato } from '@/app/(main)/contrato/controller/controller';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
+import { VendedorFormRef } from '@/app/(main)/cadastro/vendedores/types/vendedor';
+import { listTheFormaPagamento } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import CategoriaContratoForm from '@/app/components/pages/CategoriaContratos/categoriaContratosForm';
-import { fetchFilteredCompany, listTheCompany } from '@/app/components/fetchAll/listAllCompany/controller';
-import { fetchFilteredService, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
+import EmpresaDropdownField from '@/app/(main)/configuracoes/empresas/dropDown/empresa';
+import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dropDown/formaPagamento';
+import { ContratoFormProps, ContratoFormRef } from '@/app/(main)/contrato/types/contratos';
 import { fetchAllPessoas, fetchFilteredPessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { fetchFilteredFormaPagamento, listTheFormaPagamento } from '@/app/components/fetchAll/listAllFormaPagamentos/controller';
-import { fetchFilteredCategoriaContrato, listTheCategoriaContrato } from '@/app/components/fetchAll/listAllCategoriaContrato/controller';
-import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
-import FormPessoaCreated from '@/app/(main)/cadastro/pessoas/formComponentPessoa/FormCreatedPessoa';
-export interface ContratoFormRef {
-    handleSave: () => Promise<void>;
-}
-interface ContratoFormProps {
-    contrato: any;
-    initialId?: string | null;
-    onSuccess?: () => void;
-    msgs: RefObject<Messages | null>;
-    onContratoChange?: (contrato: ContratoEntity) => void;
-    onErrorsChange?: (errors: Record<string, string>) => void;
-    setContrato: React.Dispatch<React.SetStateAction<ContratoEntity>>;
-    redirectAfterSave?: boolean;
-    onClose?: () => void;
-    onSaved?: (created: ContratoEntity) => void;
-    showBTNPGCreatedDialog?: boolean;
-    showBTNPGCreatedAll?: boolean;
-    onBackClick?: () => void;
-}
+import { createContrato, fetchContratosById, updateContrato } from '@/app/(main)/contrato/controller/controller';
+import CategoriaContratoDropdownField from '@/app/(main)/cadastro/categoriaContratos/dropDown/categoriaContratos';
+import FormCreatedServico from '@/app/(main)/cadastro/servicos/form/servico';
+
 
 const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId, onContratoChange, onErrorsChange, redirectAfterSave, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }: ContratoFormProps, ref) => {
     const router = useRouter();
@@ -453,204 +436,168 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="card styled-container-main-all-routes">
                     <div className="scrollable-container">
-                            <div className="custom-flex-row">
-                                <div className="w-full">
-                                    <div className="grid formgrid ">
-                                        <div className="col-12 lg:col-10 mt-1">
-                                            <Input
-                                                id="descricao"
-                                                value={contrato.descricao || ''}
-                                                onChange={handleAllChanges}
-                                                hasError={!!errors.descricao}
-                                                errorMessage={errors.descricao}
-                                                label={'Descrição do Contrato'}
-                                                onBlur={() => {
-                                                    setTouchedFields((prev) => ({ ...prev, descricao: true }));
-                                                    validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
-                                                }}
-                                                autoFocus={true}
-                                                topLabel="Descrição:"
-                                                showTopLabel
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-12 lg:col-2 mt-1">
-                                            <CustomInputNumber
-                                                id="valor_servico"
-                                                value={contrato.valor_servico || 0}
-                                                onChange={handleNumberChange}
-                                                label="Valor Serviços"
-                                                useRightButton={true}
-                                                outlined={true}
-                                                hasError={!!errors.valor_servico}
-                                                errorMessage={errors.valor_servico}
-                                                iconLeft={<IconReal isDarkMode={false} />}
-                                                topLabel="Valor Serviço:"
-                                                showTopLabel
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-12 lg:col-3 mt-1">
-                                            <Dropdown
-                                                id="periodicidade"
-                                                value={contrato.periodicidade ?? ''}
-                                                options={OptionsPeriodicidade}
-                                                onChange={handleDropdownChange}
-                                                label="Selecione a Periodicidade"
-                                                hasError={!!errors.periodicidade}
-                                                errorMessage={errors.periodicidade}
-                                                topLabel="Periodicidade:"
-                                                showTopLabel
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-12 lg:col-3 mt-1">
-                                            <DropdownSearch<CompanyEntity>
-                                                id="selectedCompany"
-                                                selectedItem={selectedCompany}
-                                                key={reloadKeyEmpresa}
-                                                onItemChange={handleCompanyChange}
-                                                fetchAllItems={listTheCompany}
-                                                fetchFilteredItems={fetchFilteredCompany}
-                                                optionLabel="razao_social"
-                                                optionValue="id"
-                                                placeholder="Selecione a Empresa"
-                                                hasError={!!errors.selectedCompany}
-                                                errorMessage={errors.selectedCompany}
-                                                autoSelectSingle
-                                                showAddButton
-                                                onAddClick={() => setShowModalEmpresa(true)}
-                                                topLabel="Empresa:"
-                                                showTopLabel
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-12 lg:col-3 mt-1">
-                                            <DropdownSearch<ServiceEntity>
-                                                id="selectedService"
-                                                key={reloadKeyServico}
-                                                selectedItem={selectedService}
-                                                onItemChange={handleServicoChange}
-                                                fetchAllItems={listTheService}
-                                                fetchFilteredItems={fetchFilteredService}
-                                                optionLabel="descricao"
-                                                optionValue="id"
-                                                placeholder="Selecione o Serviço"
-                                                hasError={!!errors.selectedService}
-                                                errorMessage={errors.selectedService}
-                                                autoSelectSingle
-                                                showAddButton
-                                                onAddClick={() => setShowModalServico(true)}
-                                                topLabel="Serviço:"
-                                                showTopLabel
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-12 lg:col-3 mt-1">
-                                            <DropdownSearch<CategoryContratosEntity>
-                                                id="selectedCategoriaContrato"
-                                                key={reloadKeyCategoriaContrato}
-                                                selectedItem={selectedCategoriaContrato}
-                                                onItemChange={handleCategoriaContratoChange}
-                                                fetchAllItems={listTheCategoriaContrato}
-                                                fetchFilteredItems={fetchFilteredCategoriaContrato}
-                                                optionLabel="descricao"
-                                                optionValue="id"
-                                                placeholder="Selecione a Categoria de Contratos"
-                                                hasError={!!errors.selectedCategoriaContrato}
-                                                errorMessage={errors.selectedCategoriaContrato}
-                                                autoSelectSingle
-                                                showAddButton
-                                                onAddClick={() => setShowModalCategoriaContrato(true)}
-                                                topLabel="Categoria de Contratos:"
-                                                showTopLabel
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-12 lg:col-3 mt-1">
-                                            <DropdownSearch<FormaPagamentoEntity>
-                                                id="selectedFormadePagamento"
-                                                key={reloadKeyFormaPagamento}
-                                                selectedItem={selectedFormadePagamento}
-                                                onItemChange={handleFormaPagamentoChange}
-                                                fetchAllItems={listTheFormaPagamento}
-                                                fetchFilteredItems={fetchFilteredFormaPagamento}
-                                                optionLabel="descricao"
-                                                optionValue="id"
-                                                placeholder="Selecione a Forma de Pagamento"
-                                                hasError={!!errors.selectedFormadePagamento}
-                                                errorMessage={errors.selectedFormadePagamento}
-                                                autoSelectSingle={false}
-                                                showAddButton
-                                                onAddClick={() => setShowModalFormaPagamento(true)}
-                                                topLabel="Forma de pagamento:"
-                                                showTopLabel
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-12 lg:col-6 mt-1">
-                                            <CustomMultiSelect
-                                                id="selectedPessoa"
-                                                selectedItems={selectedPessoa}
-                                                onChange={handlePessoaChange}
-                                                fetchAllItems={fetchAllPessoas}
-                                                fetchFilteredItems={fetchFilteredPessoas}
-                                                options={pessoa}
-                                                hasError={!!errors.selectedPessoa}
-                                                errorMessage={errors.selectedPessoa}
-                                                optionLabel="razao_social"
-                                                placeholder="Selecione o Cliente ou Fornecedor"
-                                                showChips={true}
-                                                autoSelectSingle
-                                                showAddButton
-                                                onAddClick={() => setShowModalPessoa(true)}
-                                                topLabel="Cliente ou Fornecedor:"
-                                                showTopLabel
-                                                required
-                                            />
-                                        </div>
+                        <div className="custom-flex-row">
+                            <div className="w-full">
+                                <div className="grid formgrid ">
+                                    <div className="col-12 lg:col-10 mt-1">
+                                        <Input
+                                            id="descricao"
+                                            value={contrato.descricao || ''}
+                                            onChange={handleAllChanges}
+                                            hasError={!!errors.descricao}
+                                            errorMessage={errors.descricao}
+                                            label={'Descrição do Contrato'}
+                                            onBlur={() => {
+                                                setTouchedFields((prev) => ({ ...prev, descricao: true }));
+                                                validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
+                                            }}
+                                            autoFocus={true}
+                                            topLabel="Descrição:"
+                                            showTopLabel
+                                            required
+                                        />
                                     </div>
-                                    <div className="grid formgrid mt-3 gap-2 p-2">
-                                        <div className="flex items-center gap-2">
-                                            <InputSwitch
-                                                checked={contrato.emitir_boleto ?? false}
-                                                onChange={(event) => {
-                                                    handleAllChanges({
-                                                        target: { id: 'emitir_boleto', value: event.value, type: 'input' }
-                                                    });
-                                                }}
-                                            />
-                                            <span style={{ alignItems: 'center', display: 'flex' }}>Enviar Boleto</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <InputSwitch
-                                                checked={contrato.enviar_email ?? false}
-                                                onChange={(event) => {
-                                                    handleAllChanges({
-                                                        target: {
-                                                            id: 'enviar_email',
-                                                            value: event.value,
-                                                            type: 'input'
-                                                        }
-                                                    });
-                                                }}
-                                            />
-                                            <span style={{ alignItems: 'center', display: 'flex' }}>Enviar Email</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <InputSwitch
-                                                checked={contrato.enviar_whatsapp ?? false}
-                                                onChange={(event) => {
-                                                    handleAllChanges({
-                                                        target: { id: 'enviar_whatsapp', value: event.value, type: 'input' }
-                                                    });
-                                                }}
-                                            />
-                                            <span style={{ alignItems: 'center', display: 'flex' }}>Enviar WhatsApp</span>
-                                        </div>
+                                    <div className="col-12 lg:col-2 mt-1">
+                                        <CustomInputNumber
+                                            id="valor_servico"
+                                            value={contrato.valor_servico || 0}
+                                            onChange={handleNumberChange}
+                                            label="Valor Serviços"
+                                            useRightButton={true}
+                                            outlined={true}
+                                            hasError={!!errors.valor_servico}
+                                            errorMessage={errors.valor_servico}
+                                            iconLeft={<IconReal isDarkMode={false} />}
+                                            topLabel="Valor Serviço:"
+                                            showTopLabel
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-12 lg:col-3 mt-1">
+                                        <Dropdown
+                                            id="periodicidade"
+                                            value={contrato.periodicidade ?? ''}
+                                            options={OptionsPeriodicidade}
+                                            onChange={handleDropdownChange}
+                                            label="Selecione a Periodicidade"
+                                            hasError={!!errors.periodicidade}
+                                            errorMessage={errors.periodicidade}
+                                            topLabel="Periodicidade:"
+                                            showTopLabel
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-12 lg:col-3 mt-1">
+                                        <EmpresaDropdownField
+                                            selectedCompany={selectedCompany}
+                                            onCompanyChange={handleCompanyChange}
+                                            reloadKey={reloadKeyEmpresa}
+                                            hasError={!!errors.selectedCompany}
+                                            errorMessage={errors.selectedCompany}
+                                            showAddButton
+                                            onAddClick={() => setShowModalEmpresa(true)}
+                                            autoSelectSingle
+                                        />
+                                    </div>
+                                    <div className="col-12 lg:col-3 mt-1">
+                                        <ServicoDropdownField
+                                            selectedService={selectedService}
+                                            onServiceChange={handleServicoChange}
+                                            reloadKey={reloadKeyServico}
+                                            hasError={!!errors.selectedService}
+                                            errorMessage={errors.selectedService}
+                                            showAddButton
+                                            onAddClick={() => setShowModalServico(true)}
+                                            autoSelectSingle
+                                        />
+                                    </div>
+                                    <div className="col-12 lg:col-3 mt-1">
+                                        <CategoriaContratoDropdownField
+                                            selectedCategoriaContrato={selectedCategoriaContrato}
+                                            onCategoriaContratoChange={handleCategoriaContratoChange}
+                                            reloadKey={reloadKeyCategoriaContrato}
+                                            hasError={!!errors.selectedCategoriaContrato}
+                                            errorMessage={errors.selectedCategoriaContrato}
+                                            showAddButton
+                                            onAddClick={() => setShowModalCategoriaContrato(true)}
+                                            autoSelectSingle
+                                        />
+                                    </div>
+                                    <div className="col-12 lg:col-3 mt-1">
+                                        <FormaPagamentoDropdownField
+                                            selectedFormaPagamento={selectedFormadePagamento}
+                                            onFormaPagamentoChange={handleFormaPagamentoChange}
+                                            reloadKey={reloadKeyFormaPagamento}
+                                            hasError={!!errors.selectedFormadePagamento}
+                                            errorMessage={errors.selectedFormadePagamento}
+                                            showAddButton
+                                            onAddClick={() => setShowModalFormaPagamento(true)}
+                                            autoSelectSingle={false}
+                                        />
+                                    </div>
+                                    <div className="col-12 lg:col-6 mt-1">
+                                        <CustomMultiSelect
+                                            id="selectedPessoa"
+                                            selectedItems={selectedPessoa}
+                                            onChange={handlePessoaChange}
+                                            fetchAllItems={fetchAllPessoas}
+                                            fetchFilteredItems={fetchFilteredPessoas}
+                                            options={pessoa}
+                                            hasError={!!errors.selectedPessoa}
+                                            errorMessage={errors.selectedPessoa}
+                                            optionLabel="razao_social"
+                                            placeholder="Selecione o Cliente ou Fornecedor"
+                                            showChips={true}
+                                            autoSelectSingle
+                                            showAddButton
+                                            onAddClick={() => setShowModalPessoa(true)}
+                                            topLabel="Cliente ou Fornecedor:"
+                                            showTopLabel
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid formgrid mt-3 gap-2 p-2">
+                                    <div className="flex items-center gap-2">
+                                        <InputSwitch
+                                            checked={contrato.emitir_boleto ?? false}
+                                            onChange={(event) => {
+                                                handleAllChanges({
+                                                    target: { id: 'emitir_boleto', value: event.value, type: 'input' }
+                                                });
+                                            }}
+                                        />
+                                        <span style={{ alignItems: 'center', display: 'flex' }}>Enviar Boleto</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <InputSwitch
+                                            checked={contrato.enviar_email ?? false}
+                                            onChange={(event) => {
+                                                handleAllChanges({
+                                                    target: {
+                                                        id: 'enviar_email',
+                                                        value: event.value,
+                                                        type: 'input'
+                                                    }
+                                                });
+                                            }}
+                                        />
+                                        <span style={{ alignItems: 'center', display: 'flex' }}>Enviar Email</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <InputSwitch
+                                            checked={contrato.enviar_whatsapp ?? false}
+                                            onChange={(event) => {
+                                                handleAllChanges({
+                                                    target: { id: 'enviar_whatsapp', value: event.value, type: 'input' }
+                                                });
+                                            }}
+                                        />
+                                        <span style={{ alignItems: 'center', display: 'flex' }}>Enviar WhatsApp</span>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                     </div>
                     <div className="StyleContainer-btn-Created">
                         {showBTNPGCreatedAll && (
@@ -694,7 +641,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                         )}
                     </div>
                     <DialogFilter header="Adicionar Serviço" visible={showModalServico} onHide={() => setShowModalServico(false)}>
-                        <ServiceForm
+                        <FormCreatedServico
                             msgs={msgs}
                             ref={formRef}
                             servico={servico}

@@ -7,6 +7,7 @@ import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { searchServiceTable } from '@/app/components/fetchAll/listAllTableService/controller';
 import { exigibilidadeISSServico, issRetido, responsavelRetencao, tributacaoISSQN } from '@/app/shared/optionsDropDown/options';
+import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 type Props = {
     nfseGerada: any;
     errors: Record<string, string>;
@@ -50,7 +51,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     id="exigibilidade_iss"
                     value={nfseGerada.servico?.exigibilidade_iss ?? ''}
                     options={exigibilidadeISSServico}
-                    onChange={(e) => handleDropdownChange(e, 'servico')}     
+                    onChange={(e) => handleDropdownChange(e, 'servico')}
                     label="Selecione a Exigibilidade ISS:"
                     hasError={!!errors.exigibilidade_iss}
                     errorMessage={errors.exigibilidade_iss}
@@ -62,7 +63,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
             <div className="col-12 mt-1 lg:col-3">
                 <Dropdown
                     value={nfseGerada.servico?.iss_retido ?? ''}
-                    onChange={(e) => handleDropdownChange(e, 'servico')} 
+                    onChange={(e) => handleDropdownChange(e, 'servico')}
                     label="Iss Retido"
                     options={issRetido}
                     id="iss_retido"
@@ -78,7 +79,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     id="tributacao_issqn"
                     value={nfseGerada.servico.tributacao_issqn ?? 0}
                     options={tributacaoISSQN}
-                    onChange={(e) => handleDropdownChange(e, 'servico')} 
+                    onChange={(e) => handleDropdownChange(e, 'servico')}
                     label="Selecione a Tributação ISSQN "
                     hasError={!!errors.tributacao_issqn}
                     errorMessage={errors.tributacao_issqn}
@@ -104,19 +105,16 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 />
             </div>
             <div className="col-12 mt-1 lg:col-3">
-                <DropdownSearch<ServiceEntity>
+                <ServicoDropdownField
                     id="item_lista_servico"
-                    selectedItem={selectedService}
-                    onItemChange={(e) => handleAllChanges(e, 'servico')}
-                    fetchAllItems={searchServiceTable}
-                    fetchFilteredItems={searchServiceTable}
-                    optionLabel={'descricao' as keyof ServiceEntity}
-                    placeholder="Selecione um serviço"
-                    hasError={!!errors.item_lista_servico}
-                    errorMessage={errors.item_lista_servico}
-                    topLabel="Descrição da Atividade do Serviço:"
+                    selectedService={selectedService}
+                    onServiceChange={(e) => handleAllChanges(e, 'servico')}
+                    placeholder="Selecione um servico"
+                    topLabel="Descricao da Atividade do Servico:"
                     showTopLabel
                     required
+                    hasError={!!errors.item_lista_servico}
+                    errorMessage={errors.item_lista_servico}
                 />
             </div>
             <div className="col-12 mt-1 lg:col-3">
@@ -124,7 +122,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     id="responsavel_retencao"
                     value={nfseGerada.servico.responsavel_retencao ?? ''}
                     options={responsavelRetencao}
-                    onChange={(e) => handleDropdownChange(e, 'servico')} 
+                    onChange={(e) => handleDropdownChange(e, 'servico')}
                     label="Selecione o Responsavel Retenção:"
                     hasError={!!errors.responsavel_retencao}
                     errorMessage={errors.responsavel_retencao}
@@ -177,7 +175,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     value={nfseGerada.servico?.valores?.base_calculo ?? 0}
                     label="Base de Calculo"
                     onChange={(e) => handleNumberChange(e, 'servico')}
-                     showTopLabel
+                    showTopLabel
                     required
                     topLabel="Base de Calculo:"
                     type='number'
@@ -306,6 +304,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-        </div> 
+        </div>
     );
 };

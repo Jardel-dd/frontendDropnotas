@@ -4,12 +4,12 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import ListarPerfilUsers from './tabela/perfilUsuario';
 import Input from '@/app/shared/include/input/input-all';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
-import ListarPerfilUsers from './listUserProfile/list-permis-user';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
@@ -323,5 +323,4 @@ const PerfilUsuarios: React.FC = () => {
         </div>
     );
 };
-
 export default PerfilUsuarios;

@@ -4,20 +4,21 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
-import ListarCategoriaContrato from './listCategory/list';
-import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
+import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
+import { CategoriaContratoFormRef } from './types/categoriaContratos';
 import { validateFieldsCategoriaContrato } from './controller/validate';
+import ListarCategoriaContrato from './tabela/categoriaContratoListagem';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
-import CategoriaContratoForm, { CategoriaContratoFormRef } from '@/app/components/pages/CategoriaContratos/categoriaContratosForm';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
+import CategoriaContratoForm from '@/app/components/pages/CategoriaContratos/categoriaContratosForm';
 
 const CategoriaContrato: React.FC = () => {
     const pageSize = usePageSize();

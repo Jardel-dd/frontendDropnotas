@@ -27,18 +27,17 @@ import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import { handleSearchCNPJ } from '../../seachs/searchCnpj/controller';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { RefObject, useEffect, useState, forwardRef, useRef } from 'react';
-import { fetchCompanyByID } from '../../fetchAll/listAllCompany/controller';
 import { CustomInputNumber } from '@/app/shared/include/inputReal/inputReal';
 import EnderecoForm from '../../enderecos/enderecoFormComponent/enderecoForm';
 import { useIsDesktop, useIsMobile } from '../../responsiveCelular/responsive';
 import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { fetchFilteredUserConta, fetchUserConta } from '../../fetchAll/listUsersConta/controller';
 import { validateFieldsEmpresas } from '@/app/(main)/configuracoes/empresas/controller/validation';
 import { fetchAllCnae, fetchFilteredCnae, findCNAEByCodigo } from '../../fetchAll/listAllCnae/controller';
-import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyByID, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { incentivoFiscal, prestacaoSus, regimeEspecialTributarioOptionsCompany, regimeTributarioOptions, tipo_rps } from '@/app/shared/optionsDropDown/options';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import { fetchFilteredUserConta, fetchUserConta } from '@/app/(main)/cadastro/usuarios/controller/controller';
 
 export interface EmpresaFormRef {
     handleSave: () => Promise<void>;

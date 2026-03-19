@@ -39,7 +39,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "app/(main)/cadastro/pessoas/formComponentPessoa/FormCreatedPessoa.tsx"  ],
+, "app/(main)/cadastro/pessoas/form/pessoa.tsx"  ],
   "exclude": [
     "node_modules"
   ]

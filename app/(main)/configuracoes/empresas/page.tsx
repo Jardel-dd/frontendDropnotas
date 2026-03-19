@@ -4,7 +4,7 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
-import ListarEmpresas from './listCompany/list';
+import ListarEmpresas from './tabela/empresaListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { CompanyEntity, } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';

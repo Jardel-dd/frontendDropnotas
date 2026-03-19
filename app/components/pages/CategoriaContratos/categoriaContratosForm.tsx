@@ -2,33 +2,15 @@
 import './style.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { useEffect, useState, forwardRef } from 'react';
 import Input from '@/app/shared/include/input/input-all';
-import { RefObject, useEffect, useState, forwardRef } from 'react';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { fetchCategoriaContratoByID } from '../../fetchAll/listAllCategoriaContrato/controller';
 import { validateFieldsCategoriaContrato } from '@/app/(main)/cadastro/categoriaContratos/controller/validate';
-import { createdCategoriaContrato, updateCategoriaContrato } from '@/app/(main)/cadastro/categoriaContratos/controller/controller';
-export interface CategoriaContratoFormRef {
-    handleSave: () => Promise<void>;
-}
-interface CategoriaContratoFormProps {
-    categoriaContrato: any;
-    initialId?: string | null;
-    onSuccess?: () => void;
-    msgs: RefObject<Messages | null>;
-    onCategoriaContratoChange?: (servico: CategoryContratosEntity) => void;
-    onErrorsChange?: (errors: Record<string, string>) => void;
-    setCategoriaContrato: React.Dispatch<React.SetStateAction<CategoryContratosEntity>>;
-    redirectAfterSave?: boolean;
-    onSaved?: (created: CategoryContratosEntity) => void;
-    onClose?: () => void;
-    showBTNPGCreatedDialog?: boolean;
-    showBTNPGCreatedAll?: boolean;
-    onBackClick?: () => void;
-}
+import { createdCategoriaContrato, fetchCategoriaContratoByID, updateCategoriaContrato } from '@/app/(main)/cadastro/categoriaContratos/controller/controller';
+import { CategoriaContratoFormProps, CategoriaContratoFormRef } from '@/app/(main)/cadastro/categoriaContratos/types/categoriaContratos';
+
 const CategoriaContratoForm = forwardRef<CategoriaContratoFormRef, CategoriaContratoFormProps>(
     ({ initialId, msgs, onCategoriaContratoChange, onErrorsChange, redirectAfterSave, onSaved, onClose, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }: CategoriaContratoFormProps, ref) => {
         const router = useRouter();
