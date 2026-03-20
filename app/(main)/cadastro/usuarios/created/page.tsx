@@ -17,16 +17,15 @@ import { MultiSelectChangeEvent } from 'primereact/multiselect';
 import { validateFieldsUserConta } from '../controller/validation';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
-import { convertProfileUserToBase64, createUsuario, fetchUserContaCreated, updateUsuario } from '../controller/controller';
-
+import PerfilUserDropdownField from '../../permissoes/dropdown/perfilUsuario';
+import { fetchAllPerfilUsuarios } from '../../permissoes/controller/controller';
+import FormEmpresaCreated from '@/app/(main)/configuracoes/empresas/form/empresa';
+import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import PerfilUserChangeForm, { PermissoesFormRef } from '@/app/(main)/cadastro/permissoes/form/permissoes';
-
-import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
-import { fetchAllPerfilUsuarios } from '../../permissoes/controller/controller';
-import PerfilUserDropdownField from '../../permissoes/dropdown/perfilUsuario';
-import FormEmpresaCreated from '@/app/(main)/configuracoes/empresas/form/empresa';
+import { convertProfileUserToBase64, createUsuario, fetchUserContaCreated, updateUsuario } from '../controller/controller';
+
 export default function CriarUserConta() {
     const router = useRouter();
     const toast = useRef<Toast>(null);
@@ -141,7 +140,6 @@ export default function CriarUserConta() {
             nfseTipoVisualizacao: ''
         })
     );
-
     const [userConta, setUserConta] = useState<UsuarioContaEntity>(
         new UsuarioContaEntity({
             ativo: true,

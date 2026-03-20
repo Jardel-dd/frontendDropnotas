@@ -72,7 +72,7 @@ export function ListarPerfilUsers(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/perfilUsuario/created", router)}
+                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/permissoes/created", router)}
                                     toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
@@ -111,7 +111,7 @@ export function ListarPerfilUsers(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/perfilUsuario/created", router)}
+                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/permissoes/created", router)}
                                     toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,

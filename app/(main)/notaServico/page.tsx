@@ -213,11 +213,30 @@ const NotaServico: React.FC = () => {
     const handleVendedorChange = (vendedor: VendedorEntity | null) => {
         if (!vendedor) return;
         setSelectedVendedor(vendedor);
-        handleAllChanges({
-            target: { id: 'id_vendedor', value: vendedor.id, type: 'input' }
-        });
+    };
+    const validatePrepararNfsDialog = (empresa = selectedEmpresaDialog, servico = selectedServicoDialog, cliente = selectedPessoaDialog) => validateFieldsPrepararNfs(prepararNfs, empresa, servico, cliente, setErrors, msgs);
+    const handlePrepararNfsChange = (field: 'id_empresa' | 'id_cliente' | 'id_servico', value: number) => {
+        setPrepararNfs((prev) =>
+            prev.copyWith({
+                [field]: value
+            })
+        );
+    };
+    const clearPreparaNfsDialog = () => {
+        setSelectedEmpresaDialog(null);
+        setSelectedPessoaDialog(null);
+        setSelectedServicoDialog(null);
+        setPrepararNfs(
+            new PrepararNfs({
+                id_cliente: 0,
+                id_servico: 0,
+                id_empresa: 0
+            })
+        );
+        setErrors({});
     };
     const handleNavigate = () => {
+        clearPreparaNfsDialog();
         setShowDialogPreparaNfs(true);
     };
     const handleEmitirNotas = async () => {
@@ -248,73 +267,21 @@ const NotaServico: React.FC = () => {
     };
     const handleEmpresaChange = (empresa: CompanyEntity | null) => {
         setSelectedEmpresa(empresa);
-        if (empresa) {
-            handleAllChanges({
-                target: {
-                    id: 'id_empresa',
-                    value: empresa ? empresa.id : null,
-                    type: 'input'
-                }
-            });
-        }
     };
     const handlePessoaChange = (pessoa: PessoaEntity | null) => {
         setSelectedPessoa(pessoa);
-        if (pessoa) {
-            handleAllChanges({
-                target: { id: 'id_pessoa', value: pessoa.id, type: 'input' }
-            });
-        }
     };
     const handleEmpresaChangeDialog = (empresa: CompanyEntity | null) => {
         setSelectedEmpresaDialog(empresa);
-        if (empresa) {
-            handleAllChanges({
-                target: {
-                    id: 'id_empresa',
-                    value: empresa ? empresa.id : null,
-                    type: 'input'
-                }
-            });
-        }
-        setErrors((prevErrors) => {
-            const newErrors = { ...prevErrors };
-            delete newErrors.selectedEmpresa;
-            return newErrors;
-        });
-        validateFieldsPrepararNfs(prepararNfs, empresa, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs);
+        handlePrepararNfsChange('id_empresa', empresa?.id ?? 0);
     };
     const handleServicoChangeDialog = (servico: ServiceEntity | null) => {
         setSelectedServicoDialog(servico);
-        if (servico) {
-            handleAllChanges({
-                target: {
-                    id: 'id_servico',
-                    value: servico ? servico.id : null,
-                    type: 'input'
-                }
-            });
-        }
-        setErrors((prevErrors) => {
-            const newErrors = { ...prevErrors };
-            delete newErrors.selectedServico;
-            return newErrors;
-        });
-        validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, servico, selectedPessoaDialog, setErrors, msgs);
+        handlePrepararNfsChange('id_servico', servico?.id ?? 0);
     };
     const handlePessoaChangeDialog = (pessoa: PessoaEntity | null) => {
         setSelectedPessoaDialog(pessoa);
-        if (pessoa) {
-            handleAllChanges({
-                target: { id: 'id_pessoa', value: pessoa.id, type: 'input' }
-            });
-        }
-        setErrors((prevErrors) => {
-            const newErrors = { ...prevErrors };
-            delete newErrors.selectedCliente;
-            return newErrors;
-        });
-        validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, pessoa, setErrors, msgs);
+        handlePrepararNfsChange('id_cliente', pessoa?.id ?? 0);
     };
     const buscar = async () => {
         setLoading(true);
@@ -342,29 +309,28 @@ const NotaServico: React.FC = () => {
             setLoading(false);
         }
     };
-    const handleConfirmPreparaNfs = () => {
-        const isValid = validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs);
+    const handleConfirmPreparaNfs = async () => {
+        const isValid = validatePrepararNfsDialog();
         if (!isValid) return;
-        const query = new URLSearchParams({
-            id_empresa: String(selectedEmpresaDialog!.id),
-            id_cliente: String(selectedPessoaDialog!.id),
-            id_servico: String(selectedServicoDialog!.id)
-        });
+        setLoadingPrepararNfs(true);
+        try {
+            const query = new URLSearchParams({
+                id_empresa: String(selectedEmpresaDialog!.id),
+                id_cliente: String(selectedPessoaDialog!.id),
+                id_servico: String(selectedServicoDialog!.id)
+            });
 
-        router.push(`/notaServico/created?${query.toString()}`);
-        setShowDialogPreparaNfs(false);
-    };
-    const clearPreparaNfsDialog = () => {
-        setSelectedEmpresaDialog(null);
-        setSelectedPessoaDialog(null);
-        setSelectedServicoDialog(null);
-        setErrors({});
+            router.push(`/notaServico/created?${query.toString()}`);
+            setShowDialogPreparaNfs(false);
+        } finally {
+            setLoadingPrepararNfs(false);
+        }
     };
     useEffect(() => {
-        if (showDialogPreparaNfs) {
-            validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs);
-        }
-    }, [showDialogPreparaNfs]);
+        if (!showDialogPreparaNfs) return;
+
+        validatePrepararNfsDialog();
+    }, [showDialogPreparaNfs, selectedEmpresaDialog, selectedPessoaDialog, selectedServicoDialog]);
     useEffect(() => {
         buscar();
     }, [selectedEmpresa, selectedPessoa, selectedVendedor, selectedStatusNotaServico, dateRange]);
@@ -374,6 +340,7 @@ const NotaServico: React.FC = () => {
     if (loadingPrepararNfs) {
         return <LoadingScreen loadingText={'Preparando NFS-E...'} />;
     }
+    const disableConfirmarPrepararNfs = stateDisableBtnPrepararNfse || Object.keys(errors).length > 0 || !selectedEmpresaDialog || !selectedPessoaDialog || !selectedServicoDialog;
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
@@ -410,7 +377,7 @@ const NotaServico: React.FC = () => {
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
-                                                 <EmpresaDropdownField
+                                                <EmpresaDropdownField
                                                     selectedCompany={selectedEmpresa}
                                                     onCompanyChange={handleEmpresaChange}
                                                     hasError={!!errors.selectedCompany}
@@ -420,13 +387,7 @@ const NotaServico: React.FC = () => {
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
-                                                <PessoaDropdownField
-                                                    selectedPessoa={selectedPessoa}
-                                                    onPessoaChange={handlePessoaChange}
-                                                    reloadKey={reloadKeyPessoa}
-                                                    hasError={!!errors.selectedPessoa}
-                                                    errorMessage={errors.selectedPessoa}
-                                                />
+                                                <PessoaDropdownField selectedPessoa={selectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
                                             </div>
                                             <div className="col-12 lg:col-12">
                                                 <DropdownSearch<VendedorEntity>
@@ -505,7 +466,7 @@ const NotaServico: React.FC = () => {
                 {isDesktop && (
                     <>
                         <div className="card styled-container-main-all-routes">
-                            <div style={{ padding: "0.5rem" }}>
+                            <div style={{ padding: '0.5rem' }}>
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input
@@ -535,23 +496,16 @@ const NotaServico: React.FC = () => {
                                         <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
                                             <div className="col-12 lg:col-12 ">
                                                 <EmpresaDropdownField
-    selectedCompany={selectedEmpresa}
-    onCompanyChange={handleEmpresaChange}
-    hasError={!!errors.selectedCompany}
-    errorMessage={errors.selectedCompany}
-    showAddButton
-    autoSelectSingle={true}
-/>
-                                              
+                                                    selectedCompany={selectedEmpresa}
+                                                    onCompanyChange={handleEmpresaChange}
+                                                    hasError={!!errors.selectedCompany}
+                                                    errorMessage={errors.selectedCompany}
+                                                    showAddButton
+                                                    autoSelectSingle={true}
+                                                />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
-                                                <PessoaDropdownField
-                                                    selectedPessoa={selectedPessoa}
-                                                    onPessoaChange={handlePessoaChange}
-                                                    reloadKey={reloadKeyPessoa}
-                                                    hasError={!!errors.selectedPessoa}
-                                                    errorMessage={errors.selectedPessoa}
-                                                />
+                                                <PessoaDropdownField selectedPessoa={selectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
                                             </div>
                                             <div className="col-12 lg:col-12">
                                                 <DropdownSearch<VendedorEntity>
@@ -618,20 +572,13 @@ const NotaServico: React.FC = () => {
                             header="Preparar NFS-e"
                             visible={showDialogPreparaNfs}
                             style={{ width: '500px' }}
-                            onHide={() => setShowDialogPreparaNfs(false)}
+                            onHide={() => {
+                                clearPreparaNfsDialog();
+                                setShowDialogPreparaNfs(false);
+                            }}
                             footer={
                                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0.5rem' }}>
-                                    <Button
-                                        label="Confirmar"
-                                        style={{ boxShadow: 'none' }}
-                                        disabled={stateDisableBtnPrepararNfse || Object.keys(errors).length > 0 || !prepararNfs.id_empresa || !prepararNfs.id_servico}
-                                        onClick={async () => {
-                                            setLoadingPrepararNfs(true);
-                                            await handleConfirmPreparaNfs();
-                                            setLoadingPrepararNfs(false);
-                                        }}
-                                        outlined
-                                    />
+                                    <Button label="Confirmar" style={{ boxShadow: 'none' }} disabled={disableConfirmarPrepararNfs} onClick={handleConfirmPreparaNfs} outlined />
 
                                     <Button
                                         label="Cancelar"
@@ -647,37 +594,30 @@ const NotaServico: React.FC = () => {
                             }
                         >
                             <div className="col-12 lg:col-12 ">
-                                                <EmpresaDropdownField
-    selectedCompany={selectedEmpresa}
-    onCompanyChange={handleEmpresaChange}
-    hasError={!!errors.selectedCompany}
-    errorMessage={errors.selectedCompany}
-    showAddButton
-    autoSelectSingle={true}
-/>
-                              
-                            </div>
-                            <div className="col-12 lg:col-12 ">
-                                <PessoaDropdownField
-                                    id="selectedCliente"
-                                    selectedPessoa={selectedPessoaDialog}
-                                    onPessoaChange={handlePessoaChangeDialog}
-                                    hasError={!!errors.selectedCliente}
-                                    errorMessage={errors.selectedCliente}
+                                <EmpresaDropdownField
+                                    selectedCompany={selectedEmpresaDialog}
+                                    onCompanyChange={handleEmpresaChangeDialog}
+                                    hasError={!!errors.selectedEmpresa}
+                                    errorMessage={errors.selectedEmpresa}
+                                    showAddButton
+                                    autoSelectSingle={true}
                                 />
                             </div>
+                            <div className="col-12 lg:col-12 ">
+                                <PessoaDropdownField id="selectedCliente" selectedPessoa={selectedPessoaDialog} onPessoaChange={handlePessoaChangeDialog} hasError={!!errors.selectedCliente} errorMessage={errors.selectedCliente} />
+                            </div>
                             <div className="col-12 lg:col-12">
-                               <ServicoDropdownField
-    id="selectedServico"
-    selectedService={selectedServicoDialog}
-    onServiceChange={handleServicoChangeDialog}
-    placeholder="Selecione o serviço"
-    topLabel="Serviço:"
-    showTopLabel
-    required
-    hasError={!!errors.selectedServico}
-    errorMessage={errors.selectedServico}
-/>
+                                <ServicoDropdownField
+                                    id="selectedServico"
+                                    selectedService={selectedServicoDialog}
+                                    onServiceChange={handleServicoChangeDialog}
+                                    placeholder="Selecione o serviço"
+                                    topLabel="Serviço:"
+                                    showTopLabel
+                                    required
+                                    hasError={!!errors.selectedServico}
+                                    errorMessage={errors.selectedServico}
+                                />
                             </div>
                         </Dialog>
                     </>

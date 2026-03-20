@@ -7,42 +7,16 @@ import { InputSwitch } from 'primereact/inputswitch';
 import Input from '@/app/shared/include/input/input-all';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
-import {
-    forwardRef,
-    useEffect,
-    useImperativeHandle,
-    useRef,
-    useState
-} from 'react';
-import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
-import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
-import {
-    FormaPagamentoEntity,
-    TipoFormaPagamento
-} from '@/app/entity/FormaPagamento';
-import {
-    tipo_forma_pagamento,
-    valor_taxa
-} from '@/app/shared/optionsDropDown/options';
-import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { validateFieldsFormaPagamento } from '../controller/validation';
-import {
-    createdFormaPagamento,
-    fetchFormaPagamentoByID,
-    updateFormaPagamento
-} from '../controller/controller';
-import type {
-    FormCreatedFormaPagamentoProps,
-    FormaPagamentoFieldsProps,
-    FormaPagamentoFormProps,
-    FormaPagamentoFormRef
-} from '../types/formaPagamento';
-export type {
-    FormCreatedFormaPagamentoProps,
-    FormaPagamentoFieldsProps,
-    FormaPagamentoFormProps,
-    FormaPagamentoFormRef
-} from '../types/formaPagamento';
+import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
+import { tipo_forma_pagamento, valor_taxa } from '@/app/shared/optionsDropDown/options';
+import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
+import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
+import { createdFormaPagamento, fetchFormaPagamentoByID, updateFormaPagamento } from '../controller/controller';
+import type { FormCreatedFormaPagamentoProps, FormaPagamentoFieldsProps, FormaPagamentoFormProps, FormaPagamentoFormRef } from '../types/formaPagamento';
+export type { FormaPagamentoFormRef } from '../types/formaPagamento';
 
 const createEmptyFormaPagamento = () =>
     new FormaPagamentoEntity({
@@ -55,20 +29,12 @@ const createEmptyFormaPagamento = () =>
         tipo_taxa: '',
         valor_taxa: 0
     });
-const toFormaPagamentoEntity = (
-    formaPagamento?: Partial<FormaPagamentoEntity> | null
-) =>
+const toFormaPagamentoEntity = (formaPagamento?: Partial<FormaPagamentoEntity> | null) =>
     new FormaPagamentoEntity({
         ...createEmptyFormaPagamento(),
         ...(formaPagamento ?? {})
     });
-export function FormaPagamentoFields({
-    formaPagamento,
-    errors,
-    onChange,
-    onDropdownChange,
-    onValidateDescricao
-}: FormaPagamentoFieldsProps) {
+export function FormaPagamentoFields({ formaPagamento, errors, onChange, onDropdownChange, onValidateDescricao }: FormaPagamentoFieldsProps) {
     return (
         <>
             <div className="grid formgrid">
@@ -130,16 +96,7 @@ export function FormaPagamentoFields({
                     />
                 </div>
                 <div className="col-12 lg:col-12 mt-1">
-                    <InputTextarea
-                        value={formaPagamento.observacao || ''}
-                        onChange={onChange}
-                        rows={5}
-                        cols={30}
-                        label=""
-                        id="observacao"
-                        topLabel="Consideracoes finais:"
-                        showTopLabel
-                    />
+                    <InputTextarea value={formaPagamento.observacao || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao" topLabel="Consideracoes finais:" showTopLabel />
                 </div>
             </div>
             <div className="flex items-center gap-2 mt-3">
@@ -156,49 +113,23 @@ export function FormaPagamentoFields({
                         })
                     }
                 />
-                <span style={{ alignItems: 'center', display: 'flex' }}>
-                    Aplicar Taxa Servico
-                </span>
+                <span style={{ alignItems: 'center', display: 'flex' }}>Aplicar Taxa Servico</span>
             </div>
         </>
     );
 }
-const FormaPagamentoFormContainer = forwardRef<
-    FormaPagamentoFormRef,
-    FormaPagamentoFormProps
->(
-    (
-        {
-            initialId,
-            msgs,
-            onFormaPagamentoChange,
-            onErrorsChange,
-            redirectAfterSave,
-            onSaved,
-            onClose,
-            showBTNPGCreatedDialog,
-            showBTNPGCreatedAll,
-            onBackClick
-        },
-        ref
-    ) => {
+const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, FormaPagamentoFormProps>(
+    ({ initialId, msgs, onFormaPagamentoChange, onErrorsChange, redirectAfterSave, onSaved, onClose, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
         const router = useRouter();
         const onFormaPagamentoChangeRef = useRef(onFormaPagamentoChange);
         const onErrorsChangeRef = useRef(onErrorsChange);
         const [isLoading, setIsLoading] = useState(true);
         const [isEditMode, setIsEditMode] = useState(false);
         const [errors, setErrors] = useState<Record<string, string>>({});
-        const [isLoadingBtnCreated, setIsLoadingBtnCreated] =
-            useState(false);
-        const [formaPagamento, setFormaPagamento] =
-            useState<FormaPagamentoEntity>(createEmptyFormaPagamento());
-        const [touchedFields, setTouchedFields] = useState<
-            Record<string, boolean>
-        >({});
-        const [
-            stateDisableBtnCreatedFormaPagamento,
-            setStateDisableBtnCreatedFormaPagamento
-        ] = useState(false);
+        const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
+        const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoEntity>(createEmptyFormaPagamento());
+        const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+        const [stateDisableBtnCreatedFormaPagamento, setStateDisableBtnCreatedFormaPagamento] = useState(false);
         const handleAllChanges = (event: {
             target: {
                 id: string;
@@ -236,11 +167,7 @@ const FormaPagamentoFormContainer = forwardRef<
                 ...prev,
                 descricao: true
             }));
-            validateFieldsFormaPagamento(
-                formaPagamento,
-                setErrors,
-                msgs
-            );
+            validateFieldsFormaPagamento(formaPagamento, setErrors, msgs);
         };
 
         const handleSubmit = async (event?: React.FormEvent) => {
@@ -254,11 +181,7 @@ const FormaPagamentoFormContainer = forwardRef<
                 return;
             }
 
-            const isValid = validateFieldsFormaPagamento(
-                formaPagamento,
-                setErrors,
-                msgs
-            );
+            const isValid = validateFieldsFormaPagamento(formaPagamento, setErrors, msgs);
 
             if (!isValid) {
                 setTouchedFields((prev) => ({
@@ -273,29 +196,13 @@ const FormaPagamentoFormContainer = forwardRef<
 
             try {
                 if (isEditMode && initialId) {
-                    await updateFormaPagamento(
-                        initialId,
-                        formaPagamento,
-                        msgs,
-                        router,
-                        setErrors,
-                        setIsLoading,
-                        redirectAfterSave ?? true
-                    );
+                    await updateFormaPagamento(initialId, formaPagamento, msgs, router, setErrors, setIsLoading, redirectAfterSave ?? true);
                     onSaved?.(formaPagamento);
                     onClose?.();
                     return;
                 }
 
-                const created = await createdFormaPagamento(
-                    formaPagamento,
-                    msgs,
-                    router,
-                    setFormaPagamento,
-                    setErrors,
-                    setIsLoading,
-                    redirectAfterSave ?? true
-                );
+                const created = await createdFormaPagamento(formaPagamento, msgs, router, setFormaPagamento, setErrors, setIsLoading, redirectAfterSave ?? true);
 
                 if (created) {
                     onSaved?.(created);
@@ -310,11 +217,8 @@ const FormaPagamentoFormContainer = forwardRef<
         const listagemFormaPagamentoID = async (id: string) => {
             try {
                 setIsLoading(true);
-                const { formaPagamento } =
-                    await fetchFormaPagamentoByID(id);
-                setFormaPagamento(
-                    toFormaPagamentoEntity(formaPagamento)
-                );
+                const { formaPagamento } = await fetchFormaPagamentoByID(id);
+                setFormaPagamento(toFormaPagamentoEntity(formaPagamento));
             } finally {
                 setIsLoading(false);
             }
@@ -335,9 +239,7 @@ const FormaPagamentoFormContainer = forwardRef<
         useEffect(() => {
             if (initialId) {
                 setIsEditMode(true);
-                listagemFormaPagamentoID(initialId).finally(() =>
-                    setIsLoading(false)
-                );
+                listagemFormaPagamentoID(initialId).finally(() => setIsLoading(false));
                 return;
             }
 
@@ -346,11 +248,7 @@ const FormaPagamentoFormContainer = forwardRef<
 
         useEffect(() => {
             if (Object.values(touchedFields).some(Boolean)) {
-                validateFieldsFormaPagamento(
-                    formaPagamento,
-                    setErrors,
-                    msgs
-                );
+                validateFieldsFormaPagamento(formaPagamento, setErrors, msgs);
             }
         }, [formaPagamento, touchedFields, msgs]);
 
@@ -363,98 +261,44 @@ const FormaPagamentoFormContainer = forwardRef<
         }, [errors]);
 
         if (isLoading && initialId) {
-            return (
-                <LoadingScreen loadingText="Carregando informacoes da Forma de Pagamento selecionada..." />
-            );
+            return <LoadingScreen loadingText="Carregando informacoes da Forma de Pagamento selecionada..." />;
         }
 
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
         const isSubmitDisabled =
-            stateDisableBtnCreatedFormaPagamento ||
-            isLoadingBtnCreated ||
-            Object.keys(errors).length > 0 ||
-            !formaPagamento.descricao?.trim() ||
-            !formaPagamento.tipo_forma_pagamento ||
-            !formaPagamento.tipo_taxa ||
-            !formaPagamento.valor_taxa;
+            stateDisableBtnCreatedFormaPagamento || isLoadingBtnCreated || Object.keys(errors).length > 0 || !formaPagamento.descricao?.trim() || !formaPagamento.tipo_forma_pagamento || !formaPagamento.tipo_taxa || !formaPagamento.valor_taxa;
 
         return (
-            <div
-                className={`shared-form-layout ${
-                    isDialogMode
-                        ? 'shared-form-dialog-layout'
-                        : 'shared-form-page-layout'
-                }`}
-            >
+            <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="scrollable-container shared-form-content">
                     <div className="custom-flex-col">
-                        <FormaPagamentoFields
-                            formaPagamento={formaPagamento}
-                            errors={errors}
-                            onChange={handleAllChanges}
-                            onDropdownChange={handleDropdownChange}
-                            onValidateDescricao={
-                                handleValidateDescricao
-                            }
-                        />
+                        <FormaPagamentoFields formaPagamento={formaPagamento} errors={errors} onChange={handleAllChanges} onDropdownChange={handleDropdownChange} onValidateDescricao={handleValidateDescricao} />
                     </div>
                 </div>
-                <div
-                    className={`StyleContainer-btn-Created shared-form-footer ${
-                        isDialogMode
-                            ? 'shared-form-dialog-footer'
-                            : ''
-                    }`}
-                >
-                    {showBTNPGCreatedAll && (
-                        <BTNPGCreatedAll
-                            label="Salvar"
-                            disabled={isSubmitDisabled}
-                            onClick={handleSubmit}
-                        />
-                    )}
-                    {showBTNPGCreatedDialog && (
-                        <BTNPGCreatedDialog
-                            label="Salvar"
-                            disabled={isSubmitDisabled}
-                            onClick={handleSubmit}
-                            onBackClick={onBackClick}
-                            onClose={onClose}
-                        />
-                    )}
+                <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
+                    {showBTNPGCreatedAll && <BTNPGCreatedAll label="Salvar" disabled={isSubmitDisabled} onClick={handleSubmit} />}
+                    {showBTNPGCreatedDialog && <BTNPGCreatedDialog label="Salvar" disabled={isSubmitDisabled} onClick={handleSubmit} onBackClick={onBackClick} onClose={onClose} />}
                 </div>
             </div>
         );
     }
 );
 
-FormaPagamentoFormContainer.displayName =
-    'FormaPagamentoFormContainer';
+FormaPagamentoFormContainer.displayName = 'FormaPagamentoFormContainer';
 
-function isFormaPagamentoFormProps(
-    props: FormCreatedFormaPagamentoProps
-): props is FormaPagamentoFormProps {
+function isFormaPagamentoFormProps(props: FormCreatedFormaPagamentoProps): props is FormaPagamentoFormProps {
     return 'msgs' in props;
 }
 
-const FormFormaPagamentoCreated = forwardRef<
-    FormaPagamentoFormRef,
-    FormCreatedFormaPagamentoProps
->((props, ref) => {
+const FormFormaPagamentoCreated = forwardRef<FormaPagamentoFormRef, FormCreatedFormaPagamentoProps>((props, ref) => {
     if (isFormaPagamentoFormProps(props)) {
-        return (
-            <FormaPagamentoFormContainer
-                {...props}
-                ref={ref}
-            />
-        );
+        return <FormaPagamentoFormContainer {...props} ref={ref} />;
     }
 
     return <FormaPagamentoFields {...props} />;
 });
 
-FormFormaPagamentoCreated.displayName =
-    'FormFormaPagamentoCreated';
+FormFormaPagamentoCreated.displayName = 'FormFormaPagamentoCreated';
 
 export default FormFormaPagamentoCreated;

@@ -117,7 +117,7 @@ const PerfilUsuarios: React.FC = () => {
         empty: false
     });
     const handleNavigate = () => {
-        router.push('/cadastro/perfilUsuario/created');
+        router.push('/cadastro/permissoes/created');
         setIsPerfilUsuarioCreated(true);
     };
     const handleListPerfilUser = async (pageNumber?: number, _searchTerm?: string, listarInativos = false) => {
@@ -268,9 +268,8 @@ const PerfilUsuarios: React.FC = () => {
             {isDesktop && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                        <div className="scrollable-container">
                             <div className="p-0">
-                                <div className="grid formgrid">
+                                <div className="grid formgrid p-2">
                                     <div className="col-12 lg:col-3 container-input-search-all" >
                                         <Input
                                             label="Buscar"
@@ -299,7 +298,6 @@ const PerfilUsuarios: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         <div>
                             <ListarPerfilUsers
                                 loading={loading}
