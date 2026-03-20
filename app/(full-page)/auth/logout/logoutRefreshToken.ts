@@ -1,5 +1,10 @@
 
-const AUTH_STORAGE_KEYS = ['token', 'refreshToken'] as const;
+const AUTH_STORAGE_KEYS = [
+    'token',
+    'refreshToken',
+    'userConta',
+    'colorScheme'
+] as const;
 const DEFAULT_LOGOUT_REDIRECT_PATH = '/';
 
 export const clearAuthStorage = () => {

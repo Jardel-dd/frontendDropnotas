@@ -11,6 +11,11 @@ import { LayoutProvider } from '../layout/context/layoutcontext';
 import { LoadingContext, LoadingProvider } from '@/layout/context/LoadingContext';
 import LoadingScreen from './loading';
 import { UserProvider } from './routes/protected/UserContext';
+import {
+    DEFAULT_COLOR_SCHEME,
+    DEFAULT_COMPONENT_THEME,
+    getThemeHref
+} from './utils/themePreferences';
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     const { loading } = React.useContext(LoadingContext);
     return (
@@ -18,7 +23,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <head>
                 <title>DropNotas</title>
                 <link rel="icon" href="/layout/images/logoDrm.png" />
-                <link id="theme-link" href={`/theme/theme-dark/green/theme.css`} rel="stylesheet"></link>
+                <link
+                    id="theme-link"
+                    href={getThemeHref(
+                        DEFAULT_COLOR_SCHEME,
+                        DEFAULT_COMPONENT_THEME
+                    )}
+                    rel="stylesheet"
+                ></link>
             </head>
             <body style={{ overflow: "hidden" }}>
                 <PrimeReactProvider>

@@ -1,11 +1,11 @@
-'use client'
+'use client';
 import './TreeStyles.css';
 import '@/app/styles/styledGlobal.css';
 import { Messages } from 'primereact/messages';
 import React, { useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
-import PerfilUserChangeForm, { PermissoesFormRef } from '@/app/components/pages/Permissoes/permissoesForm';
+import PerfilUserChangeForm, { PermissoesFormRef } from '@/app/(main)/cadastro/permissoes/form/permissoes';
 
 export default function PerfilUserPage() {
     const msgs = useRef<Messages>(null);
@@ -69,8 +69,9 @@ export default function PerfilUserPage() {
             formaPagamentoAlterar: false,
             formaPagamentoDesativar: false,
             formaPagamentoPesquisar: false,
-            nfseTipoVisualizacao:''
-        }));
+            nfseTipoVisualizacao: ''
+        })
+    );
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const handlePerfilUserChange = (updatedPerfilUser: PerfilUser) => {
         setPerfilUser(updatedPerfilUser);
@@ -80,16 +81,7 @@ export default function PerfilUserPage() {
     };
     return (
         <div className="card styled-container-main-all-routes">
-                <PerfilUserChangeForm
-                    msgs={msgs}
-                    ref={formRef}
-                    perfilUser={perfilUser}
-                    initialId={perfilUserId}
-                    setPerfilUser={setPerfilUser}
-                    onPerfilUserChange={handlePerfilUserChange}
-                    onErrorsChange={handleErrorsChange}
-                    showBTNPGCreatedAll={true}
-                />
+            <PerfilUserChangeForm msgs={msgs} ref={formRef} perfilUser={perfilUser} initialId={perfilUserId} setPerfilUser={setPerfilUser} onPerfilUserChange={handlePerfilUserChange} onErrorsChange={handleErrorsChange} showBTNPGCreatedAll={true} />
         </div>
     );
 }

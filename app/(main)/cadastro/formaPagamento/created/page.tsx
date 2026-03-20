@@ -6,7 +6,7 @@ import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
 import { useSearchParams } from 'next/navigation';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
-import FormaPagamentoForm, { FormaPagamentoFormRef } from '@/app/components/pages/FormaPagamento/formaPagamentoForm';
+import FormaPagamentoForm, { FormaPagamentoFormRef } from '@/app/(main)/cadastro/formaPagamento/form/formaPagamento';
 
 export default function CriarServicos() {
     const searchParams = useSearchParams();

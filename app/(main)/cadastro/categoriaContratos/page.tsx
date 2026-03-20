@@ -18,7 +18,7 @@ import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialog
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
-import CategoriaContratoForm from '@/app/components/pages/CategoriaContratos/categoriaContratosForm';
+import CategoriaContratoForm from '@/app/(main)/cadastro/categoriaContratos/form/categoriaContratos';
 
 const CategoriaContrato: React.FC = () => {
     const pageSize = usePageSize();

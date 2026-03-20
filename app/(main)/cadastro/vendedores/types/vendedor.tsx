@@ -33,4 +33,12 @@ export interface VendedorFormProps {
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
 }
+export interface VendedorDropdownFieldProps {
+    selectedVendedor: VendedorEntity | null;
+    onVendedorChange: (vendedor: VendedorEntity | null) => void;
+    onAddClick: () => void;
+    reloadKey?: number;
+    hasError?: boolean;
+    errorMessage?: string;
+}
 export type FormCreatedVendedorProps = VendedorFieldsProps | VendedorFormProps;

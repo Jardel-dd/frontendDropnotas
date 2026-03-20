@@ -36,6 +36,7 @@ import { fetchFilteredService, listTheService } from '@/app/(main)/cadastro/serv
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
+import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 
 const NotaServico: React.FC = () => {
     const router = useRouter();
@@ -409,17 +410,13 @@ const NotaServico: React.FC = () => {
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
-                                                <DropdownSearch<CompanyEntity>
-                                                    id="selectedCompany"
-                                                    selectedItem={selectedEmpresa}
-                                                    onItemChange={handleEmpresaChange}
-                                                    fetchAllItems={listTheCompany}
-                                                    fetchFilteredItems={fetchFilteredCompany}
-                                                    optionLabel="razao_social"
-                                                    optionValue="id"
-                                                    topLabel="Empresa:"
-                                                    showTopLabel
-                                                    placeholder="Selecione a Empresa"
+                                                 <EmpresaDropdownField
+                                                    selectedCompany={selectedEmpresa}
+                                                    onCompanyChange={handleEmpresaChange}
+                                                    hasError={!!errors.selectedCompany}
+                                                    errorMessage={errors.selectedCompany}
+                                                    showAddButton
+                                                    autoSelectSingle={true}
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
@@ -537,18 +534,15 @@ const NotaServico: React.FC = () => {
                                     <div className="Container-Btn-Filter-Desktop">
                                         <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
                                             <div className="col-12 lg:col-12 ">
-                                                <DropdownSearch<CompanyEntity>
-                                                    id="selectedCompany"
-                                                    selectedItem={selectedEmpresa}
-                                                    onItemChange={handleEmpresaChange}
-                                                    fetchAllItems={listTheCompany}
-                                                    fetchFilteredItems={fetchFilteredCompany}
-                                                    optionLabel="razao_social"
-                                                    optionValue="id"
-                                                    topLabel="Empresa:"
-                                                    showTopLabel
-                                                    placeholder="Selecione a Empresa"
-                                                />
+                                                <EmpresaDropdownField
+    selectedCompany={selectedEmpresa}
+    onCompanyChange={handleEmpresaChange}
+    hasError={!!errors.selectedCompany}
+    errorMessage={errors.selectedCompany}
+    showAddButton
+    autoSelectSingle={true}
+/>
+                                              
                                             </div>
                                             <div className="col-12 lg:col-12 ">
                                                 <PessoaDropdownField
@@ -653,21 +647,15 @@ const NotaServico: React.FC = () => {
                             }
                         >
                             <div className="col-12 lg:col-12 ">
-                                <DropdownSearch<CompanyEntity>
-                                    id="selectedEmpresa"
-                                    selectedItem={selectedEmpresaDialog}
-                                    onItemChange={handleEmpresaChangeDialog}
-                                    fetchAllItems={listTheCompany}
-                                    fetchFilteredItems={fetchFilteredCompany}
-                                    optionLabel="razao_social"
-                                    optionValue="id"
-                                    topLabel="Empresa:"
-                                    showTopLabel
-                                    required
-                                    hasError={!!errors.selectedEmpresa}
-                                    errorMessage={errors.selectedEmpresa}
-                                    placeholder="Selecione a Empresa"
-                                />
+                                                <EmpresaDropdownField
+    selectedCompany={selectedEmpresa}
+    onCompanyChange={handleEmpresaChange}
+    hasError={!!errors.selectedCompany}
+    errorMessage={errors.selectedCompany}
+    showAddButton
+    autoSelectSingle={true}
+/>
+                              
                             </div>
                             <div className="col-12 lg:col-12 ">
                                 <PessoaDropdownField

@@ -19,15 +19,17 @@ import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/
 import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
+import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 
 const ComponentDashboard: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(false);
+    const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
+    const [reloadKeyEmpresa, setReloadKeyEmpresa] = useState(0);
     const [relatorio, setRelatorio] = useState<any | null>(null);
     const [filterType, setFilterType] = useState<string | null>(null);
-    const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [dateRange, setDateRange] = useState<DateRangeValue>(todayRange);
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
@@ -170,27 +172,26 @@ const ComponentDashboard: React.FC = () => {
                                         <div className="container-BTN-Filter-Created">
                                             <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
                                                 <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<CompanyEntity>
-                                                        id="selectedEmpresa"
-                                                        selectedItem={selectedCompany}
-                                                        onItemChange={handleCompanyChange}
-                                                        fetchAllItems={listTheCompany}
-                                                        fetchFilteredItems={fetchFilteredCompany}
-                                                        optionLabel="razao_social"
-                                                        optionValue="id"
-                                                        topLabel="Empresa:"
-                                                        showTopLabel
-                                                        placeholder="Selecione a Empresa"
+
+                                                    <EmpresaDropdownField
+                                                        selectedCompany={selectedCompany}
+                                                        onCompanyChange={handleCompanyChange}
+                                                        reloadKey={reloadKeyEmpresa}
+                                                        hasError={!!errors.selectedCompany}
+                                                        errorMessage={errors.selectedCompany}
+                                                        showAddButton
+                                                        autoSelectSingle={true}
                                                     />
+
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                  <PessoaDropdownField
-    selectedPessoa={selectedPessoa}
-    onPessoaChange={handlePessoaChange}
-    reloadKey={reloadKeyPessoa}
-    hasError={!!errors.selectedPessoa}
-    errorMessage={errors.selectedPessoa}
-/>
+                                                    <PessoaDropdownField
+                                                        selectedPessoa={selectedPessoa}
+                                                        onPessoaChange={handlePessoaChange}
+                                                        reloadKey={reloadKeyPessoa}
+                                                        hasError={!!errors.selectedPessoa}
+                                                        errorMessage={errors.selectedPessoa}
+                                                    />
                                                 </div>
                                             </FilterOverlay>
                                         </div>
@@ -235,44 +236,40 @@ const ComponentDashboard: React.FC = () => {
                         <div className="card styled-container-main-all-routes">
                             <div className="scrollable-container">
                                 <div className="p-0">
-                                <div className="grid formgrid">
-                                    <div className="col-12 lg:col-3 container-input-search-all">
-                                        <DateRangePicker
-                                            showTopLabel
-                                            topLabel="Filtar por Data:"
-                                            onBuscar={(inicio: Date, fim: Date) => {
-                                                setDateRange([dayjs(inicio), dayjs(fim)]);
-                                            }}
-                                        />
+                                    <div className="grid formgrid">
+                                        <div className="col-12 lg:col-3 container-input-search-all">
+                                            <DateRangePicker
+                                                showTopLabel
+                                                topLabel="Filtar por Data:"
+                                                onBuscar={(inicio: Date, fim: Date) => {
+                                                    setDateRange([dayjs(inicio), dayjs(fim)]);
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="Container-Btn-Filter-Desktop">
+                                            <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
+                                                <div className="col-12 lg:col-12 ">
+                                                     <EmpresaDropdownField
+                                                                                                        selectedCompany={selectedCompany}
+                                                                                                        onCompanyChange={handleCompanyChange}
+                                                                                                        hasError={!!errors.selectedCompany}
+                                                                                                        errorMessage={errors.selectedCompany}
+                                                                                                        showAddButton
+                                                                                                        autoSelectSingle={true}
+                                                                                                    />
+                                                </div>
+                                                <div className="col-12 lg:col-12 ">
+                                                    <PessoaDropdownField
+                                                        selectedPessoa={selectedPessoa}
+                                                        onPessoaChange={handlePessoaChange}
+                                                        reloadKey={reloadKeyPessoa}
+                                                        hasError={!!errors.selectedPessoa}
+                                                        errorMessage={errors.selectedPessoa}
+                                                    />
+                                                </div>
+                                            </FilterOverlay>
+                                        </div>
                                     </div>
-                                    <div className="Container-Btn-Filter-Desktop">
-                                        <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
-                                            <div className="col-12 lg:col-12 ">
-                                                <DropdownSearch<CompanyEntity>
-                                                    id="selectedEmpresa"
-                                                    selectedItem={selectedCompany}
-                                                    onItemChange={handleCompanyChange}
-                                                    fetchAllItems={listTheCompany}
-                                                    fetchFilteredItems={fetchFilteredCompany}
-                                                    optionLabel="razao_social"
-                                                    optionValue="id"
-                                                    topLabel="Empresa:"
-                                                    showTopLabel
-                                                    placeholder="Selecione a Empresa"
-                                                />
-                                            </div>
-                                            <div className="col-12 lg:col-12 ">
-                                              <PessoaDropdownField
-    selectedPessoa={selectedPessoa}
-    onPessoaChange={handlePessoaChange}
-    reloadKey={reloadKeyPessoa}
-    hasError={!!errors.selectedPessoa}
-    errorMessage={errors.selectedPessoa}
-/>
-                                            </div>
-                                        </FilterOverlay>
-                                    </div>
-                                </div>
                                 </div>
                                 <div className="grid formgrid relatorio-cards p-2">
                                     <div className="card relatorio-card">

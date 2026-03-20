@@ -17,6 +17,7 @@ import { Button } from 'primereact/button';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { fetchFilteredCompany, listTheCompany } from '../../configuracoes/empresas/controller/controller';
+import EmpresaDropdownField from '../../configuracoes/empresas/dropDown/empresa';
 const RelatoriosRecebimentos: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -199,17 +200,15 @@ const RelatoriosRecebimentos: React.FC = () => {
                         {(filterType === 'EMPRESA' || filterType === 'AMBOS') && (
                             <>
                                 <div className="col-12 lg:col-3 p-3 w-2">
-                                    <label htmlFor="">Empresa:</label>
-                                    <DropdownSearch<CompanyEntity>
-                                        id="selectedCompany"
-                                        selectedItem={selectedCompany}
-                                        onItemChange={handleCompanyChange}
-                                        fetchAllItems={listTheCompany}
-                                        fetchFilteredItems={fetchFilteredCompany}
-                                        optionLabel="razao_social"
-                                        optionValue="id"
-                                        placeholder="Selecione a Empresa"
+                                    <EmpresaDropdownField
+                                        selectedCompany={selectedCompany}
+                                        onCompanyChange={handleCompanyChange}
+                                        hasError={!!errors.selectedCompany}
+                                        errorMessage={errors.selectedCompany}
+                                        showAddButton
+                                        autoSelectSingle={true}
                                     />
+
                                 </div>
                             </>
                         )}

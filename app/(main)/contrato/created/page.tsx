@@ -7,8 +7,8 @@ import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { useRouter, useSearchParams } from 'next/navigation';
-import ContratoForm from '@/app/components/pages/Contratos/contrato';
 import { VendedorFormRef } from '@/app/(main)/cadastro/vendedores/types/vendedor';
+import { ContratoFormCreated } from '../form/contrato';
 
 
 export default function CriarContrato() {
@@ -44,7 +44,7 @@ export default function CriarContrato() {
     };
     return (
         <div>
-          <ContratoForm
+          <ContratoFormCreated
                     msgs={msgs}
                     ref={formRef}
                     contrato={contrato}

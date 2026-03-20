@@ -5,6 +5,7 @@ import { RefObject } from "react";
 export interface CategoriaContratoFormRef {
     handleSave: () => Promise<void>;
 }
+
 export interface CategoriaContratoFormProps {
     categoriaContrato: any;
     initialId?: string | null;
@@ -20,6 +21,26 @@ export interface CategoriaContratoFormProps {
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
 }
+
+
+export interface CategoriaContratoFieldsProps {
+    categoriaContrato: CategoryContratosEntity;
+    errors: Record<string, string>;
+    onChange: (event: {
+        target: {
+            id: string;
+            value: any;
+            checked?: any;
+            type: string;
+        };
+    }) => void;
+    onValidateDescricao: () => void;
+}
+
+export type FormCategoriaContratoCreatedProps =
+    | CategoriaContratoFieldsProps
+    | CategoriaContratoFormProps;
+
 export interface CategoriaContratoDropdownFieldProps {
     selectedCategoriaContrato: CategoryContratosEntity | null;
     onCategoriaContratoChange: (categoriaContrato: CategoryContratosEntity | null) => void;

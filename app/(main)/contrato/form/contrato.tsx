@@ -1,7 +1,6 @@
 'use client';
 import 'primeicons/primeicons.css';
 import '@/app/styles/styledGlobal.css';
-import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { Messages } from 'primereact/messages';
 import { IconReal } from '@/app/utils/icons/icons';
@@ -16,38 +15,291 @@ import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
-import { useRef, useState, useEffect, forwardRef } from 'react';
-import EmpresaForm from '@/app/components/pages/Empresa/companyForm';
+import {
+    useRef,
+    useState,
+    useEffect,
+    forwardRef,
+    useImperativeHandle
+} from 'react';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import FormPessoaCreated from '@/app/(main)/cadastro/pessoas/form/pessoa';
 import { OptionsPeriodicidade } from '@/app/shared/optionsDropDown/options';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
-import DialogFilter from '../../dialogs/dialogFilterComponents/dialogFilter';
+import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import { validateFieldsContrato } from '@/app/(main)/contrato/controller/validation';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
-import FormaPagamentoForm from '@/app/components/pages/FormaPagamento/formaPagamentoForm';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import { VendedorFormRef } from '@/app/(main)/cadastro/vendedores/types/vendedor';
 import { listTheFormaPagamento } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
-import CategoriaContratoForm from '@/app/components/pages/CategoriaContratos/categoriaContratosForm';
 import EmpresaDropdownField from '@/app/(main)/configuracoes/empresas/dropDown/empresa';
 import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dropDown/formaPagamento';
-import { ContratoFormProps, ContratoFormRef } from '@/app/(main)/contrato/types/contratos';
+import FormaPagamentoForm from '@/app/(main)/cadastro/formaPagamento/form/formaPagamento';
 import { fetchAllPessoas, fetchFilteredPessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { createContrato, fetchContratosById, updateContrato } from '@/app/(main)/contrato/controller/controller';
 import CategoriaContratoDropdownField from '@/app/(main)/cadastro/categoriaContratos/dropDown/categoriaContratos';
 import FormCreatedServico from '@/app/(main)/cadastro/servicos/form/servico';
+import FormCategoriaContratoCreated from '@/app/(main)/cadastro/categoriaContratos/form/categoriaContratos';
+import FormEmpresaCreated from '@/app/(main)/configuracoes/empresas/form/empresa';
+import type {
+    ContratoFieldsProps,
+    ContratoFormProps,
+    ContratoFormRef,
+} from '../types/contratos';
 
+export type {
+    ContratoFieldsProps,
+    ContratoFormProps,
+    ContratoFormRef,
+    FormContratoCreatedProps
+} from '../types/contratos';
 
-const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId, onContratoChange, onErrorsChange, redirectAfterSave, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }: ContratoFormProps, ref) => {
+export function ContratoFields({
+    contrato,
+    errors,
+    pessoaOptions,
+    selectedPessoa,
+    selectedCompany,
+    selectedService,
+    selectedCategoriaContrato,
+    selectedFormaPagamento,
+    reloadKeyEmpresa,
+    reloadKeyServico,
+    reloadKeyCategoriaContrato,
+    reloadKeyFormaPagamento,
+    onChange,
+    onDropdownChange,
+    onNumberChange,
+    onCompanyChange,
+    onServiceChange,
+    onCategoriaContratoChange,
+    onFormaPagamentoChange,
+    onPessoaChange,
+    onAddEmpresa,
+    onAddServico,
+    onAddCategoriaContrato,
+    onAddFormaPagamento,
+    onAddPessoa,
+    onValidateDescricao
+}: ContratoFieldsProps) {
+    return (
+        <div className="scrollable-container">
+            <div className="custom-flex-row">
+                <div className="w-full">
+                    <div className="grid formgrid ">
+                        <div className="col-12 lg:col-10 mt-1">
+                            <Input
+                                id="descricao"
+                                value={contrato.descricao || ''}
+                                onChange={onChange}
+                                hasError={!!errors.descricao}
+                                errorMessage={errors.descricao}
+                                label={'Descricao do Contrato'}
+                                onBlur={onValidateDescricao}
+                                autoFocus={true}
+                                topLabel="Descricao:"
+                                showTopLabel
+                                required
+                            />
+                        </div>
+                        <div className="col-12 lg:col-2 mt-1">
+                            <CustomInputNumber
+                                id="valor_servico"
+                                value={contrato.valor_servico || 0}
+                                onChange={onNumberChange}
+                                label="Valor Servicos"
+                                useRightButton={true}
+                                outlined={true}
+                                hasError={!!errors.valor_servico}
+                                errorMessage={errors.valor_servico}
+                                iconLeft={<IconReal isDarkMode={false} />}
+                                topLabel="Valor Servico:"
+                                showTopLabel
+                                required
+                            />
+                        </div>
+                        <div className="col-12 lg:col-3 mt-1">
+                            <Dropdown
+                                id="periodicidade"
+                                value={contrato.periodicidade ?? ''}
+                                options={OptionsPeriodicidade}
+                                onChange={onDropdownChange}
+                                label="Selecione a Periodicidade"
+                                hasError={!!errors.periodicidade}
+                                errorMessage={errors.periodicidade}
+                                topLabel="Periodicidade:"
+                                showTopLabel
+                                required
+                            />
+                        </div>
+                        <div className="col-12 lg:col-3 mt-1">
+                            <EmpresaDropdownField
+                                selectedCompany={selectedCompany}
+                                onCompanyChange={onCompanyChange}
+                                reloadKey={reloadKeyEmpresa}
+                                hasError={!!errors.selectedCompany}
+                                errorMessage={errors.selectedCompany}
+                                showAddButton
+                                onAddClick={onAddEmpresa}
+                                autoSelectSingle
+                            />
+                        </div>
+                        <div className="col-12 lg:col-3 mt-1">
+                            <ServicoDropdownField
+                                selectedService={selectedService}
+                                onServiceChange={onServiceChange}
+                                reloadKey={reloadKeyServico}
+                                hasError={!!errors.selectedService}
+                                errorMessage={errors.selectedService}
+                                showAddButton
+                                onAddClick={onAddServico}
+                                autoSelectSingle
+                            />
+                        </div>
+                        <div className="col-12 lg:col-3 mt-1">
+                            <CategoriaContratoDropdownField
+                                selectedCategoriaContrato={selectedCategoriaContrato}
+                                onCategoriaContratoChange={
+                                    onCategoriaContratoChange
+                                }
+                                reloadKey={reloadKeyCategoriaContrato}
+                                hasError={!!errors.selectedCategoriaContrato}
+                                errorMessage={
+                                    errors.selectedCategoriaContrato
+                                }
+                                showAddButton
+                                onAddClick={onAddCategoriaContrato}
+                                autoSelectSingle
+                            />
+                        </div>
+                        <div className="col-12 lg:col-3 mt-1">
+                            <FormaPagamentoDropdownField
+                                selectedFormaPagamento={
+                                    selectedFormaPagamento
+                                }
+                                onFormaPagamentoChange={
+                                    onFormaPagamentoChange
+                                }
+                                reloadKey={reloadKeyFormaPagamento}
+                                hasError={
+                                    !!errors.selectedFormadePagamento
+                                }
+                                errorMessage={
+                                    errors.selectedFormadePagamento
+                                }
+                                showAddButton
+                                onAddClick={onAddFormaPagamento}
+                                autoSelectSingle={false}
+                            />
+                        </div>
+                        <div className="col-12 lg:col-6 mt-1">
+                            <CustomMultiSelect
+                                id="selectedPessoa"
+                                selectedItems={selectedPessoa}
+                                onChange={onPessoaChange}
+                                fetchAllItems={fetchAllPessoas}
+                                fetchFilteredItems={fetchFilteredPessoas}
+                                options={pessoaOptions}
+                                hasError={!!errors.selectedPessoa}
+                                errorMessage={errors.selectedPessoa}
+                                optionLabel="razao_social"
+                                placeholder="Selecione o Cliente ou Fornecedor"
+                                showChips={true}
+                                autoSelectSingle
+                                showAddButton
+                                onAddClick={onAddPessoa}
+                                topLabel="Cliente ou Fornecedor:"
+                                showTopLabel
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div className="grid formgrid mt-3 gap-2 p-2">
+                        <div className="flex items-center gap-2">
+                            <InputSwitch
+                                checked={contrato.emitir_boleto ?? false}
+                                onChange={(event) => {
+                                    onChange({
+                                        target: {
+                                            id: 'emitir_boleto',
+                                            value: event.value,
+                                            type: 'input'
+                                        }
+                                    });
+                                }}
+                            />
+                            <span
+                                style={{
+                                    alignItems: 'center',
+                                    display: 'flex'
+                                }}
+                            >
+                                Enviar Boleto
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <InputSwitch
+                                checked={contrato.enviar_email ?? false}
+                                onChange={(event) => {
+                                    onChange({
+                                        target: {
+                                            id: 'enviar_email',
+                                            value: event.value,
+                                            type: 'input'
+                                        }
+                                    });
+                                }}
+                            />
+                            <span
+                                style={{
+                                    alignItems: 'center',
+                                    display: 'flex'
+                                }}
+                            >
+                                Enviar Email
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <InputSwitch
+                                checked={contrato.enviar_whatsapp ?? false}
+                                onChange={(event) => {
+                                    onChange({
+                                        target: {
+                                            id: 'enviar_whatsapp',
+                                            value: event.value,
+                                            type: 'input'
+                                        }
+                                    });
+                                }}
+                            />
+                            <span
+                                style={{
+                                    alignItems: 'center',
+                                    display: 'flex'
+                                }}
+                            >
+                                Enviar WhatsApp
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export const ContratoFormCreated = forwardRef<
+    ContratoFormRef,
+    ContratoFormProps
+>(({ initialId, msgs, onContratoChange, onErrorsChange, redirectAfterSave, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }: ContratoFormProps, ref) => {
     const router = useRouter();
-    const toast = useRef<Toast>(null);
-    const msgs = useRef<Messages>(null);
     const searchParams = useSearchParams();
+    const onContratoChangeRef = useRef(onContratoChange);
+    const onErrorsChangeRef = useRef(onErrorsChange);
     const pessoaId = searchParams.get('id');
     const empresaId = searchParams.get('id');
     const servicosId = searchParams.get('id');
@@ -331,26 +583,30 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
         if (isLoadingBtnCreated) return;
         setIsLoadingBtnCreated(true);
         msgs.current?.clear();
-        const isValid = validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
-        if (isValid) {
-            if (isEditMode && contratoId) {
-                await updateContrato(contratoId, contrato, setErrors, msgs, router, setContrato);
-            } else {
-                await createContrato(
-                    contrato,
-                    selectedCategoriaContrato,
-                    selectedCompany!,
-                    selectedFormadePagamento!,
-                    selectedPessoa,
-                    setSelectedCategoriaContrato,
-                    setSelectedCompany,
-                    setSelectedFormadePagamento,
-                    setSelectedPessoa,
-                    setErrors,
-                    msgs,
-                    router
-                );
+        try {
+            const isValid = validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
+            if (isValid) {
+                if (isEditMode && contratoId) {
+                    await updateContrato(contratoId, contrato, setErrors, msgs, router, setContrato);
+                } else {
+                    await createContrato(
+                        contrato,
+                        selectedCategoriaContrato,
+                        selectedCompany!,
+                        selectedFormadePagamento!,
+                        selectedPessoa,
+                        setSelectedCategoriaContrato,
+                        setSelectedCompany,
+                        setSelectedFormadePagamento,
+                        setSelectedPessoa,
+                        setErrors,
+                        msgs,
+                        router
+                    );
+                }
             }
+        } finally {
+            setIsLoadingBtnCreated(false);
         }
     };
     const handleDropdownChange = (e: DropdownChangeEvent) => {
@@ -413,6 +669,17 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
     const handleErrorsChange = (updatedErrors: Record<string, string>) => {
         setErrors(updatedErrors);
     };
+    useImperativeHandle(ref, () => ({
+        handleSave: async () => {
+            await handleSubmit();
+        }
+    }));
+    useEffect(() => {
+        onContratoChangeRef.current = onContratoChange;
+    }, [onContratoChange]);
+    useEffect(() => {
+        onErrorsChangeRef.current = onErrorsChange;
+    }, [onErrorsChange]);
     useEffect(() => {
         if (contratoId) {
             setIsEditMode(true);
@@ -426,7 +693,13 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
         if (Object.values(touchedFields).some((touched) => touched)) {
             validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
         }
+    }, [contrato, touchedFields, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa, msgs]);
+    useEffect(() => {
+        onContratoChangeRef.current?.(contrato);
     }, [contrato]);
+    useEffect(() => {
+        onErrorsChangeRef.current?.(errors);
+    }, [errors]);
     if (isLoading && contratoId) {
         return <LoadingScreen loadingText={'Carregando informações do Contrato selecionado...'} />;
     }
@@ -673,7 +946,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                         />
                     </DialogFilter>
                     <DialogFilter header="Adicionar Categoria de Contratos" visible={showModalCategoriaContrato} onHide={() => setShowModalCategoriaContrato(false)}>
-                        <CategoriaContratoForm
+                        <FormCategoriaContratoCreated
                             msgs={msgs}
                             ref={formRef}
                             categoriaContrato={categoriaContrato}
@@ -705,7 +978,7 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
                         />
                     </DialogFilter>
                     <DialogFilter header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
-                        <EmpresaForm
+                        <FormEmpresaCreated
                             msgs={msgs}
                             ref={formRef}
                             empresa={empresa}
@@ -725,5 +998,4 @@ const ContratoForm = forwardRef<ContratoFormRef, ContratoFormProps>(({ initialId
         </>
     );
 });
-ContratoForm.displayName = 'ContratoForm';
-export default ContratoForm;
+ContratoFormCreated.displayName = 'ContratoFormCreated';

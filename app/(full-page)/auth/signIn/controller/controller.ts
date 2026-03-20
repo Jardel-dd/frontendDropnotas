@@ -2,6 +2,10 @@ import api from "@/app/services/api";
 import { Messages } from "primereact/messages";
 import { saveRefreshToken, saveToken } from "@/app/services/token";
 import { UsuarioContaEntity } from "@/app/entity/UsuarioContaEntity";
+import {
+  applyThemeLink,
+  getThemePreferencesFromUser
+} from "@/app/utils/themePreferences";
 
 export const authLogin = async (
   userConta: UsuarioContaEntity,
@@ -18,12 +22,20 @@ export const authLogin = async (
     saveToken(token);
     saveRefreshToken(refreshToken);
     if (dadosUsuario) {
+      const themePreferences =
+        getThemePreferencesFromUser(dadosUsuario);
       const userData: UsuarioContaEntity = {
         ...dadosUsuario,
+        tema_componente: themePreferences.colorScheme,
+        esquema_cor: themePreferences.componentTheme,
         token,
         refreshToken,
       };
       localStorage.setItem('userConta', JSON.stringify(userData));
+      applyThemeLink(
+        userData.tema_componente,
+        userData.esquema_cor
+      );
       return true;
     }
     return false;

@@ -1,15 +1,7 @@
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
+import { VendedorDropdownFieldProps } from "../types/vendedor";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
 import { fetchAllVendedores, fetchFilteredVendedor } from "../controller/controller";
-
-interface VendedorDropdownFieldProps {
-    selectedVendedor: VendedorEntity | null;
-    onVendedorChange: (vendedor: VendedorEntity | null) => void;
-    onAddClick: () => void;
-    reloadKey?: number;
-    hasError?: boolean;
-    errorMessage?: string;
-}
 
 export default function VendedorDropdownField({
     selectedVendedor,

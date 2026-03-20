@@ -6,6 +6,7 @@ import React, { useContext, useState } from 'react';
 import type { AppConfigProps, ColorScheme } from '@/types';
 import { useUser } from '@/app/routes/protected/UserContext';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
+import { updateStoredUserThemePreferences } from '@/app/utils/themePreferences';
 
 const BtnDarkLigth = (props: AppConfigProps) => {
     const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
@@ -36,6 +37,9 @@ const BtnDarkLigth = (props: AppConfigProps) => {
         }
     });
     console.log('Resposta status:', response.status);
+    updateStoredUserThemePreferences({
+        colorScheme: newColorScheme
+    });
     if (userConta) {
         setUserData(
             userConta.copyWith({

@@ -9,6 +9,7 @@ import { LayoutContext } from '@/layout/context/layoutcontext';
 import { useContext, useEffect, useCallback, useState } from 'react';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import { InputSwitch } from 'primereact/inputswitch';
+import { updateStoredUserThemePreferences } from '@/app/utils/themePreferences';
 
 const AppConfig = () => {
     const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
@@ -83,6 +84,9 @@ const AppConfig = () => {
             );
             console.log('Status:', response.status);
             console.log('Resposta:', response.data);
+            updateStoredUserThemePreferences({
+                componentTheme: layoutConfig.componentTheme
+            });
             console.log(' Configuração salva com sucesso!');
         } catch (error: any) {
             console.error(' Erro ao salvar configuração:', error);

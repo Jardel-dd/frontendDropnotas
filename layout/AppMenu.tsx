@@ -37,7 +37,7 @@ const AppMenu = () => {
                 userConta?.perfilUsuario?.perfilUsuario ? {
                     label: 'Permissões',
                     icon: 'pi pi-unlock',
-                    to: '/cadastro/perfilUsuario',
+                    to: '/cadastro/permissoes',
                 } : null,
                 userConta?.perfilUsuario?.formaPagamento ? {
                     label: 'Forma de Pagamento',

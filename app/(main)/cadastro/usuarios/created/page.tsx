@@ -16,18 +16,17 @@ import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
 import { validateFieldsUserConta } from '../controller/validation';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
-import EmpresaForm from '@/app/components/pages/Empresa/companyForm';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import { convertProfileUserToBase64, createUsuario, fetchUserContaCreated, updateUsuario } from '../controller/controller';
 
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
-import PerfilUserChangeForm, { PermissoesFormRef } from '@/app/components/pages/Permissoes/permissoesForm';
+import PerfilUserChangeForm, { PermissoesFormRef } from '@/app/(main)/cadastro/permissoes/form/permissoes';
 
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
-import { fetchAllPerfilUsuarios } from '../../perfilUsuario/controller/controller';
-import PerfilUserDropdownField from '../../perfilUsuario/dropdown/perfilUsuario';
-
+import { fetchAllPerfilUsuarios } from '../../permissoes/controller/controller';
+import PerfilUserDropdownField from '../../permissoes/dropdown/perfilUsuario';
+import FormEmpresaCreated from '@/app/(main)/configuracoes/empresas/form/empresa';
 export default function CriarUserConta() {
     const router = useRouter();
     const toast = useRef<Toast>(null);
@@ -84,64 +83,65 @@ export default function CriarUserConta() {
     const [empresasOptions, setEmpresasOptions] = useState<CompanyEntity[]>([]);
     const [perfilUser, setPerfilUser] = useState<PerfilUser>(
         new PerfilUser({
-                   ativo: true,
-                   id: 0,
-                   nome: '',
-                   perfilUsuario: false,
-                   perfilUsuarioCadastrar: false,
-                   perfilUsuarioAlterar: false,
-                   perfilUsuarioDesativar: false,
-                   perfilUsuarioPesquisar: false,
-                   usuarioConta: false,
-                   usuarioContaCadastrar: false,
-                   usuarioContaAlterar: false,
-                   usuarioContaDesativar: false,
-                   usuarioContaPesquisar: false,
-                   empresa: false,
-                   empresaCadastrar: false,
-                   empresaAlterar: false,
-                   empresaDesativar: false,
-                   empresaPesquisar: false,
-                   pessoa: false,
-                   pessoaCadastrar: false,
-                   pessoaAlterar: false,
-                   pessoaDesativar: false,
-                   pessoaPesquisar: false,
-                   vendedor: false,
-                   vendedorCadastrar: false,
-                   vendedorAlterar: false,
-                   vendedorDesativar: false,
-                   vendedorPesquisar: false,
-                   servico: false,
-                   servicoCadastrar: false,
-                   servicoAlterar: false,
-                   servicoDesativar: false,
-                   servicoPesquisar: false,
-                   ordemServico: false,
-                   ordemServicoCadastrar: false,
-                   ordemServicoAlterar: false,
-                   ordemServicoDesativar: false,
-                   ordemServicoPesquisar: false,
-                   ordemServicoTipoVisualizacao: '',
-                   contrato: false,
-                   contratoCadastrar: false,
-                   contratoAlterar: false,
-                   contratoDesativar: false,
-                   contratoPesquisar: false,
-                   contratoTipoVisualizacao: '',
-                   categoriaContrato: false,
-                   categoriaContratoCadastrar: false,
-                   categoriaContratoAlterar: false,
-                   categoriaContratoDesativar: false,
-                   categoriaContratoPesquisar: false,
-                   formaPagamento: false,
-                   formaPagamentoCadastrar: false,
-                   formaPagamentoAlterar: false,
-                   formaPagamentoDesativar: false,
-                   formaPagamentoPesquisar: false,
-                   nfseTipoVisualizacao:''
-               }));
-   
+            ativo: true,
+            id: 0,
+            nome: '',
+            perfilUsuario: false,
+            perfilUsuarioCadastrar: false,
+            perfilUsuarioAlterar: false,
+            perfilUsuarioDesativar: false,
+            perfilUsuarioPesquisar: false,
+            usuarioConta: false,
+            usuarioContaCadastrar: false,
+            usuarioContaAlterar: false,
+            usuarioContaDesativar: false,
+            usuarioContaPesquisar: false,
+            empresa: false,
+            empresaCadastrar: false,
+            empresaAlterar: false,
+            empresaDesativar: false,
+            empresaPesquisar: false,
+            pessoa: false,
+            pessoaCadastrar: false,
+            pessoaAlterar: false,
+            pessoaDesativar: false,
+            pessoaPesquisar: false,
+            vendedor: false,
+            vendedorCadastrar: false,
+            vendedorAlterar: false,
+            vendedorDesativar: false,
+            vendedorPesquisar: false,
+            servico: false,
+            servicoCadastrar: false,
+            servicoAlterar: false,
+            servicoDesativar: false,
+            servicoPesquisar: false,
+            ordemServico: false,
+            ordemServicoCadastrar: false,
+            ordemServicoAlterar: false,
+            ordemServicoDesativar: false,
+            ordemServicoPesquisar: false,
+            ordemServicoTipoVisualizacao: '',
+            contrato: false,
+            contratoCadastrar: false,
+            contratoAlterar: false,
+            contratoDesativar: false,
+            contratoPesquisar: false,
+            contratoTipoVisualizacao: '',
+            categoriaContrato: false,
+            categoriaContratoCadastrar: false,
+            categoriaContratoAlterar: false,
+            categoriaContratoDesativar: false,
+            categoriaContratoPesquisar: false,
+            formaPagamento: false,
+            formaPagamentoCadastrar: false,
+            formaPagamentoAlterar: false,
+            formaPagamentoDesativar: false,
+            formaPagamentoPesquisar: false,
+            nfseTipoVisualizacao: ''
+        })
+    );
+
     const [userConta, setUserConta] = useState<UsuarioContaEntity>(
         new UsuarioContaEntity({
             ativo: true,
@@ -161,7 +161,7 @@ export default function CriarUserConta() {
     const [showModalPerfilUser, setShowModalPerfilUser] = useState(false);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity[]>([]);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
-    const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});    
+    const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
     const [selectedPerfilUser, setSelectedPerfilUser] = useState<PerfilUser | null>(null);
     const [stateDisableBtnCreatedUseConta, setStateDisableBtnCreatedUserConta] = useState(false);
     const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
@@ -232,7 +232,7 @@ export default function CriarUserConta() {
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         msgs.current?.clear();
-         if (isLoadingBtnCreated) return;
+        if (isLoadingBtnCreated) return;
         setIsLoadingBtnCreated(true);
         const isValid = validateFieldsUserConta(userConta, confirmPassword, selectedPerfilUser, selectedEmpresa, setErrors, msgs);
         if (!isValid) return;
@@ -306,14 +306,7 @@ export default function CriarUserConta() {
     if (isLoading && userContaID) {
         return <LoadingScreen loadingText={'Carregando informações do usuário selecionado...'} />;
     }
-    const isSubmitDisabled =
-        stateDisableBtnCreatedUseConta ||
-        Object.keys(errors).length > 0 ||
-        !userConta.nome ||
-        !userConta.email ||
-        (!userContaID && !userConta.senha) ||
-        !selectedPerfilUser ||
-        !selectedEmpresa;
+    const isSubmitDisabled = stateDisableBtnCreatedUseConta || Object.keys(errors).length > 0 || !userConta.nome || !userConta.email || (!userContaID && !userConta.senha) || !selectedPerfilUser || !selectedEmpresa;
     return (
         <>
             <div className="p-fluid">
@@ -351,44 +344,44 @@ export default function CriarUserConta() {
                                     </div>
                                 </div>
                                 <div className="col-12 lg:col-12 mt-1">
-                                        <Input
-                                            id="nome"
-                                            value={userConta.nome || ''}
-                                            onChange={handleAllChanges}
-                                            label="Digite o Nome"
-                                            icon="pi pi-user"
-                                            useRightButton={true}
-                                            outlined={true}
-                                            iconLeft={'pi pi-user'}
-                                            hasError={!!errors.nome}
-                                            errorMessage={errors.nome}
-                                            onBlur={() => {
-                                                setTouchedFields((prev) => ({ ...prev, descricao: true }));
-                                                validateFieldsUserConta(userConta, confirmPassword, selectedPerfilUser, selectedEmpresa, setErrors, msgs);
-                                            }}
-                                            autoFocus
-                                            topLabel="Nome:"
-                                            showTopLabel
-                                            required
-                                        />
+                                    <Input
+                                        id="nome"
+                                        value={userConta.nome || ''}
+                                        onChange={handleAllChanges}
+                                        label="Digite o Nome"
+                                        icon="pi pi-user"
+                                        useRightButton={true}
+                                        outlined={true}
+                                        iconLeft={'pi pi-user'}
+                                        hasError={!!errors.nome}
+                                        errorMessage={errors.nome}
+                                        onBlur={() => {
+                                            setTouchedFields((prev) => ({ ...prev, descricao: true }));
+                                            validateFieldsUserConta(userConta, confirmPassword, selectedPerfilUser, selectedEmpresa, setErrors, msgs);
+                                        }}
+                                        autoFocus
+                                        topLabel="Nome:"
+                                        showTopLabel
+                                        required
+                                    />
                                 </div>
                                 <div className="col-12 lg:col-12 mt-1">
-                                        <Input
-                                            id="email"
-                                            value={userConta.email || ''}
-                                            onChange={handleAllChanges}
-                                            label="Digite o E-mail"
-                                            type="email"
-                                            icon="pi pi-maçã"
-                                            useRightButton={true}
-                                            outlined={true}
-                                            hasError={!!errors.email}
-                                            errorMessage={errors.email}
-                                            iconLeft={'pi pi-at'}
-                                            topLabel="E-mail:"
-                                            showTopLabel
-                                            required
-                                        />
+                                    <Input
+                                        id="email"
+                                        value={userConta.email || ''}
+                                        onChange={handleAllChanges}
+                                        label="Digite o E-mail"
+                                        type="email"
+                                        icon="pi pi-maçã"
+                                        useRightButton={true}
+                                        outlined={true}
+                                        hasError={!!errors.email}
+                                        errorMessage={errors.email}
+                                        iconLeft={'pi pi-at'}
+                                        topLabel="E-mail:"
+                                        showTopLabel
+                                        required
+                                    />
                                 </div>
                                 {userContaID ? (
                                     <div style={{ width: '99%', display: 'flex', justifyContent: 'flex-end' }}>
@@ -397,131 +390,126 @@ export default function CriarUserConta() {
                                 ) : (
                                     <>
                                         <div className="col-12 lg:col-12 mt-1">
-                                                <Input
-                                                    value={userConta.senha || ''}
-                                                    onChange={handleAllChanges}
-                                                    label="Digite a Senha"
-                                                    id="senha"
-                                                    type={isPasswordVisible ? 'text' : 'password'}
-                                                    useRightButton={true}
-                                                    outlined={true}
-                                                    iconLeft={'pi pi-key'}
-                                                    hasError={!!errors.senha}
-                                                    errorMessage={errors.senha}
-                                                    topLabel="Senha:"
-                                                    showTopLabel
-                                                    required
-                                                    iconRight={
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                togglePasswordVisibility();
-                                                            }}
-                                                            style={{
-                                                                background: 'none',
-                                                                border: 'none',
-                                                                cursor: 'pointer',
-                                                                padding: 0,
-                                                                display: 'flex',
-                                                                alignItems: 'center'
-                                                            }}
-                                                        >
-                                                            <IconVisible isPasswordVisible={isPasswordVisible} />
-                                                        </button>
-                                                    }
-                                                />
+                                            <Input
+                                                value={userConta.senha || ''}
+                                                onChange={handleAllChanges}
+                                                label="Digite a Senha"
+                                                id="senha"
+                                                type={isPasswordVisible ? 'text' : 'password'}
+                                                useRightButton={true}
+                                                outlined={true}
+                                                iconLeft={'pi pi-key'}
+                                                hasError={!!errors.senha}
+                                                errorMessage={errors.senha}
+                                                topLabel="Senha:"
+                                                showTopLabel
+                                                required
+                                                iconRight={
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            togglePasswordVisibility();
+                                                        }}
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            padding: 0,
+                                                            display: 'flex',
+                                                            alignItems: 'center'
+                                                        }}
+                                                    >
+                                                        <IconVisible isPasswordVisible={isPasswordVisible} />
+                                                    </button>
+                                                }
+                                            />
                                         </div>
                                         <div className="col-12 lg:col-12 mt-1">
-                                                <Input
-                                                    value={confirmPassword}
-                                                    label="Digite a Confirmação de senha"
-                                                    id="confirmPassword"
-                                                    type={isConfirmPasswordVisible ? 'text' : 'password'}
-                                                    useRightButton={true}
-                                                    outlined={true}
-                                                    hasError={!!errors.confirmPassword}
-                                                    errorMessage={errors.confirmPassword}
-                                                    iconLeft={'pi pi-key'}
-                                                    topLabel="Confirmação de senha:"
-                                                    showTopLabel
-                                                    required
-                                                    iconRight={
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                togglePasswordVisibility();
-                                                            }}
-                                                            style={{
-                                                                background: 'none',
-                                                                border: 'none',
-                                                                cursor: 'pointer',
-                                                                padding: 0,
-                                                                display: 'flex',
-                                                                alignItems: 'center'
-                                                            }}
-                                                        >
-                                                            <IconVisible isPasswordVisible={isConfirmPasswordVisible} />
-                                                        </button>
-                                                    }
-                                                    onChange={(e) => {
-                                                        setConfirmPassword(e.target.value);
-                                                        validatePasswordConfirmation(e.target.value);
-                                                    }}
-                                                    onBlur={() => {
-                                                        validateFieldsUserConta(userConta, confirmPassword, selectedPerfilUser, selectedEmpresa, setErrors, msgs);
-                                                    }}
-                                                />
+                                            <Input
+                                                value={confirmPassword}
+                                                label="Digite a Confirmação de senha"
+                                                id="confirmPassword"
+                                                type={isConfirmPasswordVisible ? 'text' : 'password'}
+                                                useRightButton={true}
+                                                outlined={true}
+                                                hasError={!!errors.confirmPassword}
+                                                errorMessage={errors.confirmPassword}
+                                                iconLeft={'pi pi-key'}
+                                                topLabel="Confirmação de senha:"
+                                                showTopLabel
+                                                required
+                                                iconRight={
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            togglePasswordVisibility();
+                                                        }}
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            padding: 0,
+                                                            display: 'flex',
+                                                            alignItems: 'center'
+                                                        }}
+                                                    >
+                                                        <IconVisible isPasswordVisible={isConfirmPasswordVisible} />
+                                                    </button>
+                                                }
+                                                onChange={(e) => {
+                                                    setConfirmPassword(e.target.value);
+                                                    validatePasswordConfirmation(e.target.value);
+                                                }}
+                                                onBlur={() => {
+                                                    validateFieldsUserConta(userConta, confirmPassword, selectedPerfilUser, selectedEmpresa, setErrors, msgs);
+                                                }}
+                                            />
                                         </div>
                                     </>
                                 )}
                                 <div className="col-12 lg:col-12 mt-1">
-                                      <PerfilUserDropdownField
-    selectedPerfilUser={selectedPerfilUser}
-    onPerfilUserChange={handlePerfilUserChange}
-    reloadKey={reloadKeyPerfilUser}
-    hasError={!!errors.selectedPerfilUser}
-    errorMessage={errors.selectedPerfilUser}
-    showAddButton
-    onAddClick={() => setShowModalPerfilUser(true)}
-    autoSelectSingle
-/>
+                                    <PerfilUserDropdownField
+                                        selectedPerfilUser={selectedPerfilUser}
+                                        onPerfilUserChange={handlePerfilUserChange}
+                                        reloadKey={reloadKeyPerfilUser}
+                                        hasError={!!errors.selectedPerfilUser}
+                                        errorMessage={errors.selectedPerfilUser}
+                                        showAddButton
+                                        onAddClick={() => setShowModalPerfilUser(true)}
+                                        autoSelectSingle
+                                    />
                                 </div>
                                 <div className="col-12 lg:col-12 mt-1">
-                                        <CustomMultiSelect
-                                            id="selectedEmpresa"
-                                            selectedItems={selectedEmpresa}
-                                            onChange={handleCompanyChange}
-                                            options={empresasOptions}
-                                            optionLabel="razao_social"
-                                            placeholder="Selecione as Empresas"
-                                            maxSelectedLabels={3}
-                                            fetchFilteredItems={fetchFilteredCompany}
-                                            fetchAllItems={listTheCompany}
-                                            hasError={!!errors.selectedEmpresa}
-                                            errorMessage={errors.selectedEmpresa}
-                                            showChips={true}
-                                            autoSelectSingle
-                                            showAddButton
-                                            onAddClick={() => setShowModalEmpresa(true)}
-                                            topLabel="Empresa"
-                                            showTopLabel
-                                            required
-                                        />
+                                    <CustomMultiSelect
+                                        id="selectedEmpresa"
+                                        selectedItems={selectedEmpresa}
+                                        onChange={handleCompanyChange}
+                                        options={empresasOptions}
+                                        optionLabel="razao_social"
+                                        placeholder="Selecione as Empresas"
+                                        maxSelectedLabels={3}
+                                        fetchFilteredItems={fetchFilteredCompany}
+                                        fetchAllItems={listTheCompany}
+                                        hasError={!!errors.selectedEmpresa}
+                                        errorMessage={errors.selectedEmpresa}
+                                        showChips={true}
+                                        autoSelectSingle
+                                        showAddButton
+                                        onAddClick={() => setShowModalEmpresa(true)}
+                                        topLabel="Empresa"
+                                        showTopLabel
+                                        required
+                                    />
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className="StyleContainer-btn-Created shared-form-footer">
-                        <BTNPGCreatedAll
-                            onClick={async () => await handleSubmit()}
-                            label="Salvar"
-                            disabled={isSubmitDisabled}
-                            icon=""
-                        />
+                        <BTNPGCreatedAll onClick={async () => await handleSubmit()} label="Salvar" disabled={isSubmitDisabled} icon="" />
                     </div>
                     <DialogFilter header="Adicionar Perfil deste Usuário" visible={showModalPerfilUser} onHide={() => setShowModalPerfilUser(false)}>
                         <PerfilUserChangeForm
@@ -540,7 +528,7 @@ export default function CriarUserConta() {
                         />
                     </DialogFilter>
                     <DialogFilter header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
-                        <EmpresaForm
+                        <FormEmpresaCreated
                             msgs={msgs}
                             ref={formRef}
                             empresa={empresa}

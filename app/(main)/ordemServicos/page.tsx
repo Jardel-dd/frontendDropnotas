@@ -29,6 +29,7 @@ import { deletar, fetchOrdemServico, list,  preparar } from './controller/contro
 import { OrdemServicoParams } from './types/ordemServico';
 import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
+import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 const OrdemServicos: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
@@ -273,18 +274,15 @@ const OrdemServicos: React.FC = () => {
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<CompanyEntity>
-                                                        id="selectedEmpresa"
-                                                        selectedItem={selectedEmpresa}
-                                                        onItemChange={handleCompanyChange}
-                                                        fetchAllItems={listTheCompany}
-                                                        fetchFilteredItems={fetchFilteredCompany}
-                                                        optionLabel="razao_social"
-                                                        optionValue="id"
-                                                        topLabel="Empresa:"
-                                                        showTopLabel
-                                                        placeholder="Selecione a Empresa"
+                                                                    <EmpresaDropdownField
+                                                        selectedCompany={selectedEmpresa}
+                                                        onCompanyChange={handleCompanyChange}
+                                                        hasError={!!errors.selectedCompany}
+                                                        errorMessage={errors.selectedCompany}
+                                                        showAddButton
+                                                        autoSelectSingle={true}
                                                     />
+                                                
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                   <PessoaDropdownField
@@ -393,17 +391,13 @@ const OrdemServicos: React.FC = () => {
                                         <div className="Container-Btn-Filter-Desktop">
                                             <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
                                                 <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<CompanyEntity>
-                                                        id="selectedEmpresa"
-                                                        selectedItem={selectedEmpresa}
-                                                        onItemChange={handleCompanyChange}
-                                                        fetchAllItems={listTheCompany}
-                                                        fetchFilteredItems={fetchFilteredCompany}
-                                                        optionLabel="razao_social"
-                                                        optionValue="id"
-                                                        topLabel="Empresa:"
-                                                        showTopLabel
-                                                        placeholder="Selecione a Empresa"
+                                                                <EmpresaDropdownField
+                                                        selectedCompany={selectedEmpresa}
+                                                        onCompanyChange={handleCompanyChange}
+                                                        hasError={!!errors.selectedCompany}
+                                                        errorMessage={errors.selectedCompany}
+                                                        showAddButton
+                                                        autoSelectSingle={true}
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">

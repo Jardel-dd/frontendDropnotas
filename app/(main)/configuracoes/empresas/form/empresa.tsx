@@ -1,5 +1,5 @@
 'use client';
-import './style-Created-Company.css';
+import "./style.css"
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 import { Divider } from 'primereact/divider';
 import { Messages } from 'primereact/messages';
 import IconVisible from '@/app/shared/IconVisible';
-import { useTheme } from '../../isDarkMode/isDarkMode';
 import { getCitiesFromState } from '@/app/entity/maps';
 import Input from '@/app/shared/include/input/input-all';
 import { DropdownChangeEvent } from 'primereact/dropdown';
@@ -17,47 +16,34 @@ import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
+import { useEffect, useState, forwardRef, useRef } from 'react';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
+import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
-import { handleSearchCep } from '../../seachs/searchCep/controller';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
-import { handleSearchCNPJ } from '../../seachs/searchCnpj/controller';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
-import { RefObject, useEffect, useState, forwardRef, useRef } from 'react';
 import { CustomInputNumber } from '@/app/shared/include/inputReal/inputReal';
-import EnderecoForm from '../../enderecos/enderecoFormComponent/enderecoForm';
-import { useIsDesktop, useIsMobile } from '../../responsiveCelular/responsive';
-import BTNPGCreatedAll from '../../buttonsComponent/btnCreatedAll/btn-created-all';
-import BTNPGCreatedDialog from '../../buttonsComponent/btnCreatedAll/btn-created-dialog';
+import { handleSearchCep } from '@/app/components/seachs/searchCep/controller';
+import { handleSearchCNPJ } from '@/app/components/seachs/searchCnpj/controller';
+import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
+import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { validateFieldsEmpresas } from '@/app/(main)/configuracoes/empresas/controller/validation';
-import { fetchAllCnae, fetchFilteredCnae, findCNAEByCodigo } from '../../fetchAll/listAllCnae/controller';
+import { fetchAllCnae, fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyByID, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { incentivoFiscal, prestacaoSus, regimeEspecialTributarioOptionsCompany, regimeTributarioOptions, tipo_rps } from '@/app/shared/optionsDropDown/options';
-import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { fetchFilteredUserConta, fetchUserConta } from '@/app/(main)/cadastro/usuarios/controller/controller';
 
-export interface EmpresaFormRef {
-    handleSave: () => Promise<void>;
-}
-interface EmpresaFormProps {
-    empresa: any;
-    initialId?: string | null;
-    onSuccess?: () => void;
-    msgs: RefObject<Messages | null>;
-    onEmpresaChange?: (servico: CompanyEntity) => void;
-    onErrorsChange?: (errors: Record<string, string>) => void;
-    setEmpresa: React.Dispatch<React.SetStateAction<CompanyEntity>>;
-    redirectAfterSave?: boolean;
-    onSaved?: (created: CompanyEntity) => void;
-    onClose?: () => void;
-    showBTNPGCreatedDialog?: boolean;
-    showBTNPGCreatedAll?: boolean;
-    onBackClick?: () => void;
-}
-const EmpresaForm = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initialId, msgs, onEmpresaChange, onErrorsChange, redirectAfterSave, onSaved, onClose, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }: EmpresaFormProps, ref) => {
+import { fetchFilteredUserConta, fetchUserConta } from '@/app/(main)/cadastro/usuarios/controller/controller';
+import type { EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
+
+export type { EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
+
+const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initialId, msgs, onEmpresaChange, onErrorsChange, redirectAfterSave, onSaved, onClose, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }: EmpresaFormProps, ref) => {
     const router = useRouter();
     const empresaId = initialId;
     const isMobile = useIsMobile();
@@ -909,5 +895,5 @@ const EmpresaForm = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initialId, m
         </div>
     );
 });
-EmpresaForm.displayName = 'EmpresaForm';
-export default EmpresaForm;
+FormEmpresaCreated.displayName = 'FormEmpresaCreated';
+export default FormEmpresaCreated;

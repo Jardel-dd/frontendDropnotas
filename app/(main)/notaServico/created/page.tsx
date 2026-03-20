@@ -7,7 +7,7 @@ import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { DetalTomadorEntity } from '@/app/entity/PessoaEntity';
 import { DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DetalPrestadorValoresEntity, DetalServiceEntity } from '@/app/entity/ServiceEntity';
-import NotaServicoForm, { NotaServicoFormRef } from '@/app/components/pages/NotaServico/notaServicoForm';
+import NotaServicoForm, { NotaServicoFormRef } from '@/app/(main)/notaServico/form/notaServico';
 
 export default function CriarNotaServico() {
     const searchParams = useSearchParams();
@@ -47,16 +47,16 @@ export default function CriarNotaServico() {
                 id_servico: 0,
                 codigo: '',
                 descricao: '',
-                iss_retido:'',
-                item_lista_servico:'',
+                iss_retido: '',
+                item_lista_servico: '',
                 codigo_municipio: '',
                 numero_processo: '',
-                exigibilidade_iss:'',
-                responsavel_retencao:'',
-                municipio_incidencia:'',
-                codigo_nbs:'',
-                codigo_tributacao_municipio:'',
-                tributacao_issqn:'',
+                exigibilidade_iss: '',
+                responsavel_retencao: '',
+                municipio_incidencia: '',
+                codigo_nbs: '',
+                codigo_tributacao_municipio: '',
+                tributacao_issqn: '',
                 valor_total: 0,
                 valores: new DetalPrestadorValoresEntity({
                     base_calculo: 0,

@@ -4,7 +4,7 @@ import { Messages } from "primereact/messages";
 import { EnderecoEntity } from "@/app/entity/enderecoEntity";
 import { CompanyEntity } from "@/app/entity/CompanyEntity";
 import { useSearchParams } from "next/navigation";
-import EmpresaForm, { EmpresaFormRef } from "@/app/components/pages/Empresa/companyForm";
+import EmpresaForm, { EmpresaFormRef } from "@/app/(main)/configuracoes/empresas/form/empresa";
 
 export default function CriarEmpresas() {
     const searchParams = useSearchParams();

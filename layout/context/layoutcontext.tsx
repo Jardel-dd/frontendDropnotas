@@ -1,7 +1,13 @@
 'use client'
-import React, {useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserProvider } from '@/app/routes/protected/UserContext';
 import type { ChildContainerProps, LayoutContextProps, LayoutConfig, LayoutState, Breadcrumb } from '@/types';
+import {
+    applyThemeLink,
+    DEFAULT_COLOR_SCHEME,
+    DEFAULT_COMPONENT_THEME,
+    getStoredUserThemePreferences
+} from '@/app/utils/themePreferences';
 
 export const LayoutContext = React.createContext({} as LayoutContextProps);
 
@@ -12,11 +18,11 @@ export const LayoutProvider = (props: ChildContainerProps) => {
         ripple: false,
         inputStyle: 'outlined',
         menuMode: 'slim-plus',  
-        colorScheme: 'dark',
-        componentTheme: 'pink',
+        colorScheme: DEFAULT_COLOR_SCHEME,
+        componentTheme: DEFAULT_COMPONENT_THEME,
         scale: 14,
-        theme: 'pink',
-        menuTheme: 'dark',
+        theme: DEFAULT_COMPONENT_THEME,
+        menuTheme: DEFAULT_COLOR_SCHEME,
         layoutTheme: 'colorScheme',
         topBarTheme: 'colorScheme'
     });
@@ -88,6 +94,25 @@ export const LayoutProvider = (props: ChildContainerProps) => {
         newTabs.splice(index, 1);
         setTabs(newTabs);
     };
+
+    useEffect(() => {
+        const { colorScheme, componentTheme } =
+            getStoredUserThemePreferences();
+
+        applyThemeLink(colorScheme, componentTheme);
+        setLayoutConfig((prevState) => ({
+            ...prevState,
+            colorScheme,
+            componentTheme,
+            theme: componentTheme,
+            menuTheme: colorScheme,
+            layoutTheme:
+                colorScheme === 'dark'
+                    ? 'colorScheme'
+                    : prevState.layoutTheme
+        }));
+    }, []);
+
     const value: LayoutContextProps = {
         layoutConfig,
         setLayoutConfig,

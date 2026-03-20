@@ -6,7 +6,7 @@ import { Formas_recebimento } from '@/app/entity/FormaPagamento';
 import { DetalServiceOSEntity } from '@/app/entity/ServiceEntity';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import { OrdemServicoFormRef } from '../types/ordemServico';
-import OrdemServicoForm from '@/app/components/pages/OrdemServico/ordemServicoForm';
+import OrdemServicoForm from '@/app/(main)/ordemServicos/form/ordemServico';
 
 export default function CriarOrdemServico() {
     const searchParams = useSearchParams();

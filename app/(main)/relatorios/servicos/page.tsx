@@ -18,6 +18,8 @@ import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pess
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 import { fetchFilteredCompany, listTheCompany } from '../../configuracoes/empresas/controller/controller';
+import EmpresaDropdownField from '../../configuracoes/empresas/dropDown/empresa';
+import PessoaDropdownField from '../../cadastro/pessoas/dropDown/pessoa';
 const RelatoriosServicos: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState<CompanyEntity | null>(null);
@@ -158,98 +160,93 @@ const RelatoriosServicos: React.FC = () => {
             <div className="card styled-container-main-all-routes w-full">
                 <div className="scrollable-container">
                     {loading && <LoadingScreen loadingText={'Carregando...'} />}
-                   <div className="row flex w-full">
-                    <div className=" mt-2 p-2">
-                        <div className="col-12 mb-0 lg:col-12 lg:mb-0 p-0 w-full ">
-                            <label className="filter-label">Filtar por Data:</label>
-                            {/* <DateRangeField value={dateRange} onChange={setDateRange} /> */}
+                    <div className="row flex w-full">
+                        <div className=" mt-2 p-2">
+                            <div className="col-12 mb-0 lg:col-12 lg:mb-0 p-0 w-full ">
+                                <label className="filter-label">Filtar por Data:</label>
+                                {/* <DateRangeField value={dateRange} onChange={setDateRange} /> */}
+                            </div>
                         </div>
-                    </div>
-                    <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-2  ">
-                        <div className="StyleDiv-row-filtro-all w-full ">
-                            <label className="filter-label">Filtrar por:</label>
-                            <div style={{ marginBottom: '3px' }}>{filterType && <Button label="Limpar filtro" outlined style={{ height: '3px' }} onClick={handleClearFilters} />}</div>
-                        </div>
-                        <div className="col-12 lg:col-3 w-full p-0">
-                            <Dropdown
-                                value={filterType}
-                                options={filterOptions}
-                                onChange={(e) => {
-                                    const novoFiltro = e.value as string | null;
-                                    setFilterType(novoFiltro);
-                                    if (novoFiltro === 'EMPRESA') handlePessoaChange(null);
-                                    else if (novoFiltro === 'CLIENTES_FORNECEDORES') handleCompanyChange(null);
-                                    else {
-                                        handleCompanyChange(null);
-                                        handlePessoaChange(null);
-                                    }
-                                }}
-                                placeholder="Filtrar"
-                                optionLabel="label"
-                                optionValue="value"
-                                label={''}
-                            />
-                        </div>
-                    </div>
-                    {(filterType === 'EMPRESA' || filterType === 'AMBOS') && (
-                        <>
-                              <div className="col-12 lg:col-3 p-3 w-2">
-                                <label htmlFor="">Empresa:</label>
-                                <DropdownSearch<CompanyEntity>
-                                    id="selectedCompany"
-                                    selectedItem={selectedCompany}
-                                    onItemChange={handleCompanyChange}
-                                    fetchAllItems={listTheCompany}
-                                    fetchFilteredItems={fetchFilteredCompany}
-                                    optionLabel="razao_social"
-                                    optionValue="id"
-                                    placeholder="Selecione a Empresa"
+                        <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-2  ">
+                            <div className="StyleDiv-row-filtro-all w-full ">
+                                <label className="filter-label">Filtrar por:</label>
+                                <div style={{ marginBottom: '3px' }}>{filterType && <Button label="Limpar filtro" outlined style={{ height: '3px' }} onClick={handleClearFilters} />}</div>
+                            </div>
+                            <div className="col-12 lg:col-3 w-full p-0">
+                                <Dropdown
+                                    value={filterType}
+                                    options={filterOptions}
+                                    onChange={(e) => {
+                                        const novoFiltro = e.value as string | null;
+                                        setFilterType(novoFiltro);
+                                        if (novoFiltro === 'EMPRESA') handlePessoaChange(null);
+                                        else if (novoFiltro === 'CLIENTES_FORNECEDORES') handleCompanyChange(null);
+                                        else {
+                                            handleCompanyChange(null);
+                                            handlePessoaChange(null);
+                                        }
+                                    }}
+                                    placeholder="Filtrar"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    label={''}
                                 />
                             </div>
-                        </>
-                    )}
-                    {(filterType === 'CLIENTES_FORNECEDORES' || filterType === 'AMBOS') && (
-                        <>
-                            <div className="col-12 lg:col-3 w-2 mt-2">
-                                <label htmlFor="">Cliente ou Fornecedor:</label>
-                                <DropdownSearch<PessoaEntity>
-                                    id="selectedPessoa"
-                                    selectedItem={selectedPessoa}
-                                    onItemChange={handlePessoaChange}
-                                    fetchAllItems={listThePessoas}
-                                    fetchFilteredItems={fetchFilteredPessoas}
-                                    optionLabel="razao_social"
-                                    optionValue="id"
-                                    placeholder=" Selecione o Cliente ou Fornecedor"
-                                />
-                            </div>
-                        </>
-                    )}
-                </div>
+                        </div>
+                        {(filterType === 'EMPRESA' || filterType === 'AMBOS') && (
+                            <>
+                                <div className="col-12 lg:col-3 p-3 w-2">
+                                    <EmpresaDropdownField
+                                        selectedCompany={selectedCompany}
+                                        onCompanyChange={handleCompanyChange}
+                                        hasError={!!errors.selectedCompany}
+                                        errorMessage={errors.selectedCompany}
+                                        showAddButton
+                                        autoSelectSingle={true}
+                                    />
+
+                                </div>
+                            </>
+                        )}
+                        {(filterType === 'CLIENTES_FORNECEDORES' || filterType === 'AMBOS') && (
+                            <>
+                                <div className="col-12 lg:col-3 w-2 mt-2">
+                                    <label htmlFor="">Cliente ou Fornecedor:</label>
+                                    <PessoaDropdownField
+                                        selectedPessoa={selectedPessoa}
+                                        onPessoaChange={handlePessoaChange}
+                                        hasError={!!errors.selectedPessoa}
+                                        errorMessage={errors.selectedPessoa}
+                                    />
+
+                                </div>
+                            </>
+                        )}
+                    </div>
                     <div className="grid formgrid relatorio-cards p-3">
-                                                    <div className="card relatorio-card">
-                                                        <span className="relatorio-card-title">Valor Bruto</span>
-                                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalBruto)}</strong>
-                                                    </div>
-                    
-                                                    <div className="card relatorio-card">
-                                                        <span className="relatorio-card-title">Descontos</span>
-                                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalDescontos)}</strong>
-                                                    </div>
-                    
-                                                    <div className="card relatorio-card">
-                                                        <span className="relatorio-card-title">Valor Líquido</span>
-                                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalLiquido)}</strong>
-                                                    </div>
-                    
-                                                    <div className="card relatorio-card">
-                                                        <span className="relatorio-card-title">Cancelados</span>
-                                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalCancelados)}</strong>
-                                                    </div>
-                                                    <div className="card relatorio-card">
-                                                        <span className="relatorio-card-title">Não Cancelados</span>
-                                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalNaoCancelados)}</strong>
-                                                    </div>
+                        <div className="card relatorio-card">
+                            <span className="relatorio-card-title">Valor Bruto</span>
+                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalBruto)}</strong>
+                        </div>
+
+                        <div className="card relatorio-card">
+                            <span className="relatorio-card-title">Descontos</span>
+                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalDescontos)}</strong>
+                        </div>
+
+                        <div className="card relatorio-card">
+                            <span className="relatorio-card-title">Valor Líquido</span>
+                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalLiquido)}</strong>
+                        </div>
+
+                        <div className="card relatorio-card">
+                            <span className="relatorio-card-title">Cancelados</span>
+                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalCancelados)}</strong>
+                        </div>
+                        <div className="card relatorio-card">
+                            <span className="relatorio-card-title">Não Cancelados</span>
+                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalNaoCancelados)}</strong>
+                        </div>
                     </div>
                     <div className="grid formgrid ">
                         <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
