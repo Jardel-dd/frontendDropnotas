@@ -49,7 +49,7 @@ const SignIn: React.FC = () => {
 
             if (success) {
                 setIsLoggingIn(true);
-                router.push('/dashboard');
+                window.location.href = '/dashboard';
             }
         } catch (error) {
             console.error(error);
@@ -67,7 +67,7 @@ const SignIn: React.FC = () => {
         if (Object.values(touchedFields).some((touched) => touched)) {
             validateFormSignIn(userConta, setErrors, msgs);
         }
-    }, [userConta]);
+    }, [touchedFields, userConta]);
     if (isLoggingIn) {
         return <LoadingScreen loadingText={'Carregando Credenciais para acesso...'} />;
     }

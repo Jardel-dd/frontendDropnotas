@@ -1,47 +1,29 @@
-'use client';
 import React from 'react';
+import { cookies } from 'next/headers';
 import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
 import '../styles/layout/layout.scss';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/primereact.min.css';
-import { PrimeReactProvider } from 'primereact/api';
-import 'primereact/resources/themes/saga-blue/theme.css';
-import { LayoutProvider } from '../layout/context/layoutcontext';
-import { LoadingContext, LoadingProvider } from '@/layout/context/LoadingContext';
-import LoadingScreen from './loading';
-import { UserProvider } from './routes/protected/UserContext';
-import {
-    DEFAULT_COLOR_SCHEME,
-    DEFAULT_COMPONENT_THEME,
-    getThemeHref
-} from './utils/themePreferences';
+import AppProviders from './providers';
+import { DEFAULT_COLOR_SCHEME, DEFAULT_COMPONENT_THEME, THEME_PREFERENCES_STORAGE_KEY, getThemeHref, getThemePreferencesFromCookieValue } from './utils/themePreferences';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-    const { loading } = React.useContext(LoadingContext);
+    const themePreferencesCookie = cookies().get(THEME_PREFERENCES_STORAGE_KEY)?.value;
+    const initialThemePreferences = getThemePreferencesFromCookieValue(themePreferencesCookie) ?? {
+        colorScheme: DEFAULT_COLOR_SCHEME,
+        componentTheme: DEFAULT_COMPONENT_THEME
+    };
+
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
                 <title>DropNotas</title>
                 <link rel="icon" href="/layout/images/logoDrm.png" />
-                <link
-                    id="theme-link"
-                    href={getThemeHref(
-                        DEFAULT_COLOR_SCHEME,
-                        DEFAULT_COMPONENT_THEME
-                    )}
-                    rel="stylesheet"
-                ></link>
+                <link id="theme-link" href={getThemeHref(initialThemePreferences.colorScheme, initialThemePreferences.componentTheme)} rel="stylesheet" suppressHydrationWarning />
             </head>
-            <body style={{ overflow: "hidden" }}>
-                <PrimeReactProvider>
-                    <LoadingProvider>
-                        <UserProvider>
-                        <LayoutProvider>
-                            {loading ? <LoadingScreen loadingText={'Carregando...'} /> : children}
-                        </LayoutProvider>
-                        </UserProvider>
-                    </LoadingProvider>
-                </PrimeReactProvider>
+            <body style={{ overflow: 'hidden' }}>
+                <AppProviders>{children}</AppProviders>
             </body>
         </html>
     );

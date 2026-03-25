@@ -24,6 +24,68 @@
     box-shadow: none !important;
     outline: none !important;
 }
+
+.periodo-calendar-shell .p-calendar {
+    width: 100%;
+}
+
+.periodo-calendar-shell .p-inputtext {
+    box-shadow: none !important;
+}
+
+.periodo-calendar-shell .p-datepicker-trigger {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.periodo-calendar-shell-dark .p-calendar .p-inputtext,
+.periodo-calendar-shell-dark .p-calendar .p-datepicker-trigger {
+    background: #293B51 !important;
+    color: #FFFFFF !important;
+}
+
+.periodo-calendar-shell-dark .p-calendar .p-inputtext::placeholder {
+    color: #E3E6E8 !important;
+    opacity: 1;
+}
+
+.periodo-calendar-shell-dark .p-calendar .p-datepicker-trigger .pi {
+    color: #E3E6E8 !important;
+}
+
+.periodo-calendar-shell-light .p-calendar .p-inputtext,
+.periodo-calendar-shell-light .p-calendar .p-datepicker-trigger {
+    background: #FFFFFF !important;
+    color: #495057 !important;
+}
+
+.periodo-calendar-panel-dark {
+    background: #293B51;
+    border-color: #3e4f62;
+}
+
+.periodo-calendar-panel-dark .p-datepicker-header,
+.periodo-calendar-panel-dark .p-datepicker-calendar-container,
+.periodo-calendar-panel-dark .p-datepicker-group,
+.periodo-calendar-panel-dark .p-datepicker-calendar,
+.periodo-calendar-panel-dark .p-datepicker-buttonbar {
+    background: #293B51;
+    color: #FFFFFF;
+}
+
+.periodo-calendar-panel-dark .p-datepicker-title span,
+.periodo-calendar-panel-dark th,
+.periodo-calendar-panel-dark td,
+.periodo-calendar-panel-dark td > span,
+.periodo-calendar-panel-dark .p-datepicker-prev,
+.periodo-calendar-panel-dark .p-datepicker-next {
+    color: #FFFFFF;
+}
+
+.periodo-calendar-panel-dark .calendar-divider {
+    background: #3e4f62;
+}
+
 .calendar-footer-ok{
     display: flex;
     width: 100%;

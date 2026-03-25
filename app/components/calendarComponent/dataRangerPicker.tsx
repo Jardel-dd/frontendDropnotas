@@ -1,11 +1,13 @@
 'use client';
+
 import 'dayjs/locale/pt-br';
 import './styledCalendar.css';
 import dayjs, { Dayjs } from 'dayjs';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
-import { useRef, useState, ReactNode } from 'react';
 import type { Calendar as CalendarRef } from 'primereact/calendar';
+import { ReactNode, useRef, useState } from 'react';
+import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
 
 type Periodo = Date[] | null;
@@ -18,35 +20,46 @@ type Props = {
     required?: boolean;
     topRightElement?: ReactNode;
 };
+
 export const todayRange: DateRangeValue = [dayjs().startOf('day'), dayjs().endOf('day')];
 
 export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, required = false, topRightElement }: Props) => {
     const calendarRef = useRef<CalendarRef>(null);
+    const { isDarkMode } = useTheme();
+    const [periodo, setPeriodo] = useState<Periodo>(null);
+
     const clearPeriodo = () => {
         setPeriodo(null);
     };
-    const [periodo, setPeriodo] = useState<Periodo>(null);
+
     const setHoje = () => {
         const hoje = new Date();
         setPeriodo([hoje, hoje]);
     };
+
     const setOntem = () => {
         const ontem = dayjs().subtract(1, 'day').toDate();
         setPeriodo([ontem, ontem]);
     };
+
     const setSemanaAtual = () => {
         setPeriodo([dayjs().startOf('week').toDate(), dayjs().endOf('week').toDate()]);
     };
+
     const setSemanaPassada = () => {
         setPeriodo([dayjs().subtract(1, 'week').startOf('week').toDate(), dayjs().subtract(1, 'week').endOf('week').toDate()]);
     };
+
     const setMesAtual = () => {
         setPeriodo([dayjs().startOf('month').toDate(), dayjs().endOf('month').toDate()]);
     };
+
     const setMesPassado = () => {
         setPeriodo([dayjs().subtract(1, 'month').startOf('month').toDate(), dayjs().subtract(1, 'month').endOf('month').toDate()]);
     };
+
     const periodoCompleto = Array.isArray(periodo) && periodo.length === 2 && !!periodo[0] && !!periodo[1];
+
     const footerTemplate = () => (
         <div className="calendar-footer">
             <div className="calendar-divider" />
@@ -57,8 +70,8 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
             </div>
             <div className="calendar-buttons calendar-buttons-DataPiker gap-2">
                 <Button label="Semana passada" className="btn-filter-calendar" severity="secondary" outlined onClick={setSemanaPassada} />
-                <Button label="Mês atual" className="btn-filter-calendar" severity="secondary" outlined onClick={setMesAtual} />
-                <Button label="Mês passado" className="btn-filter-calendar" severity="secondary" outlined onClick={setMesPassado} />
+                <Button label="Mes atual" className="btn-filter-calendar" severity="secondary" outlined onClick={setMesAtual} />
+                <Button label="Mes passado" className="btn-filter-calendar" severity="secondary" outlined onClick={setMesPassado} />
             </div>
             <div className="calendar-footer-ok">
                 <Button
@@ -67,6 +80,7 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
                     disabled={!periodoCompleto}
                     onClick={() => {
                         if (!periodoCompleto) return;
+
                         onBuscar(periodo[0]!, periodo[1]!);
                         calendarRef.current?.hide();
                     }}
@@ -86,10 +100,11 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
             </div>
         </div>
     );
+
     return (
-        <div className="periodo-calendar-wrapper w-full" style={{ width:"100%"}}>
+        <div className="periodo-calendar-wrapper w-full" style={{ width: '100%' }}>
             {showTopLabel && (topLabel || topRightElement) && (
-                <div style={{ height:25, display:"flex", alignItems:"center" }}>
+                <div style={{ height: 25, display: 'flex', alignItems: 'center' }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -97,24 +112,36 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
                     {topRightElement}
                 </div>
             )}
-             <div className={`p-inputgroup flex-1 styled-on-focus styled-on-hover custom-input`}
-           >
-            <Calendar
-                ref={calendarRef}
-                value={periodo}
-                onChange={(e) => setPeriodo(e.value as Periodo)}
-                selectionMode="range"
-                numberOfMonths={1}
-                locale="pt"
-                dateFormat="dd/mm/yy"
-                style={{ boxShadow: 'none', borderColor: 'none', width: '100%', height:40, border:0 }}
-                readOnlyInput
-                placeholder="Data inicio      ↔︎      Data final"
-                showIcon
-                panelClassName="periodo-calendar-panel"
-                footerTemplate={footerTemplate}
-            />
-             </div>
+            <div
+                className={`p-inputgroup flex-1 styled-on-focus styled-on-hover custom-input periodo-calendar-shell ${isDarkMode ? 'periodo-calendar-shell-dark' : 'periodo-calendar-shell-light'}`}
+                style={{ border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da', borderRadius: '6px' }}
+            >
+                <Calendar
+                    ref={calendarRef}
+                    value={periodo}
+                    onChange={(e) => setPeriodo(e.value as Periodo)}
+                    selectionMode="range"
+                    numberOfMonths={1}
+                    locale="pt"
+                    dateFormat="dd/mm/yy"
+                    className={isDarkMode ? 'periodo-calendar-dark' : 'periodo-calendar-light'}
+                    inputClassName={isDarkMode ? 'periodo-calendar-input-dark' : 'periodo-calendar-input-light'}
+                    inputStyle={{
+                        boxShadow: 'none',
+                        background: isDarkMode ? '#293B51' : '#FFFFFF',
+                        color: isDarkMode ? '#FFFFFF' : '#495057',
+                        width: '100%',
+                        height: 40,
+                        border: 0
+                    }}
+                    style={{ boxShadow: 'none', borderColor: 'none', width: '100%', height: 40, border: 0 }}
+                    readOnlyInput
+                    placeholder="Data inicio      -      Data final"
+                    showIcon
+                    panelClassName={`periodo-calendar-panel ${isDarkMode ? 'periodo-calendar-panel-dark' : 'periodo-calendar-panel-light'}`}
+                    footerTemplate={footerTemplate}
+                />
+            </div>
             <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}></div>
         </div>
     );

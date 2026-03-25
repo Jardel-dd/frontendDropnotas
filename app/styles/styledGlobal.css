@@ -95,7 +95,6 @@ height: 66px;
     display: flex;
 
 }
-
 .checkBoxMobile-width-max-10rem {
     width: 100%;
     max-width: 15rem;
@@ -316,7 +315,6 @@ height: 66px;
 .padding-1rem {
     padding: 1rem;
 }
-
 .checkbox-container {
     align-items: center;
     display: flex;
@@ -348,7 +346,29 @@ height: 66px;
     border-color: var(--primary-color);
 }
 
+.p-checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.p-checkbox .p-checkbox-input {
+    appearance: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+
 .p-checkbox .p-checkbox-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-color: var(--primary-color);
 }
 

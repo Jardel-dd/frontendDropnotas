@@ -5,8 +5,7 @@ import { Toast } from 'primereact/toast';
 import { useRef, useState } from 'react';
 import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
-import { useRouter } from 'next/navigation';
-import { clearAuthStorage } from './logoutRefreshToken';
+import { clearAuthStorage, redirectToLogout } from './logoutRefreshToken';
 import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 
 const LOGOUT_REDIRECT_PATH = '/';
@@ -17,13 +16,12 @@ const LOGOUT_CONFIRMATION_HEADER = 'Você tem certeza que deseja sair?';
 const Logout = () => {
     const toast = useRef<Toast>(null);
     const [loading, setLoading] = useState(false);
-    const router = useRouter();
     const showLogoutError = () => {
         toast.current?.show({
             severity: 'error',
             summary: 'Erro',
             detail: LOGOUT_ERROR_MESSAGE,
-            life: 3000,
+            life: 3000
         });
     };
     const performLogout = async () => {
@@ -31,7 +29,7 @@ const Logout = () => {
             setLoading(true);
             await api.post('logout');
             clearAuthStorage();
-            router.replace(LOGOUT_REDIRECT_PATH);
+            redirectToLogout(LOGOUT_REDIRECT_PATH);
         } catch {
             setLoading(false);
             showLogoutError();
@@ -45,7 +43,7 @@ const Logout = () => {
             className: 'p-confirm-dialog-footer',
             acceptClassName: 'btn-sim',
             rejectClassName: 'p-button-outlined btn-nao',
-            accept: performLogout,
+            accept: performLogout
         });
     };
     return (
@@ -54,14 +52,7 @@ const Logout = () => {
             <Toast ref={toast} />
             <ConfirmDialog draggable={false} />
             <div className="logout-container">
-                <Button
-                    onClick={openLogoutConfirmation}
-                    severity="secondary"
-                    icon="pi pi-sign-out"
-                    label="Sair"
-                    outlined
-                    className="logout-button"
-                />
+                <Button onClick={openLogoutConfirmation} severity="secondary" icon="pi pi-sign-out" label="Sair" outlined className="logout-button" />
             </div>
         </>
     );

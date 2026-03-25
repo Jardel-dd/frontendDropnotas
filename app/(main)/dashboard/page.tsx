@@ -11,15 +11,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import PieChart from '@/app/components/chartsComponent/charts';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
-import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
+import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 
 const ComponentDashboard: React.FC = () => {
     const isMobile = useIsMobile();
@@ -169,10 +166,9 @@ const ComponentDashboard: React.FC = () => {
                                         />
                                     </div>
                                     <div className="col-3 mb-0 lg:col-3" >
-                                        <div className="container-BTN-Filter-Created">
+                                        <div className="container-BTN-Filter-Created mt-1">
                                             <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
                                                 <div className="col-12 lg:col-12 ">
-
                                                     <EmpresaDropdownField
                                                         selectedCompany={selectedCompany}
                                                         onCompanyChange={handleCompanyChange}

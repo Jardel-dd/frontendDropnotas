@@ -1,13 +1,8 @@
-'use client'
+'use client';
 import React, { useEffect, useState } from 'react';
 import { UserProvider } from '@/app/routes/protected/UserContext';
 import type { ChildContainerProps, LayoutContextProps, LayoutConfig, LayoutState, Breadcrumb } from '@/types';
-import {
-    applyThemeLink,
-    DEFAULT_COLOR_SCHEME,
-    DEFAULT_COMPONENT_THEME,
-    getStoredUserThemePreferences
-} from '@/app/utils/themePreferences';
+import { applyThemeLink, DEFAULT_COLOR_SCHEME, DEFAULT_COMPONENT_THEME, getStoredUserThemePreferences, updateStoredUserThemePreferences } from '@/app/utils/themePreferences';
 
 export const LayoutContext = React.createContext({} as LayoutContextProps);
 
@@ -17,7 +12,7 @@ export const LayoutProvider = (props: ChildContainerProps) => {
     const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
         ripple: false,
         inputStyle: 'outlined',
-        menuMode: 'slim-plus',  
+        menuMode: 'slim-plus',
         colorScheme: DEFAULT_COLOR_SCHEME,
         componentTheme: DEFAULT_COMPONENT_THEME,
         scale: 14,
@@ -79,7 +74,7 @@ export const LayoutProvider = (props: ChildContainerProps) => {
             topbarMenuActive: !prevLayoutState.topbarMenuActive
         }));
     };
-    
+
     const showRightSidebar = () => {
         setLayoutState((prevLayoutState) => ({
             ...prevLayoutState,
@@ -96,20 +91,20 @@ export const LayoutProvider = (props: ChildContainerProps) => {
     };
 
     useEffect(() => {
-        const { colorScheme, componentTheme } =
-            getStoredUserThemePreferences();
+        const { colorScheme, componentTheme } = getStoredUserThemePreferences();
 
         applyThemeLink(colorScheme, componentTheme);
+        updateStoredUserThemePreferences({
+            colorScheme,
+            componentTheme
+        });
         setLayoutConfig((prevState) => ({
             ...prevState,
             colorScheme,
             componentTheme,
             theme: componentTheme,
             menuTheme: colorScheme,
-            layoutTheme:
-                colorScheme === 'dark'
-                    ? 'colorScheme'
-                    : prevState.layoutTheme
+            layoutTheme: colorScheme === 'dark' ? 'colorScheme' : prevState.layoutTheme
         }));
     }, []);
 
@@ -136,8 +131,7 @@ export const LayoutProvider = (props: ChildContainerProps) => {
     };
     return (
         <UserProvider>
-            <LayoutContext.Provider value={value}>{props.children}
-            </LayoutContext.Provider>
+            <LayoutContext.Provider value={value}>{props.children}</LayoutContext.Provider>
         </UserProvider>
     );
 };
