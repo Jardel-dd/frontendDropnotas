@@ -152,7 +152,6 @@ const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, FormaPagam
                 })
             );
         };
-
         const handleDropdownChange = (event: DropdownChangeEvent) => {
             setFormaPagamento(
                 toFormaPagamentoEntity({
@@ -161,7 +160,6 @@ const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, FormaPagam
                 })
             );
         };
-
         const handleValidateDescricao = () => {
             setTouchedFields((prev) => ({
                 ...prev,
@@ -169,7 +167,6 @@ const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, FormaPagam
             }));
             validateFieldsFormaPagamento(formaPagamento, setErrors, msgs);
         };
-
         const handleSubmit = async (event?: React.FormEvent) => {
             if (event) {
                 event.preventDefault();
@@ -213,7 +210,6 @@ const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, FormaPagam
                 setIsLoadingBtnCreated(false);
             }
         };
-
         const listagemFormaPagamentoID = async (id: string) => {
             try {
                 setIsLoading(true);
@@ -223,26 +219,21 @@ const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, FormaPagam
                 setIsLoading(false);
             }
         };
-
         useImperativeHandle(ref, () => ({
             handleSave: handleSubmit
         }));
-
         useEffect(() => {
             onFormaPagamentoChangeRef.current = onFormaPagamentoChange;
         }, [onFormaPagamentoChange]);
-
         useEffect(() => {
             onErrorsChangeRef.current = onErrorsChange;
         }, [onErrorsChange]);
-
         useEffect(() => {
             if (initialId) {
                 setIsEditMode(true);
                 listagemFormaPagamentoID(initialId).finally(() => setIsLoading(false));
                 return;
             }
-
             setIsLoading(false);
         }, [initialId]);
 

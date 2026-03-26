@@ -26,7 +26,7 @@ import { handleSearchCep } from '@/app/components/seachs/searchCep/controller';
 import { handleSearchCNPJ } from '@/app/components/seachs/searchCnpj/controller';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import CNAEDropdownField from '@/app/components/fetchAll/listAllCnae/cnaeFiscal';
-import {forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import VendedorForm from '../../vendedores/form/vendedor';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
@@ -216,7 +216,7 @@ export function PessoaFields({
                             outlined
                             hasError={!!errors.cpf}
                             errorMessage={errors.cpf}
-                            onClickSearch={function (): void {}}
+                            onClickSearch={function (): void { }}
                             autoFocus={!hasFocused}
                             onFocus={onFocusFirstField}
                             showTopLabel
@@ -235,7 +235,7 @@ export function PessoaFields({
                             outlined
                             hasError={!!errors.rg}
                             errorMessage={errors.rg}
-                            onClickSearch={function (): void {}}
+                            onClickSearch={function (): void { }}
                             showTopLabel
                             required
                             topLabel="RG:"
@@ -518,9 +518,29 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             const type = event?.target?.type;
             const checked = event?.target?.checked;
             const value = event?.target?.value ?? event?.value ?? '';
-            const newValue = type === 'checkbox' || type === 'switch' ? checked : value;
-            const camposEndereco = ['cep', 'logradouro', 'bairro', 'numero', 'uf', 'municipio', 'codigo_municipio', 'codigo_pais', 'complemento', 'nome_pais', 'telefone'];
-
+            let newValue = type === 'checkbox' || type === 'switch' ? checked : value;
+            const numericFields = [
+                'inscricao_estadual',
+                'inscricao_municipal',
+                'telefone',
+                'cep'
+            ];
+            if (numericFields.includes(id)) {
+                newValue = String(newValue).replace(/\D/g, '');
+            }
+            const camposEndereco = [
+                'cep',
+                'logradouro',
+                'bairro',
+                'numero',
+                'uf',
+                'municipio',
+                'codigo_municipio',
+                'codigo_pais',
+                'complemento',
+                'nome_pais',
+                'telefone'
+            ];
             setPessoa((prev) => {
                 const pessoaAnterior = new PessoaEntity(prev);
 
@@ -532,7 +552,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                         }
                     });
                 }
-
                 return pessoaAnterior.copyWith({
                     [id]: newValue
                 });
@@ -648,10 +667,10 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 setSelectedCNAE(
                     dataPessoa.cnae_fiscal
                         ? new TableCNAEEntity({
-                              id: 0,
-                              codigo: dataPessoa.cnae_fiscal,
-                              descricao: dataPessoa.cnae_fiscal
-                          })
+                            id: 0,
+                            codigo: dataPessoa.cnae_fiscal,
+                            descricao: dataPessoa.cnae_fiscal
+                        })
                         : null
                 );
                 const vendedores = await fetchAllVendedores();

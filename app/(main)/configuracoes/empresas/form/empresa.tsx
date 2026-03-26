@@ -112,10 +112,26 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
     const [stateDisableBtnCreatedCompany, setStateDisableBtnCreatedCompany] = useState(false);
     const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
         const { id, value, checked, type } = event.target;
-        const newValue = type === 'checkbox' || type === 'switch' ? checked : value;
-        const camposEndereco = ['cep', 'logradouro', 'bairro', 'numero', 'uf', 'municipio', 'codigo_municipio', 'codigo_pais', 'complemento', 'nome_pais'];
+        let newValue = type === 'checkbox' || type === 'switch' ? checked : value;
+        const numericFields = ['inscricao_estadual', 'inscricao_municipal'];
+        if (numericFields.includes(id)) {
+            newValue = String(newValue).replace(/\D/g, '');
+        }
+        const camposEndereco = [
+            'cep',
+            'logradouro',
+            'bairro',
+            'numero',
+            'uf',
+            'municipio',
+            'codigo_municipio',
+            'codigo_pais',
+            'complemento',
+            'nome_pais'
+        ];
         setEmpresa((prev) => {
             const empresaInstanciada = new CompanyEntity(prev);
+
             if (camposEndereco.includes(id)) {
                 return empresaInstanciada.copyWith({
                     endereco: {

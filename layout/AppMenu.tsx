@@ -57,7 +57,6 @@ const AppMenu = () => {
               to: '/contrato',
                 } : null,
               
-         
         userConta?.perfilUsuario?.ordemServico ? {
             label: 'Ordem de Serviços',
             icon: 'pi pi-wrench',
@@ -68,12 +67,23 @@ const AppMenu = () => {
             icon: 'pi pi-book',
             to: '/notaServico',
         },
-        // {
-        //     label: 'Cobranças',
-        //     icon: 'pi pi-money-bill',
-        //     to: '/cobrancas',
-        //     className: 'menu-item-cobrancas',
-        // },
+         userConta?.perfilUsuario?.financeiro ?? true ? {
+            label: 'Finanças',
+            icon: 'pi pi-money-bill',
+            to: '/financas',
+            items: [
+                {
+                    label: 'Contas a Pagar',
+                    icon: 'pi pi-building',
+                    to: '/financas/pagar',
+                },
+                {
+                    label: 'Contas a Receber',
+                    icon: 'pi pi-palette',
+                    to: '/financas/receber',
+                }
+            ],
+        } : null,
         {
             label: 'Relatórios',
             icon: 'pi pi-chart-bar',

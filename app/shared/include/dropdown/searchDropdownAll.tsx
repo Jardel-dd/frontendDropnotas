@@ -72,17 +72,14 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [filterValue, setFilterValue] = useState<string>('');
-
     const wrapperRef = useRef<HTMLDivElement>(null);
     const selectedItemRef = useRef<T | null>(selectedItem);
     const optionValueRef = useRef<keyof T | undefined>(optionValue);
     const onItemChangeRef = useRef(onItemChange);
     const didAutoSelectRef = useRef(false);
-
     useEffect(() => {
         selectedItemRef.current = selectedItem;
     }, [selectedItem]);
-
     useEffect(() => {
         optionValueRef.current = optionValue;
     }, [optionValue]);
@@ -183,7 +180,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
         if (!hasInList) {
             setItems((prev) => ensureSelectedInList(prev, selectedItem, optionValue));
         }
-    }, [selectedItem, optionValue, items.length]);
+    }, [selectedItem, optionValue, items]);
 
     return (
         <div ref={wrapperRef} className="p-field" style={{ width: '100%' }}>
@@ -250,7 +247,22 @@ export const DropdownSearch = <T extends Record<string, any>>({
                                     boxShadow: 'none'
                                 }}
                             />
-                            {showAddButton && <Button style={{ height: '15px', width: '25px' }} tooltip="Adicionar" icon="pi pi-plus" severity="success" aria-label="Adicionar" onClick={onAddClick} />}
+                            {showAddButton && (
+                                <Button
+                                    style={{
+                                        height: '15px',
+                                        width: '25px',
+                                        background: 'var(--primary-color)',
+                                        borderColor: 'var(--primary-color)',
+                                        color: 'var(--primary-color-text)',
+                                        boxShadow: 'none'
+                                    }}
+                                    tooltip="Adicionar"
+                                    icon="pi pi-plus"
+                                    aria-label="Adicionar"
+                                    onClick={onAddClick}
+                                />
+                            )}
                         </div>
                     )}
                 />

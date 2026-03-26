@@ -2,6 +2,7 @@ import { UsuarioContaEntity } from "./UsuarioContaEntity";
 
 export interface PerfilUsuario {
     empresa?: boolean;
+    financeiro?:boolean;
     pessoa?: boolean;
     servico?: boolean;
     vendedor?: boolean;

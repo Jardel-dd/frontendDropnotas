@@ -1,30 +1,9 @@
-import { ReactNode, useContext, useRef } from 'react';
+import "./sytles.css"
+import {  useContext, useRef } from 'react';
+import { CustomInputNumberProps } from "./types";
+import { Mandatory } from '../../mandatory/InputMandatory';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
-import { Mandatory } from '../../mandatory/InputMandatory';
-
-import "./sytles.css"
-
-type CustomInputNumberProps = {
-    value: number | string;
-    onChange: (e: InputNumberValueChangeEvent) => void;
-    currency?: string;
-    locale?: string;
-    label?: string;
-    useRightButton?: boolean;
-    outlined?: boolean;
-    iconLeft?: React.ReactNode;
-    id?: string;
-    className?: string;
-    readOnly?: boolean;
-    placeholder?: string;
-    errorMessage?: string;
-    hasError?: boolean;
-    disabled?: boolean;
-    showTopLabel?: boolean;
-    topLabel?: string | ReactNode;
-    required?: boolean;
-};
 
 export function CustomInputNumber({
     value,
@@ -49,6 +28,8 @@ export function CustomInputNumber({
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const inputRef = useRef<HTMLInputElement>(null);
+    const inputBackground = isDarkMode ? '#293B51' : '#FFFFFF';
+    const inputTextColor = isDarkMode ? '#E3E6E8' : '#495057';
     return (
         <div className="p-field" style={{ width: '100%' }}>
             {showTopLabel && topLabel && (
@@ -59,7 +40,7 @@ export function CustomInputNumber({
                     </label>
                 </div>
             )}
-           <div className={`p-inputgroup flex-1 custom-input-number styled-on-focus styled-on-hover ${hasError ? 'input-error' : ''}`}
+           <div className={`p-inputgroup flex-1 custom-input-number ${isDarkMode ? 'dark-theme' : 'light-theme'} styled-on-focus styled-on-hover ${hasError ? 'input-error' : ''}`}
                   style={{ border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da' , borderRadius: '6px' }}>
                 {iconLeft && (
                     <span className="p-inputgroup-addon" style={{ background: isDarkMode ? '#293B51' : '#FFFFFF', border: 'none' }}>
@@ -90,11 +71,18 @@ export function CustomInputNumber({
                         readOnly={readOnly}
                         placeholder={placeholder}
                         style={{
-                            boxShadow: 'none',
-                            background: isDarkMode ? '#293B51' : '#FFFFFF',
                             width: '100%',
                             border: 'none',
                             height:40
+                        }}
+                        inputClassName="custom-input-number-field"
+                        inputStyle={{
+                            boxShadow: 'none',
+                            background: inputBackground,
+                            color: inputTextColor,
+                            width: '100%',
+                            border: 'none',
+                            height: 40
                         }}
                     />
             </div>

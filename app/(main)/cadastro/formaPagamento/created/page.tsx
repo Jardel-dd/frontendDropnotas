@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
 import FormaPagamentoForm, { FormaPagamentoFormRef } from '@/app/(main)/cadastro/formaPagamento/form/formaPagamento';
 
-export default function CriarServicos() {
+export default function CriarFormaPagamentos() {
     const searchParams = useSearchParams();
     const msgs = useRef<Messages | null>(null);
     const formaPagamentoId = searchParams.get('id');

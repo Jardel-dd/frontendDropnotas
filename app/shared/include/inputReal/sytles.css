@@ -17,6 +17,21 @@ box-shadow: none !important;
     border: none !important;
     box-shadow: none !important;
 }
+.custom-input-number .p-inputnumber {
+    width: 100%;
+}
+.custom-input-number .custom-input-number-field {
+    border: none !important;
+    box-shadow: none !important;
+}
+.custom-input-number.dark-theme .custom-input-number-field {
+    background: #293B51 !important;
+    color: #E3E6E8 !important;
+}
+.custom-input-number.light-theme .custom-input-number-field {
+    background: #FFFFFF !important;
+    color: #495057 !important;
+}
 .custom-input-number.input-error {
     border-color: #fca5a5 !important; 
 }

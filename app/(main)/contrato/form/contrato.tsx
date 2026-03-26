@@ -185,12 +185,8 @@ export function ContratoFields({
                                     onFormaPagamentoChange
                                 }
                                 reloadKey={reloadKeyFormaPagamento}
-                                hasError={
-                                    !!errors.selectedFormadePagamento
-                                }
-                                errorMessage={
-                                    errors.selectedFormadePagamento
-                                }
+                                hasError={!!errors.selectedFormadePagamento}
+                                errorMessage={errors.selectedFormadePagamento}
                                 showAddButton
                                 onAddClick={onAddFormaPagamento}
                                 autoSelectSingle={false}

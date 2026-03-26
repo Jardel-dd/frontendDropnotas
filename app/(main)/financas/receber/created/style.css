@@ -1,0 +1,102 @@
+
+.custom-multiselect .p-checkbox.p-highlight .p-checkbox-box {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.p-checkbox.p-highlight .p-checkbox-box {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight.p-focus {
+  outline: none;
+}
+
+.p-checkbox .p-checkbox-box {
+  border-color: var(--primary-color);
+}
+
+.p-checkbox .p-checkbox-box .p-checkbox-icon {
+  color: var(--checkbox-icon-color);
+}
+/* 
+.p-dialog-content {
+  overflow: hidden;
+} */
+
+.p-checkbox:not(.p-highlight) .p-checkbox-box {
+  border-color: var(--unchecked-border-color);
+  background-color: var(--unchecked-background-color);
+}
+
+.custom-multiselect .p-multiselect-panel .p-multiselect-item:hover {
+  background-color: var(--hover-background-color);
+  color: var(--hover-text-color);
+}
+
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+  background: rgba(var(--primary-color), 0.5);
+}
+
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+  background-color: rgba(var(--primary-color), 0.5);
+}
+
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled).p-focus {
+  background-color: var(--hover-background-color);
+  color: var(--text-color);
+}
+
+.p-invalid .p-inputtext {
+  border: 1px solid #FCA5A5;
+}
+
+.container-PerfilUser {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 20.8rem);
+  padding: 0 0 1.5rem;
+}
+
+.subContainer-PerfilUser {
+  overflow-y: auto;
+  overflow-x: hidden;
+
+}
+
+.custom-divPerfilUser {
+  min-height: 500px;
+  max-height: 620px;
+  height: 100%;
+  margin-bottom: 1rem;
+}
+
+.custom-tree {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.div-DropDown-PerfilUser {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.custom-dialog-vendedor .p-dialog-content {
+  padding: 0 !important;
+}
+
+.dialog-content-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dialog-scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
