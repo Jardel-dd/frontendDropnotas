@@ -28,10 +28,7 @@ export const validateFieldsContasReceber = (
         newErrors = { valor_original: 'Informe um valor original maior que zero.' };
     } else if (!contasReceber.data_vencimento) {
         newErrors = { data_vencimento: 'Informe a data de vencimento.' };
-    } else if (!contasReceber.observacao || contasReceber.observacao.trim().length < 2) {
-        newErrors = { observacao: 'A observacao deve ter pelo menos 2 caracteres.' };
-    }
-
+    } 
     if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         return false;

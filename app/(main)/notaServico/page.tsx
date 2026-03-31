@@ -312,7 +312,9 @@ const NotaServico: React.FC = () => {
     const handleConfirmPreparaNfs = async () => {
         const isValid = validatePrepararNfsDialog();
         if (!isValid) return;
+
         setLoadingPrepararNfs(true);
+
         try {
             const query = new URLSearchParams({
                 id_empresa: String(selectedEmpresaDialog!.id),
@@ -320,9 +322,9 @@ const NotaServico: React.FC = () => {
                 id_servico: String(selectedServicoDialog!.id)
             });
 
-            router.push(`/notaServico/created?${query.toString()}`);
             setShowDialogPreparaNfs(false);
-        } finally {
+            router.push(`/notaServico/created?${query.toString()}`);
+        } catch (error) {
             setLoadingPrepararNfs(false);
         }
     };

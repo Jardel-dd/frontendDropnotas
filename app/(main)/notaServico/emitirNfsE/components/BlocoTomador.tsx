@@ -2,6 +2,7 @@ import { getCitiesFromState } from '@/app/entity/maps';
 import Input from '@/app/shared/include/input/input-all';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
+import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation';
 
 type Props = {
     nfseGerada: any;
@@ -14,12 +15,16 @@ type Props = {
     msgs: any;
     errors: Record<string, string>;
     handleDropdownChangeEnderecoTomador: (e: any) => void;
-
     loadingCep: boolean;
 };
+
 export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropdownChange, handleSearchCep, setLoadingCep, setNfs, setError, msgs, errors, handleDropdownChangeEnderecoTomador, loadingCep }: Props) {
+    const tomadorErrors = getScopedErrors(errors, 'tomador');
+    const tomadorEnderecoErrors = getScopedErrors(errors, 'tomador.endereco');
+    const tomadorEmail = nfseGerada.tomador?.email || nfseGerada.tomador?.contato?.email || '';
+
     return (
-        <div >
+        <div>
             <div className="grid formgrid mt-3">
                 <div className="col-12 mb-0 lg:col-3 lg:mb-0">
                     <InputMaskDrop
@@ -41,7 +46,8 @@ export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropd
                         placeholder="99.999.999/9999-99"
                         mask="99.999.999/9999-99"
                         iconRight="pi pi-search"
-                        errorMessage={errors.cnpj}
+                        hasError={!!tomadorErrors.cpf_cnpj}
+                        errorMessage={tomadorErrors.cpf_cnpj}
                         onClickSearch={() => {}}
                         outlined={false}
                         showTopLabel
@@ -50,32 +56,36 @@ export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropd
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-9">
-                    <Input 
-                    id="razao_social" 
-                    value={nfseGerada.tomador?.razao_social || ''} 
-                    label="Razão Social" 
-                    onChange={(e) => handleAllChanges(e, 'tomador')} 
-                    showTopLabel 
-                    required 
-                    topLabel="Razão Social:"
-                     />
+                    <Input
+                        id="razao_social"
+                        value={nfseGerada.tomador?.razao_social || ''}
+                        label="RazÃ£o Social"
+                        onChange={(e) => handleAllChanges(e, 'tomador')}
+                        hasError={!!tomadorErrors.razao_social}
+                        errorMessage={tomadorErrors.razao_social}
+                        showTopLabel
+                        required
+                        topLabel="RazÃ£o Social:"
+                    />
                 </div>
-                 <div className="col-12 mb-1 lg:col-12 lg:mb-0">
-                    <Input 
-                    value={nfseGerada.tomador?.contato.email || ''} 
-                    onChange={(e) => handleAllChanges(e, 'prestador')} 
-                    label="E-mail" 
-                    id="email" 
-                    type="email" 
-                    showTopLabel 
-                    topLabel="E-mail:" 
+                <div className="col-12 mb-1 lg:col-12 lg:mb-0">
+                    <Input
+                        value={tomadorEmail}
+                        onChange={(e) => handleAllChanges(e, 'tomador')}
+                        label="E-mail"
+                        id="email"
+                        type="email"
+                        hasError={!!tomadorErrors.email}
+                        errorMessage={tomadorErrors.email}
+                        showTopLabel
+                        topLabel="E-mail:"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-12">
                     <EnderecoForm
                         endereco={nfseGerada.tomador?.endereco}
                         telefone={nfseGerada.tomador?.telefone}
-                        errors={errors}
+                        errors={tomadorEnderecoErrors}
                         onChange={handleDropdownChangeEnderecoTomador}
                         onCepSearch={() => handleSearchCep(nfseGerada.tomador?.endereco?.cep || '', setLoadingCep, setNfs, setError, msgs)}
                         onDropdownChange={handleDropdownChange}
@@ -85,11 +95,7 @@ export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropd
                     />
                 </div>
             </div>
-            <div className="grid formgrid mt-3">
-                <div className="col-12 mb-1 lg:col-12 lg:mb-0">
-                    <Input value={nfseGerada.tomador?.contato?.email || ''} onChange={(e) => handleAllChanges(e, 'tomador')} label="E-mail" id="email" type="email" showTopLabel topLabel="E-mail:" />
-                </div>
-            </div>
+            
         </div>
     );
 }

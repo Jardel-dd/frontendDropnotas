@@ -19,6 +19,7 @@ import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/
 import { createdNotaServico, prepararNotaServico } from '@/app/(main)/notaServico/controller/controller';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { incentivoFiscal, prestacaoSus, regimeEspecialTributarioOptionsCompany, tipo_rps } from '@/app/shared/optionsDropDown/options';
+import { validateFieldsNotaServico } from '@/app/(main)/notaServico/controller/validation';
 import type { FormCreatedNotaServicoProps, NotaServicoFieldsProps, NotaServicoFormProps, NotaServicoFormRef } from '../types/notaServico';
 
 export type { FormCreatedNotaServicoProps, NotaServicoFieldsProps, NotaServicoFormProps, NotaServicoFormRef } from '../types/notaServico';
@@ -134,34 +135,38 @@ export function NotaServicoFields({
                         options={regimeEspecialTributarioOptionsCompany}
                         onChange={onDropdownChangeRegime}
                         label="Selecione o Regime Tributario"
+                        hasError={!!errors.regime_especial_tributacao}
+                        errorMessage={errors.regime_especial_tributacao}
                         showTopLabel
                         required
                         topLabel="Regime Especial Tributario:"
                     />
                 </div>
             </div>
-            <NotaServico
-                nfseGerada={gerarNfse}
-                handleAllChanges={onChange}
-                handleDropdownChange={onDropdownChange}
-                handleSubmit={onSubmit}
-                errors={errors}
-                handleSearchCep={() => {}}
-                setLoadingCep={setLoadingCep}
-                setNfs={() => {}}
-                setError={setErrors}
-                msgs={msgs}
-                router={router}
-                handleNumberChange={onNumberChange}
-                setNfseGerada={setGerarNfse}
-                tipo_rps={tipo_rps}
-                prestacaoSus={prestacaoSus}
-                incentivoFiscal={incentivoFiscal}
-                handleDropdownChangeEnderecoPrestador={onDropdownChangeEnderecoPrestador}
-                handleDropdownChangeEnderecoTomador={onDropdownChangeEnderecoTomador}
-                getCitiesFromState={getCitiesFromState}
-                loadingCep={loadingCep}
-            />
+            <div>
+                <NotaServico
+                    nfseGerada={gerarNfse}
+                    handleAllChanges={onChange}
+                    handleDropdownChange={onDropdownChange}
+                    handleSubmit={onSubmit}
+                    errors={errors}
+                    handleSearchCep={() => {}}
+                    setLoadingCep={setLoadingCep}
+                    setNfs={() => {}}
+                    setError={setErrors}
+                    msgs={msgs}
+                    router={router}
+                    handleNumberChange={onNumberChange}
+                    setNfseGerada={setGerarNfse}
+                    tipo_rps={tipo_rps}
+                    prestacaoSus={prestacaoSus}
+                    incentivoFiscal={incentivoFiscal}
+                    handleDropdownChangeEnderecoPrestador={onDropdownChangeEnderecoPrestador}
+                    handleDropdownChangeEnderecoTomador={onDropdownChangeEnderecoTomador}
+                    getCitiesFromState={getCitiesFromState}
+                    loadingCep={loadingCep}
+                />
+            </div>
         </>
     );
 }
@@ -170,13 +175,16 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
     const router = useRouter();
     const toast = useRef<Toast>(null);
     const searchParams = useSearchParams();
+    const hasPrepararParams = Boolean(searchParams.get('id_empresa') && searchParams.get('id_cliente') && searchParams.get('id_servico'));
     const onNotaServicoChangeRef = useRef(onNotaServicoChange);
     const onErrorsChangeRef = useRef(onErrorsChange);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(hasPrepararParams);
+    const [loadingText, setLoadingText] = useState(hasPrepararParams ? 'Preparando NFS-e...' : 'Emitindo NFS-e...');
     const [loadingCep, setLoadingCep] = useState(false);
     const [gerarNfse, setGerarNfse] = useState<NfsEntity>(notaServico instanceof NfsEntity ? notaServico : createEmptyNfse());
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
+    const [isValidationActive, setIsValidationActive] = useState(false);
     const [dateRange, setDateRange] = useState<Date[] | null>([new Date(), new Date()]);
     const [selectedEmpresa] = useState<CompanyEntity | null>(null);
     const [selectedCliente] = useState<PessoaEntity | null>(null);
@@ -307,25 +315,17 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             return;
         }
 
-        const validationErrors: Record<string, string> = {};
-        if (!gerarNfse.competencia) {
-            validationErrors.competencia = 'Competencia e obrigatoria';
-        }
+        setIsValidationActive(true);
 
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            msgs.current?.show({
-                severity: 'error',
-                summary: 'Erro de validacao',
-                detail: 'Por favor, preencha todos os campos obrigatorios',
-                life: 5000
-            });
+        const isValid = validateFieldsNotaServico(gerarNfse, setErrors, msgs, true);
+        if (!isValid) {
             return;
         }
 
         setIsLoadingBtnCreated(true);
 
         try {
+            setLoadingText('Emitindo NFS-e...');
             setLoading(true);
             await createdNotaServico(gerarNfse, setErrors, msgs, router);
             onSaved?.(gerarNfse);
@@ -363,6 +363,14 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
     }, [errors]);
 
     useEffect(() => {
+        if (!isValidationActive) {
+            return;
+        }
+
+        validateFieldsNotaServico(gerarNfse, setErrors);
+    }, [gerarNfse, isValidationActive]);
+
+    useEffect(() => {
         const id_empresa = Number(searchParams.get('id_empresa'));
         const id_cliente = Number(searchParams.get('id_cliente'));
         const id_servico = Number(searchParams.get('id_servico'));
@@ -372,6 +380,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         }
 
         const prepararEmissao = async () => {
+            setLoadingText('Preparando NFS-e...');
             setLoading(true);
             try {
                 const payload = new PrepararNfs({
@@ -394,6 +403,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                             })
                         })
                     );
+                    setIsValidationActive(true);
                 }
             } catch (error) {
                 toast.current?.show({
@@ -410,10 +420,11 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
     }, [searchParams]);
 
     if (loading) {
-        return <LoadingScreen loadingText="Emitindo NFS-e..." />;
+        return <LoadingScreen loadingText={loadingText} />;
     }
 
     const isDialogMode = Boolean(showBTNPGCreatedDialog);
+    const isSubmitDisabled = isLoadingBtnCreated || (isValidationActive && Object.keys(errors).length > 0);
 
     return (
         <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
@@ -440,8 +451,8 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                 />
             </div>
             <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`} style={{ marginTop: 'auto' }}>
-                {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Emitir NFS-E" disabled={isLoadingBtnCreated} icon="" />}
-                {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Emitir NFS-E" disabled={isLoadingBtnCreated} icon="" onBackClick={onBackClick} onClose={onClose} />}
+                {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Emitir NFS-E" disabled={isSubmitDisabled} icon="" />}
+                {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Emitir NFS-E" disabled={isSubmitDisabled} icon="" onBackClick={onBackClick} onClose={onClose} />}
             </div>
         </div>
     );

@@ -168,9 +168,6 @@ export function ContasReceberFields({
                     topLabel="Observacao:"
                     showTopLabel
                 />
-                <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}>
-                    {errors.observacao && <small className="p-error block">{errors.observacao}</small>}
-                </div>
             </div>
         </div>
     );
@@ -364,8 +361,7 @@ const ContasReceberFormContainer = forwardRef<ContasReceberFormRef, ContasRecebe
             !contasReceber.id_forma_pagamento ||
             !contasReceber.valor_original ||
             Number(contasReceber.valor_original) <= 0 ||
-            !contasReceber.data_vencimento ||
-            !contasReceber.observacao?.trim();
+            !contasReceber.data_vencimento
 
         return (
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>

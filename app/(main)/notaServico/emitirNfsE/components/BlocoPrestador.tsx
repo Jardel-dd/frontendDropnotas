@@ -3,8 +3,9 @@ import Input from '@/app/shared/include/input/input-all';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
+import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation';
 
- type Props = {
+type Props = {
     nfseGerada: any;
     handleAllChanges: (e: any, bloco?: 'prestador' | 'tomador' | 'servico') => void;
     handleDropdownChange: (e: any) => void;
@@ -37,8 +38,11 @@ export default function BlocoPrestador({
     handleDropdownChangeEnderecoPrestador,
     loadingCep
 }: Props) {
+    const prestadorErrors = getScopedErrors(errors, 'prestador');
+    const prestadorEnderecoErrors = getScopedErrors(errors, 'prestador.endereco');
+
     return (
-        <div >
+        <div>
             <div className="grid formgrid">
                 <div className="col-12 mb-0 lg:col-3 lg:mb-0">
                     <InputMaskDrop
@@ -56,7 +60,8 @@ export default function BlocoPrestador({
                         placeholder="99.999.999/9999-99"
                         mask="99.999.999/9999-99"
                         iconRight="pi pi-search"
-                        errorMessage={errors.cnpj}
+                        hasError={!!prestadorErrors.cpf_cnpj}
+                        errorMessage={prestadorErrors.cpf_cnpj}
                         onClickSearch={() => {}}
                         outlined={false}
                         showTopLabel
@@ -65,36 +70,43 @@ export default function BlocoPrestador({
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-5">
-                    <Input 
-                    id="razao_social" 
-                    value={nfseGerada.prestador?.razao_social || ''} 
-                    label="Razão Social:" 
-                    onChange={(e) => handleAllChanges(e, 'prestador')} 
-                    showTopLabel 
-                    required 
-                    topLabel="Razão Social do Prestador:" />
+                    <Input
+                        id="razao_social"
+                        value={nfseGerada.prestador?.razao_social || ''}
+                        label="RazÃ£o Social:"
+                        onChange={(e) => handleAllChanges(e, 'prestador')}
+                        hasError={!!prestadorErrors.razao_social}
+                        errorMessage={prestadorErrors.razao_social}
+                        showTopLabel
+                        required
+                        topLabel="RazÃ£o Social do Prestador:"
+                    />
                 </div>
                 <div className="col-12 mb-1 lg:col-4">
-                    <Input 
-                    id="nome_fantasia" 
-                    value={nfseGerada.prestador?.nome_fantasia || ''} 
-                    label="Nome Fantasia" 
-                    onChange={(e) => handleAllChanges(e, 'prestador')} 
-                    showTopLabel 
-                    required 
-                    topLabel="Nome Fantasia do Prestador:" 
+                    <Input
+                        id="nome_fantasia"
+                        value={nfseGerada.prestador?.nome_fantasia || ''}
+                        label="Nome Fantasia"
+                        onChange={(e) => handleAllChanges(e, 'prestador')}
+                        hasError={!!prestadorErrors.nome_fantasia}
+                        errorMessage={prestadorErrors.nome_fantasia}
+                        showTopLabel
+                        required
+                        topLabel="Nome Fantasia do Prestador:"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-3 lg:mb-0">
                     <Input
                         value={nfseGerada.prestador?.inscricao_municipal || ''}
                         onChange={(e) => handleAllChanges(e, 'prestador')}
-                        label="Digite Inscrição Municipal"
+                        label="Digite InscriÃ§Ã£o Municipal"
                         id="inscricao_municipal"
                         type="number"
+                        hasError={!!prestadorErrors.inscricao_municipal}
+                        errorMessage={prestadorErrors.inscricao_municipal}
                         showTopLabel
                         required
-                        topLabel="Inscrição Municipal:"
+                        topLabel="InscriÃ§Ã£o Municipal:"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-3 lg:mb-0">
@@ -103,12 +115,12 @@ export default function BlocoPrestador({
                         value={nfseGerada.prestador?.prestacao_sus ?? null}
                         options={prestacaoSus}
                         onChange={handleDropdownChange}
-                        label="Prestação SUS:"
-                        hasError={!!errors.prestacao_sus}
-                        errorMessage={errors.prestacao_sus}
+                        label="PrestaÃ§Ã£o SUS:"
+                        hasError={!!prestadorErrors.prestacao_sus}
+                        errorMessage={prestadorErrors.prestacao_sus}
                         showTopLabel
                         required
-                        topLabel="Selecione a Prestação SUS"
+                        topLabel="Selecione a PrestaÃ§Ã£o SUS"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-3 lg:mb-0">
@@ -118,8 +130,8 @@ export default function BlocoPrestador({
                         options={incentivoFiscal}
                         onChange={handleDropdownChange}
                         label="Selecione o Incentivo Fiscal"
-                        hasError={!!errors.incentivo_fiscal}
-                        errorMessage={errors.incentivo_fiscal}
+                        hasError={!!prestadorErrors.incentivo_fiscal}
+                        errorMessage={prestadorErrors.incentivo_fiscal}
                         showTopLabel
                         required
                         topLabel="Incentivo Fiscal:"
@@ -132,20 +144,24 @@ export default function BlocoPrestador({
                         options={prestacaoSus}
                         onChange={handleDropdownChange}
                         label="Selecione Optante Simples Nacional:"
+                        hasError={!!prestadorErrors.optante_simples_nacional}
+                        errorMessage={prestadorErrors.optante_simples_nacional}
                         showTopLabel
                         required
                         topLabel="Optante Simples Nacional:"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-12 lg:mb-0">
-                    <Input 
-                    value={nfseGerada.prestador?.email || ''} 
-                    onChange={(e) => handleAllChanges(e, 'prestador')} 
-                    label="E-mail" 
-                    id="email" 
-                    type="email" 
-                    showTopLabel 
-                    topLabel="E-mail:" 
+                    <Input
+                        value={nfseGerada.prestador?.email || ''}
+                        onChange={(e) => handleAllChanges(e, 'prestador')}
+                        label="E-mail"
+                        id="email"
+                        type="email"
+                        hasError={!!prestadorErrors.email}
+                        errorMessage={prestadorErrors.email}
+                        showTopLabel
+                        topLabel="E-mail:"
                     />
                 </div>
             </div>
@@ -154,7 +170,7 @@ export default function BlocoPrestador({
                     <EnderecoForm
                         endereco={nfseGerada.prestador?.endereco}
                         telefone={nfseGerada.prestador?.telefone}
-                        errors={errors}
+                        errors={{ ...prestadorEnderecoErrors, telefone: prestadorErrors.telefone }}
                         onChange={handleDropdownChangeEnderecoPrestador}
                         onCepSearch={() => handleSearchCep(nfseGerada.prestador?.endereco?.cep || '', setLoadingCep, setNfs, setError, msgs)}
                         onDropdownChange={handleDropdownChange}

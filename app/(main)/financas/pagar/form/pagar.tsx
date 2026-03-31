@@ -184,9 +184,6 @@ export function ContasPagarFields({
                     topLabel="Observacao:"
                     showTopLabel
                 />
-                <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}>
-                    {errors.observacao && <small className="p-error block">{errors.observacao}</small>}
-                </div>
             </div>
         </div>
     );
@@ -239,18 +236,10 @@ const ContasPagarFormContainer = forwardRef<ContasPagarFormRef, ContasPagarFormP
                 value = value === '' ? 0 : Number(value);
             }
             setContasPagar((prev) =>
-                {
-                    const nextState = toContasPagarEntity({
-                        ...prev,
-                        [id]: value
-                    });
-
-                    if (id === 'valor_original' && (!prev.valor_total || Number(prev.valor_total) <= 0)) {
-                        nextState.valor_total = Number(value) || 0;
-                    }
-
-                    return nextState;
-                }
+                toContasPagarEntity({
+                    ...prev,
+                    [id]: value
+                })
             );
         };
         const clearFieldError = (field: string) => {

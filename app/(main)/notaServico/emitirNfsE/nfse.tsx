@@ -31,7 +31,7 @@ export function NotaServico(props: any) {
     } = props;
     return (
         <div>
-            <TabView className="custom-tabs">
+            <TabView className="nota-servico-tabs">
                 <TabPanel header="Empresa  (Prestador)">
                     <BlocoPrestador
                         nfseGerada={nfseGerada}
