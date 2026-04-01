@@ -1,10 +1,11 @@
 import { CompanyEntity } from "@/app/entity/CompanyEntity";
 import { EmpresaDropdownFieldProps } from "../types/empresa";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
-import { fetchFilteredCompany, listTheCompany } from "../controller/controller";
+import { fetchCompanyDropdownByID, fetchFilteredCompany, listTheCompany } from "../controller/controller";
 
 export default function EmpresaDropdownField({
     selectedCompany,
+    selectedCompanyId,
     onCompanyChange,
     reloadKey = 0,
     hasError,
@@ -21,8 +22,10 @@ export default function EmpresaDropdownField({
             onItemChange={onCompanyChange}
             fetchAllItems={listTheCompany}
             fetchFilteredItems={fetchFilteredCompany}
+            fetchItemByValue={async (value) => await fetchCompanyDropdownByID(String(value))}
             optionLabel="razao_social"
             optionValue="id"
+            initialOptionValue={selectedCompanyId ?? null}
             placeholder="Selecione a Empresa"
             hasError={hasError}
             errorMessage={errorMessage}

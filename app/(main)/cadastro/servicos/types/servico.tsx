@@ -47,6 +47,7 @@ export interface ServicoFieldsProps {
 
 export interface ServicoDropdownFieldProps {
     selectedService: ServiceEntity | null;
+    selectedServiceId?: number | null;
     onServiceChange: (service: ServiceEntity | null) => void;
     reloadKey?: number;
     id?: string;

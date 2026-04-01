@@ -110,11 +110,11 @@ export const createContrato = async (
     selectedCategoriaContrato: CategoryContratosEntity | null,
     selectedCompany: CompanyEntity,
     selectedFormadePagamento: FormaPagamentoEntity,
-    selectedPessoa: PessoaEntity[],
+    selectedPessoa: PessoaEntity | null,
     setSelectedCategoriaContrato: React.Dispatch<React.SetStateAction<CategoryContratosEntity | null>>,
     setSelectedCompany: React.Dispatch<React.SetStateAction<CompanyEntity | null>>,
     setSelectedFormadePagamento: React.Dispatch<React.SetStateAction<FormaPagamentoEntity| null>>,
-    setSelectedPessoa: React.Dispatch<React.SetStateAction<PessoaEntity[]>>,
+    setSelectedPessoa: React.Dispatch<React.SetStateAction<PessoaEntity | null>>,
     setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
     msgs: any,
     router: AppRouterInstance,
@@ -125,15 +125,16 @@ export const createContrato = async (
             id_forma_pagamento: selectedFormadePagamento.id,
             id_empresa: selectedCompany.id,
             id_categoria_contrato: selectedCategoriaContrato?.id,
-            id_clientes_contrato: selectedPessoa.map(usuario => usuario.id),
+            id_clientes_contrato: selectedPessoa ? [selectedPessoa.id] : (contrato.id_clientes_contrato ?? []),
         };
         console.log('Enviando dados do contrato:', contratoDataToSend);
         const response = await api.post('/contrato', contratoDataToSend);
         console.log('Resposta da API após criação:', response.data);
         msgs.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Contrato cadastrado com sucesso!' });
         setSelectedFormadePagamento(null);
-        setSelectedCompany(null)
+        setSelectedCompany(null);
         setSelectedCategoriaContrato(null);
+        setSelectedPessoa(null);
         router.push('/contrato');
     } catch (error) {
         console.error('Erro ao cadastrar contrato:', error);
@@ -220,41 +221,39 @@ export const fetchContratosById = async (contratoID: string) => {
         const { data: dataContrato } = await api.get(`/contrato/${contratoID}`);
         console.log("Contrato selecionado:", dataContrato);
         const contratoInstanciado = new ContratoEntity(dataContrato);
-        const empresaList = await fetchList<CompanyEntity>("/empresa", e => e as unknown as CompanyEntity);
-        const selectedEmpresa = empresaList.find(e => e.id === dataContrato.id_empresa) ?? null;
-        const serviceList = await fetchList<ServiceEntity>("/servico", s => s as unknown as ServiceEntity);
-        const selectedService = serviceList.find(s => s.id === dataContrato.id_servico) ?? null;
-        const categoriaList = await fetchList<CategoryContratosEntity>("/categoria-contrato", c => c as unknown as CategoryContratosEntity);
-        const selectedCategoriaContrato = categoriaList.find(c => c.id === dataContrato.id_categoria_contrato) ?? null;
-        const formaPagamentoList = await fetchList<FormaPagamentoEntity>("/forma-pagamento", f => f as unknown as FormaPagamentoEntity);
-        const selectedFormaPagamento = formaPagamentoList.find(f => f.id === dataContrato.id_forma_pagamento) ?? null;
-        const idsResponse = await api.get("/pessoa");
-        let pessoa = [];
-        if (Array.isArray(idsResponse.data)) {
-            pessoa = idsResponse.data;
-        } else if (idsResponse.data && Array.isArray(idsResponse.data.content)) {
-            pessoa = idsResponse.data.content;
+        let selectedPessoa: PessoaEntity | null = null;
+        const pessoaResumo = (dataContrato?.pessoaResumo ?? null) as Pick<PessoaEntity, 'id' | 'razao_social'> | null;
+        const pessoaId: number | null = null;
+
+        if (pessoaResumo?.id) {
+            selectedPessoa = {
+                id: pessoaResumo.id,
+                razao_social: pessoaResumo.razao_social ?? 'Nome nÃ£o disponÃ­vel'
+            } as PessoaEntity;
+        } else if (pessoaId) {
+            try {
+                const { data: dataPessoa } = await api.get(`/pessoa/${pessoaId}`);
+                selectedPessoa = {
+                    id: dataPessoa.id,
+                    razao_social: dataPessoa.razao_social ?? 'Nome nÃ£o disponÃ­vel'
+                } as PessoaEntity;
+            } catch (pessoaError) {
+                console.error("Erro ao buscar pessoa do contrato:", pessoaError);
+            }
         }
-        const idsData: PessoaEntity[] = pessoa.map((user: any) => ({
-            id: user.id,
-            razao_social: user.razao_social || "Nome não disponível",
-        }));
-        let selectedPessoa: PessoaEntity[] = [];
-        if (Array.isArray(dataContrato.id_clientes_contrato)) {
-            selectedPessoa = idsData.filter(user => dataContrato.id_clientes_contrato.includes(user.id));
-        }
+
         return {
             dataContrato: contratoInstanciado,
-            empresaList,
-            serviceList,
-            categoriaList,
-            formaPagamentoList,
-            selectedEmpresa,
-            selectedService,
-            selectedCategoriaContrato,
-            selectedFormaPagamento,
-            pessoa: idsData,
-            selectedPessoa: selectedPessoa,
+            empresaList: [],
+            serviceList: [],
+            categoriaList: [],
+            formaPagamentoList: [],
+            selectedEmpresa: null,
+            selectedService: null,
+            selectedCategoriaContrato: null,
+            selectedFormaPagamento: null,
+            pessoa: [],
+            selectedPessoa,
         };
     } catch (error) {
         console.error("Erro ao buscar contrato:", error);

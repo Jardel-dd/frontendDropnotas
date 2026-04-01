@@ -9,6 +9,8 @@ import { LayoutContext } from '@/layout/context/layoutcontext';
 import LoadingScreenComponent from '@/app/loading/loadingComponent';
 import { ReactNode, useContext, useEffect, useRef, useState } from 'react';
 
+const normalize = (value: unknown) => (value === null || value === undefined ? null : String(value));
+
 type MultiSelectProps = {
     selectedItems: any[];
     id: string;
@@ -25,6 +27,7 @@ type MultiSelectProps = {
     fetchAllItems?: () => Promise<any[]>;
     autoSelectSingle?: boolean;
     dataKey?: string;
+    initialSelectedValues?: Array<string | number>;
     showAddButton?: boolean;
     onAddClick?: () => void;
     minSearchChars?: number;
@@ -33,6 +36,17 @@ type MultiSelectProps = {
     topLabel?: string | ReactNode;
     required?: boolean;
 };
+
+function ensureSelectedItemsInList(list: any[], selectedItems: any[], dataKey?: string) {
+    if (!dataKey || !Array.isArray(selectedItems) || selectedItems.length === 0) {
+        return list;
+    }
+
+    const existingKeys = new Set(list.map((item) => normalize(item?.[dataKey])));
+    const missingItems = selectedItems.filter((item) => !existingKeys.has(normalize(item?.[dataKey])));
+
+    return missingItems.length > 0 ? [...missingItems, ...list] : list;
+}
 
 function CustomMultiSelect({
     selectedItems,
@@ -50,6 +64,7 @@ function CustomMultiSelect({
     fetchAllItems,
     autoSelectSingle = false,
     dataKey,
+    initialSelectedValues = [],
     showAddButton = false,
     onAddClick,
     minSearchChars = 2,
@@ -63,23 +78,53 @@ function CustomMultiSelect({
     const [filterValue, setFilterValue] = useState('');
     const [filteredOptions, setFilteredOptions] = useState<any[]>(options);
     const [loading, setLoading] = useState(false);
+    const [hasLoadedAllOptions, setHasLoadedAllOptions] = useState(false);
 
     const didAutoSelectRef = useRef(false);
     const selectedItemsRef = useRef<any[]>(selectedItems);
+    const initialSelectedValuesRef = useRef<Array<string | number>>(initialSelectedValues);
     useEffect(() => {
         selectedItemsRef.current = selectedItems;
     }, [selectedItems]);
+    useEffect(() => {
+        initialSelectedValuesRef.current = initialSelectedValues;
+    }, [initialSelectedValues]);
     const loadAll = async () => {
         setLoading(true);
         try {
             const data = fetchAllItems ? await fetchAllItems() : options;
-            const arr = Array.isArray(data) ? data.slice(0, maxResults) : [];
+            let arr = Array.isArray(data) ? data.slice(0, maxResults) : [];
+            arr = ensureSelectedItemsInList(arr, selectedItemsRef.current, dataKey);
             setFilteredOptions(arr);
 
-            if (autoSelectSingle && !didAutoSelectRef.current && !filterValue && selectedItemsRef.current?.length === 0 && arr.length === 1) {
+            if (
+                dataKey &&
+                selectedItemsRef.current?.length === 0 &&
+                Array.isArray(initialSelectedValuesRef.current) &&
+                initialSelectedValuesRef.current.length > 0
+            ) {
+                const selectedKeys = new Set(initialSelectedValuesRef.current.map((value) => normalize(value)));
+                const matchedItems = (Array.isArray(data) ? data : []).filter((item) =>
+                    selectedKeys.has(normalize(item?.[dataKey]))
+                );
+
+                if (matchedItems.length > 0) {
+                    onChange({ value: matchedItems });
+                }
+            }
+
+            if (
+                autoSelectSingle &&
+                !didAutoSelectRef.current &&
+                !filterValue &&
+                selectedItemsRef.current?.length === 0 &&
+                initialSelectedValuesRef.current.length === 0 &&
+                arr.length === 1
+            ) {
                 didAutoSelectRef.current = true;
                 onChange({ value: [arr[0]] });
             }
+            setHasLoadedAllOptions(true);
         } catch (e) {
             console.error('Erro ao carregar opções:', e);
             setFilteredOptions([]);
@@ -89,18 +134,26 @@ function CustomMultiSelect({
     };
     useEffect(() => {
         if (!fetchAllItems) {
-            setFilteredOptions(options);
-            if (autoSelectSingle && !didAutoSelectRef.current && !filterValue && selectedItemsRef.current?.length === 0 && Array.isArray(options) && options.length === 1) {
+            setFilteredOptions(ensureSelectedItemsInList(options, selectedItemsRef.current, dataKey));
+            if (
+                autoSelectSingle &&
+                !didAutoSelectRef.current &&
+                !filterValue &&
+                selectedItemsRef.current?.length === 0 &&
+                initialSelectedValuesRef.current.length === 0 &&
+                Array.isArray(options) &&
+                options.length === 1
+            ) {
                 didAutoSelectRef.current = true;
                 onChange({ value: [options[0]] });
             }
         }
-    }, [options, fetchAllItems, autoSelectSingle, filterValue, onChange]);
+    }, [options, fetchAllItems, autoSelectSingle, filterValue, onChange, dataKey]);
     const handleShow = async () => {
-        if (fetchAllItems && !loading) {
+        if (fetchAllItems && !loading && !hasLoadedAllOptions) {
             await loadAll();
         } else {
-            setFilteredOptions(options);
+            setFilteredOptions(ensureSelectedItemsInList(options, selectedItemsRef.current, dataKey));
         }
     };
     const debouncedFilter = useDebouncedCallback(async (value: string) => {
@@ -115,7 +168,10 @@ function CustomMultiSelect({
             setLoading(true);
             try {
                 const data = await fetchFilteredItems(trimmed);
-                setFilteredOptions(Array.isArray(data) ? data : []);
+                setFilteredOptions(
+                    ensureSelectedItemsInList(Array.isArray(data) ? data : [], selectedItemsRef.current, dataKey)
+                );
+                setHasLoadedAllOptions(false);
             } catch (err) {
                 console.error('Erro ao filtrar opções:', err);
                 setFilteredOptions([]);
@@ -127,14 +183,21 @@ function CustomMultiSelect({
             const v = trimmed.toLowerCase();
             const base = fetchAllItems ? filteredOptions : options;
             setFilteredOptions(
-                (Array.isArray(base) ? base : []).filter((opt: any) =>
-                    String(opt?.[optionLabel] ?? '')
-                        .toLowerCase()
-                        .includes(v)
+                ensureSelectedItemsInList(
+                    (Array.isArray(base) ? base : []).filter((opt: any) =>
+                        String(opt?.[optionLabel] ?? '')
+                            .toLowerCase()
+                            .includes(v)
+                    ),
+                    selectedItemsRef.current,
+                    dataKey
                 )
             );
         }
     }, 1000);
+    useEffect(() => {
+        setFilteredOptions((prev) => ensureSelectedItemsInList(prev, selectedItems, dataKey));
+    }, [selectedItems, dataKey]);
     return (
         <div className="p-field" style={{ width: '100%', height: '71px', }}>
             {showTopLabel && topLabel && (
@@ -153,6 +216,7 @@ function CustomMultiSelect({
                         onChange={onChange}
                         options={filteredOptions}
                         optionLabel={optionLabel}
+                        dataKey={dataKey}
                         placeholder={loading ? 'Carregando...' : placeholder}
                         selectedItemsLabel="{0} itens selecionados"
                         style={{ boxShadow: 'none', background: isDarkMode ? '#293B51' : '#FFFFFF',display:"flex" }}
@@ -184,7 +248,25 @@ function CustomMultiSelect({
                                     className="p-inputtext-sm w-full"
                                     style={{ boxShadow: 'none',display:"flex" }}
                                 />
-                                {showAddButton && <Button type="button" icon="pi pi-plus" tooltip="Adicionar" severity="success" aria-label="Adicionar" onClick={onAddClick} style={{ height: 28, width: 32 }} />}
+                                {showAddButton && (
+                                    <Button
+                                        type="button"
+                                        icon="pi pi-plus"
+                                        tooltip="Adicionar"
+                                        severity="success"
+                                        aria-label="Adicionar"
+                                        onMouseDown={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                        }}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            onAddClick?.();
+                                        }}
+                                        style={{ height: 28, width: 32 }}
+                                    />
+                                )}
                             </div>
                         )}
                     />
@@ -201,14 +283,18 @@ function CustomMultiSelect({
                             {selectedItems.map((item: any) => {
                                 const label = item?.[optionLabel];
                                 const truncatedLabel = label && label.length > 10 ? label.slice(0, 10) + '...' : label;
+                                const itemKey = dataKey ? item?.[dataKey] : item?.id;
                                 return (
                                     <Chip
-                                        key={item.id ?? JSON.stringify(item)}
+                                        key={itemKey ?? JSON.stringify(item)}
                                         label={truncatedLabel}
                                         removable
                                         onRemove={() =>
                                             onChange({
-                                                value: selectedItems.filter((i: any) => (i.id ?? JSON.stringify(i)) !== (item.id ?? JSON.stringify(item)))
+                                                value: selectedItems.filter((i: any) => {
+                                                    const currentKey = dataKey ? i?.[dataKey] : i?.id;
+                                                    return (currentKey ?? JSON.stringify(i)) !== (itemKey ?? JSON.stringify(item));
+                                                })
                                             })
                                         }
                                         className="selected-chip mt-2"

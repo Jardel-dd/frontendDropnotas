@@ -35,6 +35,7 @@ export interface VendedorFormProps {
 }
 export interface VendedorDropdownFieldProps {
     selectedVendedor: VendedorEntity | null;
+    selectedVendedorId?: number | null;
     onVendedorChange: (vendedor: VendedorEntity | null) => void;
     onAddClick: () => void;
     reloadKey?: number;

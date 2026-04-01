@@ -309,18 +309,15 @@ export const fetchPessoasById = async (pessoaId: string) => {
         const { data: dataPessoa } = await api.get(`/pessoa/${pessoaId}`);
         console.log("Pessoa selecionada:", dataPessoa);
         const pessoaInstanciada = new PessoaEntity(dataPessoa);
-        const { data: VendedorResponse } = await api.get("/vendedor");
-        const empresaList = Array.isArray(VendedorResponse.content) ? VendedorResponse.content : [];
-        const VendedorListFormatada: VendedorEntity[] = empresaList.map((vendedor: any) => ({
-            id: vendedor.id,
-            nome: vendedor.razao_social,
-        }));
-        const selectedVendedor: VendedorEntity | null = VendedorListFormatada.find(
-            (vendedor: any) => vendedor.id === dataPessoa.id_vendedor_padrao
-        ) || null;
+        const vendedorResumo = dataPessoa?.vendedor_padrao ?? dataPessoa?.vendedor ?? null;
+        const selectedVendedor: VendedorEntity | null = vendedorResumo
+            ? ({
+                id: vendedorResumo.id ?? dataPessoa.id_vendedor_padrao,
+                razao_social: vendedorResumo.razao_social ?? vendedorResumo.nome ?? 'Nome não disponível'
+            } as VendedorEntity)
+            : null;
         return {
             dataPessoa: pessoaInstanciada,
-            vendedor: VendedorListFormatada,
             selectedVendedor,
         };
     } catch (error) {

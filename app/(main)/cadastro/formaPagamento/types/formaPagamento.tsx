@@ -44,6 +44,7 @@ export type FormCreatedFormaPagamentoProps =
 
 export interface FormaPagamentoDropdownFieldProps {
     selectedFormaPagamento: FormaPagamentoEntity | null;
+    selectedFormaPagamentoId?: number | null;
     onFormaPagamentoChange: (
         formaPagamento: FormaPagamentoEntity | null
     ) => void;

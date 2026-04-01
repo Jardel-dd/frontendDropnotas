@@ -5,6 +5,7 @@ import { fetchAllVendedores, fetchFilteredVendedor } from "../controller/control
 
 export default function VendedorDropdownField({
     selectedVendedor,
+    selectedVendedorId,
     onVendedorChange,
     onAddClick,
     reloadKey = 0,
@@ -20,6 +21,8 @@ export default function VendedorDropdownField({
             fetchAllItems={fetchAllVendedores}
             fetchFilteredItems={fetchFilteredVendedor}
             optionLabel="razao_social"
+            optionValue="id"
+            initialOptionValue={selectedVendedorId ?? null}
             placeholder="Selecione o Vendedor"
             hasError={hasError}
             errorMessage={errorMessage}

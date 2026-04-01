@@ -4,6 +4,7 @@ import { RefObject } from "react";
 
 export interface EmpresaDropdownFieldProps {
     selectedCompany: CompanyEntity | null;
+    selectedCompanyId?: number | null;
     onCompanyChange: (empresa: CompanyEntity | null) => void;
     reloadKey?: number;
     hasError?: boolean;

@@ -19,6 +19,18 @@ export const validateFieldsContrato = (
     let valid = true;
     let errorMessages: string[] = [];
     let newErrors: { [key: string]: string } = {};
+    const hasSelectedCompany = !!selectedCompany;
+    const hasSavedCompanyId = contrato.id_empresa !== null && contrato.id_empresa !== undefined;
+    const hasSelectedService = !!selectedService;
+    const hasSavedServiceId = contrato.id_servico !== null && contrato.id_servico !== undefined;
+    const hasSelectedCategoriaContrato = !!selectedCategoriaContrato;
+    const hasSavedCategoriaContratoId = contrato.id_categoria_contrato !== null && contrato.id_categoria_contrato !== undefined;
+    const hasSelectedFormaPagamento = !!selectedFormadePagamento;
+    const hasSavedFormaPagamentoId = contrato.id_forma_pagamento !== null && contrato.id_forma_pagamento !== undefined;
+    const hasSelectedPessoa = !!selectedPessoa;
+    const hasSavedPessoaIds =
+        Array.isArray(contrato.id_clientes_contrato) &&
+        contrato.id_clientes_contrato.some((id) => Number(id) > 0);
     msgs.current?.clear();
     if (!contrato.descricao || contrato.descricao.trim().length < 2) {
         newErrors.descricao = 'A descrição deve ter pelo menos 2 caracteres.';
@@ -26,19 +38,19 @@ export const validateFieldsContrato = (
     } else if (!contrato.valor_servico || String(contrato.valor_servico).trim().length < 1) {
         newErrors.valor_servico = 'O Preço deve ter pelo menos 1 digíto.';
         valid = false;
-    } else if (!selectedCompany) {
+    } else if (!hasSelectedCompany && !hasSavedCompanyId) {
         newErrors.selectedCompany = 'Este Campo deve ser selecionado.';
         valid = false;
-    } else if (!selectedService) {
+    } else if (!hasSelectedService && !hasSavedServiceId) {
         newErrors.selectedService = 'Este Campo deve ser selecionado.';
         valid = false;
-    } else if (!selectedCategoriaContrato) {
+    } else if (!hasSelectedCategoriaContrato && !hasSavedCategoriaContratoId) {
         newErrors.selectedCategoriaContrato = 'Este Campo deve ser selecionado.';
         valid = false;
-    } else if (!selectedFormadePagamento) {
+    } else if (!hasSelectedFormaPagamento && !hasSavedFormaPagamentoId) {
         newErrors.selectedFormadePagamento = 'Este Campo deve ser selecionado.';
         valid = false;
-    } else if (!selectedPessoa) {
+    } else if (!hasSelectedPessoa && !hasSavedPessoaIds) {
         newErrors.selectedPessoa = 'Este Campo deve ser selecionado.';
         valid = false;
     } else if (!contrato.periodicidade) {

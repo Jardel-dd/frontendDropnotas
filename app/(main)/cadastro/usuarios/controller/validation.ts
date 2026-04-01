@@ -14,6 +14,8 @@ export const validateFieldsUserConta = (
     let valid = true;
     let errorMessages: string[] = [];
     let newErrors: { [key: string]: string } = {};
+    const hasSelectedEmpresa = Array.isArray(selectedEmpresa) && selectedEmpresa.length > 0;
+    const hasSavedEmpresaIds = Array.isArray(userConta.id_empresas_acesso) && userConta.id_empresas_acesso.length > 0;
     msgs.current?.clear();
 
 
@@ -32,7 +34,7 @@ export const validateFieldsUserConta = (
     } else if (!selectedPerfilUser) {
         newErrors.selectedPerfilUser = 'Este Campo deve ser selecionado.';
         valid = false;
-    } else if (!selectedEmpresa || selectedEmpresa.length === 0) {
+    } else if (!hasSelectedEmpresa && !hasSavedEmpresaIds) {
         newErrors.selectedEmpresa = 'Este Campo deve ser selecionado.';
         valid = false;
     }

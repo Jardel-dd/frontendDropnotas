@@ -6,6 +6,7 @@ export class UsuarioContaEntity {
     nome!: string;
     email!: string;
     senha!: string;
+    id_empresas_acesso?: number[];
     esquema_cor?:string;
     perfilUsuario?: PerfilUsuario;
     tema_componente?:string;
@@ -16,6 +17,7 @@ export class UsuarioContaEntity {
         nome,
         email,
         senha,
+        id_empresas_acesso,
         perfilUsuario,
         tema_componente,
         esquema_cor
@@ -26,6 +28,7 @@ export class UsuarioContaEntity {
         nome: string;
         email: string;
         senha: string;
+        id_empresas_acesso?: number[];
         esquema_cor?:string;
         tema_componente?:string;
         perfilUsuario?: PerfilUsuario;
@@ -37,6 +40,7 @@ export class UsuarioContaEntity {
             nome,
             email,
             senha,
+            id_empresas_acesso,
             perfilUsuario,
             tema_componente,
             esquema_cor
@@ -49,6 +53,7 @@ export class UsuarioContaEntity {
         nome,
         email,
         senha,
+        id_empresas_acesso,
         perfilUsuario,
         tema_componente,
         esquema_cor
@@ -59,6 +64,7 @@ export class UsuarioContaEntity {
         nome?: string;
         email?: string;
         senha?: string;
+        id_empresas_acesso?: number[];
         tema_componente?:string;
         esquema_cor?:string;
         perfilUsuario?: PerfilUsuario;
@@ -70,6 +76,7 @@ export class UsuarioContaEntity {
             nome: nome ?? this.nome,
             email: email ?? this.email,
             senha: senha ?? this.senha,
+            id_empresas_acesso: id_empresas_acesso ?? this.id_empresas_acesso,
             tema_componente: tema_componente ?? this.tema_componente,
             esquema_cor: esquema_cor ?? this.esquema_cor,
             perfilUsuario: perfilUsuario ?? this.perfilUsuario,

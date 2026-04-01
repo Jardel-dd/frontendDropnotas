@@ -14,7 +14,6 @@ import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
-import { MultiSelectChangeEvent } from 'primereact/multiselect';
 import {
     useRef,
     useState,
@@ -23,7 +22,6 @@ import {
     useImperativeHandle
 } from 'react';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
-import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import FormPessoaCreated from '@/app/(main)/cadastro/pessoas/form/pessoa';
 import { OptionsPeriodicidade } from '@/app/shared/optionsDropDown/options';
@@ -39,7 +37,7 @@ import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/
 import EmpresaDropdownField from '@/app/(main)/configuracoes/empresas/dropDown/empresa';
 import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dropDown/formaPagamento';
 import FormaPagamentoForm from '@/app/(main)/cadastro/formaPagamento/form/formaPagamento';
-import { fetchAllPessoas, fetchFilteredPessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import PessoaDropdownField from '@/app/(main)/cadastro/pessoas/dropDown/pessoa';
 import { createContrato, fetchContratosById, updateContrato } from '@/app/(main)/contrato/controller/controller';
 import CategoriaContratoDropdownField from '@/app/(main)/cadastro/categoriaContratos/dropDown/categoriaContratos';
 import FormCreatedServico from '@/app/(main)/cadastro/servicos/form/servico';
@@ -61,12 +59,12 @@ export type {
 export function ContratoFields({
     contrato,
     errors,
-    pessoaOptions,
     selectedPessoa,
     selectedCompany,
     selectedService,
     selectedCategoriaContrato,
     selectedFormaPagamento,
+    reloadKeyPessoa,
     reloadKeyEmpresa,
     reloadKeyServico,
     reloadKeyCategoriaContrato,
@@ -139,6 +137,7 @@ export function ContratoFields({
                         <div className="col-12 lg:col-3 mt-1">
                             <EmpresaDropdownField
                                 selectedCompany={selectedCompany}
+                                selectedCompanyId={contrato.id_empresa ?? null}
                                 onCompanyChange={onCompanyChange}
                                 reloadKey={reloadKeyEmpresa}
                                 hasError={!!errors.selectedCompany}
@@ -151,6 +150,7 @@ export function ContratoFields({
                         <div className="col-12 lg:col-3 mt-1">
                             <ServicoDropdownField
                                 selectedService={selectedService}
+                                selectedServiceId={contrato.id_servico ?? null}
                                 onServiceChange={onServiceChange}
                                 reloadKey={reloadKeyServico}
                                 hasError={!!errors.selectedService}
@@ -163,6 +163,7 @@ export function ContratoFields({
                         <div className="col-12 lg:col-3 mt-1">
                             <CategoriaContratoDropdownField
                                 selectedCategoriaContrato={selectedCategoriaContrato}
+                                selectedCategoriaContratoId={contrato.id_categoria_contrato ?? null}
                                 onCategoriaContratoChange={
                                     onCategoriaContratoChange
                                 }
@@ -181,6 +182,7 @@ export function ContratoFields({
                                 selectedFormaPagamento={
                                     selectedFormaPagamento
                                 }
+                                selectedFormaPagamentoId={contrato.id_forma_pagamento ?? null}
                                 onFormaPagamentoChange={
                                     onFormaPagamentoChange
                                 }
@@ -193,30 +195,25 @@ export function ContratoFields({
                             />
                         </div>
                         <div className="col-12 lg:col-6 mt-1">
-                            <CustomMultiSelect
-                                id="selectedPessoa"
-                                selectedItems={selectedPessoa}
-                                onChange={onPessoaChange}
-                                fetchAllItems={fetchAllPessoas}
-                                fetchFilteredItems={fetchFilteredPessoas}
-                                options={pessoaOptions}
+                            <PessoaDropdownField
                                 hasError={!!errors.selectedPessoa}
                                 errorMessage={errors.selectedPessoa}
-                                optionLabel="razao_social"
-                                placeholder="Selecione o Cliente ou Fornecedor"
-                                showChips={true}
+                                selectedPessoa={selectedPessoa}
+                                selectedPessoaId={contrato.id_clientes_contrato?.[0] ?? null}
+                                onPessoaChange={onPessoaChange}
+                                reloadKey={reloadKeyPessoa}
                                 autoSelectSingle
                                 showAddButton
                                 onAddClick={onAddPessoa}
-                                topLabel="Cliente ou Fornecedor:"
-                                showTopLabel
-                                required
                             />
                         </div>
                     </div>
-                    <div className="grid formgrid mt-3 gap-2 p-2">
-                        <div className="flex items-center gap-2">
+                    <div className="grid formgrid mt-3 p-2 contrato-switch-group">
+                        <div className="col-12 md:col-4">
+                            <div className="contrato-switch-item">
                             <InputSwitch
+                                inputId="emitir_boleto"
+                                className="contrato-inputswitch"
                                 checked={contrato.emitir_boleto ?? false}
                                 onChange={(event) => {
                                     onChange({
@@ -228,17 +225,16 @@ export function ContratoFields({
                                     });
                                 }}
                             />
-                            <span
-                                style={{
-                                    alignItems: 'center',
-                                    display: 'flex'
-                                }}
-                            >
-                                Enviar Boleto
-                            </span>
+                                <label htmlFor="emitir_boleto" className="contrato-switch-label">
+                                    Enviar Boleto
+                                </label>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="col-12 md:col-4">
+                            <div className="contrato-switch-item">
                             <InputSwitch
+                                inputId="enviar_email"
+                                className="contrato-inputswitch"
                                 checked={contrato.enviar_email ?? false}
                                 onChange={(event) => {
                                     onChange({
@@ -250,17 +246,16 @@ export function ContratoFields({
                                     });
                                 }}
                             />
-                            <span
-                                style={{
-                                    alignItems: 'center',
-                                    display: 'flex'
-                                }}
-                            >
-                                Enviar Email
-                            </span>
+                                <label htmlFor="enviar_email" className="contrato-switch-label">
+                                    Enviar Email
+                                </label>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="col-12 md:col-4">
+                            <div className="contrato-switch-item">
                             <InputSwitch
+                                inputId="enviar_whatsapp"
+                                className="contrato-inputswitch"
                                 checked={contrato.enviar_whatsapp ?? false}
                                 onChange={(event) => {
                                     onChange({
@@ -272,14 +267,10 @@ export function ContratoFields({
                                     });
                                 }}
                             />
-                            <span
-                                style={{
-                                    alignItems: 'center',
-                                    display: 'flex'
-                                }}
-                            >
-                                Enviar WhatsApp
-                            </span>
+                                <label htmlFor="enviar_whatsapp" className="contrato-switch-label">
+                                    Enviar WhatsApp
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -296,13 +287,8 @@ export const ContratoFormCreated = forwardRef<
     const searchParams = useSearchParams();
     const onContratoChangeRef = useRef(onContratoChange);
     const onErrorsChangeRef = useRef(onErrorsChange);
-    const pessoaId = searchParams.get('id');
-    const empresaId = searchParams.get('id');
-    const servicosId = searchParams.get('id');
     const contratoId = searchParams.get('id');
     const formRef = useRef<VendedorFormRef>(null);
-    const formaPagamentoId = searchParams.get('id');
-    const categoriaContratoId = searchParams.get('id');
     const [isLoading, setIsLoading] = useState(true);
     const [isEditMode, setIsEditMode] = useState(false);
     const [servico, setServico] = useState<ServiceEntity>(
@@ -405,7 +391,7 @@ export const ContratoFormCreated = forwardRef<
             id_empresa: null,
             id_categoria_contrato: null,
             id_forma_pagamento: null,
-            id_clientes_contrato: [0]
+            id_clientes_contrato: []
         })
     );
     const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
@@ -416,7 +402,7 @@ export const ContratoFormCreated = forwardRef<
     const [showModalEmpresa, setShowModalEmpresa] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
-    const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity[]>([]);
+    const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity[]>([]);
     const [reloadKeyFormaPagamento, setReloadKeyFormaPagamento] = useState(0);
     const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoEntity>(
@@ -454,7 +440,7 @@ export const ContratoFormCreated = forwardRef<
         });
         setContrato(_contrato);
         if (touchedFields[event.target.id]) {
-            validateFieldsContrato(_contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
+            validateFieldsContrato(_contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa, setErrors, msgs);
         }
     };
     const handleServico = (updatedServico: ServiceEntity) => {
@@ -555,22 +541,32 @@ export const ContratoFormCreated = forwardRef<
     };
     const handlePessoaSaved = (created: PessoaEntity) => {
         setShowModalPessoa(false);
-        setSelectedPessoa((prev) => [...prev, created]);
+        setSelectedPessoa(created);
+        handleAllChanges({
+            target: { id: 'id_clientes_contrato', value: [created.id], type: 'input' }
+        });
+        setErrors((prevErrors) => {
+            const newErrors = { ...prevErrors };
+            delete newErrors.selectedPessoa;
+            return newErrors;
+        });
         setReloadKeyPessoa((k) => k + 1);
     };
     const handlePessoaContrato = (updatedPessoa: PessoaEntity) => {
         setPessoa([updatedPessoa]);
     };
-    const handlePessoaChange = (e: MultiSelectChangeEvent) => {
-        const selected = e.value as PessoaEntity[];
-        setSelectedPessoa(selected);
-        const selectedIds = selected.map((user) => user.id);
+    const handlePessoaChange = (pessoa: PessoaEntity | null) => {
+        setSelectedPessoa(pessoa);
         handleAllChanges({
-            target: { id: 'id_clientes_contrato', value: selectedIds, type: 'input' }
+            target: {
+                id: 'id_clientes_contrato',
+                value: pessoa ? [pessoa.id] : [],
+                type: 'input'
+            }
         });
         setErrors((prevErrors) => {
             const newErrors = { ...prevErrors };
-            delete newErrors.selectedUserConta;
+            delete newErrors.selectedPessoa;
             return newErrors;
         });
     };
@@ -580,7 +576,7 @@ export const ContratoFormCreated = forwardRef<
         setIsLoadingBtnCreated(true);
         msgs.current?.clear();
         try {
-            const isValid = validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
+            const isValid = validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa, setErrors, msgs);
             if (isValid) {
                 if (isEditMode && contratoId) {
                     await updateContrato(contratoId, contrato, setErrors, msgs, router, setContrato);
@@ -620,7 +616,7 @@ export const ContratoFormCreated = forwardRef<
             ...prev,
             [e.target.id]: true
         }));
-        validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
+        validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa, setErrors, msgs);
     };
     const handleCompanyChange = (empresa: CompanyEntity | null) => {
         setSelectedCompany(empresa);
@@ -648,10 +644,10 @@ export const ContratoFormCreated = forwardRef<
             setIsLoading(true);
             const { dataContrato, selectedEmpresa, selectedService, selectedCategoriaContrato, selectedFormaPagamento, selectedPessoa, pessoa } = await fetchContratosById(contratoId);
             setContrato(dataContrato);
-            setSelectedCompany(selectedEmpresa);
-            setSelectedService(selectedService);
-            setSelectedCategoriaContrato(selectedCategoriaContrato);
-            setSelectedFormadePagamento(selectedFormaPagamento);
+            setSelectedCompany(selectedEmpresa ?? null);
+            setSelectedService(selectedService ?? null);
+            setSelectedCategoriaContrato(selectedCategoriaContrato ?? null);
+            setSelectedFormadePagamento(selectedFormaPagamento ?? null);
             setPessoa(pessoa);
             setSelectedPessoa(selectedPessoa);
             console.log('Contrato ID:', dataContrato.id);
@@ -681,13 +677,13 @@ export const ContratoFormCreated = forwardRef<
             setIsEditMode(true);
             ListagemContratoID(contratoId);
         } else {
-            setSelectedPessoa([]);
+            setSelectedPessoa(null);
             setIsLoading(false);
         }
     }, [contratoId]);
     useEffect(() => {
         if (Object.values(touchedFields).some((touched) => touched)) {
-            validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
+            validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa, setErrors, msgs);
         }
     }, [contrato, touchedFields, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa, msgs]);
     useEffect(() => {
@@ -718,7 +714,7 @@ export const ContratoFormCreated = forwardRef<
                                             label={'Descrição do Contrato'}
                                             onBlur={() => {
                                                 setTouchedFields((prev) => ({ ...prev, descricao: true }));
-                                                validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa[0], setErrors, msgs);
+                                                validateFieldsContrato(contrato, selectedCompany, selectedService, selectedCategoriaContrato, selectedFormadePagamento, selectedPessoa, setErrors, msgs);
                                             }}
                                             autoFocus={true}
                                             topLabel="Descrição:"
@@ -759,6 +755,7 @@ export const ContratoFormCreated = forwardRef<
                                     <div className="col-12 lg:col-3 mt-1">
                                         <EmpresaDropdownField
                                             selectedCompany={selectedCompany}
+                                            selectedCompanyId={contrato.id_empresa ?? null}
                                             onCompanyChange={handleCompanyChange}
                                             reloadKey={reloadKeyEmpresa}
                                             hasError={!!errors.selectedCompany}
@@ -771,6 +768,7 @@ export const ContratoFormCreated = forwardRef<
                                     <div className="col-12 lg:col-3 mt-1">
                                         <ServicoDropdownField
                                             selectedService={selectedService}
+                                            selectedServiceId={contrato.id_servico ?? null}
                                             onServiceChange={handleServicoChange}
                                             reloadKey={reloadKeyServico}
                                             hasError={!!errors.selectedService}
@@ -783,6 +781,7 @@ export const ContratoFormCreated = forwardRef<
                                     <div className="col-12 lg:col-3 mt-1">
                                         <CategoriaContratoDropdownField
                                             selectedCategoriaContrato={selectedCategoriaContrato}
+                                            selectedCategoriaContratoId={contrato.id_categoria_contrato ?? null}
                                             onCategoriaContratoChange={handleCategoriaContratoChange}
                                             reloadKey={reloadKeyCategoriaContrato}
                                             hasError={!!errors.selectedCategoriaContrato}
@@ -795,6 +794,7 @@ export const ContratoFormCreated = forwardRef<
                                     <div className="col-12 lg:col-3 mt-1">
                                         <FormaPagamentoDropdownField
                                             selectedFormaPagamento={selectedFormadePagamento}
+                                            selectedFormaPagamentoId={contrato.id_forma_pagamento ?? null}
                                             onFormaPagamentoChange={handleFormaPagamentoChange}
                                             reloadKey={reloadKeyFormaPagamento}
                                             hasError={!!errors.selectedFormadePagamento}
@@ -805,30 +805,25 @@ export const ContratoFormCreated = forwardRef<
                                         />
                                     </div>
                                     <div className="col-12 lg:col-6 mt-1">
-                                        <CustomMultiSelect
-                                            id="selectedPessoa"
-                                            selectedItems={selectedPessoa}
-                                            onChange={handlePessoaChange}
-                                            fetchAllItems={fetchAllPessoas}
-                                            fetchFilteredItems={fetchFilteredPessoas}
-                                            options={pessoa}
+                                        <PessoaDropdownField
                                             hasError={!!errors.selectedPessoa}
                                             errorMessage={errors.selectedPessoa}
-                                            optionLabel="razao_social"
-                                            placeholder="Selecione o Cliente ou Fornecedor"
-                                            showChips={true}
+                                            selectedPessoa={selectedPessoa}
+                                            selectedPessoaId={contrato.id_clientes_contrato?.[0] ?? null}
+                                            onPessoaChange={handlePessoaChange}
+                                            reloadKey={reloadKeyPessoa}
                                             autoSelectSingle
                                             showAddButton
                                             onAddClick={() => setShowModalPessoa(true)}
-                                            topLabel="Cliente ou Fornecedor:"
-                                            showTopLabel
-                                            required
                                         />
                                     </div>
                                 </div>
-                                <div className="grid formgrid mt-3 gap-2 p-2">
-                                    <div className="flex items-center gap-2">
+                                <div className="grid formgrid mt-3 p-2 contrato-switch-group">
+                                    <div className="col-3 md:col-2">
+                                        <div className="contrato-switch-item">
                                         <InputSwitch
+                                            inputId="emitir_boleto"
+                                            className="contrato-inputswitch"
                                             checked={contrato.emitir_boleto ?? false}
                                             onChange={(event) => {
                                                 handleAllChanges({
@@ -836,10 +831,14 @@ export const ContratoFormCreated = forwardRef<
                                                 });
                                             }}
                                         />
-                                        <span style={{ alignItems: 'center', display: 'flex' }}>Enviar Boleto</span>
+                                            <label htmlFor="emitir_boleto" className="contrato-switch-label">Enviar Boleto</label>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="col-3 md:col-2">
+                                        <div className="contrato-switch-item">
                                         <InputSwitch
+                                            inputId="enviar_email"
+                                            className="contrato-inputswitch"
                                             checked={contrato.enviar_email ?? false}
                                             onChange={(event) => {
                                                 handleAllChanges({
@@ -851,10 +850,14 @@ export const ContratoFormCreated = forwardRef<
                                                 });
                                             }}
                                         />
-                                        <span style={{ alignItems: 'center', display: 'flex' }}>Enviar Email</span>
+                                            <label htmlFor="enviar_email" className="contrato-switch-label">Enviar Email</label>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="col-3 md:col-2">
+                                        <div className="contrato-switch-item">
                                         <InputSwitch
+                                            inputId="enviar_whatsapp"
+                                            className="contrato-inputswitch"
                                             checked={contrato.enviar_whatsapp ?? false}
                                             onChange={(event) => {
                                                 handleAllChanges({
@@ -862,7 +865,8 @@ export const ContratoFormCreated = forwardRef<
                                                 });
                                             }}
                                         />
-                                        <span style={{ alignItems: 'center', display: 'flex' }}>Enviar WhatsApp</span>
+                                            <label htmlFor="enviar_whatsapp" className="contrato-switch-label">Enviar WhatsApp</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -878,11 +882,11 @@ export const ContratoFormCreated = forwardRef<
                                     Object.keys(errors).length > 0 ||
                                     !contrato.descricao ||
                                     !contrato.valor_servico ||
-                                    !selectedCompany ||
-                                    !selectedService ||
-                                    !selectedCategoriaContrato ||
-                                    !selectedFormadePagamento ||
-                                    !selectedPessoa ||
+                                    (!selectedCompany && !contrato.id_empresa) ||
+                                    (!selectedService && !contrato.id_servico) ||
+                                    (!selectedCategoriaContrato && !contrato.id_categoria_contrato) ||
+                                    (!selectedFormadePagamento && !contrato.id_forma_pagamento) ||
+                                    (!selectedPessoa && !(contrato.id_clientes_contrato?.length ?? 0)) ||
                                     !contrato.periodicidade
                                 }
                             />
@@ -895,11 +899,11 @@ export const ContratoFormCreated = forwardRef<
                                     Object.keys(errors).length > 0 ||
                                     !contrato.descricao ||
                                     !contrato.valor_servico ||
-                                    !selectedCompany ||
-                                    !selectedService ||
-                                    !selectedCategoriaContrato ||
-                                    !selectedFormadePagamento ||
-                                    !selectedPessoa ||
+                                    (!selectedCompany && !contrato.id_empresa) ||
+                                    (!selectedService && !contrato.id_servico) ||
+                                    (!selectedCategoriaContrato && !contrato.id_categoria_contrato) ||
+                                    (!selectedFormadePagamento && !contrato.id_forma_pagamento) ||
+                                    (!selectedPessoa && !(contrato.id_clientes_contrato?.length ?? 0)) ||
                                     !contrato.periodicidade
                                 }
                                 icon={''}
@@ -914,7 +918,7 @@ export const ContratoFormCreated = forwardRef<
                             msgs={msgs}
                             ref={formRef}
                             servico={servico}
-                            initialId={servicosId}
+                            initialId={null}
                             setServico={setServico}
                             onServicoChange={handleServico}
                             onErrorsChange={handleErrorsChange}
@@ -930,7 +934,7 @@ export const ContratoFormCreated = forwardRef<
                             msgs={msgs}
                             ref={formRef}
                             formaPagamento={formaPagamento}
-                            initialId={formaPagamentoId}
+                            initialId={null}
                             setFormaPagamento={setFormaPagamento}
                             onFormaPagamentoChange={handleFormaPagamento}
                             onErrorsChange={handleErrorsChange}
@@ -946,7 +950,7 @@ export const ContratoFormCreated = forwardRef<
                             msgs={msgs}
                             ref={formRef}
                             categoriaContrato={categoriaContrato}
-                            initialId={categoriaContratoId}
+                            initialId={null}
                             setCategoriaContrato={setCategoriaContrato}
                             onCategoriaContratoChange={handleCategoriaContrato}
                             onErrorsChange={handleErrorsChange}
@@ -962,7 +966,7 @@ export const ContratoFormCreated = forwardRef<
                             msgs={msgs}
                             ref={formRef}
                             pessoa={pessoa}
-                            initialId={pessoaId}
+                            initialId={null}
                             setPessoa={setPessoa}
                             onPessoaChange={handlePessoaContrato}
                             onErrorsChange={handleErrorsChange}
@@ -978,7 +982,7 @@ export const ContratoFormCreated = forwardRef<
                             msgs={msgs}
                             ref={formRef}
                             empresa={empresa}
-                            initialId={empresaId}
+                            initialId={null}
                             setEmpresa={setEmpresa}
                             onEmpresaChange={handleEmpresa}
                             onErrorsChange={handleErrorsChange}

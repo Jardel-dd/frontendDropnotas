@@ -13,7 +13,6 @@ import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import LoadingScreenComponent from '@/app/loading/loadingComponent';
-import { OptionsTipoContrato } from '@/app/shared/optionsDropDown/options';
 import FormPessoaCreated   from '../form/pessoa';
 import { VendedorFormRef } from '../../vendedores/types/vendedor';
 import { handleSearchCep } from '../../../../components/seachs/searchCep/controller';
@@ -26,13 +25,23 @@ import EnderecoForm from '../../../../components/enderecos/enderecoFormComponent
 import BTNPGCreatedAll from '../../../../components/buttonsComponent/btnCreatedAll/btn-created-all';
 import { fetchAllCnae, fetchFilteredCnae } from '../../../../components/fetchAll/listAllCnae/controller';
 import { createdPessoa, fetchPessoasById, updatePessoa } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { fetchAllVendedores } from '../../vendedores/controller/controller';
+
+const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string | null => {
+    if (pessoa.pessoa_cliente && pessoa.pessoa_fornecedor) return 'AMBOS';
+    if (pessoa.pessoa_cliente) return 'pessoa_cliente';
+    if (pessoa.pessoa_fornecedor) return 'pessoa_fornecedor';
+    return null;
+};
+
+const mapContatoSelectionToFlags = (selectedContato: string | null) => ({
+    pessoa_cliente: selectedContato === 'AMBOS' || selectedContato === 'pessoa_cliente',
+    pessoa_fornecedor: selectedContato === 'AMBOS' || selectedContato === 'pessoa_fornecedor'
+});
 
 export default function PessoaPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const pessoaId = searchParams.get('id');
-    const vendedorId = searchParams.get('id');
     const msgs = useRef<Messages | null>(null);
     const formRef = useRef<VendedorFormRef>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +76,7 @@ export default function PessoaPage() {
     const [loadingCep, setLoadingCep] = useState<boolean>(false);
     const [loadingCnpj, setLoadingCnpj] = useState<boolean>(false);
     const [showModalVendedor, setShowModalVendedor] = useState(false);
-    const [selectedContato, setSelectedContato] = useState<string[]>([]);
+    const [selectedContato, setSelectedContato] = useState<string | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
@@ -183,18 +192,10 @@ export default function PessoaPage() {
             return newErrors;
         });
     };
-    const handleContatoChange = (event: any) => {
-        const selected = event.value as string[];
+    const handleContatoChange = (event: DropdownChangeEvent) => {
+        const selected = (event.value as string | null) ?? null;
         setSelectedContato(selected);
-
-        const contatoStatus: Record<string, boolean> = OptionsTipoContrato.reduce((acc, option) => {
-            acc[option.value] = selected.includes(option.value);
-            return acc;
-        }, {} as Record<string, boolean>);
-
-        const updatedPessoa = pessoa.copyWith({
-            ...contatoStatus
-        });
+        const updatedPessoa = pessoa.copyWith(mapContatoSelectionToFlags(selected));
 
         setPessoa(updatedPessoa);
         validateFieldsPessoa(updatedPessoa, setErrors, msgs, selectedVendedor);
@@ -228,14 +229,9 @@ export default function PessoaPage() {
         try {
             setIsLoading(true);
             const { dataPessoa } = await fetchPessoasById(currentPessoaId);
-            const contatoSelecionado: string[] = [];
-
-            if (dataPessoa.pessoa_cliente) contatoSelecionado.push('pessoa_cliente');
-            if (dataPessoa.pessoa_fornecedor) contatoSelecionado.push('pessoa_fornecedor');
-
             const pessoaEntity = new PessoaEntity(dataPessoa);
             setPessoa(pessoaEntity);
-            setSelectedContato(contatoSelecionado);
+            setSelectedContato(mapPessoaContatoToSelection(dataPessoa));
             setSelectedCNAE(
                 dataPessoa.cnae_fiscal
                     ? new TableCNAEEntity({
@@ -246,9 +242,7 @@ export default function PessoaPage() {
                     : null
             );
 
-            const vendedores = await fetchAllVendedores();
-            const vendedorSelecionado = vendedores.find((item) => item.id === dataPessoa.id_vendedor_padrao);
-            setSelectedVendedor(vendedorSelecionado ?? null);
+            setSelectedVendedor(null);
         } finally {
             setIsLoading(false);
         }
@@ -281,7 +275,7 @@ export default function PessoaPage() {
         !pessoa?.razao_social ||
         !pessoa.codigo_regime_tributario ||
         !pessoa.contribuinte ||
-        !selectedVendedor ||
+        (!selectedVendedor && !pessoa.id_vendedor_padrao) ||
         !pessoa.endereco ||
         !pessoa.email;
 
@@ -313,6 +307,7 @@ export default function PessoaPage() {
                     <div className="col-12 lg:col-3 ">
                         <VendedorDropdownField
                             selectedVendedor={selectedVendedor}
+                            selectedVendedorId={pessoa.id_vendedor_padrao ?? null}
                             reloadKey={reloadKeyVendedor}
                             onVendedorChange={handleVendedorChange}
                             onAddClick={() => setShowModalVendedor(true)}
@@ -346,7 +341,7 @@ export default function PessoaPage() {
                     msgs={msgs}
                     ref={formRef}
                     vendedor={vendedor}
-                    initialId={vendedorId}
+                    initialId={null}
                     setVendedor={setVendedor}
                     onVendedorChange={handleVendedor}
                     onErrorsChange={handleErrorsChange}

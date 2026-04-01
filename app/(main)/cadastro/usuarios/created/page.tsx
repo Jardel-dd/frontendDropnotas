@@ -18,7 +18,6 @@ import { validateFieldsUserConta } from '../controller/validation';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import PerfilUserDropdownField from '../../permissoes/dropdown/perfilUsuario';
-import { fetchAllPerfilUsuarios } from '../../permissoes/controller/controller';
 import FormEmpresaCreated from '@/app/(main)/configuracoes/empresas/form/empresa';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
@@ -31,9 +30,7 @@ export default function CriarUserConta() {
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages>(null);
     const searchParams = useSearchParams();
-    const empresaId = searchParams.get('id');
     const userContaID = searchParams.get('id');
-    const perfilUserId = searchParams.get('id');
     const formRef = useRef<PermissoesFormRef>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -287,13 +284,9 @@ export default function CriarUserConta() {
             setIsEditMode(true);
             ListagemUserID(userContaID).finally(() => setIsLoading(false));
         } else {
-            Promise.all([fetchAllPerfilUsuarios(), listTheCompany()])
-                .then(([perfilUser, empresa]) => {
-                    setSelectedPerfilUser(null);
-                    setEmpresa(empresa);
-                    setSelectedEmpresa(selectedEmpresa);
-                })
-                .finally(() => setIsLoading(false));
+            setSelectedPerfilUser(null);
+            setSelectedEmpresa([]);
+            setIsLoading(false);
         }
     }, [userContaID]);
     useEffect(() => {
@@ -488,6 +481,8 @@ export default function CriarUserConta() {
                                         onChange={handleCompanyChange}
                                         options={empresasOptions}
                                         optionLabel="razao_social"
+                                        dataKey="id"
+                                        initialSelectedValues={userConta.id_empresas_acesso ?? []}
                                         placeholder="Selecione as Empresas"
                                         maxSelectedLabels={3}
                                         fetchFilteredItems={fetchFilteredCompany}
@@ -514,7 +509,7 @@ export default function CriarUserConta() {
                             msgs={msgs}
                             ref={formRef}
                             perfilUser={perfilUser}
-                            initialId={perfilUserId}
+                            initialId={null}
                             setPerfilUser={setPerfilUser}
                             onPerfilUserChange={handlePerfilUser}
                             onErrorsChange={handleErrorsChange}
@@ -530,7 +525,7 @@ export default function CriarUserConta() {
                             msgs={msgs}
                             ref={formRef}
                             empresa={empresa}
-                            initialId={empresaId}
+                            initialId={null}
                             setEmpresa={setEmpresa}
                             onEmpresaChange={handleEmpresa}
                             onErrorsChange={handleErrorsChange}

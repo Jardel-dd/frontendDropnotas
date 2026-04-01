@@ -38,7 +38,10 @@ export const updateEmpresa = async (
         }
         const empresaData = {
             ...empresaParaEnviar,
-            id_usuarios_acesso: selectedUserConta.map((usuario) => usuario.id),
+            id_usuarios_acesso:
+                selectedUserConta.length > 0
+                    ? selectedUserConta.map((usuario) => usuario.id)
+                    : empresaParaEnviar.id_usuarios_acesso ?? [],
             inscricao_estadual: empresaParaEnviar.inscricao_estadual ?? "",
             complemento: empresaParaEnviar.endereco.complemento ?? "",
             email: empresaParaEnviar.email ?? "",
@@ -158,7 +161,10 @@ export const createdEmpresa = async (
             ...empresa,
             cnpj: empresa.cnpj?.replace(/\D/g, ''),
             cep: empresa.endereco?.cep?.replace(/\D/g, '') || '',
-            id_usuarios_acesso: selectedUserConta.map(usuario => usuario.id),
+            id_usuarios_acesso:
+                selectedUserConta.length > 0
+                    ? selectedUserConta.map((usuario) => usuario.id)
+                    : empresa.id_usuarios_acesso ?? [],
         };
         const response = await api.post('/empresa', empresaData);
         const created = response?.data?.empresa ?? response?.data;
@@ -337,21 +343,6 @@ export const fetchCompanyByID = async (empresaId: string) => {
         const response = await api.get(`/empresa/${empresaId}`);
         const data = response.data;
         console.log("empresa", data)
-        const idsResponse = await api.get("/usuario-conta");
-        let usuariosConta = [];
-        if (Array.isArray(idsResponse.data)) {
-            usuariosConta = idsResponse.data;
-        } else if (idsResponse.data && Array.isArray(idsResponse.data.content)) {
-            usuariosConta = idsResponse.data.content;
-        }
-        const idsData: UsuarioContaEntity[] = usuariosConta.map((user: any) => ({
-            id: user.id,
-            nome: user.nome || "Nome não disponível",
-        }));
-        let selectedUsers: UsuarioContaEntity[] = [];
-        if (Array.isArray(data.id_usuarios_acesso)) {
-            selectedUsers = idsData.filter(user => data.id_usuarios_acesso.includes(user.id));
-        }
         const cnaeResponse = await fetchAllCnae();
         let selectedCnae = null;
         if (data.cnae_fiscal) {
@@ -361,13 +352,22 @@ export const fetchCompanyByID = async (empresaId: string) => {
         }
         return {
             empresa: data,
-            userConta: idsData,
-            selectedUserConta: selectedUsers,
+            userConta: [],
+            selectedUserConta: [],
             selectedCnae: selectedCnae,
         };
     } catch (error) {
         console.error("Erro ao buscar empresa, perfis ou CNAEs:", error);
         throw error;
+    }
+};
+export const fetchCompanyDropdownByID = async (empresaId: string): Promise<CompanyEntity | null> => {
+    try {
+        const response = await api.get(`/empresa/${empresaId}`);
+        return response.data ?? null;
+    } catch (error) {
+        console.error("Erro ao buscar empresa por ID:", error);
+        return null;
     }
 };
 export const fetchFilteredCompany = async (filtro: string) => {

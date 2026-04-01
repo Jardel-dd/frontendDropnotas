@@ -11,6 +11,8 @@ export const validateFieldsEmpresas = (
     let valid = true;
     let errorMessages: string[] = [];
     let newErrors: { [key: string]: string } = {};
+    const hasSelectedUserConta = !!selectedUserConta;
+    const hasSavedUserContaIds = Array.isArray(empresa.id_usuarios_acesso) && empresa.id_usuarios_acesso.length > 0;
     msgs.current?.clear();
 
     if (!empresa.cnpj || empresa.cnpj.replace(/\D/g, '').length < 14) {
@@ -58,7 +60,7 @@ export const validateFieldsEmpresas = (
     } else if (!empresa.endereco?.codigo_pais || empresa.endereco.codigo_pais.length < 2) {
         newErrors.codigo_pais = 'Campo deve ter no mínimo 2 números.';
         valid = false;
-    } else if (!selectedUserConta) {
+    } else if (!hasSelectedUserConta && !hasSavedUserContaIds) {
         newErrors.selectedUserConta = 'Este Campo deve ser selecionado.';
         valid = false;
     } else if (!empresa.serie_emissao_nfse || String(empresa.serie_emissao_nfse).trim().length < 1) {

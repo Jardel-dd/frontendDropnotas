@@ -1,10 +1,11 @@
 import { CategoryContratosEntity } from "@/app/entity/CategoryContratEntity";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
-import { fetchFilteredCategoriaContrato, listTheCategoriaContrato } from "../controller/controller";
+import { fetchCategoriaContratoByID, fetchFilteredCategoriaContrato, listTheCategoriaContrato } from "../controller/controller";
 import { CategoriaContratoDropdownFieldProps } from "../types/categoriaContratos";
 
 export default function CategoriaContratoDropdownField({
     selectedCategoriaContrato,
+    selectedCategoriaContratoId,
     onCategoriaContratoChange,
     reloadKey = 0,
     hasError,
@@ -21,8 +22,13 @@ export default function CategoriaContratoDropdownField({
             onItemChange={onCategoriaContratoChange}
             fetchAllItems={listTheCategoriaContrato}
             fetchFilteredItems={fetchFilteredCategoriaContrato}
+            fetchItemByValue={async (value) => {
+                const response = await fetchCategoriaContratoByID(String(value));
+                return response.categoriaContrato ?? null;
+            }}
             optionLabel="descricao"
             optionValue="id"
+            initialOptionValue={selectedCategoriaContratoId ?? null}
             placeholder="Selecione a Categoria de Contratos"
             hasError={hasError}
             errorMessage={errorMessage}

@@ -19,8 +19,6 @@ import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import LoadingScreenComponent from '@/app/loading/loadingComponent';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
-import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
-import { fetchAllVendedores } from '../../vendedores/controller/controller';
 import { VendedorFormRef } from '../../vendedores/types/vendedor';
 import { handleSearchCep } from '@/app/components/seachs/searchCep/controller';
 import { handleSearchCNPJ } from '@/app/components/seachs/searchCnpj/controller';
@@ -38,6 +36,17 @@ import VendedorDropdownField from '@/app/(main)/cadastro/vendedores/dropDown/Dro
 import { FormPessoaCreatedProps, PessoaFieldsProps, PessoaFormProps, PessoaFormRef } from '../types/pessoa';
 import { createdPessoa, fetchPessoasById, updatePessoa } from '@/app/(main)/cadastro/pessoas/controller/controller';
 
+const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string | null => {
+    if (pessoa.pessoa_cliente && pessoa.pessoa_fornecedor) return 'AMBOS';
+    if (pessoa.pessoa_cliente) return 'pessoa_cliente';
+    if (pessoa.pessoa_fornecedor) return 'pessoa_fornecedor';
+    return null;
+};
+
+const mapContatoSelectionToFlags = (selectedContato: string | null) => ({
+    pessoa_cliente: selectedContato === 'AMBOS' || selectedContato === 'pessoa_cliente',
+    pessoa_fornecedor: selectedContato === 'AMBOS' || selectedContato === 'pessoa_fornecedor'
+});
 
 export function PessoaFields({
     pessoa,
@@ -390,20 +399,20 @@ export function PessoaFields({
                 />
             </div>
             <div className="col-12 lg:col-3 mt-1">
-                <CustomMultiSelect
+                <Dropdown
                     id="selectedContato"
-                    selectedItems={selectedContato}
+                    value={selectedContato}
                     onChange={onContatoChange}
                     options={OptionsTipoContrato}
                     optionLabel="label"
+                    optionValue="value"
+                    label=""
                     placeholder="Selecione o Contato"
-                    maxSelectedLabels={2}
-                    showChips={false}
                     hasError={!!errors.selectedContato}
                     errorMessage={errors.selectedContato}
                     showTopLabel
                     required
-                    topLabel="Tipo de contrato:"
+                    topLabel="Tipo de contato:"
                 />
             </div>
             <div className="col-12 mt-1 lg:col-6">
@@ -442,7 +451,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const router = useRouter();
         const searchParams = useSearchParams();
         const pessoaId = initialId;
-        const vendedorId = searchParams.get('id');
         const formRef = useRef<VendedorFormRef>(null);
         const onPessoaChangeRef = useRef(onPessoaChange);
         const onErrorsChangeRef = useRef(onErrorsChange);
@@ -478,7 +486,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const [loadingCep, setLoadingCep] = useState(false);
         const [loadingCnpj, setLoadingCnpj] = useState(false);
         const [showModalVendedor, setShowModalVendedor] = useState(false);
-        const [selectedContato, setSelectedContato] = useState<string[]>([]);
+        const [selectedContato, setSelectedContato] = useState<string | null>(null);
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
         const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
@@ -614,17 +622,10 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 return newErrors;
             });
         };
-        const handleContatoChange = (event: any) => {
-            const selected = event.value as string[];
+        const handleContatoChange = (event: DropdownChangeEvent) => {
+            const selected = (event.value as string | null) ?? null;
             setSelectedContato(selected);
-            const contatoStatus: Record<string, boolean> = OptionsTipoContrato.reduce((accumulator, option) => {
-                accumulator[option.value] = selected.includes(option.value);
-                return accumulator;
-            }, {} as Record<string, boolean>);
-
-            const updatedPessoa = pessoa.copyWith({
-                ...contatoStatus
-            });
+            const updatedPessoa = pessoa.copyWith(mapContatoSelectionToFlags(selected));
             setPessoa(updatedPessoa);
             validateFieldsPessoa(updatedPessoa, setErrors, msgs, selectedVendedor);
         };
@@ -657,13 +658,9 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             try {
                 setIsLoading(true);
                 const { dataPessoa } = await fetchPessoasById(currentPessoaId);
-                const contatoSelecionado: string[] = [];
-                if (dataPessoa.pessoa_cliente) contatoSelecionado.push('pessoa_cliente');
-                if (dataPessoa.pessoa_fornecedor) contatoSelecionado.push('pessoa_fornecedor');
-
                 const pessoaEntity = new PessoaEntity(dataPessoa);
                 setPessoa(pessoaEntity);
-                setSelectedContato(contatoSelecionado);
+                setSelectedContato(mapPessoaContatoToSelection(dataPessoa));
                 setSelectedCNAE(
                     dataPessoa.cnae_fiscal
                         ? new TableCNAEEntity({
@@ -673,9 +670,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                         })
                         : null
                 );
-                const vendedores = await fetchAllVendedores();
-                const vendedorSelecionado = vendedores.find((item) => item.id === dataPessoa.id_vendedor_padrao);
-                setSelectedVendedor(vendedorSelecionado ?? null);
+                setSelectedVendedor(null);
             } finally {
                 setIsLoading(false);
             }
@@ -723,7 +718,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             !pessoa?.razao_social ||
             !pessoa.codigo_regime_tributario ||
             !pessoa.contribuinte ||
-            !selectedVendedor ||
+            (!selectedVendedor && !pessoa.id_vendedor_padrao) ||
             !pessoa.endereco ||
             !pessoa.email;
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
@@ -756,6 +751,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                             <div className="col-12 lg:col-3">
                                 <VendedorDropdownField
                                     selectedVendedor={selectedVendedor}
+                                    selectedVendedorId={pessoa.id_vendedor_padrao ?? null}
                                     reloadKey={reloadKeyVendedor}
                                     onVendedorChange={handleVendedorChange}
                                     onAddClick={() => setShowModalVendedor(true)}
@@ -802,7 +798,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                         msgs={msgs}
                         ref={formRef}
                         vendedor={vendedor}
-                        initialId={vendedorId}
+                        initialId={null}
                         setVendedor={setVendedor}
                         onVendedorChange={handleVendedor}
                         onErrorsChange={handleErrorsChange}

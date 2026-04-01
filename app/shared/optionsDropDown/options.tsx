@@ -314,6 +314,7 @@ export const OptionsSituacao = [
     { label: 'Pendente', value: 'PENDENTE ' }
 ];
 export const OptionsTipoContrato = [
+    { label: 'Cliente e Fornecedor', value: 'AMBOS' },
     { label: 'Cliente', value: 'pessoa_cliente' },
     { label: 'Fornecedor', value: 'pessoa_fornecedor' }
 ];

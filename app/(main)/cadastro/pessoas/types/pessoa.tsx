@@ -27,14 +27,14 @@ export type FormPessoaCreatedProps = PessoaFieldsProps | PessoaFormProps;
 export interface PessoaFieldsProps {
     pessoa: PessoaEntity;
     errors: Record<string, string>;
-    selectedContato: string[];
+    selectedContato: string | null;
     selectedCNAE: TableCNAEEntity | null;
     loadingCnpj: boolean;
     hasFocused: boolean;
     onFocusFirstField: () => void;
     onChange: (event: any) => void;
     onDropdownChange: (event: DropdownChangeEvent) => void;
-    onContatoChange: (event: any) => void;
+    onContatoChange: (event: DropdownChangeEvent) => void;
     onCNAEChange: (cnae: TableCNAEEntity | null) => void;
     onSearchCnpj: () => Promise<void>;
     onValidateCnpj: () => void;
@@ -44,6 +44,7 @@ export interface PessoaFieldsProps {
 
 export interface PessoaDropdownFieldProps {
     selectedPessoa: PessoaEntity | null;
+    selectedPessoaId?: number | null;
     onPessoaChange: (pessoa: PessoaEntity | null) => void;
     reloadKey?: number;
     id?: string;

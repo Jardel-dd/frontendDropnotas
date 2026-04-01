@@ -155,7 +155,7 @@ export function PermissoesFields({ perfilUser, errors, selectedKeys, isLoading, 
                     selectionMode="checkbox"
                     selectionKeys={selectedKeys}
                     onSelectionChange={(event) => onSelectionChange(event.value as TreeCheckboxSelectionKeys)}
-                    className={`w-full custom-multiselect ${errors.selectedPerfilUser ? 'tree-error' : ''}`}
+                    className={`w-full custom-multiselect permissoes-tree ${errors.selectedPerfilUser ? 'tree-error' : ''}`}
                     disabled={isLoading}
                 />
                 {errors.selectedPerfilUser && <small className="p-error">{errors.selectedPerfilUser}</small>}

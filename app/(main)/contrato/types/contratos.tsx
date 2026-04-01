@@ -5,7 +5,6 @@ import { CompanyEntity } from "@/app/entity/CompanyEntity";
 import { DropdownChangeEvent } from "primereact/dropdown";
 import { Messages } from "primereact/messages";
 import { FormaPagamentoEntity } from "@/app/entity/FormaPagamento";
-import { MultiSelectChangeEvent } from "primereact/multiselect";
 import { CategoryContratosEntity } from "@/app/entity/CategoryContratEntity";
 import { RefObject } from "react";
 import { InputNumberValueChangeEvent } from "primereact/inputnumber";
@@ -33,12 +32,12 @@ export interface ContratoFormProps {
 export interface ContratoFieldsProps {
     contrato: ContratoEntity;
     errors: Record<string, string>;
-    pessoaOptions: PessoaEntity[];
-    selectedPessoa: PessoaEntity[];
+    selectedPessoa: PessoaEntity | null;
     selectedCompany: CompanyEntity | null;
     selectedService: ServiceEntity | null;
     selectedCategoriaContrato: CategoryContratosEntity | null;
     selectedFormaPagamento: FormaPagamentoEntity | null;
+    reloadKeyPessoa: number;
     reloadKeyEmpresa: number;
     reloadKeyServico: number;
     reloadKeyCategoriaContrato: number;
@@ -63,7 +62,7 @@ export interface ContratoFieldsProps {
     onFormaPagamentoChange: (
         formaPagamento: FormaPagamentoEntity | null
     ) => void;
-    onPessoaChange: (event: MultiSelectChangeEvent) => void;
+    onPessoaChange: (pessoa: PessoaEntity | null) => void;
     onAddEmpresa: () => void;
     onAddServico: () => void;
     onAddCategoriaContrato: () => void;

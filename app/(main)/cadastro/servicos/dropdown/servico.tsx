@@ -1,10 +1,11 @@
 import { ServiceEntity } from "@/app/entity/ServiceEntity";
 import { ServicoDropdownFieldProps } from "../types/servico";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
-import { fetchFilteredService, listTheService } from "../controller/controller";
+import { fetchFilteredService, fetchServicesByID, listTheService } from "../controller/controller";
 
 export default function ServicoDropdownField({
     selectedService,
+    selectedServiceId,
     onServiceChange,
     reloadKey = 0,
     id = "selectedService",
@@ -28,8 +29,13 @@ export default function ServicoDropdownField({
             onItemChange={onServiceChange}
             fetchAllItems={fetchAllItems}
             fetchFilteredItems={fetchFilteredItems}
+            fetchItemByValue={async (value) => {
+                const response = await fetchServicesByID(String(value));
+                return response.servico ?? null;
+            }}
             optionLabel="descricao"
             optionValue="id"
+            initialOptionValue={selectedServiceId ?? null}
             placeholder={placeholder}
             hasError={hasError}
             errorMessage={errorMessage}
@@ -42,4 +48,3 @@ export default function ServicoDropdownField({
         />
     );
 }
-

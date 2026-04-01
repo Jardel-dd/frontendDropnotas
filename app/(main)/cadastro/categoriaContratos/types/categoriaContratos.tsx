@@ -43,6 +43,7 @@ export type FormCategoriaContratoCreatedProps =
 
 export interface CategoriaContratoDropdownFieldProps {
     selectedCategoriaContrato: CategoryContratosEntity | null;
+    selectedCategoriaContratoId?: number | null;
     onCategoriaContratoChange: (categoriaContrato: CategoryContratosEntity | null) => void;
     reloadKey?: number;
     hasError?: boolean;

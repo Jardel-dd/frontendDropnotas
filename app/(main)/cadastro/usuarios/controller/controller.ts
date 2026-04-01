@@ -73,10 +73,13 @@ export const createUsuario = async (
     setSelectedPerfilUser: React.Dispatch<React.SetStateAction<PerfilUser | null>>,
 ) => {
     try {
+        const empresaIds = selectedEmpresa.length > 0
+            ? selectedEmpresa.map((usuario) => usuario.id)
+            : userConta.id_empresas_acesso ?? [];
         const userDataToSend = {
             ...userConta,
             id_perfil_usuario: selectedPerfilUser?.id,
-            id_empresas_acesso: selectedEmpresa.map(usuario => usuario.id),
+            id_empresas_acesso: empresaIds,
         };
         console.log('Dados enviados para criação:', userDataToSend);
         const response = await api.post('/usuario-conta', userDataToSend);
@@ -119,9 +122,13 @@ export const updateUsuario = async (
         return;
     }
     try {
+        const empresaIds = selectedEmpresa && selectedEmpresa.length > 0
+            ? selectedEmpresa.map((empresa) => empresa.id)
+            : userConta.id_empresas_acesso ?? [];
         const userContaData = {
             ...userConta,
             id_perfil_usuario: selectedPerfilUser.id,
+            id_empresas_acesso: empresaIds,
             perfilUsuario: selectedPerfilUser,
         };
         await api.put(`/usuario-conta/alterar-email`, userContaData);
@@ -305,15 +312,8 @@ export const fetchUserContaCreated = async (userContaID: string) => {
     const perfilUser = perfilSelecionadoRaw
       ? new PerfilUser({ ...perfilDefault, ...perfilSelecionadoRaw })
       : perfilDefault;
-    const { data: empresaResponse } = await api.get("/empresa");
-    const empresaRaw = Array.isArray(empresaResponse?.content) ? empresaResponse.content : [];
-    const empresaListFormatada: CompanyEntity[] = empresaRaw.map((e: any) => ({
-      id: e.id,
-      razao_social: e.razao_social || "Nome não disponível",
-    }));
-    const selectedEmpresa: CompanyEntity[] = Array.isArray(userConta?.id_empresas_acesso)
-      ? empresaListFormatada.filter((e) => userConta.id_empresas_acesso.includes(e.id))
-      : [];
+    const empresaListFormatada: CompanyEntity[] = [];
+    const selectedEmpresa: CompanyEntity[] = [];
     const empresaDefault = new CompanyEntity({
       id: 0,
       id_usuarios_acesso: [0],
@@ -353,10 +353,7 @@ export const fetchUserContaCreated = async (userContaID: string) => {
       percentual_desconto_incondicionado: 0,
       percentual_desconto_condicionado: 0,
     });
-    const empresa =
-      selectedEmpresa.length > 0
-        ? new CompanyEntity({ ...empresaDefault, ...selectedEmpresa[0] })
-        : empresaDefault;
+    const empresa = empresaDefault;
     return {
       userConta,
       perfilUser,         
