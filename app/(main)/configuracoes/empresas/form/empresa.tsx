@@ -34,7 +34,7 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { validateFieldsEmpresas } from '@/app/(main)/configuracoes/empresas/controller/validation';
-import { fetchAllCnae, fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
+import { fetchAllCnae, fetchFilteredCnae } from '@/app/components/fetchAll/listAllCnae/controller';
 import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyByID, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { incentivoFiscal, prestacaoSus, regimeEspecialTributarioOptionsCompany, regimeTributarioOptions, tipo_rps } from '@/app/shared/optionsDropDown/options';
 
@@ -54,7 +54,6 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
     const [isLoading, setIsLoading] = useState(true);
     const [isEditMode, setIsEditMode] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [reloadKeyCNAE, setReloadKeyCNAE] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [empresa, setEmpresa] = useState<CompanyEntity>(
         new CompanyEntity({
@@ -259,12 +258,7 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
             setEmpresa(empresa);
             setUserConta(userConta);
             setSelectedUserConta(selectedUserConta);
-            const allCnaes = await fetchAllCnae();
-            console.log('CNAE fiscal vindo do backend:', empresa.cnae_fiscal);
-            console.log('Todos os CNAEs disponíveis:', allCnaes);
-            const selected = findCNAEByCodigo(empresa.cnae_fiscal, allCnaes);
-            console.log('CNAE encontrado:', selected);
-            setSelectedCNAE(selected ?? null);
+            setSelectedCNAE(null);
         } finally {
             setIsLoading(false);
         }
@@ -749,16 +743,16 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
                             <DropdownSearch<TableCNAEEntity>
                                 id="cnae_fiscal"
                                 selectedItem={selectedCNAE}
-                                key={reloadKeyCNAE}
                                 onItemChange={handleCNAEChange}
                                 fetchAllItems={fetchAllCnae}
                                 fetchFilteredItems={fetchFilteredCnae}
                                 optionLabel="descricao"
-                                optionValue="id"
+                                optionValue="codigo"
+                                initialOptionValue={empresa.cnae_fiscal || null}
                                 placeholder="Selecione CNAE"
                                 hasError={!!errors.cnae_fiscal}
                                 errorMessage={errors.cnae_fiscal}
-                                topLabel="CNAE Fiscal"
+                                topLabel="CNAE Fiscal:"
                                 showTopLabel
                                 required
                             />
@@ -816,7 +810,7 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
                                 <Mandatory />
                             </label>
                             <Toast ref={toast}></Toast>
-                            <div className="file-upload-container" style={{ display: 'flex', alignItems: 'center' }}>
+                            <div className="file-upload-container mt-2" style={{ display: 'flex', alignItems: 'center' }}>
                                 <FileUpload
                                     ref={fileUploadRef}
                                     name="file"
@@ -866,7 +860,7 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
                         </div>
                         {empresaId && (
                             <>
-                                <div className="col-12 mb-1 lg:col-6 lg:mb-0">
+                                <div className="col-12 mt-1 lg:col-6 lg:mb-0">
                                     <Input
                                         value={empresa.data_vencimento_certificado_digital || ''}
                                         onChange={handleAllChanges}
@@ -890,6 +884,9 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
                             </>
                         )}
                     </div>
+                    <Divider align="center" className="form-divider">
+                        <span> Credenciais WebService </span>
+                    </Divider>
                 </div>
             </div>
             <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>

@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, ReactNode } from 'react';
+import React, { useRef, ReactNode, useState } from 'react';
 import { Button } from 'primereact/button';
 import './style.css';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
@@ -58,6 +58,7 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
     const { isDarkMode } = useTheme();
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [displayValue, setDisplayValue] = React.useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     // Conta o número máximo de dígitos baseado na máscara
     const maxDigits = mask.split('').filter(char => char === '9').length;
@@ -86,7 +87,6 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let onlyDigits = e.target.value.replace(/\D/g, '');
 
-        // Limita os dígitos ao máximo da máscara
         if (onlyDigits.length > maxDigits) {
             onlyDigits = onlyDigits.slice(0, maxDigits);
         }
@@ -96,8 +96,7 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
         onChange({ value: onlyDigits, target: { value: onlyDigits, id } });
     };
 
-    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-        // Mantém o cursor no início
+    const handleFocus = () => {
         setTimeout(() => {
             inputRef.current?.setSelectionRange(0, 0);
         }, 0);
@@ -105,58 +104,102 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
         if (onFocus) onFocus();
     };
 
+    const handleSearchClick = async () => {
+        setIsLoading(true);
+        try {
+            await onClickSearch();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const onlyDigits = (value || '').replace(/\D/g, '');
     const rightButtonDisabled = disabledRightButton ?? (onlyDigits.length !== maxDigits);
 
     return (
-        <div className="p-field" style={{ width: '100%', height: '71px' }}>
+        <div className="p-field" style={{ width: '100%' }}>
             {showTopLabel && topLabel && (
-                <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
+                <div style={{ height: 25, display: 'flex', alignItems: 'center' }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
                     </label>
                 </div>
             )}
-            <div className={`p-inputgroup flex-1`} style={{ width: '100%' }}>
+
+            <div
+                className={`p-inputgroup flex-1 styled-on-focus styled-on-hover custom-input ${
+                    hasError ? 'input-error' : ''
+                }`}
+                style={{
+                    border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da',
+                    borderRadius: '6px'
+                }}
+            >
                 {iconLeft && (
-                    <span className="p-inputgroup-addon">
-                        {typeof iconLeft === 'string' ? <i className={`pi ${iconLeft}`} style={{ color: '#FFF' }}></i> : iconLeft}
-                    </span>
-                )}
-                <InputText
-                    type="text"
-                    value={displayValue}
-                    placeholder={placeholder}
-                    onFocus={handleFocus}
-                    onBlur={onBlur}
-                    onChange={handleInputChange}
-                    ref={inputRef}
-                    readOnly={readOnly}
-                    className={`p-inputtext p-component ${hasError ? 'p-invalid' : ''}`}
-                    autoFocus={autoFocus}
-                    style={{
-                        boxShadow: 'none',
-                        background: isDarkMode ? '#293B51' : '#FFFFFF'
-                    }}
-                />
-                {useRightButton && (
-                    <Button
-                        icon={loading ? 'pi pi-spin pi-spinner' : iconRight}
-                        outlined={outlined}
-                        onClick={onClickSearch}
-                        disabled={rightButtonDisabled || loading}
-                        className="p-button p-component"
+                    <span
+                        className="p-inputgroup-addon"
                         style={{
                             background: isDarkMode ? '#293B51' : '#FFFFFF',
-                            color: isDarkMode ? '#FFF' : '#000',
+                            border: 'none'
+                        }}
+                    >
+                        {typeof iconLeft === 'string' ? (
+                            <i
+                                className={iconLeft}
+                                style={{
+                                    color: isDarkMode ? '#E3E6E8' : '#495057'
+                                }}
+                            />
+                        ) : (
+                            iconLeft
+                        )}
+                    </span>
+                )}
+
+                <div className="w-full">
+                    <InputText
+                        id={id}
+                        type="text"
+                        value={displayValue}
+                        placeholder={placeholder}
+                        onFocus={handleFocus}
+                        onBlur={onBlur}
+                        onChange={handleInputChange}
+                        ref={inputRef}
+                        readOnly={readOnly}
+                        autoFocus={autoFocus}
+                        className="p-inputtext p-component"
+                        style={{
+                            boxShadow: 'none',
+                            background: isDarkMode ? '#293B51' : '#FFFFFF',
+                            width: '100%',
+                            border: 'none',
+                            height: 40
+                        }}
+                    />
+                </div>
+
+                {useRightButton && iconRight && (
+                    <Button
+                        icon={loading || isLoading ? 'pi pi-spin pi-spinner' : iconRight}
+                        outlined={outlined}
+                        onClick={handleSearchClick}
+                        disabled={rightButtonDisabled || loading || isLoading}
+                        style={{
+                            background: isDarkMode ? '#293B51' : '#FFFFFF',
+                            color: isDarkMode ? '#FFFFFF' : '#495057',
                             borderColor: isDarkMode ? '#3e4f62' : '#ced4da',
-                            boxShadow: 'none'
+                            boxShadow: 'none',
+                            border: 'none'
                         }}
                     />
                 )}
             </div>
-            {hasError && errorMessage && <small className="p-error block">{errorMessage}</small>}
+
+            <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}>
+                {hasError && errorMessage && <small className="p-error block">{errorMessage}</small>}
+            </div>
         </div>
     );
 };

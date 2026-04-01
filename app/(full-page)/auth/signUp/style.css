@@ -1,0 +1,77 @@
+.sign-up-page-shell {
+    padding: max(1.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
+    overflow: hidden;
+}
+.sign-up-card {
+    width: min(100%, 34.5rem);
+    max-height: calc(100vh - 3rem);
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 24px;
+    gap: 0;
+}
+
+.sign-up-card__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.sign-up-card__logo {
+    height: 10rem;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.sign-up-card__description {
+    margin: 0;
+}
+
+.sign-up-card__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.25rem;
+    margin-top: 0.5rem;
+    overscroll-behavior: contain;
+}
+
+.sign-up-card__body .grid.formgrid {
+    margin: 0;
+}
+
+.sign-up-card__footer {
+    flex-shrink: 0;
+    margin-top: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--surface-border, rgba(148, 163, 184, 0.25));
+}
+
+@media (max-width: 768px) {
+    .sign-up-page-shell {
+        align-items: stretch;
+        justify-content: center;
+        padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+    }
+
+    .sign-up-card {
+        width: 100%;
+        max-width: none;
+        max-height: calc(100vh - 2rem);
+        padding: 1rem;
+        border-radius: 18px;
+    }
+
+    .sign-up-card__logo {
+        height: clamp(8.5rem, 28vw, 10.5rem);
+    }
+
+    .sign-up-card__body {
+        padding-right: 0.1rem;
+    }
+}

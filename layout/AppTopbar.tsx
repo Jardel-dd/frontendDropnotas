@@ -11,6 +11,7 @@ import BtnDarkLigth from '@/app/components/buttonsComponent/btn-dark-ligth/btn-d
 import Logout from '@/app/(full-page)/auth/logout/logout';
 import { useRouter } from 'next/navigation';
 import { UserContext } from '@/app/routes/protected/UserContext';
+import { useIsMobile } from '@/app/components/responsiveCelular/responsive';
 
 const AppTopbar = forwardRef<AppTopbarRef>(() => {
     const { onMenuToggle, layoutConfig } = useContext(LayoutContext);
@@ -18,7 +19,12 @@ const AppTopbar = forwardRef<AppTopbarRef>(() => {
     const searchRef = useRef(null);
     const menubuttonRef = useRef(null);
     const router = useRouter();
+    const isMobile = useIsMobile();
     const { userConta , setUserData } = useContext(UserContext)!;
+    const logoSrc = layoutConfig.colorScheme === 'dark'
+        ? '/layout/images/image-logo-Mobile-Dark.png'
+        : '/layout/images/image-logo-Mobile-Ligth.png';
+
     const handleGoToProfile = () => {
         if (userConta?.id) {
             router.push(`/cadastro/usuarios/created?id=${userConta.id}`);
@@ -34,11 +40,11 @@ const AppTopbar = forwardRef<AppTopbarRef>(() => {
     return (
         <div className="layout-topbar">
             <div>
-                <div style={{ width: '100%' }}>
+                <div className="topbar-logo-shell">
                     <img
-                        style={{ width:"100%", maxWidth:"10rem", height:"5rem" }}
-                        alt="dropdown icon"
-                        src="/layout/images/DropNotas60w40hh.png"
+                        className={`topbar-logo ${isMobile ? 'topbar-logo-mobile' : 'topbar-logo-desktop'}`}
+                        alt="Logo DropNotas"
+                        src={logoSrc}
                     />
                 </div>
             </div>

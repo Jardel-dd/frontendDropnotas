@@ -1,6 +1,8 @@
 'use client';
+
 import Link from 'next/link';
-import "@/app/styles/styledGlobal.css";
+import './style.css';
+import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
@@ -13,12 +15,13 @@ import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { validateFormCreatedAccount } from './controller/validateForm';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import { create, handleSearchCNPJCreated } from './controller/controller';
-import { CreatedAccountEntity, } from '../../../entity/CreatedAccountEntity';
+import { CreatedAccountEntity } from '../../../entity/CreatedAccountEntity';
 
 export type LoginResponse = {
     token: string;
     refreshToken?: string;
 };
+
 function SignUp() {
     const router = useRouter();
     const msgs = useRef<Messages>(null);
@@ -37,45 +40,70 @@ function SignUp() {
             email: '',
             senha: '',
             razao_social: '',
-            cnpj: '',
+            cnpj: ''
         })
     );
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
-    const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
+
+    const handleSearchCnpj = async (cnpjValue?: string) => {
+        const cnpjNumeros = (cnpjValue ?? userConta.cnpj ?? '').replace(/\D/g, '');
+
+        if (cnpjNumeros.length !== 14 || cnpjNumeros === cnpjBuscado) {
+            return;
+        }
+
+        setLoadingCnpj(true);
+        try {
+            await handleSearchCNPJCreated(cnpjNumeros, setUserConta, setErrors, msgs);
+            setCnpjBuscado(cnpjNumeros);
+        } catch (error) {
+            console.error('Erro ao buscar CNPJ:', error);
+        } finally {
+            setLoadingCnpj(false);
+        }
+    };
+
     const handleAllChanges = (event: {
         target: { id: string; value: any; checked?: any; type: string }
     }) => {
         const { id, value, type, checked } = event.target;
-        setTouchedFields(prev => ({ ...prev, [id]: true }));
         const newValue =
-            (type === "checkbox" || type === "switch")
+            type === 'checkbox' || type === 'switch'
                 ? checked
-                : id === "cnpj"
-                    ? value.replace(/\D/g, "")
+                : id === 'cnpj'
+                    ? value.replace(/\D/g, '')
                     : value;
-        let updatedUserConta: CreatedAccountEntity;
+
         const newUsuarioContaData = {
             nome: id === 'nome' ? newValue : userConta.usuario_conta.nome,
             email: id === 'email' ? newValue : userConta.usuario_conta.email,
-            senha: id === 'senha' ? newValue : userConta.usuario_conta.senha,
+            senha: id === 'senha' ? newValue : userConta.usuario_conta.senha
         };
-        updatedUserConta = userConta.copyWith({
-            [id]: newValue,
-            usuario_conta: new UsuarioContaEntity(newUsuarioContaData)
-        });
-        setUserConta(updatedUserConta);
+
+        setUserConta(
+            userConta.copyWith({
+                [id]: newValue,
+                usuario_conta: new UsuarioContaEntity(newUsuarioContaData)
+            })
+        );
     };
-    const togglePasswordVisibility = (event: React.MouseEvent)=> {
-         event.preventDefault();
-        setIsPasswordVisible(!isPasswordVisible);
-        setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
+
+    const togglePasswordVisibility = (event: React.MouseEvent) => {
+        event.preventDefault();
+        setIsPasswordVisible((prev) => !prev);
+        setIsConfirmPasswordVisible((prev) => !prev);
     };
-    const handleSubmit = async (event: React.FormEvent) => {
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         msgs.current?.clear();
-        if (isLoadingBtnCreated) return;
+
+        if (isLoadingBtnCreated) {
+            return;
+        }
+
         setIsLoadingBtnCreated(true);
         try {
             await create(userConta, router, msgs);
@@ -86,11 +114,14 @@ function SignUp() {
             setIsLoadingBtnCreated(false);
         }
     };
+
     useEffect(() => {
         validateFormCreatedAccount(userConta, confirmPassword, setErrors, msgs);
     }, [userConta, confirmPassword]);
+
     useEffect(() => {
         const cnpjNumeros = userConta.cnpj?.replace(/\D/g, '') || '';
+
         if (cnpjNumeros.length === 14 && cnpjNumeros !== cnpjBuscado) {
             const buscarCnpj = async () => {
                 setLoadingCnpj(true);
@@ -103,24 +134,27 @@ function SignUp() {
                     setLoadingCnpj(false);
                 }
             };
+
             buscarCnpj();
         }
-    }, [userConta.cnpj]);
+    }, [userConta.cnpj, cnpjBuscado]);
+
     return (
         <>
-            <form onSubmit={handleSubmit}>
-                {isLoadingBtnCreated && <LoadingScreen loadingText="Criando sua conta, por favor, aguarde..." />}
-                <div className="styled-containerSignUp-SignIn">
-                    <Messages ref={msgs} className="custom-messages" />
-                    <div className="card styled-container-login-register">
-                        <img
-                            style={{ height: '10rem' }}
-                            alt="dropdown icon"
-                            src="/layout/images/logoDropNotas.svg"
-                        />
-                        <p>Para fazer o cadastro você precisa preencher os campos abaixo:</p>
+        <form onSubmit={handleSubmit}>
+            {isLoadingBtnCreated && <LoadingScreen loadingText="Criando sua conta, por favor, aguarde..." />}
+            <div className="styled-containerSignUp-SignIn sign-up-page-shell">
+                <Messages ref={msgs} className="custom-messages" />
+                <div className="card styled-container-login-register sign-up-card">
+                    <div className="sign-up-card__header">
+                        <img className="sign-up-card__logo" alt="dropdown icon" src="/layout/images/logoDropNOTAS.png" />
+                        <p className="sign-up-card__description">
+                            Para fazer o cadastro você precisa preencher os campos abaixo:
+                        </p>
+                    </div>
+                    <div className="sign-up-card__body">
                         <div className="grid formgrid w-full">
-                            <div className="col-12 lg:col-12 mt-1" >
+                            <div className="col-12 lg:col-12 mt-1">
                                 <InputMaskDrop
                                     id="cnpj"
                                     value={userConta.cnpj || ''}
@@ -133,32 +167,34 @@ function SignUp() {
                                             }
                                         });
                                     }}
+                                    onClickSearch={() => {
+                                        handleSearchCnpj();
+                                    }}
                                     placeholder="99.999.999/9999-99"
                                     mask="99.999.999/9999-99"
-                                    iconRight={<IconSearch />}
+                                    iconRight="pi pi-search"
+                                    outlined={false}
+                                    useRightButton={true}
                                     hasError={!!errors.cnpj}
                                     errorMessage={errors.cnpj}
                                     disabledRightButton={(userConta.cnpj || '').replace(/\D/g, '').length !== 14}
                                     loading={loadingCnpj}
-                                    iconLeft={<IconCNPJ />}
                                     autoFocus
-                                    onClickSearch={function (): void {
-                                        throw new Error('Function not implemented.');
-                                    }}
-                                    outlined={false}
+                                    iconLeft="pi pi-building"
                                     topLabel="CNPJ:"
-                                showTopLabel
-                                required
+                                    showTopLabel
+                                    required
                                 />
+
                             </div>
-                            <div className="col-12 lg:col-12 mt-1"  >
+                            <div className="col-12 lg:col-12 mt-1">
                                 <Input
                                     id="razao_social"
                                     value={userConta.razao_social || ''}
                                     onChange={handleAllChanges}
                                     label="Digite a Razão Social"
-                                    icon="pi pi-building"
-                                    iconLeft={'pi pi-building'}
+                                    icon="pi pi-home"
+                                    iconLeft="pi pi-sitemap"
                                     outlined={true}
                                     hasError={!!errors.razao_social}
                                     errorMessage={errors.razao_social}
@@ -174,7 +210,7 @@ function SignUp() {
                                     onChange={handleAllChanges}
                                     label="Digite o Nome"
                                     icon="pi pi-user"
-                                    iconLeft={'pi pi-user'}
+                                    iconLeft="pi pi-user"
                                     outlined={true}
                                     hasError={!!errors.nome}
                                     errorMessage={errors.nome}
@@ -190,8 +226,8 @@ function SignUp() {
                                     onChange={handleAllChanges}
                                     label="Digite o E-mail"
                                     icon="pi pi-at"
-                                    type='email'
-                                    iconLeft={'pi pi-at'}
+                                    type="email"
+                                    iconLeft="pi pi-at"
                                     outlined={true}
                                     hasError={!!errors.email}
                                     errorMessage={errors.email}
@@ -200,8 +236,7 @@ function SignUp() {
                                     required
                                 />
                             </div>
-
-                            <div className="col-12 lg:col-12 mt-1" >
+                            <div className="col-12 lg:col-12 mt-1">
                                 <Input
                                     value={userConta.senha || ''}
                                     onChange={handleAllChanges}
@@ -210,7 +245,7 @@ function SignUp() {
                                     type={isPasswordVisible ? 'text' : 'password'}
                                     useRightButton={true}
                                     outlined={true}
-                                    iconLeft={'pi pi-key'}
+                                    iconLeft="pi pi-key"
                                     iconRight={<IconVisible isPasswordVisible={isPasswordVisible} />}
                                     onClick={togglePasswordVisibility}
                                     hasError={!!errors.senha}
@@ -220,7 +255,6 @@ function SignUp() {
                                     required
                                 />
                             </div>
-
                             <div className="col-12 lg:col-12 mt-1">
                                 <Input
                                     className="w-70"
@@ -234,7 +268,6 @@ function SignUp() {
                                     value={confirmPassword}
                                     onChange={(e) => {
                                         setConfirmPassword(e.target.value);
-                                        // validatePasswordConfirmation(e.target.value);
                                     }}
                                     onClick={togglePasswordVisibility}
                                     hasError={!!errors.confirmPassword}
@@ -244,13 +277,14 @@ function SignUp() {
                                     required
                                 />
                             </div>
-                            <div className='padding-1rem'>
-                            </div>
                         </div>
+                    </div>
+                    <div className='p-2 mt-2'>
                         <Button
+                            type="submit"
                             label={isLoadingBtnCreated ? 'Criando conta...' : 'Criar conta'}
                             icon={isLoadingBtnCreated ? 'pi pi-spin pi-spinner' : undefined}
-                            className="mb-4"
+                            className="mb-4 w-full"
                             disabled={
                                 isLoadingBtnCreated ||
                                 Object.keys(errors).length > 0 ||
@@ -260,11 +294,9 @@ function SignUp() {
                                 !userConta.email ||
                                 !userConta.senha ||
                                 !confirmPassword
-
                             }
-                            onClick={() => { }}
                         />
-                        <div className="text-center mt-4">
+                        <div className="text-center ">
                             Já tem uma conta? {'  '}
                             <Link href="/">
                                 <span className="text-primary cursor-pointer">Acessar conta</span>
@@ -272,10 +304,10 @@ function SignUp() {
                         </div>
                     </div>
                 </div>
+            </div>
             </form>
         </>
     );
 }
+
 export default SignUp;
-
-

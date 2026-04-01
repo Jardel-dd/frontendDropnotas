@@ -3,7 +3,6 @@ import '@/app/styles/styledGlobal.css';
 import { CompanyEntity } from '../../../../entity/CompanyEntity';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
-import { fetchAllCnae } from '@/app/components/fetchAll/listAllCnae/controller';
 
 export const listEmpresa = async (
     listPaginationEmpresa: Record<string, any>,
@@ -343,21 +342,13 @@ export const fetchCompanyByID = async (empresaId: string) => {
         const response = await api.get(`/empresa/${empresaId}`);
         const data = response.data;
         console.log("empresa", data)
-        const cnaeResponse = await fetchAllCnae();
-        let selectedCnae = null;
-        if (data.cnae_fiscal) {
-            selectedCnae = cnaeResponse.find(
-                (item: { codigo: string }) => item.codigo === data.cnae_fiscal
-            ) || null;
-        }
         return {
             empresa: data,
             userConta: [],
             selectedUserConta: [],
-            selectedCnae: selectedCnae,
         };
     } catch (error) {
-        console.error("Erro ao buscar empresa, perfis ou CNAEs:", error);
+        console.error("Erro ao buscar empresa:", error);
         throw error;
     }
 };
