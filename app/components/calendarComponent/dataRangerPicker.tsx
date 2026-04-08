@@ -15,6 +15,8 @@ export type DateRangeValue = [Dayjs | null, Dayjs | null];
 
 type Props = {
     onBuscar: (inicio: Date, fim: Date) => void;
+    onPeriodoChange?: (periodo: Date[] | null) => void;
+    onClear?: () => void;
     showTopLabel?: boolean;
     topLabel?: string;
     required?: boolean;
@@ -23,68 +25,68 @@ type Props = {
 
 export const todayRange: DateRangeValue = [dayjs().startOf('day'), dayjs().endOf('day')];
 
-export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, required = false, topRightElement }: Props) => {
+export const DateRangePicker = ({ onBuscar, onPeriodoChange, onClear, showTopLabel = false, topLabel, required = false, topRightElement }: Props) => {
     const calendarRef = useRef<CalendarRef>(null);
     const { isDarkMode } = useTheme();
     const [periodo, setPeriodo] = useState<Periodo>(null);
+    const updatePeriodo = (nextPeriodo: Periodo) => {
+        setPeriodo(nextPeriodo);
+        onPeriodoChange?.(nextPeriodo);
+    };
 
     const clearPeriodo = () => {
-        setPeriodo(null);
+        updatePeriodo(null);
     };
 
     const setHoje = () => {
         const hoje = new Date();
-        setPeriodo([hoje, hoje]);
+        updatePeriodo([hoje, hoje]);
     };
 
     const setOntem = () => {
         const ontem = dayjs().subtract(1, 'day').toDate();
-        setPeriodo([ontem, ontem]);
+        updatePeriodo([ontem, ontem]);
     };
 
     const setSemanaAtual = () => {
-        setPeriodo([dayjs().startOf('week').toDate(), dayjs().endOf('week').toDate()]);
+        updatePeriodo([dayjs().startOf('week').toDate(), dayjs().endOf('week').toDate()]);
     };
 
     const setSemanaPassada = () => {
-        setPeriodo([dayjs().subtract(1, 'week').startOf('week').toDate(), dayjs().subtract(1, 'week').endOf('week').toDate()]);
+        updatePeriodo([dayjs().subtract(1, 'week').startOf('week').toDate(), dayjs().subtract(1, 'week').endOf('week').toDate()]);
     };
 
     const setMesAtual = () => {
-        setPeriodo([dayjs().startOf('month').toDate(), dayjs().endOf('month').toDate()]);
+        updatePeriodo([dayjs().startOf('month').toDate(), dayjs().endOf('month').toDate()]);
     };
 
     const setMesPassado = () => {
-        setPeriodo([dayjs().subtract(1, 'month').startOf('month').toDate(), dayjs().subtract(1, 'month').endOf('month').toDate()]);
+        updatePeriodo([dayjs().subtract(1, 'month').startOf('month').toDate(), dayjs().subtract(1, 'month').endOf('month').toDate()]);
     };
 
     const periodoCompleto = Array.isArray(periodo) && periodo.length === 2 && !!periodo[0] && !!periodo[1];
 
     const footerTemplate = () => (
         <div className="calendar-footer">
-            <div className="calendar-divider" />
-            <div className="calendar-buttons calendar-buttons-DataPiker gap-2">
+            <div className="calendar-buttons calendar-buttons-DataPiker">
                 <Button label="Hoje" className="btn-filter-calendar" severity="secondary" outlined onClick={setHoje} />
                 <Button label="Ontem" className="btn-filter-calendar" severity="secondary" outlined onClick={setOntem} />
                 <Button label="Semana atual" className="btn-filter-calendar" severity="secondary" outlined onClick={setSemanaAtual} />
-            </div>
-            <div className="calendar-buttons calendar-buttons-DataPiker gap-2">
                 <Button label="Semana passada" className="btn-filter-calendar" severity="secondary" outlined onClick={setSemanaPassada} />
                 <Button label="Mes atual" className="btn-filter-calendar" severity="secondary" outlined onClick={setMesAtual} />
                 <Button label="Mes passado" className="btn-filter-calendar" severity="secondary" outlined onClick={setMesPassado} />
             </div>
-            <div className="calendar-footer-ok">
+            <div className="row flex justify-content-between gap-2 mt-4">
                 <Button
                     label="Filtrar"
                     icon="pi pi-search"
                     disabled={!periodoCompleto}
                     onClick={() => {
                         if (!periodoCompleto) return;
-
                         onBuscar(periodo[0]!, periodo[1]!);
                         calendarRef.current?.hide();
                     }}
-                    style={{ height: '20px' }}
+                    style={{ height: '25px', maxHeight:"20px" }}
                 />
                 <Button
                     label="Limpar filtro"
@@ -93,16 +95,16 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
                     outlined
                     onClick={() => {
                         clearPeriodo();
+                        onClear?.();
                         calendarRef.current?.hide();
                     }}
-                    style={{ height: '20px' }}
+                    style={{ height: '25px', maxHeight:"20px" }}
                 />
             </div>
         </div>
     );
-
     return (
-        <div className="periodo-calendar-wrapper w-full" style={{ width: '100%' }}>
+        <div className="periodo-calendar-wrapper w-full" >
             {showTopLabel && (topLabel || topRightElement) && (
                 <div style={{ height: 25, display: 'flex', alignItems: 'center' }}>
                     <label className="filter-label">
@@ -119,7 +121,10 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
                 <Calendar
                     ref={calendarRef}
                     value={periodo}
-                    onChange={(e) => setPeriodo(e.value as Periodo)}
+                    onChange={(e) => {
+                        const nextPeriodo = e.value as Periodo;
+                        updatePeriodo(nextPeriodo);
+                    }}
                     selectionMode="range"
                     numberOfMonths={1}
                     locale="pt"
@@ -132,11 +137,12 @@ export const DateRangePicker = ({ onBuscar, showTopLabel = false, topLabel, requ
                         color: isDarkMode ? '#FFFFFF' : '#495057',
                         width: '100%',
                         height: 40,
-                        border: 0
+                        border: 0,
+                        textAlign: 'center'
                     }}
                     style={{ boxShadow: 'none', borderColor: 'none', width: '100%', height: 40, border: 0 }}
                     readOnlyInput
-                    placeholder="Data inicio      -      Data final"
+                    placeholder="Data inicio - Data final"
                     showIcon
                     panelClassName={`periodo-calendar-panel ${isDarkMode ? 'periodo-calendar-panel-dark' : 'periodo-calendar-panel-light'}`}
                     footerTemplate={footerTemplate}

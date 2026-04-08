@@ -1,8 +1,11 @@
 'use client';
+import "./style.css";
+import "@/app/styles/styledGlobal.css";
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { ReactNode, useRef, useState, useEffect } from 'react';
+import { useIsDesktop, useIsMobile } from "../../responsiveCelular/responsive";
 type FilterOverlayProps = {
     children: ReactNode;
     onApply?: () => void;
@@ -15,15 +18,9 @@ type FilterOverlayProps = {
 };
 export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply, onClear, width = '300px', mobileBreakpoint = 768, buttonLabel = 'Filtros', buttonIcon = 'pi pi-filter', buttonClassName = '' }) => {
     const op = useRef<OverlayPanel>(null);
-    const [isMobile, setIsMobile] = useState(false);
     const [mobileVisible, setMobileVisible] = useState(false);
-    useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth <= mobileBreakpoint);
-        check();
-        window.addEventListener('resize', check);
-        return () => window.removeEventListener('resize', check);
-    }, [mobileBreakpoint]);
-
+    const isMobile = useIsMobile();
+    const isDesktop = useIsDesktop();
     const toggle = (e?: any) => {
         if (isMobile) setMobileVisible(true);
         else op.current?.toggle(e);
@@ -42,26 +39,49 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
     };
     return (
         <>
-            <Button label={isMobile ? undefined : buttonLabel} icon={buttonIcon} outlined onClick={toggle} className={buttonClassName} style={{ boxShadow: 'None' }} />
-            {!isMobile && (
-                <OverlayPanel ref={op} dismissable className="filter-overlay">
-                    <div className="flex flex-column" style={{ width }}>
-                        {children}
-                        <div className="flex justify-content-between align-items-center mt-2">
-                            <Button label="Aplicar Filtro" outlined onClick={handleApply} style={{ boxShadow: 'None' }} />
-                            <Button label="Limpar Filtro" severity="secondary" outlined onClick={handleClear} style={{ boxShadow: 'None' }} />
-                        </div>
+            {!isDesktop && (
+                <>
+                <div >
+                    <Button
+                        label={isMobile ? undefined : buttonLabel}
+                        icon={buttonIcon}
+                        outlined
+                        onClick={toggle}
+                        style={{ boxShadow: "none",height: "42px" }}
+                    />
                     </div>
-                </OverlayPanel>
-            )}
-            {isMobile && (
-                <Dialog header="Filtros" visible={mobileVisible} onHide={hide} modal style={{ width: '90vw', maxWidth: '420px' }} contentStyle={{ paddingBottom: '1rem' }}>
-                    <div className="flex flex-column ">{children}</div>
-                    <div className="flex gap-2 p-3">
-                        <Button label="Aplicar" className="w-full" onClick={handleApply} />
-                        <Button label="Limpar" outlined className="w-full" onClick={handleClear} />
+                <Dialog header="Filtros" visible={mobileVisible} onHide={hide} modal
+                    style={{ width: '90vw', maxWidth: '420px' }}
+                    contentStyle={{ paddingBottom: '1rem' }}>
+                    <div className="flex flex-column">{children}</div>
+                    <div className="flex gap-2 mt-1 p-2">
+                        <Button label="Aplicar Filtro" icon="pi pi-search" outlined className="btn-filter-Component-Mobile" onClick={handleApply} />
+                        <Button label="Limpar Filtro" icon="pi pi-trash" severity="danger"  outlined className="btn-filter-Component-Mobile" onClick={handleClear} />
                     </div>
                 </Dialog>
+                </>
+            )}
+             {!isMobile && (
+                <>
+                <div style={{ height: "40px"}}>
+                    <Button
+                        label={isMobile ? undefined : buttonLabel}
+                        icon={buttonIcon}
+                        outlined
+                        onClick={toggle}
+                        style={{ boxShadow: "none", height:"42px", borderRadius:23 }}
+                    />
+                    </div>
+                    <OverlayPanel ref={op} dismissable className="filter-overlay" >
+                        <div className="flex flex-column">
+                            {children}
+                            <div className="flex justify-content-between  p-2 gap-3">
+                                <Button label="Aplicar Filtro" icon="pi pi-search" outlined onClick={handleApply} className="btn-filter-Component-Desktop" />
+                                <Button label="Limpar Filtro" icon="pi pi-trash" severity="danger" outlined onClick={handleClear} className="btn-filter-Component-Desktop" />
+                            </div>
+                        </div>
+                    </OverlayPanel>
+                </>
             )}
         </>
     );

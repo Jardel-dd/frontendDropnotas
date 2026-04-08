@@ -12,8 +12,10 @@ export default function EmpresaDropdownField({
     errorMessage,
     showAddButton = false,
     onAddClick,
-    autoSelectSingle = true
-}: EmpresaDropdownFieldProps) {
+    autoSelectSingle = true,
+    required = false
+}: EmpresaDropdownFieldProps & { required?: boolean }) {
+
     return (
         <DropdownSearch<CompanyEntity>
             id="selectedCompany"
@@ -34,7 +36,7 @@ export default function EmpresaDropdownField({
             onAddClick={onAddClick}
             topLabel="Empresa:"
             showTopLabel
-            required
+            required={required}
         />
     );
 }

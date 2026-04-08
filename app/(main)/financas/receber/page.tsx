@@ -161,7 +161,7 @@ const ContasReceber: React.FC = () => {
                                     <FilterOverlay 
                                     onClear={handleClearFilters} 
                                     onApply={handleApplyFilters}
-                                    buttonClassName="height-2-8rem-ml-1rem"
+                                    buttonClassName="height-2-8rem-ml-1rem-mobile"
                                      >
                                         <div className="col-12 lg:col-12 mt-3">
                                             <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />

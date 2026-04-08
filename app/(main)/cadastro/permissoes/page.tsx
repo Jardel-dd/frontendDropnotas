@@ -153,12 +153,6 @@ const PerfilUsuarios: React.FC = () => {
         field: 'nome',
         onSearch: (value) => handleListPerfilUser(0, value, listarInativos)
     });
-    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        const newValue = e.checked ?? false;
-        setListarInativos(newValue);
-        handleListPerfilUser(0, searchTerm, newValue);
-        setVisible(false);
-    };
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationPerfilUser((prev) => ({
@@ -179,11 +173,13 @@ const PerfilUsuarios: React.FC = () => {
         handleListPerfilUser(0, searchTerm, listarInativos);
         setVisible(false);
     };
-    const handleCancelarFiltro = () => {
-        setVisible(false);
-    };
     const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
+    };
+     const handleClearFilters = () => {
+        setListarInativos(false);
+        handleListPerfilUser(0, searchTerm, listarInativos);
+        setVisible(false);
     };
     useEffect(() => {
         handleListPerfilUser();
@@ -210,9 +206,12 @@ const PerfilUsuarios: React.FC = () => {
                                         showTopLabel
                                     />
                                 </div>
-                            <div className="col-4 mb-0 lg:col-2 p-1">
+                            <div className="col-4 mb-0 lg:col-2">
                                 <div className="container-BTN-Filter-Created  ">
-                                    <FilterOverlay onApply={handleSalvarFiltro} onClear={handleCancelarFiltro} buttonClassName="height-2-8rem-ml-1rem">
+                                    <FilterOverlay 
+                                    onApply={handleSalvarFiltro} 
+                                    onClear={handleClearFilters} 
+                                    buttonClassName="height-2-8rem-ml-1rem">
                                         <div className="checkBoxMobile-width-max-10rem">
                                             <div className="checkbox-container">
                                                 <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
@@ -285,17 +284,22 @@ const PerfilUsuarios: React.FC = () => {
                                             showTopLabel
                                         />
                                     </div>
-                                    <div className="checkBox-width-max-10rem">
-                                        <div className="checkbox-container">
-                                            <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                            <label htmlFor="listarInativos" className="ml-2">
-                                                Listar Desativadas
-                                            </label>
+                                <div className="Container-Btn-Filter-Desktop">
+                                    <FilterOverlay
+                                        onApply={handleSalvarFiltro}
+                                        onClear={handleClearFilters}
+                                        buttonClassName="Btn-Filter-Desktop">
+                                        <div className="checkBoxMobile-width-max-10rem">
+                                            <div className="checkbox-container">
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                <label htmlFor="listarInativos" className="ml-2">
+                                                    Listar Desativadas
+                                                </label>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="container-button-primary-novo">
-                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
-                                    </div>
+                                    </FilterOverlay>
+                                </div>
+                                    
                                 </div>
                             </div>
                         <div>

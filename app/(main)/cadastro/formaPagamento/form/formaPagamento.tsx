@@ -1,9 +1,7 @@
 'use client';
-import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
-import { InputSwitch } from 'primereact/inputswitch';
 import Input from '@/app/shared/include/input/input-all';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
@@ -16,6 +14,7 @@ import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdFormaPagamento, fetchFormaPagamentoByID, updateFormaPagamento } from '../controller/controller';
 import type { FormCreatedFormaPagamentoProps, FormaPagamentoFieldsProps, FormaPagamentoFormProps, FormaPagamentoFormRef } from '../types/formaPagamento';
+import { InputSwitch } from 'primereact/inputswitch';
 export type { FormaPagamentoFormRef } from '../types/formaPagamento';
 
 const createEmptyFormaPagamento = () =>

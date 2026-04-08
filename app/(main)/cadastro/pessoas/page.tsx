@@ -4,6 +4,7 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import ListarPessoa from './tabela/pessoaListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { DropdownChangeEvent } from 'primereact/dropdown';
@@ -13,7 +14,6 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import ListarPessoa from './tabela/pessoaListagem';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarPessoa, deletarPessoa, listPessoa } from './controller/controller';
@@ -59,7 +59,6 @@ const ClientesFornecedores: React.FC = () => {
     );
     const [visible, setVisible] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [filterType, setFilterType] = useState<string | null>(null);
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [isClientesFornecedoresCreated, setIsClientesFornecedoresCreated] = useState(false);
     type ClienteFornecedorFilter = {
@@ -99,16 +98,6 @@ const ClientesFornecedores: React.FC = () => {
     const handleNavigate = () => {
         router.push('/cadastro/pessoas/created');
         setIsClientesFornecedoresCreated(true);
-    };
-    const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
-        let value = event.target.value;
-        if (event.target.type === 'checkbox' || event.target.type === 'switch') {
-            value = event.target.checked;
-        } else if (event.target.type === 'number') {
-            value = value === '' ? null : Number(value);
-        }
-        const _clienteFornecedor = pessoa!.copyWith({ [event.target.id]: value });
-        setPessoa(_clienteFornecedor);
     };
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setPessoa,
@@ -197,50 +186,52 @@ const ClientesFornecedores: React.FC = () => {
             {isMobile && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                            <div className="grid formgrid p-2">
-                                <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
-                                    <Input
-                                        label="Buscar"
-                                        outlined={true}
-                                        id="razao_social"
-                                        useRightButton={true}
-                                        iconRight={'pi pi-search'}
-                                        onChange={handleSearchChange}
-                                        value={searchTerm}
-                                        loading={loading}
-                                        onClickSearch={() => searchNow(searchTerm)}
-                                        topLabel="Razão Social:"
-                                        showTopLabel
-                                    />
-                                </div>
-                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
-                                    <div className="container-BTN-Filter-Created">
-                                        <FilterOverlay 
+                        <div className="grid formgrid p-2">
+                            <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
+                                <Input
+                                    label="Buscar"
+                                    outlined={true}
+                                    id="razao_social"
+                                    useRightButton={true}
+                                    iconRight={'pi pi-search'}
+                                    onChange={handleSearchChange}
+                                    value={searchTerm}
+                                    loading={loading}
+                                    onClickSearch={() => searchNow(searchTerm)}
+                                    topLabel="Razão Social:"
+                                    showTopLabel
+                                />
+                            </div>
+                            <div className="col-4 mb-0 lg:col-3 lg:mb-0">
+                                <div className="container-BTN-Filter-Created">
+                                    <FilterOverlay
                                         onApply={handleApplyFilters}
-                                         onClear={handleClearFilters} 
-                                         buttonClassName="height-2-8rem-ml-1rem">
-                                            <div className="col-12 lg:col-12 ">
-                                                <Dropdown
-                                                    value={selectedClienteFornecedor}
-                                                    options={DropDownFilterClienteFornecedor}
-                                                    onChange={handleClienteFornecedorChange}
-                                                    placeholder="Selecione o tipo"
-                                                    topLabel="Cliente ou Fornecedor:"
-                                                    showTopLabel
-                                                    label={''}
-                                                />
-                                                <div className="col-12 lg:col-12 mt-3">
+                                        onClear={handleClearFilters}
+                                        buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                        <div>
+                                            <Dropdown
+                                                value={selectedClienteFornecedor}
+                                                options={DropDownFilterClienteFornecedor}
+                                                onChange={handleClienteFornecedorChange}
+                                                placeholder="Selecione o tipo"
+                                                topLabel="Cliente ou Fornecedor:"
+                                                showTopLabel
+                                                label={''}
+                                            />
+                                            <div className="checkBoxMobile-width-max-10rem">
+                                                <div className="checkbox-container">
                                                     <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
                                                     <label htmlFor="listarInativos" className="ml-2">
                                                         Listar Desativadas
                                                     </label>
                                                 </div>
                                             </div>
-                                        </FilterOverlay>
-                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                    </div>
+                                        </div>
+                                    </FilterOverlay>
+                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
                             </div>
+                        </div>
                         <div>
                             <ListarPessoa
                                 loading={loading}
@@ -304,7 +295,9 @@ const ClientesFornecedores: React.FC = () => {
                                         />
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
-                                        <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
+                                        <FilterOverlay onApply={handleApplyFilters}
+                                            onClear={handleClearFilters}
+                                            buttonClassName="Btn-Filter-Desktop">
                                             <div className="col-12 lg:col-12 ">
                                                 <Dropdown
                                                     value={selectedClienteFornecedor}
@@ -315,11 +308,13 @@ const ClientesFornecedores: React.FC = () => {
                                                     showTopLabel
                                                     label={''}
                                                 />
-                                                <div className="col-12 lg:col-12 mt-3">
-                                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                                    <label htmlFor="listarInativos" className="ml-2">
-                                                        Listar Desativadas
-                                                    </label>
+                                                <div className="checkBoxMobile-width-max-10rem">
+                                                    <div className="checkbox-container">
+                                                        <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
+                                                        <label htmlFor="listarInativos" className="ml-2">
+                                                            Listar Desativadas
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </FilterOverlay>

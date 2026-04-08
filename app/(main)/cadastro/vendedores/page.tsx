@@ -117,12 +117,6 @@ const Vendedores: React.FC = () => {
         field: 'razao_social',
         onSearch: (value) => handleListVendedores(0, value, listarInativos)
     });
-    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        const newValue = e.checked ?? false;
-        setListarInativos(newValue);
-        handleListVendedores(0, searchTerm, newValue);
-        setVisible(false);
-    };
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationVendedores((prev) => ({
@@ -156,6 +150,10 @@ const Vendedores: React.FC = () => {
     const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
+    const handleSalvarFiltro = () => {
+        handleListVendedores(0, searchTerm, listarInativos);
+        setVisible(false);
+    };
     useEffect(() => {
         handleListVendedores();
     }, []);
@@ -181,12 +179,13 @@ const Vendedores: React.FC = () => {
                                     showTopLabel
                                 />
                             </div>
-                            <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
+                            <div className="col-4 mb-0 lg:col-3 lg:mb-0">
                                 <div className="container-BTN-Filter-Created">
-                                    <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
+                                    <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
                                         <div className="checkBoxMobile-width-max-10rem">
                                             <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} 
+                                                checked={listarInativos} />
                                                 <label htmlFor="listarInativos" className="ml-2">
                                                     Listar Desativadas
                                                 </label>
@@ -255,15 +254,22 @@ const Vendedores: React.FC = () => {
                                             showTopLabel
                                         />
                                     </div>
-                                    <div className="checkbox-container">
-                                        <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                        <label htmlFor="listarInativos" className="ml-2">
-                                            Listar Desativadas
-                                        </label>
-                                    </div>
-                                    <div className="container-button-primary-novo">
-                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
-                                    </div>
+                                    <div className="Container-Btn-Filter-Desktop">
+                                    <FilterOverlay
+                                        onApply={handleSalvarFiltro}
+                                        onClear={handleClearFilters}
+                                        buttonClassName="Btn-Filter-Desktop">
+                                        <div className="checkBoxMobile-width-max-10rem">
+                                            <div className="checkbox-container">
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                <label htmlFor="listarInativos" className="ml-2">
+                                                    Listar Desativadas
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </FilterOverlay>
+                                </div>
+                                </div>
                                 </div>
                                 <div className="mt-2">
                                     <ListarVendedores
@@ -278,7 +284,6 @@ const Vendedores: React.FC = () => {
                                     />
                                 </div>
                             </div>
-                        </div>
                         <div style={{ marginTop: 'auto' }}>
                             <Paginator first={listPaginationVendedores.pageable.pageNumber * listPaginationVendedores.pageable.pageSize} rows={pageSize} totalRecords={listPaginationVendedores.totalElements} onPageChange={onPageChange} />
                         </div>

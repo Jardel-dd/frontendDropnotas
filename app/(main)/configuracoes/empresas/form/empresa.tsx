@@ -35,7 +35,7 @@ import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { validateFieldsEmpresas } from '@/app/(main)/configuracoes/empresas/controller/validation';
 import { fetchAllCnae, fetchFilteredCnae } from '@/app/components/fetchAll/listAllCnae/controller';
-import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyByID, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyByID, resolveLogoEmpresaSource, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { incentivoFiscal, prestacaoSus, regimeEspecialTributarioOptionsCompany, regimeTributarioOptions, tipo_rps } from '@/app/shared/optionsDropDown/options';
 
 import { fetchFilteredUserConta, fetchUserConta } from '@/app/(main)/cadastro/usuarios/controller/controller';
@@ -228,19 +228,26 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
                 data.cnpj = data.cnpj.replace(/\D/g, '');
             }
             if (isEditMode && empresaId) {
-                updateEmpresa(empresaId, data as CompanyEntity, selectedUserConta, setErrors, msgs, router, redirectAfterSave ?? true);
+                const updated = await updateEmpresa(empresaId, data as CompanyEntity, selectedUserConta, logoAlterada, setErrors, msgs, router, redirectAfterSave ?? true);
+
+                if (updated) {
+                    onSaved?.(updated);
+                    onClose?.();
+                }
             } else {
                 const created = await createdEmpresa(data as CompanyEntity, selectedUserConta, setErrors, msgs, router, setEmpresa as React.Dispatch<React.SetStateAction<Partial<CompanyEntity>>>, setSelectedUserConta, redirectAfterSave ?? true);
                 if (created) {
                     onSaved?.(created);
+                    onClose?.();
                 }
             }
-            onClose?.();
         } finally {
             setStateDisableBtnCreatedCompany(false);
+            setIsLoadingBtnCreated(false);
         }
     };
     const handleDeleteClick = () => {
+        setLogoAlterada(true);
         setEmpresa((prevEmpresa) =>
             prevEmpresa.copyWith({
                 ...prevEmpresa,
@@ -255,7 +262,17 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
         try {
             setIsLoading(true);
             const { empresa, userConta, selectedUserConta } = await fetchCompanyByID(empresaId);
-            setEmpresa(empresa);
+            const logoEmpresaSource = await resolveLogoEmpresaSource(empresa.logo_empresa);
+            const empresaNormalizada = new CompanyEntity({
+                ...empresa,
+                logo_empresa: logoEmpresaSource,
+                aliquota_outras_retencoes: empresa.aliquota_outras_retencoes ?? 0,
+                aliquota_deducoes: empresa.aliquota_deducoes ?? 0,
+                percentual_desconto_incondicionado: empresa.percentual_desconto_incondicionado ?? 0,
+                percentual_desconto_condicionado: empresa.percentual_desconto_condicionado ?? 0,
+            });
+            setEmpresa(empresaNormalizada);
+            setLogoAlterada(false);
             setUserConta(userConta);
             setSelectedUserConta(selectedUserConta);
             setSelectedCNAE(null);
@@ -502,7 +519,6 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
                     <Divider align="center" className="form-divider">
                         <span>Acesso a Empresa</span>
                     </Divider>
-
                     <div className="grid formgrid">
                         <div className="col-12 mb-1 lg:col-6 lg:mb-0">
                             <div className="p-field">
@@ -887,6 +903,58 @@ const FormEmpresaCreated = forwardRef<EmpresaFormRef, EmpresaFormProps>(({ initi
                     <Divider align="center" className="form-divider">
                         <span> Credenciais WebService </span>
                     </Divider>
+                     <div className="grid formgrid">
+                      <div className="col-12 lg:col-4 mt-1">
+                                    <InputMaskDrop
+                                        id="webservice_usuario"
+                                        value={empresa.webservice_usuario || ''}
+                                        onChange={(e) => {
+                                            handleAllChanges({
+                                                target: {
+                                                    id: e.target.id!,
+                                                    value: e.value,
+                                                    type: 'text'
+                                                }
+                                            });
+                                        }}
+                                        onClickSearch={async () => {
+                                            setLoadingCnpj(true);
+                                            setLoadingCnpj(false);
+                                        }}
+                                        placeholder="99.999.999/9999-99"
+                                        mask="99.999.999/9999-99"
+                                        outlined={false}
+                                        topLabel="Usúario WebService:"
+                                        showTopLabel
+                                    />
+                       </div>
+                        <div className="col-12 lg:col-4  mt-1 ">
+                            <Input
+                                value={empresa.webservice_senha || ''}
+                                onChange={handleAllChanges}
+                                label="Senha"
+                                id="webservice_senha"
+                                type={isPasswordVisible ? 'text' : 'password'}
+                                useRightButton={true}
+                                outlined={true}
+                                iconLeft={'pi pi-key'}
+                                iconRight={<IconVisible isPasswordVisible={isPasswordVisible} />}
+                                onClick={togglePasswordVisibility}
+                                topLabel="Senha WebService:"
+                                showTopLabel
+                            />
+                        </div>
+                        <div className="col-12 lg:col-4 mt-1 ">
+                                    <Input
+                                        value={empresa.webservice_chaveacesso || ''}
+                                        onChange={handleAllChanges}
+                                        label="Digite a chave de acesso"
+                                        id="webservice_chaveacesso"
+                                        topLabel="Chave de acesso WebService :"
+                                        showTopLabel
+                                    />
+                                </div>
+                        </div>
                 </div>
             </div>
             <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>

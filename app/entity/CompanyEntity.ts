@@ -1,7 +1,7 @@
 import { EnderecoEntity } from "./enderecoEntity";
 
 
-export class CompanyEntity  {
+export class CompanyEntity {
     id!: number;
     id_usuarios_acesso!: number[];
     cnpj!: string;
@@ -41,6 +41,10 @@ export class CompanyEntity  {
     aliquota_deducoes!: number | null;
     percentual_desconto_incondicionado!: number | null;
     percentual_desconto_condicionado!: number | null;
+    webservice_usuario?: string;
+    webservice_senha?: string;
+    webservice_chaveacesso?: string;
+
     constructor({
         id,
         id_usuarios_acesso,
@@ -81,10 +85,16 @@ export class CompanyEntity  {
         aliquota_deducoes,
         percentual_desconto_incondicionado,
         percentual_desconto_condicionado,
+        webservice_usuario,
+        webservice_senha,
+        webservice_chaveacesso
     }: {
         id?: number;
         id_usuarios_acesso?: number[];
         cnpj: string;
+        webservice_usuario?: string;
+        webservice_senha?: string;
+        webservice_chaveacesso?: string;
         razao_social: string;
         nome_fantasia: string;
         logo_empresa?: string;
@@ -160,6 +170,9 @@ export class CompanyEntity  {
             aliquota_deducoes,
             percentual_desconto_incondicionado,
             percentual_desconto_condicionado,
+            webservice_usuario,
+            webservice_senha,
+            webservice_chaveacesso
         });
     }
 
@@ -202,10 +215,17 @@ export class CompanyEntity  {
         aliquota_deducoes,
         percentual_desconto_incondicionado,
         percentual_desconto_condicionado,
+        webservice_usuario,
+        webservice_senha,
+        webservice_chaveacesso
     }: {
         id?: number;
         id_usuarios_acesso?: number[];
         cnpj?: string;
+        webservice_usuario?: string;
+        webservice_senha?: string;
+        webservice_chaveacesso?: string;
+
         razao_social?: string;
         nome_fantasia?: string;
         logo_empresa?: string;
@@ -246,6 +266,9 @@ export class CompanyEntity  {
             id: id ?? this.id,
             id_usuarios_acesso: id_usuarios_acesso ?? this.id_usuarios_acesso,
             cnpj: cnpj ?? this.cnpj,
+            webservice_usuario: webservice_usuario ?? this.webservice_usuario,
+            webservice_senha: webservice_senha ?? this.webservice_senha,
+            webservice_chaveacesso: webservice_chaveacesso ?? this.webservice_chaveacesso,
             razao_social: razao_social ?? this.razao_social,
             nome_fantasia: nome_fantasia ?? this.nome_fantasia,
             logo_empresa: logo_empresa ?? this.logo_empresa,

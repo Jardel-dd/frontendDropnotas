@@ -1,106 +1,96 @@
-.p-calendar .p-inputtext.p-focus {
-    box-shadow: none !important;
-    border-color: none !important;
-    outline: none !important;
-}
-.p-calendar .p-inputtext.p-focus {
-    box-shadow: none !important;
-    border-color: none !important;
-    outline: none !important;
-}
-.p-calendar .p-inputtext.p-focus,
-.p-calendar.p-focus .p-inputtext,
-.p-calendar.p-inputwrapper.p-focus input {
-    box-shadow: none !important;
-    border-color: var(--primary-color);
-    outline: none !important;
+.periodo-calendar-wrapper{
+    width: 100%;
+    min-width: 200px;
+
 }
 .p-calendar .p-datepicker-trigger {
-    background-color: transparent !important;
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-.p-calendar .p-datepicker-trigger:focus {
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-.periodo-calendar-shell .p-calendar {
-    width: 100%;
-}
-
-.periodo-calendar-shell .p-inputtext {
-    box-shadow: none !important;
-}
-
-.periodo-calendar-shell .p-datepicker-trigger {
+    background: transparent !important;
     border: none !important;
-    box-shadow: none !important;
+    box-shadow: none;
 }
-
-.periodo-calendar-shell-dark .p-calendar .p-inputtext,
-.periodo-calendar-shell-dark .p-calendar .p-datepicker-trigger {
-    background: #293B51 !important;
-    color: #FFFFFF !important;
+.p-calendar .p-datepicker-trigger .pi {
+    color: inherit !important;
 }
-
-.periodo-calendar-shell-dark .p-calendar .p-inputtext::placeholder {
-    color: #E3E6E8 !important;
-    opacity: 1;
+.p-calendar .p-inputtext {
+    height: 32px;
+    font-size: 13px;
 }
-
-.periodo-calendar-shell-dark .p-calendar .p-datepicker-trigger .pi {
-    color: #E3E6E8 !important;
+.periodo-calendar-panel {
+    max-width: 520px;
+    font-size: 13px;
 }
-
-.periodo-calendar-shell-light .p-calendar .p-inputtext,
-.periodo-calendar-shell-light .p-calendar .p-datepicker-trigger {
-    background: #FFFFFF !important;
-    color: #495057 !important;
+.periodo-calendar-panel .p-datepicker-header {
+    padding: 6px;
 }
-
-.periodo-calendar-panel-dark {
-    background: #293B51;
-    border-color: #3e4f62;
+.periodo-calendar-panel .p-datepicker-title {
+    font-size: 14px;
 }
-
-.periodo-calendar-panel-dark .p-datepicker-header,
-.periodo-calendar-panel-dark .p-datepicker-calendar-container,
-.periodo-calendar-panel-dark .p-datepicker-group,
-.periodo-calendar-panel-dark .p-datepicker-calendar,
-.periodo-calendar-panel-dark .p-datepicker-buttonbar {
-    background: #293B51;
-    color: #FFFFFF;
+.periodo-calendar-panel th {
+    font-size: 12px;
 }
-
-.periodo-calendar-panel-dark .p-datepicker-title span,
-.periodo-calendar-panel-dark th,
-.periodo-calendar-panel-dark td,
-.periodo-calendar-panel-dark td > span,
-.periodo-calendar-panel-dark .p-datepicker-prev,
-.periodo-calendar-panel-dark .p-datepicker-next {
-    color: #FFFFFF;
+.periodo-calendar-panel .p-datepicker td > span {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
 }
-
-.periodo-calendar-panel-dark .calendar-divider {
-    background: #3e4f62;
+.calendar-buttons-DataPiker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px;
+    padding: 6px;
 }
-
-.calendar-footer-ok{
-    display: flex;
+.btn-filter-calendar {
     width: 100%;
-    justify-content: space-between;
-    margin-top: 1rem;
+    height: 26px;
+    font-size: 11px;
 }
-.calendar-buttons-DataPiker{
-display: flex;
-justify-content: space-between;
-padding: 10px;
-gap: 16px;
+.calendar-footer-ok {
+    margin-top: 8px;
+}
+.calendar-footer-ok .p-button {
+    height: 28px;
+    font-size: 12px;
+}
+@media (max-width: 768px) {
+    .calendar-buttons-DataPiker{
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 6px;
+    }
 
-}
-.btn-filter-calendar{
-height: 20px;
-font-size:9px ;
-width: 120px;
+    .btn-filter-calendar{
+        height: 28px;
+        font-size: 11px;
+    }
+
+    .periodo-calendar-panel {
+        width: 92vw !important;
+        font-size: 12px;
+    }
+
+    .periodo-calendar-panel .p-datepicker {
+        font-size: 12px;
+        padding: 0.3rem;
+    }
+
+    .periodo-calendar-panel .p-datepicker td > span {
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+    }
+
+    .periodo-calendar-panel .p-datepicker-title {
+        font-size: 12px;
+    }
+
+    .calendar-footer-ok{
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .calendar-footer-ok .p-button{
+        width: 100%;
+        height: 28px;
+        font-size: 11px;
+    }
+
 }

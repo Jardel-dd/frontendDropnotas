@@ -353,3 +353,11 @@ export const DropDownFilterOrdemServicoContratoNotaServico = [
     { label: 'Ordem de Serviços', value: 'PENDENTE' },
     { label: 'Nota de Serviço', value: 'PENDENTE' }
 ];
+
+
+export const DropDownFilterTipoOrigem = [
+    { label: 'Todos', value: '' },
+    { label: 'Ordem Serviço', value: 'ORDEM_SERVICO' },
+    { label: 'Nota Serviço', value: 'NOTA_SERVICO' },
+    { label: 'Comissão', value: 'COMISSAO' },
+];

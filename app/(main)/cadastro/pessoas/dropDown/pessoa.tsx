@@ -14,11 +14,12 @@ export default function PessoaDropdownField({
     placeholder = "Selecione o Cliente ou Fornecedor",
     topLabel = "Cliente ou Fornecedor:",
     showTopLabel = true,
-    required = true,
+    required = false,
     autoSelectSingle = false,
     showAddButton = false,
     onAddClick
-}: PessoaDropdownFieldProps) {
+}: PessoaDropdownFieldProps & { required?: boolean }) {
+
     return (
         <DropdownSearch<PessoaEntity>
             id={id}

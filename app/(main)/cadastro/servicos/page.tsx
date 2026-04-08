@@ -4,9 +4,9 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import ListarServicos from './tabela/servicoListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import ListarServicos from './tabela/servicoListagem';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
@@ -126,12 +126,6 @@ function Servicos() {
         field: 'descricao',
         onSearch: (value) => handleListServicos(0, value, listarInativos)
     });
-    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        const newValue = e.checked ?? false;
-        setListarInativos(newValue);
-        handleListServicos(0, searchTerm, newValue);
-        setVisible(false);
-    };
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationServicos((prev) => ({
@@ -152,7 +146,7 @@ function Servicos() {
         handleListServicos(0, searchTerm, listarInativos);
         setVisible(false);
     };
-     const handleClearFilters = () => {
+    const handleClearFilters = () => {
         setListarInativos(false);
         handleListServicos(0, searchTerm, listarInativos);
         setVisible(false);
@@ -169,39 +163,41 @@ function Servicos() {
             {isMobile && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                            <div className="grid formgrid p-2">
-                              <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
-                                    <Input
-                                        label="Buscar"
-                                        outlined={true}
-                                        useRightButton={true}
-                                        iconRight={'pi pi-search'}
-                                        id="descricao"
-                                        onChange={handleSearchChange}
-                                        value={searchTerm}
-                                        loading={loading}
-                                        onClickSearch={() => searchNow(searchTerm)}
-                                        topLabel="Serviço:"
-                                        showTopLabel
-                                    />
-                                </div>
-                                <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
-                                     <div className="container-BTN-Filter-Created">
-                                        <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
-                                            <div className="checkBoxMobile-width-max-10rem">
-                                    <div className="checkbox-container">
-                                        <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                        <label htmlFor="listarInativos" className="ml-2">
-                                            Listar Desativadas
-                                        </label>
-                                    </div>
-                                </div>
-                                        </FilterOverlay>
-                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                    </div>
-                                 
+                        <div className="grid formgrid p-2">
+                            <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
+                                <Input
+                                    label="Buscar"
+                                    outlined={true}
+                                    useRightButton={true}
+                                    iconRight={'pi pi-search'}
+                                    id="descricao"
+                                    onChange={handleSearchChange}
+                                    value={searchTerm}
+                                    loading={loading}
+                                    onClickSearch={() => searchNow(searchTerm)}
+                                    topLabel="Serviço:"
+                                    showTopLabel
+                                />
+                            </div>
+                            <div className="col-4 mb-0 lg:col-3 lg:mb-0 ">
+                                <div className="container-BTN-Filter-Created">
+                                    <FilterOverlay
+                                        onApply={handleSalvarFiltro}
+                                        onClear={handleClearFilters}
+                                        buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                        <div className="checkBoxMobile-width-max-10rem">
+                                            <div className="checkbox-container">
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                <label htmlFor="listarInativos" className="ml-2">
+                                                    Listar Desativadas
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </FilterOverlay>
+                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
                             </div>
+                        </div>
                         <div>
                             <ListarServicos
                                 loading={loading}
@@ -244,7 +240,7 @@ function Servicos() {
                         <div className="scrollable-container">
                             <div className="p-0">
                                 <div className="grid formgrid">
-                                    <div className="col-12 lg:col-3 container-input-search-all">
+                                    <div className="col-12 lg:col-12 container-input-search-all">
                                         <Input
                                             label="Buscar"
                                             outlined={true}
@@ -259,17 +255,21 @@ function Servicos() {
                                             showTopLabel
                                         />
                                     </div>
-                                    <div className="checkBox-width-max-10rem">
-                                        <div className="checkbox-container">
-                                            <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                            <label htmlFor="listarInativos" className="ml-2">
-                                                Listar Desativadas
-                                            </label>
+                                <div className="Container-Btn-Filter-Desktop">
+                                    <FilterOverlay
+                                        onApply={handleSalvarFiltro}
+                                        onClear={handleClearFilters}
+                                        buttonClassName="Btn-Filter-Desktop">
+                                        <div className="checkBoxMobile-width-max-10rem">
+                                            <div className="checkbox-container">
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                <label htmlFor="listarInativos" className="ml-2">
+                                                    Listar Desativadas
+                                                </label>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="container-button-primary-novo">
-                                        <Button label="Novo" icon="pi pi-plus" onClick={handleNavigate} className="p-button-primary-novo" />
-                                    </div>
+                                    </FilterOverlay>
+                                </div>
                                 </div>
                                 <div className="mt-3">
                                     <ListarServicos

@@ -56,7 +56,7 @@ export function BTNFilterMobile({
                   )}
                 <div className="flex-center-row">
                     <Button
-                        className="height-2-8rem-ml-1rem"
+                        className="height-2-8rem-ml-1rem-mobile"
                         icon="pi pi-filter"
                         outlined
                         onClick={onOpenFilter}
@@ -65,7 +65,7 @@ export function BTNFilterMobile({
                     {onAddClick && (
                         <Button
                             icon="pi pi-plus"
-                            className="height-2-8rem-ml-1rem"
+                            className="height-2-8rem-ml-1rem-mobile"
                             onClick={onAddClick}
                         />
                     )}

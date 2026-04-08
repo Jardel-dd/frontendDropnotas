@@ -166,7 +166,9 @@ const Empresas: React.FC = () => {
         handleListCompany(0, searchTerm, listarInativos);
         setVisible(false);
     };
-    const handleCancelarFiltro = () => {
+     const handleClearFilters = () => {
+        setListarInativos(false);
+        handleListCompany(0, searchTerm, listarInativos);
         setVisible(false);
     };
     const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
@@ -200,7 +202,7 @@ const Empresas: React.FC = () => {
                                 </div>
                                  <div className="col-4 mb-0 lg:col-2 p-0 " style={{ marginTop: "2px" }}>
                                     <div className="container-BTN-Filter-Created ">
-                                <FilterOverlay onApply={handleSalvarFiltro} onClear={handleCancelarFiltro} buttonClassName="height-2-8rem-ml-1rem">
+                                <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
                                     <div className='checkBoxMobile-width-max-10rem'>
                                         <div className="checkbox-container">
                                             <Checkbox

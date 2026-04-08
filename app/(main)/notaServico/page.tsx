@@ -350,82 +350,106 @@ const NotaServico: React.FC = () => {
                 {isMobile && (
                     <>
                         <div className="card styled-container-main-all-routes">
-                            <div className="grid formgrid container-top-bar">
-                                <div className="search-container">
-                                    <Input
-                                        label="Buscar"
-                                        outlined={true}
-                                        id="razao_social_cliente"
-                                        useRightButton={true}
-                                        iconRight="pi pi-search"
-                                        onChange={handleSearchChange}
-                                        value={searchTerm}
-                                        loading={loading}
-                                        onClickSearch={() => searchNow(searchTerm)}
-                                        topLabel="Buscar:"
-                                        showTopLabel
-                                    />
-                                </div>
-                                <div className="actions-wrapper" style={{ marginTop: '3px' }}>
-                                    <div className="container-BTN-Filter-Created w-full">
-                                        <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
-                                            <div className="col-12 lg:col-12 ">
-                                                <DateRangePicker
-                                                    showTopLabel
-                                                    topLabel="Filtar por Data:"
-                                                    onBuscar={(inicio: Date, fim: Date) => {
-                                                        setDateRange([dayjs(inicio), dayjs(fim)]);
+                            <div style={{ marginTop: "8px", marginLeft: "8px" }}>
+                                <div className="grid formgrid w-full" style={{ maxHeight: '74px' }}>
+                                    <div className="col-8 mb-0 lg:col-8  ">
+                                        <Input
+                                            label="Buscar"
+                                            outlined={true}
+                                            id="razao_social_cliente"
+                                            useRightButton={true}
+                                            iconRight="pi pi-search"
+                                            onChange={handleSearchChange}
+                                            value={searchTerm}
+                                            loading={loading}
+                                            onClickSearch={() => searchNow(searchTerm)}
+                                            topLabel="Buscar:"
+                                            showTopLabel
+                                        />
+                                    </div>
+                                    <div className="col-4 mb-0 lg:col-3 ">
+                                        <div className="nota-servico-mobile-buttons" style={{ position: "relative" }}>
+                                            {selectedNotas.length > 0 && (
+                                                <Button
+                                                    icon="pi pi-send"
+                                                     label={`Emitir selecionadas (${selectedNotas.length})`}
+                                                    onClick={handleEmitirNotas}
+                                                    outlined
+                                                    severity='success'
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: "-10px",
+                                                        width: "200px",
+                                                        right: "0",
+                                                        height: "28px", 
+                                                        boxShadow:"none"
                                                     }}
                                                 />
+                                            )}
+                                        </div>
+                                        <div className="container-BTN-Filter-Created nota-servico-mobile-actions">
+                                            <FilterOverlay
+                                                onApply={buscar}
+                                                onClear={handleClearFilters}
+                                                buttonClassName="height-2-8rem-ml-1rem-mobile"
+                                            >
+                                                <div className="col-12 lg:col-12 ">
+                                                    <DateRangePicker
+                                                        showTopLabel
+                                                        topLabel="Filtar por Data:"
+                                                        onBuscar={(inicio: Date, fim: Date) => {
+                                                            setDateRange([dayjs(inicio), dayjs(fim)]);
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="col-12 lg:col-12 ">
+                                                    <EmpresaDropdownField
+                                                        selectedCompany={selectedEmpresa}
+                                                        onCompanyChange={handleEmpresaChange}
+                                                        hasError={!!errors.selectedCompany}
+                                                        errorMessage={errors.selectedCompany}
+                                                    />
+                                                </div>
+                                                <div className="col-12 lg:col-12 ">
+                                                    <PessoaDropdownField selectedPessoa={selectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
+                                                </div>
+                                                <div className="col-12 lg:col-12">
+                                                    <DropdownSearch<VendedorEntity>
+                                                        id="selectedVendedor"
+                                                        selectedItem={selectedVendedor}
+                                                        onItemChange={handleVendedorChange}
+                                                        fetchAllItems={listTheVendedor}
+                                                        fetchFilteredItems={fetchFilteredVendedor}
+                                                        optionLabel="razao_social"
+                                                        placeholder="Selecione o Serviço"
+                                                        hasError={!!errors.selectedVendedor}
+                                                        errorMessage={errors.selectedVendedor}
+                                                        topLabel="Vendedor:"
+                                                        showTopLabel
+                                                    />
+                                                </div>
+                                                <div className="col-12 lg:col-12 ">
+                                                    <Dropdown
+                                                        id="selectedStatusNotaServico"
+                                                        value={selectedStatusNotaServico}
+                                                        options={DropDownFilterNotaServico}
+                                                        optionLabel="label"
+                                                        optionValue="value"
+                                                        placeholder="Selecione"
+                                                        onChange={(e) => setSelectedStatusNotaServico(e.value)}
+                                                        className="custom-multiselect w-full"
+                                                        label={''}
+                                                        topLabel="Status:"
+                                                        showTopLabel
+                                                    />
+                                                </div>
+                                            </FilterOverlay>
+                                            <div className="nota-servico-mobile-buttons">
+
+                                                <Button label="" icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                             </div>
-                                            <div className="col-12 lg:col-12 ">
-                                                <EmpresaDropdownField
-                                                    selectedCompany={selectedEmpresa}
-                                                    onCompanyChange={handleEmpresaChange}
-                                                    hasError={!!errors.selectedCompany}
-                                                    errorMessage={errors.selectedCompany}
-                                                    showAddButton
-                                                    autoSelectSingle={true}
-                                                />
-                                            </div>
-                                            <div className="col-12 lg:col-12 ">
-                                                <PessoaDropdownField selectedPessoa={selectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
-                                            </div>
-                                            <div className="col-12 lg:col-12">
-                                                <DropdownSearch<VendedorEntity>
-                                                    id="selectedVendedor"
-                                                    selectedItem={selectedVendedor}
-                                                    onItemChange={handleVendedorChange}
-                                                    fetchAllItems={listTheVendedor}
-                                                    fetchFilteredItems={fetchFilteredVendedor}
-                                                    optionLabel="razao_social"
-                                                    placeholder="Selecione o Serviço"
-                                                    hasError={!!errors.selectedVendedor}
-                                                    errorMessage={errors.selectedVendedor}
-                                                    topLabel="Vendedor:"
-                                                    showTopLabel
-                                                />
-                                            </div>
-                                            <div className="col-12 lg:col-12 ">
-                                                <Dropdown
-                                                    id="selectedStatusNotaServico"
-                                                    value={selectedStatusNotaServico}
-                                                    options={DropDownFilterNotaServico}
-                                                    optionLabel="label"
-                                                    optionValue="value"
-                                                    placeholder="Selecione"
-                                                    onChange={(e) => setSelectedStatusNotaServico(e.value)}
-                                                    className="custom-multiselect w-full"
-                                                    label={''}
-                                                    topLabel="Status:"
-                                                    showTopLabel
-                                                />
-                                            </div>
-                                        </FilterOverlay>
-                                    </div>
-                                    <div className="buttons-group">
-                                        {selectedNotas.length > 0 && <Button style={{ marginRight: '10px' }} className="height-2-8rem-ml-1rem" icon="pi pi-send" onClick={handleEmitirNotas} outlined />}
-                                        <Button style={{ marginRight: '5px' }} label="" icon="pi pi-plus" className="height-2-8rem-ml-1rem" onClick={handleNavigate} />
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>

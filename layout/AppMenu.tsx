@@ -81,6 +81,11 @@ const AppMenu = () => {
                     label: 'Contas a Receber',
                     icon: 'pi pi-palette',
                     to: '/financas/receber',
+                },
+                 {
+                    label: 'Comissões',
+                    icon: 'pi pi-dollar',
+                    to: '/financas/comissoes',
                 }
             ],
         } : null,

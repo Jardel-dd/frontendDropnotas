@@ -189,9 +189,9 @@ const Contratos: React.FC = () => {
                                         showTopLabel
                                     />
                                 </div>
-                                <div className="col-4 mb-0 lg:col-2 p-0 " style={{ marginTop: "4px" }}>
+                                <div className="col-4 mb-0 lg:col-2 p-0 ">
                                     <div className="container-BTN-Filter-Created">
-                                        <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
+                                        <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
                                             <div className="checkBoxMobile-width-max-10rem">
                                                 <div className="checkbox-container">
                                                     <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
@@ -263,15 +263,21 @@ const Contratos: React.FC = () => {
                                             showTopLabel
                                         />
                                     </div>
-                                    <div className="checkbox-container">
-                                        <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                        <label htmlFor="listarInativos" className="ml-2">
-                                            Listar Desativadas
-                                        </label>
-                                    </div>
-                                    <div className="container-button-primary-novo">
-                                        <Button label="Novo" icon="pi pi-plus" onClick={handleNavigate} className="p-button-primary-novo" />
-                                    </div>
+                                     <div className="Container-Btn-Filter-Desktop">
+                                    <FilterOverlay
+                                        onApply={handleSalvarFiltro}
+                                        onClear={handleClearFilters}
+                                        buttonClassName="Btn-Filter-Desktop">
+                                        <div className="checkBoxMobile-width-max-10rem">
+                                            <div className="checkbox-container">
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                <label htmlFor="listarInativos" className="ml-2">
+                                                    Listar Desativadas
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </FilterOverlay>
+                                </div>
                                 </div>
                             </div>
                             <div className="mt-3">

@@ -10,8 +10,10 @@ export default function VendedorDropdownField({
     onAddClick,
     reloadKey = 0,
     hasError,
-    errorMessage
-}: VendedorDropdownFieldProps) {
+    errorMessage,
+    required = false
+}: VendedorDropdownFieldProps & { required?: boolean }) {
+
     return (
         <DropdownSearch<VendedorEntity>
             id="selectedVendedor"
@@ -30,7 +32,7 @@ export default function VendedorDropdownField({
             showAddButton
             autoSelectSingle
             showTopLabel
-            required
+            required={required}
             topLabel="Vendedor:"
         />
     );

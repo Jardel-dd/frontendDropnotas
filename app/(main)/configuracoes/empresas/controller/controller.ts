@@ -4,6 +4,99 @@ import { CompanyEntity } from '../../../../entity/CompanyEntity';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 
+const BASE64_IMAGE_DATA_URL_REGEX = /^data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/i;
+const IMAGE_URL_REGEX = /^(https?:\/\/|blob:|\/)/i;
+const RAW_BASE64_REGEX = /^[A-Za-z0-9+/=\s]+$/;
+
+const blobToDataUrl = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Nao foi possivel ler o blob da imagem.'));
+        reader.readAsDataURL(blob);
+    });
+
+const getLogoUrlCandidates = (imageUrl: string): string[] => {
+    const trimmedUrl = imageUrl.trim();
+
+    if (!trimmedUrl) {
+        return [];
+    }
+    const candidates = [trimmedUrl];
+
+    try {
+        const parsedUrl = new URL(trimmedUrl);
+
+        if (parsedUrl.hostname === 'backend.dropnotas.com' && parsedUrl.port === '2712') {
+            const withoutPortUrl = new URL(trimmedUrl);
+            withoutPortUrl.port = '';
+            candidates.push(withoutPortUrl.toString());
+        }
+    } catch {
+        return candidates;
+    }
+
+    return Array.from(new Set(candidates));
+};
+
+const inferImageMimeTypeFromBase64 = (base64Value: string): string | null => {
+    const normalizedValue = base64Value.replace(/\s/g, '');
+
+    if (normalizedValue.startsWith('iVBORw0KGgo')) {
+        return 'image/png';
+    }
+    if (normalizedValue.startsWith('/9j/')) {
+        return 'image/jpeg';
+    }
+    if (normalizedValue.startsWith('R0lGOD')) {
+        return 'image/gif';
+    }
+    if (normalizedValue.startsWith('UklGR')) {
+        return 'image/webp';
+    }
+    if (normalizedValue.startsWith('Qk')) {
+        return 'image/bmp';
+    }
+    if (normalizedValue.startsWith('AAABAA')) {
+        return 'image/x-icon';
+    }
+    if (normalizedValue.startsWith('PHN2Zy') || normalizedValue.startsWith('PD94bWwg')) {
+        return 'image/svg+xml';
+    }
+
+    return null;
+};
+
+const normalizeLogoEmpresaForBackend = async (logoEmpresa?: string | null): Promise<string> => {
+    const logoNormalizado = logoEmpresa?.trim() ?? '';
+
+    if (!logoNormalizado) {
+        return '';
+    }
+    if (BASE64_IMAGE_DATA_URL_REGEX.test(logoNormalizado)) {
+        return logoNormalizado;
+    }
+    if (IMAGE_URL_REGEX.test(logoNormalizado)) {
+        const convertedLogo = await convertImageUrlToBase64(logoNormalizado);
+
+        if (convertedLogo) {
+            return convertedLogo;
+        }
+
+        throw new Error('Nao foi possivel converter o logo da empresa para o formato Base64 esperado.');
+    }
+
+    const rawBase64 = logoNormalizado.replace(/\s/g, '');
+
+    if (RAW_BASE64_REGEX.test(rawBase64)) {
+        const inferredMimeType = inferImageMimeTypeFromBase64(rawBase64) ?? 'image/png';
+
+        return `data:${inferredMimeType};base64,${rawBase64}`;
+    }
+
+    return logoNormalizado;
+};
+
 export const listEmpresa = async (
     listPaginationEmpresa: Record<string, any>,
     listarInativos: boolean,
@@ -25,6 +118,7 @@ export const updateEmpresa = async (
     empresaId: string,
     empresa: CompanyEntity,
     selectedUserConta: UsuarioContaEntity[],
+    logoAlterada: boolean,
     setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
     msgs: any,
     router: AppRouterInstance,
@@ -34,6 +128,14 @@ export const updateEmpresa = async (
         const empresaParaEnviar = { ...empresa };
         if (empresaParaEnviar.cnpj) {
             empresaParaEnviar.cnpj = empresaParaEnviar.cnpj.replace(/\D/g, '');
+        }
+        const logoEmpresaAtual = empresaParaEnviar.logo_empresa?.trim() ?? '';
+        const shouldSkipLogoOnUpdate = !logoAlterada && IMAGE_URL_REGEX.test(logoEmpresaAtual);
+
+        if (shouldSkipLogoOnUpdate) {
+            delete (empresaParaEnviar as Partial<CompanyEntity>).logo_empresa;
+        } else {
+            empresaParaEnviar.logo_empresa = await normalizeLogoEmpresaForBackend(empresaParaEnviar.logo_empresa);
         }
         const empresaData = {
             ...empresaParaEnviar,
@@ -46,10 +148,10 @@ export const updateEmpresa = async (
             email: empresaParaEnviar.email ?? "",
             nome_pais: empresaParaEnviar.endereco.nome_pais ?? "",
             telefone: empresaParaEnviar.telefone ?? "",
-            logo_empresa: empresaParaEnviar.logo_empresa ?? "",
             aliquota_iss: Number(empresaParaEnviar.aliquota_iss),
             proximo_numero_lote: Number(empresaParaEnviar.proximo_numero_lote),
             proximo_numero_rps: Number(empresaParaEnviar.proximo_numero_rps),
+            ...(shouldSkipLogoOnUpdate ? {} : { logo_empresa: empresaParaEnviar.logo_empresa ?? "" }),
         };
         console.log(' enviado para o backend:', empresaData);
         const response = await api.put(`/empresa`, empresaData);
@@ -156,10 +258,12 @@ export const createdEmpresa = async (
     redirectAfterSave: boolean,
 ) => {
     try {
+        const logoEmpresaNormalizado = await normalizeLogoEmpresaForBackend(empresa.logo_empresa);
         const empresaData = {
             ...empresa,
             cnpj: empresa.cnpj?.replace(/\D/g, ''),
             cep: empresa.endereco?.cep?.replace(/\D/g, '') || '',
+            logo_empresa: logoEmpresaNormalizado,
             id_usuarios_acesso:
                 selectedUserConta.length > 0
                     ? selectedUserConta.map((usuario) => usuario.id)
@@ -288,19 +392,51 @@ export const convertCertificadoToBase64 = (
 export const convertImageUrlToBase64 = async (
     imageUrl: string
 ): Promise<string | null> => {
+    const imageCandidates = getLogoUrlCandidates(imageUrl);
+
     try {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        return await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = () => reject(null);
-            reader.readAsDataURL(blob);
-        });
+        for (const candidate of imageCandidates) {
+            try {
+                const response = await api.get(candidate, {
+                    responseType: 'blob',
+                    headers: {
+                        Accept: 'image/*',
+                    },
+                });
+                const blob = response.data as Blob;
+
+                if (blob?.type?.startsWith('image/')) {
+                    return await blobToDataUrl(blob);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar imagem da logo:', candidate, error);
+            }
+        }
     } catch (error) {
         console.error("Erro ao converter imagem para base64:", error);
-        return null;
     }
+
+    return null;
+};
+
+export const resolveLogoEmpresaSource = async (imageUrl?: string | null): Promise<string> => {
+    const logoSource = imageUrl?.trim() ?? '';
+
+    if (!logoSource) {
+        return '';
+    }
+    if (BASE64_IMAGE_DATA_URL_REGEX.test(logoSource)) {
+        return logoSource;
+    }
+
+    const logoInBase64 = await convertImageUrlToBase64(logoSource);
+
+    if (logoInBase64) {
+        return logoInBase64;
+    }
+
+    const imageCandidates = getLogoUrlCandidates(logoSource);
+    return imageCandidates[imageCandidates.length - 1] ?? logoSource;
 };
 export const handleActiveOrInativeEmpresa = async (
     rowData: CompanyEntity,

@@ -128,7 +128,6 @@ export function DataTableSelectable<T extends NfsEntity>({
                 />
             )}
         </DataTable>
-
     );
 }
 export const downloadPdfButton = (

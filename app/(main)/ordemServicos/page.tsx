@@ -1,46 +1,41 @@
 'use client';
 import './fotter.css';
 import '@/app/styles/styledGlobal.css';
-import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
+import { OrdemServicoParams } from './types/ordemServico';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
+import ListarOrdemServico from './tabela/ordemServicoListagem';
 import { Formas_recebimento } from '@/app/entity/FormaPagamento';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { DetalServiceOSEntity } from '@/app/entity/ServiceEntity';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
-import ListarOrdemServico from './tabela/ordemServicoListagem';
+import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
-import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
+import { deletar, fetchOrdemServico, list, preparar } from './controller/controller';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DropDownFilterOrdemOrdemServico } from '@/app/shared/optionsDropDown/options';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
-import { deletar, fetchOrdemServico, list,  preparar } from './controller/controller';
-import { OrdemServicoParams } from './types/ordemServico';
-import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
-import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
-import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 const OrdemServicos: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
-    const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
-    const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0); 
+    const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
     const [emitirOS, setEmitirOS] = useState<ServiceOrderEntity>(
         new ServiceOrderEntity({
             id: 0,
@@ -244,7 +239,7 @@ const OrdemServicos: React.FC = () => {
                 {isMobile && (
                     <>
                         <div className="card styled-container-main-all-routes">
-                            <div style={{padding:"8px"}}>
+                            <div style={{ padding: "8px" }}>
                                 <div className="grid formgrid" style={{ maxHeight: '74px' }}>
                                     <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                         <Input
@@ -261,10 +256,13 @@ const OrdemServicos: React.FC = () => {
                                             showTopLabel
                                         />
                                     </div>
-                                    <div className="col-4 mb-0 lg:col-2 p-0 " style={{ marginTop: '3px' }}>
+                                    <div className="col-4 mb-0 lg:col-2 p-0 " >
                                         <div className="container-BTN-Filter-Created">
-                                            <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
-                                                <div className="col-12 lg:col-12 w-full">
+                                            <FilterOverlay 
+                                            onApply={buscar}
+                                             onClear={handleClearFilters}
+                                              buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                                <div className="col-12 lg:col-12 ">
                                                     <DateRangePicker
                                                         showTopLabel
                                                         topLabel="Filtar por Data:"
@@ -274,7 +272,7 @@ const OrdemServicos: React.FC = () => {
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                                    <EmpresaDropdownField
+                                                    <EmpresaDropdownField
                                                         selectedCompany={selectedEmpresa}
                                                         onCompanyChange={handleCompanyChange}
                                                         hasError={!!errors.selectedCompany}
@@ -282,16 +280,16 @@ const OrdemServicos: React.FC = () => {
                                                         showAddButton
                                                         autoSelectSingle={true}
                                                     />
-                                                
+
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                  <PessoaDropdownField
-    selectedPessoa={selectedPessoa}
-    onPessoaChange={handlePessoaChange}
-    reloadKey={reloadKeyPessoa}
-    hasError={!!errors.selectedPessoa}
-    errorMessage={errors.selectedPessoa}
-/>
+                                                    <PessoaDropdownField
+                                                        selectedPessoa={selectedPessoa}
+                                                        onPessoaChange={handlePessoaChange}
+                                                        reloadKey={reloadKeyPessoa}
+                                                        hasError={!!errors.selectedPessoa}
+                                                        errorMessage={errors.selectedPessoa}
+                                                    />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <Dropdown
@@ -322,7 +320,7 @@ const OrdemServicos: React.FC = () => {
                                                             });
                                                             router.push(`/ordemServicos/created?${queryParams.toString()}`);
                                                         }
-                                                    } catch (error) {}
+                                                    } catch (error) { }
                                                 }}
                                             />
                                         </div>
@@ -385,29 +383,30 @@ const OrdemServicos: React.FC = () => {
                                                 showTopLabel
                                             />
                                         </div>
-                                        <div className="col-12 lg:col-2 p-0">
+                                        <div>
                                             <DateRangePicker showTopLabel topLabel="Filtar por Data:" onBuscar={buscar} />
                                         </div>
                                         <div className="Container-Btn-Filter-Desktop">
-                                            <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
+                                            <FilterOverlay 
+                                            onApply={buscar} 
+                                            onClear={handleClearFilters} 
+                                            buttonClassName="Btn-Filter-Desktop">
                                                 <div className="col-12 lg:col-12 ">
-                                                                <EmpresaDropdownField
+                                                    <EmpresaDropdownField
                                                         selectedCompany={selectedEmpresa}
                                                         onCompanyChange={handleCompanyChange}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
-                                                        showAddButton
-                                                        autoSelectSingle={true}
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                 <PessoaDropdownField
-    selectedPessoa={selectedPessoa}
-    onPessoaChange={handlePessoaChange}
-    reloadKey={reloadKeyPessoa}
-    hasError={!!errors.selectedPessoa}
-    errorMessage={errors.selectedPessoa}
-/>
+                                                    <PessoaDropdownField
+                                                        selectedPessoa={selectedPessoa}
+                                                        onPessoaChange={handlePessoaChange}
+                                                        reloadKey={reloadKeyPessoa}
+                                                        hasError={!!errors.selectedPessoa}
+                                                        errorMessage={errors.selectedPessoa}
+                                                    />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <Dropdown
@@ -440,7 +439,7 @@ const OrdemServicos: React.FC = () => {
                                                             });
                                                             router.push(`/ordemServicos/created?${queryParams.toString()}`);
                                                         }
-                                                    } catch (error) {}
+                                                    } catch (error) { }
                                                 }}
                                             />
                                         </div>

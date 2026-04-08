@@ -155,8 +155,8 @@ const ComponentDashboard: React.FC = () => {
                     <>
                         <div className="card styled-container-main-all-routes">
                             <div className="scrollable-container">
-                                <div className="grid formgrid w-full" style={{ maxHeight: '74px' }}>
-                                    <div className="col-9 mb-0 lg:col-9 lg:mb-0 p-0">
+                                <div className="grid formgrid flex justify-content-between w-full" style={{ maxHeight: '74px' }}>
+                                    <div className="p-0">
                                         <DateRangePicker
                                             showTopLabel
                                             topLabel="Filtar por Data:"
@@ -165,9 +165,11 @@ const ComponentDashboard: React.FC = () => {
                                             }}
                                         />
                                     </div>
-                                    <div className="col-3 mb-0 lg:col-3" >
-                                        <div className="container-BTN-Filter-Created mt-1">
-                                            <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem">
+                                    <div className="col-3 mb-0 lg:col-3"  >
+                                        <div className="container-BTN-Filter-Created">
+                                            <FilterOverlay 
+                                            onApply={buscar}
+                                            onClear={handleClearFilters}>
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
                                                         selectedCompany={selectedCompany}
@@ -245,14 +247,12 @@ const ComponentDashboard: React.FC = () => {
                                         <div className="Container-Btn-Filter-Desktop">
                                             <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
                                                 <div className="col-12 lg:col-12 ">
-                                                     <EmpresaDropdownField
-                                                                                                        selectedCompany={selectedCompany}
-                                                                                                        onCompanyChange={handleCompanyChange}
-                                                                                                        hasError={!!errors.selectedCompany}
-                                                                                                        errorMessage={errors.selectedCompany}
-                                                                                                        showAddButton
-                                                                                                        autoSelectSingle={true}
-                                                                                                    />
+                                                    <EmpresaDropdownField
+                                                        selectedCompany={selectedCompany}
+                                                        onCompanyChange={handleCompanyChange}
+                                                        hasError={!!errors.selectedCompany}
+                                                        errorMessage={errors.selectedCompany}
+                                                    />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <PessoaDropdownField

@@ -197,13 +197,22 @@
  margin-left: 5px;
 }
 
-.buttons-group {
+.nota-servico-mobile-actions {
+    width: 100%;
+    margin-left: 0 !important;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.nota-servico-mobile-buttons {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-left: 11px;
-    margin-top: 5px;
-    width: 100%;
+    width: auto;
+    margin-left: auto;
+    margin-top: 0;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex-shrink: 0;
 }
 
 .paginator-wrapper {

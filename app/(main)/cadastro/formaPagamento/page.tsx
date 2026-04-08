@@ -120,7 +120,7 @@ const CategoriaContrato: React.FC = () => {
         }));
         handleListFormaPagamento(selectedPage, searchTerm, listarInativos);
     };
-    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
+    const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
         const newValue = e.checked ?? false;
         setListarInativos(newValue);
         handleListFormaPagamento(0, searchTerm, newValue);
@@ -130,12 +130,6 @@ const CategoriaContrato: React.FC = () => {
         const value = event.target.value;
         setSearchTerm(value);
         debouncedSearch(value);
-    };
-    const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
-        setListarInativos(e.checked ?? false);
-    };
-    const handleCancelarFiltro = () => {
-        setVisible(false);
     };
     const handleClearFilters = () => {
         setListarInativos(false);
@@ -177,14 +171,14 @@ const CategoriaContrato: React.FC = () => {
                                     showTopLabel
                                 />
                             </div>
-                           <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
+                           <div className="col-4 mb-0 lg:col-3 lg:mb-0">
                                 <div className="container-BTN-Filter-Created">
                                     <FilterOverlay 
                                     onClear={handleClearFilters} 
                                     onApply={handleApplyFilters}
-                                    buttonClassName="height-2-8rem-ml-1rem"
+                                    buttonClassName="height-2-8rem-ml-1rem-mobile"
                                      >
-                                        <div className="col-12 lg:col-12 ">
+                                        <div>
                                             <Dropdown
                                                 value={selectedFormaPagamento}
                                                 options={tipo_forma_pagamento}
@@ -197,11 +191,13 @@ const CategoriaContrato: React.FC = () => {
                                                 label=""
                                             />
                                         </div>
-                                        <div className="col-12 lg:col-12 mt-3">
-                                            <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                            <label htmlFor="listarInativos" className="ml-2">
-                                                Listar Desativadas
-                                            </label>
+                                          <div className="checkBoxMobile-width-max-10rem">
+                                            <div className="checkbox-container">
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                <label htmlFor="listarInativos" className="ml-2">
+                                                    Listar Desativadas
+                                                </label>
+                                            </div>
                                         </div>
                                     </FilterOverlay>
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
@@ -269,7 +265,7 @@ const CategoriaContrato: React.FC = () => {
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
                                         <FilterOverlay onClear={handleClearFilters} onApply={handleApplyFilters} buttonClassName="Btn-Filter-Desktop">
-                                            <div className="col-12 lg:col-12 ">
+                                            <div>
                                                 <Dropdown
                                                     value={selectedFormaPagamento}
                                                     options={tipo_forma_pagamento}
@@ -282,12 +278,14 @@ const CategoriaContrato: React.FC = () => {
                                                     label=""
                                                 />
                                             </div>
-                                            <div className="col-12 lg:col-12 mt-3">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
+                                            <div className="checkBoxMobile-width-max-10rem">
+                                            <div className="checkbox-container">
+                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
                                                 <label htmlFor="listarInativos" className="ml-2">
                                                     Listar Desativadas
                                                 </label>
                                             </div>
+                                        </div>
                                         </FilterOverlay>
                                     </div>
                                     <div className="container-button-primary-novo">
