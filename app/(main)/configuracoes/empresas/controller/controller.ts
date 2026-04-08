@@ -2,11 +2,17 @@ import api from '@/app/services/api';
 import '@/app/styles/styledGlobal.css';
 import { CompanyEntity } from '../../../../entity/CompanyEntity';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
+import { getToken } from '@/app/services/token';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 
 const BASE64_IMAGE_DATA_URL_REGEX = /^data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/i;
 const IMAGE_URL_REGEX = /^(https?:\/\/|blob:|\/)/i;
 const RAW_BASE64_REGEX = /^[A-Za-z0-9+/=\s]+$/;
+const NO_CACHE_REQUEST_HEADERS = {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    Pragma: 'no-cache',
+    Expires: '0',
+};
 
 const blobToDataUrl = (blob: Blob): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -37,6 +43,45 @@ const getLogoUrlCandidates = (imageUrl: string): string[] => {
     }
 
     return Array.from(new Set(candidates));
+};
+
+const resolveRequestUrl = (requestUrl: string): string => {
+    const trimmedUrl = requestUrl.trim();
+
+    if (!trimmedUrl) {
+        return '';
+    }
+
+    try {
+        return new URL(trimmedUrl).toString();
+    } catch {
+        const apiBaseUrl = api.defaults.baseURL;
+
+        if (!apiBaseUrl) {
+            return trimmedUrl;
+        }
+
+        return new URL(trimmedUrl, apiBaseUrl).toString();
+    }
+};
+
+const fetchImageBlobWithoutCache = async (imageUrl: string): Promise<Blob | null> => {
+    const token = await getToken();
+    const response = await fetch(resolveRequestUrl(imageUrl), {
+        method: 'GET',
+        cache: 'no-store',
+        headers: {
+            Accept: 'image/*',
+            ...NO_CACHE_REQUEST_HEADERS,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Falha ao buscar imagem. Status: ${response.status}`);
+    }
+
+    return response.blob();
 };
 
 const inferImageMimeTypeFromBase64 = (base64Value: string): string | null => {
@@ -397,13 +442,7 @@ export const convertImageUrlToBase64 = async (
     try {
         for (const candidate of imageCandidates) {
             try {
-                const response = await api.get(candidate, {
-                    responseType: 'blob',
-                    headers: {
-                        Accept: 'image/*',
-                    },
-                });
-                const blob = response.data as Blob;
+                const blob = await fetchImageBlobWithoutCache(candidate);
 
                 if (blob?.type?.startsWith('image/')) {
                     return await blobToDataUrl(blob);
@@ -475,7 +514,12 @@ export const listTheCompany = async () => {
 };
 export const fetchCompanyByID = async (empresaId: string) => {
     try {
-        const response = await api.get(`/empresa/${empresaId}`);
+        const response = await api.get(`/empresa/${empresaId}`, {
+            headers: NO_CACHE_REQUEST_HEADERS,
+            params: {
+                _requestTime: Date.now(),
+            },
+        });
         const data = response.data;
         console.log("empresa", data)
         return {

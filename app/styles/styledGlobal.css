@@ -1,4 +1,82 @@
-/* BTNs */
+:root {
+    --form-control-height: 40px;
+    --form-label-height: 25px;
+    --form-feedback-height: 15px;
+    --form-control-radius: 6px;
+}
+
+.p-inputtext,
+.p-dropdown,
+.p-calendar,
+.p-inputmask,
+.p-inputnumber-input {
+    height: var(--form-control-height) !important;
+    min-height: var(--form-control-height) !important;
+    box-sizing: border-box;
+}
+
+.p-dropdown .p-dropdown-label {
+    min-height: var(--form-control-height) !important;
+    display: flex;
+    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.p-dropdown .p-dropdown-trigger,
+.p-calendar .p-datepicker-trigger {
+    width: var(--form-control-height) !important;
+    min-width: var(--form-control-height) !important;
+    height: var(--form-control-height) !important;
+}
+
+.p-inputgroup > .p-button,
+.p-inputgroup > .p-inputgroup-addon {
+    min-height: var(--form-control-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.p-inputgroup.custom-input,
+.p-inputgroup.custom-input-number,
+.p-inputgroup.single-date-picker-shell,
+.p-inputgroup.periodo-calendar-shell {
+    height: var(--form-control-height) !important;
+    min-height: var(--form-control-height) !important;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.p-inputgroup.custom-input > .w-full,
+.p-inputgroup.custom-input-number > .w-full,
+.p-inputgroup.single-date-picker-shell > .p-calendar,
+.p-inputgroup.periodo-calendar-shell > .p-calendar,
+.p-inputgroup.custom-input-number .p-inputnumber {
+    height: 100%;
+}
+
+.p-inputgroup.custom-input .p-inputtext,
+.p-inputgroup.custom-input-number .p-inputnumber-input,
+.p-inputgroup.single-date-picker-shell .p-inputtext,
+.p-inputgroup.periodo-calendar-shell .p-inputtext {
+    height: 100% !important;
+    min-height: 100% !important;
+    box-sizing: border-box;
+}
+
+.p-inputgroup.custom-input > .p-button,
+.p-inputgroup.custom-input > .p-inputgroup-addon,
+.p-inputgroup.custom-input-number > .p-button,
+.p-inputgroup.custom-input-number > .p-inputgroup-addon,
+.p-inputgroup.single-date-picker-shell > .p-button,
+.p-inputgroup.single-date-picker-shell > .p-inputgroup-addon,
+.p-inputgroup.periodo-calendar-shell > .p-button,
+.p-inputgroup.periodo-calendar-shell > .p-inputgroup-addon {
+    height: 100% !important;
+    min-height: 100% !important;
+    box-sizing: border-box;
+}
 .container-button-primary-novo{
 margin-left: auto;
 display: flex;

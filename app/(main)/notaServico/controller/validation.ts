@@ -1,26 +1,21 @@
-import { CompanyEntity } from '@/app/entity/CompanyEntity';
+import { NfsEntity } from '@/app/entity/NfsEntity';
 import { PrepararNfs } from '@/app/entity/NfsEntity';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import { NfsEntity } from '@/app/entity/NfsEntity';
+import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 
 const REQUIRED_FIELD_MESSAGE = 'Este campo deve ser preenchido.';
-
 const isBlank = (value: unknown) => value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
-
 const hasDigits = (value: unknown) => String(value ?? '')
     .replace(/\D/g, '')
     .length > 0;
-
 const isBooleanUnset = (value: unknown) => value === undefined || value === null || value === '';
-
 const addRequiredError = (errors: Record<string, string>, key: string, invalid: boolean, message = REQUIRED_FIELD_MESSAGE) => {
     if (invalid) {
         errors[key] = message;
     }
 };
-
 const validateEndereco = (errors: Record<string, string>, prefix: string, endereco?: EnderecoEntity | null) => {
     addRequiredError(errors, `${prefix}.cep`, !hasDigits(endereco?.cep));
     addRequiredError(errors, `${prefix}.logradouro`, isBlank(endereco?.logradouro));
@@ -32,14 +27,10 @@ const validateEndereco = (errors: Record<string, string>, prefix: string, endere
     addRequiredError(errors, `${prefix}.nome_pais`, isBlank(endereco?.nome_pais));
     addRequiredError(errors, `${prefix}.codigo_pais`, isBlank(endereco?.codigo_pais));
 };
-
 const buildNotaServicoErrors = (notaServico: NfsEntity) => {
     const newErrors: Record<string, string> = {};
     const tomadorEmail = (notaServico.tomador as any)?.email ?? (notaServico.tomador as any)?.contato?.email ?? '';
-
     addRequiredError(newErrors, 'competencia', isBlank(notaServico.competencia));
-    addRequiredError(newErrors, 'regime_especial_tributacao', isBlank(notaServico.regime_especial_tributacao));
-
     addRequiredError(newErrors, 'prestador.cpf_cnpj', !hasDigits(notaServico.prestador?.cpf_cnpj));
     addRequiredError(newErrors, 'prestador.inscricao_municipal', isBlank(notaServico.prestador?.inscricao_municipal));
     addRequiredError(newErrors, 'prestador.razao_social', isBlank(notaServico.prestador?.razao_social));
@@ -50,7 +41,6 @@ const buildNotaServicoErrors = (notaServico: NfsEntity) => {
     addRequiredError(newErrors, 'prestador.optante_simples_nacional', isBooleanUnset(notaServico.prestador?.optante_simples_nacional));
     addRequiredError(newErrors, 'prestador.incentivo_fiscal', isBooleanUnset(notaServico.prestador?.incentivo_fiscal));
     validateEndereco(newErrors, 'prestador.endereco', notaServico.prestador?.endereco);
-
     addRequiredError(newErrors, 'servico.descricao', isBlank(notaServico.servico?.descricao));
     addRequiredError(newErrors, 'servico.valores.valor_servico', Number(notaServico.servico?.valores?.valor_servico ?? 0) <= 0);
     addRequiredError(newErrors, 'servico.iss_retido', isBlank(notaServico.servico?.iss_retido));
@@ -59,7 +49,6 @@ const buildNotaServicoErrors = (notaServico: NfsEntity) => {
     addRequiredError(newErrors, 'servico.exigibilidade_iss', isBlank(notaServico.servico?.exigibilidade_iss));
     addRequiredError(newErrors, 'servico.responsavel_retencao', isBlank(notaServico.servico?.responsavel_retencao));
     addRequiredError(newErrors, 'servico.municipio_incidencia', isBlank(notaServico.servico?.municipio_incidencia));
-
     addRequiredError(newErrors, 'tomador.razao_social', isBlank(notaServico.tomador?.razao_social));
     addRequiredError(newErrors, 'tomador.cpf_cnpj', !hasDigits(notaServico.tomador?.cpf_cnpj));
     addRequiredError(newErrors, 'tomador.email', isBlank(tomadorEmail));
@@ -67,7 +56,6 @@ const buildNotaServicoErrors = (notaServico: NfsEntity) => {
 
     return newErrors;
 };
-
 export const validateFieldsPrepararNfs = (
     _emitirOS: PrepararNfs,
     selectedEmpresa: CompanyEntity | null,
@@ -81,23 +69,15 @@ export const validateFieldsPrepararNfs = (
 
     if (!selectedEmpresa || Object.keys(selectedEmpresa).length === 0) {
         newErrors.selectedEmpresa = 'Este Campo deve ser selecionado.';
-    }
-
-    if (!selectedCliente || Object.keys(selectedCliente).length === 0) {
+    }  else if (!selectedCliente || Object.keys(selectedCliente).length === 0) {
         newErrors.selectedCliente = 'Este Campo deve ser selecionado.';
-    }
-
-    if (!selectedServico || Object.keys(selectedServico).length === 0) {
+    } else if (!selectedServico || Object.keys(selectedServico).length === 0) {
         newErrors.selectedServico = 'Este Campo deve ser selecionado.';
     }
-
     const valid = Object.keys(newErrors).length === 0;
-
     setErrors(newErrors);
-
     return valid;
 };
-
 export const validateFieldsNotaServico = (
     notaServico: NfsEntity,
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>,
@@ -120,12 +100,10 @@ export const validateFieldsNotaServico = (
 
     return valid;
 };
-
 export const getScopedErrors = (errors: Record<string, string>, prefix: string) =>
     Object.entries(errors).reduce<Record<string, string>>((acc, [key, value]) => {
         if (key.startsWith(`${prefix}.`)) {
             acc[key.slice(prefix.length + 1)] = value;
         }
-
         return acc;
-    }, {});
+}, {});

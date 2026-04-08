@@ -25,7 +25,7 @@ const InputTextarea: React.FC<InputTextareaProps> = ({ value, onChange, label, r
     return (
         <>
          {showTopLabel && topLabel && (
-                <label className="filter-label flex my-1 items-center">
+                <label className="filter-label flex mt-2 items-center">
                     {topLabel}
                     <div>
                     {required && <Mandatory />}

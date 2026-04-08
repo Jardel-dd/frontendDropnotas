@@ -214,9 +214,9 @@ export const DropdownSearch = <T extends Record<string, any>>({
     }, [selectedItem, optionValue, items]);
 
     return (
-        <div ref={wrapperRef} className="p-field" style={{ width: '100%' }}>
+        <div ref={wrapperRef} className="p-field" style={{ width: '100%', height:'85px', maxHeight:"85px"}}>
             {showTopLabel && topLabel && (
-                <div style={{ height:25, display:"flex", alignItems:"center" }}>
+                <div style={{ height: 'var(--form-label-height)', display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -258,10 +258,11 @@ export const DropdownSearch = <T extends Record<string, any>>({
                     className={`${hasError ? 'p-invalid' : ''}`}
                     style={{
                         boxShadow: 'none',
-                            background: isDarkMode ? '#293B51' : '#FFFFFF',
-                            width: '100%',
-                            border: 'none',
-                            height:40
+                        background: isDarkMode ? '#293B51' : '#FFFFFF',
+                        width: '100%',
+                        border: 'none',
+                        height: 'var(--form-control-height)',
+                        minHeight: 'var(--form-control-height)'
                         
                     }}
                     filterTemplate={() => (
@@ -300,7 +301,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
                     )}
                 />
             </div>
-            <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
+            <div style={{ height: 'var(--form-feedback-height)', display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
         </div>
         </div>
     );

@@ -39,7 +39,6 @@ type InputProps = {
     required?: boolean;
     min?: number;
 };
-
 function Input({
     value,
     onChange,
@@ -91,9 +90,9 @@ function Input({
         }
     };
     return (
-        <div className="p-field" style={{ width: '100%' }}>
+        <div className="p-field" style={{ width: '100%', height:'85px', maxHeight:"85px"}}>
             {showTopLabel && topLabel && (
-                <div style={{ height:25, display:"flex", alignItems:"center" }}>
+                <div style={{ height: 'var(--form-label-height)', display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -126,7 +125,7 @@ function Input({
                             background: isDarkMode ? '#293B51' : '#FFFFFF',
                             width: '100%',
                             border: 'none',
-                            height:40
+                            height: 'var(--form-control-height)'
                         }}
                     />
                 </div>
@@ -140,12 +139,15 @@ function Input({
                             color: isDarkMode ? '#FFFFFF' : '#495057',
                             borderColor: isDarkMode ? '#3e4f62' : '#ced4da',
                             boxShadow: 'none',
-                            border: 'none'
+                            border: 'none',
+                            width: 'var(--form-control-height)',
+                            minWidth: 'var(--form-control-height)',
+                            height: 'var(--form-control-height)'
                         }}
                     />
                 )}
             </div>
-            <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}>{errorMessage && <small className="p-error block">{errorMessage}</small>}</div>
+            <div style={{ height: 'var(--form-feedback-height)', display: 'flex', alignItems: 'flex-end' }}>{errorMessage && <small className="p-error block">{errorMessage}</small>}</div>
         </div>
     );
 }

@@ -59,10 +59,7 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [displayValue, setDisplayValue] = React.useState('');
     const [isLoading, setIsLoading] = useState(false);
-
-    // Conta o número máximo de dígitos baseado na máscara
     const maxDigits = mask.split('').filter(char => char === '9').length;
-
     const applyDynamicMask = (value: string, mask: string) => {
         let masked = '';
         let valueIndex = 0;
@@ -79,11 +76,9 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
         }
         return masked;
     };
-
     React.useEffect(() => {
         setDisplayValue(applyDynamicMask(value || '', mask));
     }, [value, mask]);
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let onlyDigits = e.target.value.replace(/\D/g, '');
 
@@ -95,7 +90,6 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
         setDisplayValue(masked);
         onChange({ value: onlyDigits, target: { value: onlyDigits, id } });
     };
-
     const handleFocus = () => {
         setTimeout(() => {
             inputRef.current?.setSelectionRange(0, 0);
@@ -103,7 +97,6 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
 
         if (onFocus) onFocus();
     };
-
     const handleSearchClick = async () => {
         setIsLoading(true);
         try {
@@ -112,34 +105,25 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
             setIsLoading(false);
         }
     };
-
     const onlyDigits = (value || '').replace(/\D/g, '');
     const rightButtonDisabled = disabledRightButton ?? (onlyDigits.length !== maxDigits);
-
     return (
-        <div className="p-field" style={{ width: '100%' }}>
+        <div className="p-field" style={{ width: '100%', height:'85px', maxHeight:"85px"}}>
             {showTopLabel && topLabel && (
-                <div style={{ height: 25, display: 'flex', alignItems: 'center' }}>
+                <div style={{ height: 'var(--form-label-height)', display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
                     </label>
                 </div>
             )}
-
-            <div
-                className={`p-inputgroup flex-1 styled-on-focus styled-on-hover custom-input ${
-                    hasError ? 'input-error' : ''
-                }`}
+            <div className={`p-inputgroup flex-1 styled-on-focus styled-on-hover custom-input ${hasError ? 'input-error' : ''}`}
                 style={{
                     border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da',
                     borderRadius: '6px'
-                }}
-            >
+                }}>
                 {iconLeft && (
-                    <span
-                        className="p-inputgroup-addon"
-                        style={{
+                    <span className="p-inputgroup-addon" style={{
                             background: isDarkMode ? '#293B51' : '#FFFFFF',
                             border: 'none'
                         }}
@@ -156,7 +140,6 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
                         )}
                     </span>
                 )}
-
                 <div className="w-full">
                     <InputText
                         id={id}
@@ -175,11 +158,10 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
                             background: isDarkMode ? '#293B51' : '#FFFFFF',
                             width: '100%',
                             border: 'none',
-                            height: 40
+                            height: 'var(--form-control-height)'
                         }}
                     />
                 </div>
-
                 {useRightButton && iconRight && (
                     <Button
                         icon={loading || isLoading ? 'pi pi-spin pi-spinner' : iconRight}
@@ -191,13 +173,15 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
                             color: isDarkMode ? '#FFFFFF' : '#495057',
                             borderColor: isDarkMode ? '#3e4f62' : '#ced4da',
                             boxShadow: 'none',
-                            border: 'none'
+                            border: 'none',
+                            width: 'var(--form-control-height)',
+                            minWidth: 'var(--form-control-height)',
+                            height: 'var(--form-control-height)'
                         }}
                     />
                 )}
             </div>
-
-            <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}>
+            <div style={{ height: 'var(--form-feedback-height)', display: 'flex', alignItems: 'flex-end' }}>
                 {hasError && errorMessage && <small className="p-error block">{errorMessage}</small>}
             </div>
         </div>

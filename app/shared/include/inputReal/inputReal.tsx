@@ -33,7 +33,7 @@ export function CustomInputNumber({
     return (
         <div className="p-field" style={{ width: '100%' }}>
             {showTopLabel && topLabel && (
-                <div style={{ height:25, display:"flex", alignItems:"center" }}>
+                <div style={{ height: 'var(--form-label-height)', display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -73,7 +73,7 @@ export function CustomInputNumber({
                         style={{
                             width: '100%',
                             border: 'none',
-                            height:40
+                            height: 'var(--form-control-height)'
                         }}
                         inputClassName="custom-input-number-field"
                         inputStyle={{
@@ -82,11 +82,11 @@ export function CustomInputNumber({
                             color: inputTextColor,
                             width: '100%',
                             border: 'none',
-                            height: 40
+                            height: 'var(--form-control-height)'
                         }}
                     />
             </div>
-           <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
+           <div style={{ height: 'var(--form-feedback-height)', display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
         </div>
         </div> 
     );

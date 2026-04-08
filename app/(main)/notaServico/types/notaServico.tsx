@@ -1,11 +1,11 @@
-import { Messages } from 'primereact/messages';
 import { RefObject } from 'react';
+import { Messages } from 'primereact/messages';
 import { NfsEntity } from '@/app/entity/NfsEntity';
+import { DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
 
 export interface NotaServicoFormRef {
     handleSave: () => Promise<void>;
 }
-
 export interface NotaServicoFormProps {
     notaServico: NfsEntity;
     initialId?: string | null;
@@ -21,7 +21,6 @@ export interface NotaServicoFormProps {
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
 }
-
 export interface NotaServicoFieldsProps {
     gerarNfse: NfsEntity;
     errors: Record<string, string>;
@@ -41,5 +40,28 @@ export interface NotaServicoFieldsProps {
     setLoadingCep: React.Dispatch<React.SetStateAction<boolean>>;
     setGerarNfse: React.Dispatch<React.SetStateAction<NfsEntity>>;
 }
-
 export type FormCreatedNotaServicoProps = NotaServicoFieldsProps | NotaServicoFormProps;
+export type NotaFiscalQueryParams = NotaFiscalParams & {
+    page?: number;
+    size?: number;
+};
+export interface ListNotaServicoParams {
+    page: number;
+    size: number;
+    termo?: string;
+    status?: string;
+    dateRange?: DateRangeValue;
+    id_empresa?: number | null;
+    id_cliente?: number | null;
+    id_vendedor?: number | null;
+}
+export type NotaFiscalParams = {
+    termo?: string | null;
+    id_empresa?: number | null;
+    id_cliente?: number | null;
+    id_vendedor?: number | null;
+    status?: string | null;
+    data_hora_inicio?: string | null;
+    data_hora_fim?: string | null;
+    sort?: string;
+};

@@ -66,20 +66,20 @@ export default function BlocoPrestador({
                         outlined={false}
                         showTopLabel
                         required
-                        topLabel=" CNPJ:"
+                        topLabel="CNPJ:"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-5">
                     <Input
                         id="razao_social"
                         value={nfseGerada.prestador?.razao_social || ''}
-                        label="RazÃ£o Social:"
+                        label="Razão Social:"
                         onChange={(e) => handleAllChanges(e, 'prestador')}
                         hasError={!!prestadorErrors.razao_social}
                         errorMessage={prestadorErrors.razao_social}
                         showTopLabel
                         required
-                        topLabel="RazÃ£o Social do Prestador:"
+                        topLabel="Razão Social do Prestador:"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-4">
@@ -99,14 +99,14 @@ export default function BlocoPrestador({
                     <Input
                         value={nfseGerada.prestador?.inscricao_municipal || ''}
                         onChange={(e) => handleAllChanges(e, 'prestador')}
-                        label="Digite InscriÃ§Ã£o Municipal"
+                        label="Digite Inscrição Municipal"
                         id="inscricao_municipal"
                         type="number"
                         hasError={!!prestadorErrors.inscricao_municipal}
                         errorMessage={prestadorErrors.inscricao_municipal}
                         showTopLabel
                         required
-                        topLabel="InscriÃ§Ã£o Municipal:"
+                        topLabel="Inscrição Municipal:"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-3 lg:mb-0">
@@ -115,12 +115,12 @@ export default function BlocoPrestador({
                         value={nfseGerada.prestador?.prestacao_sus ?? null}
                         options={prestacaoSus}
                         onChange={handleDropdownChange}
-                        label="PrestaÃ§Ã£o SUS:"
+                        label="Prestação SUS:"
                         hasError={!!prestadorErrors.prestacao_sus}
                         errorMessage={prestadorErrors.prestacao_sus}
                         showTopLabel
                         required
-                        topLabel="Selecione a PrestaÃ§Ã£o SUS"
+                        topLabel="Selecione a Prestação SUS"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-3 lg:mb-0">

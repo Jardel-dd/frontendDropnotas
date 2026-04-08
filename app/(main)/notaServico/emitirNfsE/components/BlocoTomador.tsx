@@ -59,13 +59,13 @@ export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropd
                     <Input
                         id="razao_social"
                         value={nfseGerada.tomador?.razao_social || ''}
-                        label="RazÃ£o Social"
+                        label="Razão Social"
                         onChange={(e) => handleAllChanges(e, 'tomador')}
                         hasError={!!tomadorErrors.razao_social}
                         errorMessage={tomadorErrors.razao_social}
                         showTopLabel
                         required
-                        topLabel="RazÃ£o Social:"
+                        topLabel="Razão Social:"
                     />
                 </div>
                 <div className="col-12 mb-1 lg:col-12 lg:mb-0">

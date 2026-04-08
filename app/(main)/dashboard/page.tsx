@@ -10,12 +10,12 @@ import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import React, { useEffect, useRef, useState } from 'react';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import PieChart from '@/app/components/chartsComponent/charts';
+import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
+import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
-import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 
 const ComponentDashboard: React.FC = () => {
@@ -156,7 +156,7 @@ const ComponentDashboard: React.FC = () => {
                         <div className="card styled-container-main-all-routes">
                             <div className="scrollable-container">
                                 <div className="grid formgrid flex justify-content-between w-full" style={{ maxHeight: '74px' }}>
-                                    <div className="p-0">
+                                    <div className="ml-4">
                                         <DateRangePicker
                                             showTopLabel
                                             topLabel="Filtar por Data:"

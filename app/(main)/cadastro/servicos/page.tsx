@@ -255,21 +255,21 @@ function Servicos() {
                                             showTopLabel
                                         />
                                     </div>
-                                <div className="Container-Btn-Filter-Desktop">
-                                    <FilterOverlay
-                                        onApply={handleSalvarFiltro}
-                                        onClear={handleClearFilters}
-                                        buttonClassName="Btn-Filter-Desktop">
-                                        <div className="checkBoxMobile-width-max-10rem">
-                                            <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
+                                    <div className="Container-Btn-Filter-Desktop">
+                                        <FilterOverlay
+                                            onApply={handleSalvarFiltro}
+                                            onClear={handleClearFilters}
+                                            buttonClassName="Btn-Filter-Desktop">
+                                            <div className="checkBoxMobile-width-max-10rem">
+                                                <div className="checkbox-container">
+                                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                    <label htmlFor="listarInativos" className="ml-2">
+                                                        Listar Desativadas
+                                                    </label>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </FilterOverlay>
-                                </div>
+                                        </FilterOverlay>
+                                    </div>
                                 </div>
                                 <div className="mt-3">
                                     <ListarServicos

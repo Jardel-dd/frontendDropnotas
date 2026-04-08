@@ -9,6 +9,8 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import { NotaFiscalParams } from './types/notaServico';
+import { listNotaServico} from './controller/controller';
 import Input from '@/app/shared/include/input/input-all';
 import ListarNotaServico from './tabela/notaServicoListagem';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
@@ -18,10 +20,12 @@ import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { validateFieldsPrepararNfs } from './controller/validation';
+import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
+import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
-import { listNotaServico, NotaFiscalParams } from './controller/controller';
 import { DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
+import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 import { DropDownFilterNotaServico } from '@/app/shared/optionsDropDown/options';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
@@ -29,14 +33,8 @@ import { mapDateRangeToParams } from '@/app/components/calendarComponent/control
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { DateRangePicker, DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
-import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { fetchFilteredService, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
-import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
-import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 
 const NotaServico: React.FC = () => {
     const router = useRouter();
@@ -55,12 +53,12 @@ const NotaServico: React.FC = () => {
     const [showDialogPreparaNfs, setShowDialogPreparaNfs] = useState(false);
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity | null>(null);
+    const [stateDisableBtnPrepararNfse, setStateDisableBtnPrepararNfse] = useState(false);
+    const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
+    const [selectedStatusNotaServico, setSelectedStatusNotaServico] = useState<string>('');
     const [selectedPessoaDialog, setSelectedPessoaDialog] = useState<PessoaEntity | null>(null);
     const [selectedServicoDialog, setSelectedServicoDialog] = useState<ServiceEntity | null>(null);
     const [selectedEmpresaDialog, setSelectedEmpresaDialog] = useState<CompanyEntity | null>(null);
-    const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
-    const [selectedStatusNotaServico, setSelectedStatusNotaServico] = useState<string>('');
-    const [stateDisableBtnPrepararNfse, setStateDisableBtnPrepararNfse] = useState(false);
     const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>({
         pageable: {
             pageNumber: 0,
@@ -193,15 +191,6 @@ const NotaServico: React.FC = () => {
             setLoading(false);
         }
     };
-    const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
-        const value = event.target.type === 'checkbox' || event.target.type === 'switch' ? event.target.checked : event.target.value;
-        const _prepararNfs = prepararNfs!.copyWith({
-            ...prepararNfs,
-            [event.target.id]: value
-        });
-
-        setPrepararNfs(_prepararNfs);
-    };
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
@@ -214,7 +203,8 @@ const NotaServico: React.FC = () => {
         if (!vendedor) return;
         setSelectedVendedor(vendedor);
     };
-    const validatePrepararNfsDialog = (empresa = selectedEmpresaDialog, servico = selectedServicoDialog, cliente = selectedPessoaDialog) => validateFieldsPrepararNfs(prepararNfs, empresa, servico, cliente, setErrors, msgs);
+    const validatePrepararNfsDialog = (empresa = selectedEmpresaDialog, servico = selectedServicoDialog, cliente = selectedPessoaDialog) => 
+    validateFieldsPrepararNfs(prepararNfs, empresa, servico, cliente, setErrors, msgs);
     const handlePrepararNfsChange = (field: 'id_empresa' | 'id_cliente' | 'id_servico', value: number) => {
         setPrepararNfs((prev) =>
             prev.copyWith({
@@ -509,7 +499,7 @@ const NotaServico: React.FC = () => {
                                             showTopLabel
                                         />
                                     </div>
-                                    <div className="col-12 lg:col-2 ">
+                                    <div>
                                         <DateRangePicker
                                             showTopLabel
                                             topLabel="Filtar por Data:"

@@ -16,7 +16,7 @@ import { DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { createdNotaServico, prepararNotaServico } from '@/app/(main)/notaServico/controller/controller';
+import { createdNotaServico, normalizeNfseServiceValores, prepararNotaServico } from '@/app/(main)/notaServico/controller/controller';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { incentivoFiscal, prestacaoSus, regimeEspecialTributarioOptionsCompany, tipo_rps } from '@/app/shared/optionsDropDown/options';
 import { validateFieldsNotaServico } from '@/app/(main)/notaServico/controller/validation';
@@ -125,10 +125,17 @@ export function NotaServicoFields({
     return (
         <>
             <div className="grid formgrid">
-                <div className="col-4 lg:col-3">
-                    <DatePicker value={dateRange ? dateRange[0] : new Date()} onChange={onDateChange} label="Competencia:" showTopLabel topLabel="Competencia:" />
-                </div>
-                <div className="col-5 lg:col-4">
+              <div className="col-12 lg:col-3">
+                    <DatePicker
+                     value={dateRange ? dateRange[0] : new Date()} 
+                     onChange={onDateChange} 
+                     label="Competencia:" 
+                     showTopLabel 
+                     topLabel="Competencia:" 
+                     required
+                     />
+                     </div>
+                <div className="col-12 lg:col-3" >
                     <Dropdown
                         id="regime_especial_tributacao"
                         value={gerarNfse.regime_especial_tributacao ?? ''}
@@ -170,7 +177,6 @@ export function NotaServicoFields({
         </>
     );
 }
-
 const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(({ notaServico, msgs, onNotaServicoChange, onErrorsChange, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
     const router = useRouter();
     const toast = useRef<Toast>(null);
@@ -206,7 +212,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             });
         });
     };
-
     const handleNumberChange = (e: any, bloco: 'prestador' | 'tomador' | 'servico' = 'servico') => {
         const { id, value } = e.target;
         setGerarNfse((prev) =>
@@ -219,7 +224,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             })
         );
     };
-
     const handleDropdownChange = (e: DropdownChangeEvent, bloco: 'prestador' | 'tomador' | 'servico' = 'prestador') => {
         const { id, value } = e.target;
         setGerarNfse((prev) =>
@@ -231,7 +235,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             })
         );
     };
-
     const handleDropdownChangeRegime = (e: DropdownChangeEvent) => {
         setGerarNfse((prev) =>
             prev.copyWith({
@@ -239,7 +242,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             })
         );
     };
-
     const handleInputChangeEnderecoPrestador = (e: React.ChangeEvent<HTMLInputElement>) => {
         const field = e.target.id;
         const value = e.target.value;
@@ -255,7 +257,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             })
         );
     };
-
     const handleEnderecoChangePrestador = (e: React.ChangeEvent<HTMLInputElement>) => {
         const field = e.target.id;
         const enderecoFields = ['cep', 'logradouro', 'complemento', 'numero', 'bairro', 'municipio', 'codigo_municipio', 'uf', 'nome_pais', 'codigo_pais'];
@@ -265,7 +266,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         }
         handleAllChanges(e, 'prestador');
     };
-
     const handleInputChangeEnderecoTomador = (e: React.ChangeEvent<HTMLInputElement>) => {
         const field = e.target.id;
         const value = e.target.value;
@@ -281,7 +281,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             })
         );
     };
-
     const handleEnderecoChangeTomador = (e: React.ChangeEvent<HTMLInputElement>) => {
         const field = e.target.id;
         const enderecoFields = ['cep', 'logradouro', 'complemento', 'numero', 'bairro', 'municipio', 'codigo_municipio', 'uf', 'nome_pais', 'codigo_pais'];
@@ -291,7 +290,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         }
         handleAllChanges(e, 'tomador');
     };
-
     const handleDateChange = (date: Date | null) => {
         setDateRange(date ? [date] : null);
         if (!date) return;
@@ -303,25 +301,19 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             return next;
         });
     };
-
     const handleSubmit = async (event?: React.FormEvent) => {
         if (event) {
             event.preventDefault();
         }
-
         msgs.current?.clear();
-
         if (isLoadingBtnCreated) {
             return;
         }
-
         setIsValidationActive(true);
-
         const isValid = validateFieldsNotaServico(gerarNfse, setErrors, msgs, true);
         if (!isValid) {
             return;
         }
-
         setIsLoadingBtnCreated(true);
 
         try {
@@ -341,27 +333,21 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             setIsLoadingBtnCreated(false);
         }
     };
-
     useImperativeHandle(ref, () => ({
         handleSave: handleSubmit
     }));
-
     useEffect(() => {
         onNotaServicoChangeRef.current = onNotaServicoChange;
     }, [onNotaServicoChange]);
-
     useEffect(() => {
         onErrorsChangeRef.current = onErrorsChange;
     }, [onErrorsChange]);
-
     useEffect(() => {
         onNotaServicoChangeRef.current?.(gerarNfse);
     }, [gerarNfse]);
-
     useEffect(() => {
         onErrorsChangeRef.current?.(errors);
     }, [errors]);
-
     useEffect(() => {
         if (!isValidationActive) {
             return;
@@ -378,7 +364,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         if (!id_empresa || !id_cliente || !id_servico) {
             return;
         }
-
         const prepararEmissao = async () => {
             setLoadingText('Preparando NFS-e...');
             setLoading(true);
@@ -392,6 +377,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
 
                 if (response?.nfse) {
                     const nfse = response.nfse;
+                    const valoresNormalizados = normalizeNfseServiceValores(nfse.servico?.valores);
                     setGerarNfse(
                         new NfsEntity({
                             ...nfse,
@@ -399,7 +385,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                             tomador: nfse.tomador,
                             servico: new DetalServiceEntity({
                                 ...nfse.servico,
-                                valores: nfse.servico.valores instanceof DetalPrestadorValoresEntity ? nfse.servico.valores : new DetalPrestadorValoresEntity(nfse.servico.valores)
+                                valores: valoresNormalizados
                             })
                         })
                     );
@@ -417,7 +403,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         };
 
         prepararEmissao();
-    }, [searchParams]);
+    }, [msgs, router, searchParams, selectedCliente, selectedEmpresa, selectedServico]);
 
     if (loading) {
         return <LoadingScreen loadingText={loadingText} />;

@@ -46,7 +46,7 @@ const createEmptyServico = () =>
         descricao: '',
         descricao_completa: '',
         codigo: '',
-        item_lista_servico: '',
+        item_lista_servico: '010501',
         exigibilidade_iss: '',
         iss_retido: '',
         observacoes: '',
@@ -94,7 +94,7 @@ export function ServicoFields({
 }: ServicoFieldsProps) {
     return (
         <div className="grid formgrid">
-            <div className="col-12 mt-1 lg:col-10">
+            <div className="col-12  lg:col-10">
                 <Input
                     value={servico.descricao || ''}
                     onChange={onChange}
@@ -109,7 +109,7 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-2">
+            <div className="col-12  lg:col-2">
                 <CustomInputNumber
                     id="valor_servico"
                     value={servico.valor_servico || 0}
@@ -125,7 +125,7 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <CustomInputNumber
                     id="percentual_diferencial_municipal"
                     value={servico.percentual_diferencial_municipal || 0}
@@ -141,7 +141,7 @@ export function ServicoFields({
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <CustomInputNumber
                     id="aliquota_deducoes"
                     value={servico.aliquota_deducoes || 0}
@@ -157,7 +157,7 @@ export function ServicoFields({
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <CustomInputNumber
                     id="percentual_diferencial_cbs"
                     value={servico.percentual_diferencial_cbs || 0}
@@ -173,7 +173,7 @@ export function ServicoFields({
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <CustomInputNumber
                     id="percentual_diferencial_uf"
                     value={servico.percentual_diferencial_uf || 0}
@@ -189,7 +189,7 @@ export function ServicoFields({
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <Dropdown
                     value={servico.iss_retido ?? ''}
                     onChange={onDropdownChange}
@@ -203,7 +203,7 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12 lg:col-4">
                 <Dropdown
                     id="exigibilidade_iss"
                     value={servico.exigibilidade_iss ?? ''}
@@ -218,7 +218,7 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <Dropdown
                     id="codigo_situacao_tributaria"
                     value={servico.codigo_situacao_tributaria ?? ''}
@@ -233,7 +233,7 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <DropdownSearch<TableClassificacaoTributariaEntity>
                     id="codigo_classificacao_tributaria"
                     selectedItem={selectedClassificacaoTributaria}
@@ -249,7 +249,7 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <DropdownSearch<TableCodigoNBSEntity>
                     id="codigo_nbs"
                     selectedItem={selectedCodigoNBS}
@@ -265,7 +265,7 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <Dropdown
                     id="codigo_situacao_tributaria_regular"
                     value={servico.codigo_situacao_tributaria_regular || ''}
@@ -280,20 +280,31 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
-                <ServicoDropdownField
+            <div className="col-12  lg:col-4">
+                <Input
+                    id="item_lista_servico"
+                    value={servico.item_lista_servico || '010501'}
+                    onChange={onChange}
+                    topLabel="Descricao da Atividade do Servico:"
+                    useRightButton
+                    outlined
+                    hasError={!!errors.item_lista_servico}
+                    errorMessage={errors.item_lista_servico}
+                    showTopLabel
+                    required
+                    label=""
+                />
+                {/* <ServicoDropdownField
                     id="item_lista_servico"
                     selectedService={selectedService}
                     onServiceChange={onServicoChange}
                     placeholder="Selecione um servico"
-                    topLabel="Descricao da Atividade do Servico:"
                     showTopLabel
                     required
-                    hasError={!!errors.item_lista_servico}
-                    errorMessage={errors.item_lista_servico}
-                />
+                  
+                /> */}
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <Input
                     value={servico.codigo_credito_presumido || ''}
                     onChange={onChange}
@@ -306,7 +317,7 @@ export function ServicoFields({
                     showTopLabel
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <Dropdown
                     id="responsavel_retencao"
                     value={servico.responsavel_retencao ?? ''}
@@ -321,7 +332,7 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <Dropdown
                     id="codigo_indicador_operacao"
                     value={servico.codigo_indicador_operacao ?? ''}
@@ -336,7 +347,7 @@ export function ServicoFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <Input
                     value={servico.codigo_municipio || ''}
                     onChange={onChange}
@@ -348,7 +359,7 @@ export function ServicoFields({
                     showTopLabel
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-4">
+            <div className="col-12  lg:col-4">
                 <Input
                     value={servico.numero_processo || ''}
                     onChange={onChange}
@@ -494,7 +505,7 @@ const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>(
                 setServico(
                     new ServiceEntity({
                         ...entidade,
-                        item_lista_servico: entidade.item_lista_servico ? entidade.item_lista_servico.split(' - ')[0].trim() : ''
+                        item_lista_servico: '010501'
                     })
                 );
 

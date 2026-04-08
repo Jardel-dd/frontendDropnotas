@@ -39,7 +39,7 @@ export default function EnderecoForm({
                 <span>Endereço</span>
             </Divider>
             <div className="grid formgrid mt-3">
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12  lg:col-3 ">
                     <InputMaskDrop
                         id="cep"
                         value={enderecoSafe.cep}
@@ -60,19 +60,19 @@ export default function EnderecoForm({
                         required
                     />
                 </div>
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12 lg:col-3 ">
                     <Input readOnly={readOnly} id="logradouro" label="Logradouro" value={endereco?.logradouro || ''} onChange={onChange} hasError={!!errors.logradouro} errorMessage={errors.logradouro} topLabel="Logradouro:" showTopLabel required />
                 </div>
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12 lg:col-3 ">
                     <Input id="complemento" label="Complemento" value={endereco?.complemento || ''} onChange={onChange} readOnly={readOnly} topLabel="Complemento:" showTopLabel />
                 </div>
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12 lg:col-3 ">
                     <Input id="numero" label="Número" value={endereco?.numero || ''} onChange={onChange} hasError={!!errors.numero} errorMessage={errors.numero} readOnly={readOnly} topLabel="Número:" showTopLabel required />
                 </div>
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12  lg:col-3 ">
                     <Input id="bairro" label="Bairro" value={endereco?.bairro || ''} onChange={onChange} hasError={!!errors.bairro} errorMessage={errors.bairro} readOnly={readOnly} topLabel="Bairro:" showTopLabel required />
                 </div>
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12  lg:col-3 ">
                     <Dropdown
                         id="uf"
                         value={endereco?.uf || ''}
@@ -88,7 +88,7 @@ export default function EnderecoForm({
                         required
                     />
                 </div>
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12  lg:col-3 ">
                     <Dropdown
                         id="municipio"
                         value={endereco?.municipio || ''}
@@ -105,7 +105,7 @@ export default function EnderecoForm({
                         required
                     />
                 </div>
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12  lg:col-3 ">
                     <Input
                         id="codigo_municipio"
                         label="Código do Município"
@@ -119,7 +119,7 @@ export default function EnderecoForm({
                         required
                     />
                 </div>
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12  lg:col-3 ">
                     <Input
                         id="nome_pais"
                         label="Nome do país"
@@ -133,7 +133,7 @@ export default function EnderecoForm({
                         required
                     />
                 </div>
-                <div className="col-12 mt-1 lg:col-3 ">
+                <div className="col-12  lg:col-3 ">
                     <Input
                         id="codigo_pais"
                         label="Código do País"
@@ -148,7 +148,7 @@ export default function EnderecoForm({
                     />
                 </div>
                 {exibirTelefone && (
-                    <div className="col-12 mt-1 lg:col-3 ">
+                    <div className="col-12 lg:col-3 ">
                         <InputMaskDrop
                             id="telefone"
                             mask="(99) 99999-9999"

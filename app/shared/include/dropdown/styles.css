@@ -2,10 +2,22 @@
     border: 1px solid #ced4da;
     border-radius: 6px;
     transition: border-color 0.2s ease;
+    min-height: var(--form-control-height);
 }
 
 .dark .p-dropdown {
     border: 1px solid #3e4f62;
+}
+
+.p-dropdown .p-dropdown-label {
+    display: flex;
+    align-items: center;
+    min-height: var(--form-control-height);
+}
+
+.p-dropdown .p-dropdown-trigger {
+    width: var(--form-control-height);
+    min-width: var(--form-control-height);
 }
 
 .p-dropdown:hover {

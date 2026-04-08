@@ -3,6 +3,8 @@ import api from '@/app/services/api';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 
+const FIXED_ITEM_LISTA_SERVICO = '010501';
+
 export const listServico = async (
     listPaginationServicos: Record<string, any>,
     listarInativos: boolean,
@@ -109,11 +111,11 @@ export const createServico = async (
     try {
         const dataServiceCreated = {
             ...service,
-            item_lista_servico: service.item_lista_servico
-                ? service.item_lista_servico.split(" - ")[0].trim()
-                : "",
+            item_lista_servico: FIXED_ITEM_LISTA_SERVICO,
             codigo: service.codigo?.trim() ? service.codigo : null,
+            aliquota_deducoes: service.aliquota_deducoes ?? 0,
         };
+        console.log('[Cadastro/Servicos] Payload enviado ao criar servico:', dataServiceCreated);
         const resp = await api.post('/servico', dataServiceCreated);
         const created = new ServiceEntity(resp.data?.servico ?? resp.data);
         msgs.current?.show({
@@ -143,10 +145,10 @@ export const updateServico = async (
     try {
         const dataServiceUpdate = {
             ...service,
-            item_lista_servico: service.item_lista_servico
-                ? service.item_lista_servico.split(" - ")[0]
-                : "",
+            item_lista_servico: FIXED_ITEM_LISTA_SERVICO,
+            aliquota_deducoes: service.aliquota_deducoes ?? 0,
         };
+        console.log('[Cadastro/Servicos] Payload enviado ao atualizar servico:', dataServiceUpdate);
         await api.put(`/servico`, dataServiceUpdate);
         msgs.current?.show({
             severity: 'success',
@@ -204,6 +206,7 @@ export const fetchServicesByID = async (id: string): Promise<{ servico: ServiceE
         return {
             servico: {
                 ...data,
+                aliquota_deducoes: data.aliquota_deducoes ?? 0,
                 item_lista_servico_display: `${data.codigo} - ${data.item_lista_servico}`,
             },
         };

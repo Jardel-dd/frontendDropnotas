@@ -2,36 +2,39 @@ import axios from 'axios';
 import api from '@/app/services/api';
 import { Messages } from 'primereact/messages';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
-import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
-import { DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
-export type NotaFiscalQueryParams = NotaFiscalParams & {
-    page?: number;
-    size?: number;
+import { DetalPrestadorValoresEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
+import { ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams } from '../types/notaServico';
+
+const normalizeOptionalNumberToZero = (value: unknown): number => {
+    if (value === null || value === undefined || value === '') {
+        return 0;
+    }
+    if (typeof value === 'string') {
+        const normalized = Number(value.replace(',', '.'));
+        return Number.isFinite(normalized) ? normalized : 0;
+    }
+    const normalized = Number(value);
+    return Number.isFinite(normalized) ? normalized : 0;
 };
-export interface ListNotaServicoParams {
-    page: number;
-    size: number;
-    termo?: string;
-    status?: string;
-    dateRange?: DateRangeValue;
-    id_empresa?: number | null;
-    id_cliente?: number | null;
-    id_vendedor?: number | null;
-}
-export type NotaFiscalParams = {
-    termo?: string | null;
-    id_empresa?: number | null;
-    id_cliente?: number | null;
-    id_vendedor?: number | null;
-    status?: string | null;
-    data_hora_inicio?: string | null;
-    data_hora_fim?: string | null;
-    sort?: string;
-};
+export const normalizeNfseServiceValores = (valores?: Partial<DetalPrestadorValoresEntity> | null): DetalPrestadorValoresEntity =>
+    new DetalPrestadorValoresEntity({
+        base_calculo: normalizeOptionalNumberToZero(valores?.base_calculo),
+        valor_servico: normalizeOptionalNumberToZero(valores?.valor_servico),
+        aliquota_iss: normalizeOptionalNumberToZero(valores?.aliquota_iss),
+        aliquota_deducoes: normalizeOptionalNumberToZero(valores?.aliquota_deducoes),
+        aliquota_pis: normalizeOptionalNumberToZero(valores?.aliquota_pis),
+        aliquota_cofins: normalizeOptionalNumberToZero(valores?.aliquota_cofins),
+        aliquota_inss: normalizeOptionalNumberToZero(valores?.aliquota_inss),
+        aliquota_ir: normalizeOptionalNumberToZero(valores?.aliquota_ir),
+        aliquota_csll: normalizeOptionalNumberToZero(valores?.aliquota_csll),
+        aliquota_outras_retencoes: normalizeOptionalNumberToZero(valores?.aliquota_outras_retencoes),
+        percentual_desconto_incondicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_incondicionado),
+        percentual_desconto_condicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_condicionado)
+});
 export const fetchNotaServico = async (params: NotaFiscalParams) => {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
@@ -95,6 +98,7 @@ export const prepararNotaServico = async (
 ) => {
     try {
         const response = await api.post('/nfse/preparar-emissao', prepararNfs);
+        console.log('[NotaServico] Retorno do backend ao preparar NFS-e:', response.data);
         return response.data;
     } catch (error) {
         console.error('Erro ao preparar NFS-e:', error);
@@ -118,22 +122,23 @@ export const prepararNotaServico = async (
 };
 export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>, msgs: any, router: AppRouterInstance) => {
     try {
+        const valoresNormalizados = normalizeNfseServiceValores(nfs.servico?.valores);
+        const valorServicoNormalizado = (() => {
+            const raw = nfs.servico.valores?.valor_servico as string | number | undefined;
+            if (typeof raw === 'string') {
+                const normalized = raw.replace(',', '.');
+                return parseFloat(normalized) || 0;
+            }
+
+            return parseFloat(Number(raw ?? 0).toFixed(2));
+        })();
         const dataNfse = {
             ...nfs,
             servico: {
                 ...nfs.servico,
-                valores: {
-                    ...nfs.servico.valores,
-                    valor_servico: (() => {
-                        const raw = nfs.servico.valores?.valor_servico as string | number | undefined;
-                        if (typeof raw === 'string') {
-                            const normalized = raw.replace(',', '.');
-                            return parseFloat(normalized) || 0;
-                        }
-
-                        return parseFloat(Number(raw ?? 0).toFixed(2));
-                    })()
-                }
+                valores: valoresNormalizados.copyWith({
+                    valor_servico: valorServicoNormalizado
+                })
             }
         };
         console.log('Envio:', { nfse: dataNfse });

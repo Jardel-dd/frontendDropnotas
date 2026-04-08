@@ -2,9 +2,11 @@
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import { InputSwitch } from 'primereact/inputswitch';
 import Input from '@/app/shared/include/input/input-all';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
+export type { FormaPagamentoFormRef } from '../types/formaPagamento';
 import { validateFieldsFormaPagamento } from '../controller/validation';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
@@ -14,8 +16,6 @@ import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdFormaPagamento, fetchFormaPagamentoByID, updateFormaPagamento } from '../controller/controller';
 import type { FormCreatedFormaPagamentoProps, FormaPagamentoFieldsProps, FormaPagamentoFormProps, FormaPagamentoFormRef } from '../types/formaPagamento';
-import { InputSwitch } from 'primereact/inputswitch';
-export type { FormaPagamentoFormRef } from '../types/formaPagamento';
 
 const createEmptyFormaPagamento = () =>
     new FormaPagamentoEntity({
@@ -37,7 +37,7 @@ export function FormaPagamentoFields({ formaPagamento, errors, onChange, onDropd
     return (
         <>
             <div className="grid formgrid">
-                <div className="col-12 lg:col-12 mt-1">
+                <div className="col-12 lg:col-12">
                     <Input
                         value={formaPagamento.descricao || ''}
                         onChange={onChange}
@@ -52,7 +52,7 @@ export function FormaPagamentoFields({ formaPagamento, errors, onChange, onDropd
                         required
                     />
                 </div>
-                <div className="col-12 lg:col-3 mt-1">
+                <div className="col-12 lg:col-3 ">
                     <Dropdown
                         id="tipo_forma_pagamento"
                         value={formaPagamento.tipo_forma_pagamento ?? ''}
@@ -66,7 +66,7 @@ export function FormaPagamentoFields({ formaPagamento, errors, onChange, onDropd
                         required
                     />
                 </div>
-                <div className="col-12 lg:col-3 mt-1">
+                <div className="col-12 lg:col-3 ">
                     <Dropdown
                         id="tipo_taxa"
                         value={formaPagamento.tipo_taxa ?? ''}
@@ -80,7 +80,7 @@ export function FormaPagamentoFields({ formaPagamento, errors, onChange, onDropd
                         required
                     />
                 </div>
-                <div className="col-12 lg:col-3 mt-1">
+                <div className="col-12 lg:col-3 ">
                     <Input
                         value={String(formaPagamento.valor_taxa ?? '')}
                         onChange={onChange}
@@ -94,7 +94,7 @@ export function FormaPagamentoFields({ formaPagamento, errors, onChange, onDropd
                         required
                     />
                 </div>
-                <div className="col-12 lg:col-12 mt-1">
+                <div className="col-12 lg:col-12 ">
                     <InputTextarea value={formaPagamento.observacao || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao" topLabel="Consideracoes finais:" showTopLabel />
                 </div>
             </div>

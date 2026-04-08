@@ -1,34 +1,9 @@
 import './styles.css'
-import { JSX, ReactNode, useContext } from 'react';
-import { LayoutContext } from '@/layout/context/layoutcontext';
-import { SelectItemOptionsType } from 'primereact/selectitem';
-import { Dropdown as PrimeDropdown, DropdownChangeEvent } from 'primereact/dropdown';
+import {  useContext } from 'react';
+import { DropdownProps } from './types/type';
 import { Mandatory } from '../../mandatory/InputMandatory';
-
-type DropdownProps = {
-    value: any;
-    label: string;
-    id?: string;
-    options?: SelectItemOptionsType;
-    onChange: (event: DropdownChangeEvent) => void;
-    disabled?: boolean;
-    loading?: boolean;
-    placeholder?: string;
-    className?: string;
-    optionLabel?: string;
-    filterBy?: boolean;
-    valueTemplate?: (option: any, props: any) => JSX.Element;
-    itemTemplate?: (option: any) => JSX.Element;
-    optionValue?: string;
-    hasError?: boolean;
-    errorMessage?: string;
-    readOnly?: boolean;
-    style?: string;
-    showTopLabel?: boolean;
-    topLabel?: string | ReactNode;
-    required?: boolean;
-    topRightElement?: ReactNode;
-};
+import { LayoutContext } from '@/layout/context/layoutcontext';
+import { Dropdown as PrimeDropdown } from 'primereact/dropdown';
 
 function Dropdown({
     value,
@@ -56,12 +31,11 @@ function Dropdown({
 }: DropdownProps) {
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
-
     return (
-        <div className="p-field" style={{ width: '100%'}}>
+        <div className="p-field" style={{ width: '100%', height:'85px', maxHeight:"85px"}}>
             {showTopLabel && (topLabel 
             || topRightElement) && (
-                <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
+                <div style={{ height: 'var(--form-label-height)', display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -89,11 +63,12 @@ function Dropdown({
                         background: isDarkMode ? '#293B51' : '#FFFFFF',
                         boxShadow: 'none',
                         border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da',  
-                        height:40
+                        height: 'var(--form-control-height)',
+                        minHeight: 'var(--form-control-height)',
                     }}
                 />
             </div>
-             <div style={{ height: 15, display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
+             <div style={{ height: 'var(--form-feedback-height)', display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
         </div>
         </div>
     );

@@ -42,12 +42,10 @@ const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente'
     if (pessoa.pessoa_fornecedor) return 'pessoa_fornecedor';
     return null;
 };
-
 const mapContatoSelectionToFlags = (selectedContato: string | null) => ({
     pessoa_cliente: selectedContato === 'AMBOS' || selectedContato === 'pessoa_cliente',
     pessoa_fornecedor: selectedContato === 'AMBOS' || selectedContato === 'pessoa_fornecedor'
 });
-
 export function PessoaFields({
     pessoa,
     errors,
@@ -68,7 +66,7 @@ export function PessoaFields({
     const reloadKeyCNAE = 0;
     return (
         <div className="grid formgrid">
-            <div className="col-12 lg:col-3 mt-1">
+            <div className="col-12 lg:col-3">
                 <Dropdown
                     id="tipo_pessoa"
                     value={pessoa?.tipo_pessoa || ''}
@@ -86,7 +84,7 @@ export function PessoaFields({
             </div>
             {pessoa?.tipo_pessoa === 'PESSOA_JURIDICA' && (
                 <>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <InputMaskDrop
                             id="cnpj"
                             value={pessoa.cnpj || ''}
@@ -117,7 +115,7 @@ export function PessoaFields({
                             topLabel="CNPJ:"
                         />
                     </div>
-                    <div className="col-12 lg:col-6 mt-1">
+                    <div className="col-12 lg:col-6 ">
                         <Input
                             id="razao_social"
                             value={pessoa?.razao_social || ''}
@@ -130,7 +128,7 @@ export function PessoaFields({
                             topLabel="Nome ou Razao Social do contato:"
                         />
                     </div>
-                    <div className="col-12 lg:col-6 mt-1">
+                    <div className="col-12 lg:col-6 ">
                         <Input
                             value={pessoa?.nome_fantasia || ''}
                             onChange={onChange}
@@ -143,7 +141,7 @@ export function PessoaFields({
                             topLabel="Nome Fantasia:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Dropdown
                             id="codigo_regime_tributario"
                             value={pessoa?.codigo_regime_tributario ?? ''}
@@ -157,7 +155,7 @@ export function PessoaFields({
                             topLabel="Codigo Regime Tributario:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Dropdown
                             id="contribuinte"
                             value={pessoa.contribuinte ?? ''}
@@ -172,7 +170,7 @@ export function PessoaFields({
                             required
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.inscricao_estadual || ''}
                             onChange={onChange}
@@ -185,7 +183,7 @@ export function PessoaFields({
                             topLabel="Inscricao Estadual:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.inscricao_municipal || ''}
                             onChange={onChange}
@@ -198,7 +196,7 @@ export function PessoaFields({
                             topLabel="Inscricao Municipal:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.atividade_principal || ''}
                             onChange={onChange}
@@ -214,7 +212,7 @@ export function PessoaFields({
             )}
             {pessoa?.tipo_pessoa === 'PESSOA_FISICA' && (
                 <>
-                    <div className="col-12 lg:col-2 mt-1">
+                    <div className="col-12 lg:col-2 ">
                         <InputMaskDrop
                             id="cpf"
                             value={pessoa.cpf || ''}
@@ -233,7 +231,7 @@ export function PessoaFields({
                             topLabel="CPF:"
                         />
                     </div>
-                    <div className="col-12 lg:col-2 mt-1">
+                    <div className="col-12 lg:col-2 ">
                         <InputMaskDrop
                             id="rg"
                             value={pessoa.rg || ''}
@@ -250,7 +248,7 @@ export function PessoaFields({
                             topLabel="RG:"
                         />
                     </div>
-                    <div className="col-12 lg:col-5 mt-1">
+                    <div className="col-12 lg:col-5 ">
                         <Input
                             id="razao_social"
                             value={pessoa?.razao_social || ''}
@@ -263,7 +261,7 @@ export function PessoaFields({
                             topLabel="Nome:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Dropdown
                             id="codigo_regime_tributario"
                             value={pessoa?.codigo_regime_tributario ?? ''}
@@ -277,7 +275,7 @@ export function PessoaFields({
                             topLabel="Codigo Regime Tributario:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Dropdown
                             id="contribuinte"
                             value={pessoa.contribuinte || ''}
@@ -293,7 +291,7 @@ export function PessoaFields({
                             topLabel="Contribuinte:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.inscricao_estadual || ''}
                             onChange={onChange}
@@ -306,7 +304,7 @@ export function PessoaFields({
                             topLabel="Inscricao Estadual:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.inscricao_municipal || ''}
                             onChange={onChange}
@@ -319,7 +317,7 @@ export function PessoaFields({
                             topLabel="Inscricao Municipal:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <div className="p-field">
                             <CNAEDropdownField
                                 selectedCNAE={selectedCNAE}
@@ -337,7 +335,7 @@ export function PessoaFields({
             )}
             {pessoa?.tipo_pessoa === 'ESTRANGEIRO' && (
                 <>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.documento_estrangeiro || ''}
                             onChange={onChange}
@@ -350,7 +348,7 @@ export function PessoaFields({
                             topLabel="Documento de identificacao:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 mt-1">
+                    <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.pais || ''}
                             onChange={onChange}
@@ -366,7 +364,7 @@ export function PessoaFields({
                 </>
             )}
             {pessoa?.tipo_pessoa === 'ESTRANGEIRO_NO_BRASIL' && (
-                <div className="col-12 lg:col-3 mt-1">
+                <div className="col-12 lg:col-3 ">
                     <Input
                         value={pessoa.documento_estrangeiro || ''}
                         onChange={onChange}
@@ -380,7 +378,7 @@ export function PessoaFields({
                     />
                 </div>
             )}
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12  lg:col-3">
                 <DropdownSearch<TableCNAEEntity>
                     id="cnae_fiscal"
                     selectedItem={selectedCNAE}
@@ -398,7 +396,7 @@ export function PessoaFields({
                     required
                 />
             </div>
-            <div className="col-12 lg:col-3 mt-1">
+            <div className="col-12 lg:col-3 ">
                 <Dropdown
                     id="selectedContato"
                     value={selectedContato}
@@ -415,7 +413,7 @@ export function PessoaFields({
                     topLabel="Tipo de contato:"
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-6">
+            <div className="col-12 lg:col-6">
                 <Input
                     value={pessoa?.email || ''}
                     onChange={onChange}
@@ -721,7 +719,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             (!selectedVendedor && !pessoa.id_vendedor_padrao) ||
             !pessoa.endereco ||
             !pessoa.email;
-        const isDialogMode = Boolean(showBTNPGCreatedDialog);
+             const isDialogMode = Boolean(showBTNPGCreatedDialog);
         return (
             <>
                 <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>

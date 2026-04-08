@@ -199,9 +199,9 @@ function CustomMultiSelect({
         setFilteredOptions((prev) => ensureSelectedItemsInList(prev, selectedItems, dataKey));
     }, [selectedItems, dataKey]);
     return (
-        <div className="p-field" style={{ width: '100%', height: '71px', }}>
+        <div className="p-field" style={{ width: '100%', height:'85px', maxHeight:"85px"}}>
             {showTopLabel && topLabel && (
-                <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
+                <div style={{ height:25, display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}

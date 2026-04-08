@@ -1,24 +1,17 @@
 import './styledCalendar.css';
-import { ReactNode } from 'react';
 import { Calendar } from 'primereact/calendar';
+import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
-interface SingleDatePickerProps {
-    value: Date | null;
-    onChange: (date: Date | null) => void;
-    onSearch?: (date: Date | null) => void;
-    label?: string;
-    placeholder?: string;
-    className?: string;
-    showTopLabel?: boolean;
-    topLabel?: string | ReactNode;
-    required?: boolean;
-    topRightElement?: ReactNode;
-}
-export function DatePicker({ topRightElement, required, value, onChange, onSearch, label, placeholder = 'Selecione a data', showTopLabel, topLabel, className }: SingleDatePickerProps) {
+import { SingleDatePickerProps } from '@/app/shared/include/inputMask/types/types';
+
+export function DatePicker({
+     topRightElement, required, value, onChange, onSearch, label, placeholder = 'Selecione a data', showTopLabel, topLabel, className }: SingleDatePickerProps) {
+    const { isDarkMode } = useTheme();
+
     return (
-        <div className="p-field" style={{ height: '71px' }}>
+        <div className={`single-date-picker-wrapper ${className ?? ''}`}>
             {showTopLabel && (topLabel || topRightElement) && (
-                <div className="flex align-items-center justify-content-between my-1" style={{ height: '17px' }}>
+                <div style={{ height: 'var(--form-label-height)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -26,7 +19,10 @@ export function DatePicker({ topRightElement, required, value, onChange, onSearc
                     {topRightElement}
                 </div>
             )}
-            <div className="flex flex-column w-full">
+            <div
+                className={`p-inputgroup flex-1 styled-on-focus styled-on-hover custom-input single-date-picker-shell ${isDarkMode ? 'single-date-picker-shell-dark' : 'single-date-picker-shell-light'}`}
+                style={{ border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da', borderRadius: '6px' }}
+            >
                 <Calendar
                     id="singleDate"
                     value={value}
@@ -39,12 +35,22 @@ export function DatePicker({ topRightElement, required, value, onChange, onSearc
                     showTime
                     hourFormat="24"
                     showIcon
+                    className="single-date-picker-calendar"
+                    inputClassName={`single-date-picker-input ${isDarkMode ? 'single-date-picker-input-dark' : 'single-date-picker-input-light'}`}
+                    inputStyle={{
+                        boxShadow: 'none',
+                        background: isDarkMode ? '#293B51' : '#FFFFFF',
+                        color: isDarkMode ? '#FFFFFF' : '#495057',
+                        width: '100%',
+                        height: 'var(--form-control-height)',
+                    }}
                     readOnlyInput
-                    placeholder={placeholder}
-                    style={{ width: '100%' }}
+                    placeholder={placeholder || label}
+                    panelClassName={`periodo-calendar-panel ${isDarkMode ? 'periodo-calendar-panel-dark' : 'periodo-calendar-panel-light'}`}
                     locale="pt"
                 />
             </div>
+            <div style={{ height: 'var(--form-feedback-height)', display: 'flex', alignItems: 'flex-end' }}></div>
         </div>
     );
 }

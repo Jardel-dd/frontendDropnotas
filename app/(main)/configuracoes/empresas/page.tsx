@@ -166,7 +166,7 @@ const Empresas: React.FC = () => {
         handleListCompany(0, searchTerm, listarInativos);
         setVisible(false);
     };
-     const handleClearFilters = () => {
+    const handleClearFilters = () => {
         setListarInativos(false);
         handleListCompany(0, searchTerm, listarInativos);
         setVisible(false);
@@ -200,25 +200,25 @@ const Empresas: React.FC = () => {
                                         showTopLabel
                                     />
                                 </div>
-                                 <div className="col-4 mb-0 lg:col-2 p-0 " style={{ marginTop: "2px" }}>
+                                <div className="col-4 mb-0 lg:col-2 p-0">
                                     <div className="container-BTN-Filter-Created ">
-                                <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
-                                    <div className='checkBoxMobile-width-max-10rem'>
-                                        <div className="checkbox-container">
-                                            <Checkbox
-                                                inputId="listarInativos"
-                                                onChange={handleCheckboxChangeMobile}
-                                                checked={listarInativos}
-                                            />
-                                            <label htmlFor="listarInativos" className="ml-2">
-                                                Listar Desativadas
-                                            </label>
-                                        </div>
+                                        <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                            <div className='checkBoxMobile-width-max-10rem'>
+                                                <div className="checkbox-container">
+                                                    <Checkbox
+                                                        inputId="listarInativos"
+                                                        onChange={handleCheckboxChangeMobile}
+                                                        checked={listarInativos}
+                                                    />
+                                                    <label htmlFor="listarInativos" className="ml-2">
+                                                        Listar Desativadas
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </FilterOverlay>
+                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                     </div>
-                                </FilterOverlay>
-                            <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                            </div>
-                            </div>
+                                </div>
                             </div>
                         </div>
                         <div >
@@ -262,64 +262,69 @@ const Empresas: React.FC = () => {
             }
             {isDesktop &&
                 <>
-                 <div className="card styled-container-main-all-routes p-2">
-                     <div className="scrollable-container">
-                    <div className="p-0">
-                    <div className="grid formgrid"  >
-                        <div className="col-12 lg:col-3 container-input-search-all" >
-                            <Input
-                                label="Buscar"
-                                outlined={true}
-                                id="razao_social"
-                                useRightButton={true}
-                                iconRight={'pi pi-search'}
-                                onChange={handleSearchChange}
-                                value={searchTerm}
-                                loading={loading}
-                                onClickSearch={() => searchNow(searchTerm)}
-                                topLabel="Empresas:"
-                                showTopLabel
+                    <div className="card styled-container-main-all-routes p-2">
+                        <div className="scrollable-container">
+                            <div className="p-0">
+                                <div className="grid formgrid"  >
+                                    <div className="col-12 lg:col-3 container-input-search-all" >
+                                        <Input
+                                            label="Buscar"
+                                            outlined={true}
+                                            id="razao_social"
+                                            useRightButton={true}
+                                            iconRight={'pi pi-search'}
+                                            onChange={handleSearchChange}
+                                            value={searchTerm}
+                                            loading={loading}
+                                            onClickSearch={() => searchNow(searchTerm)}
+                                            topLabel="Empresas:"
+                                            showTopLabel
+                                        />
+                                    </div>
+                                    <div className="Container-Btn-Filter-Desktop">
+                                        <FilterOverlay
+                                            onApply={handleSalvarFiltro}
+                                            onClear={handleClearFilters}
+                                            buttonClassName="Btn-Filter-Desktop">
+                                            <div className="checkBoxMobile-width-max-10rem">
+                                                <div className="checkbox-container">
+                                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
+                                                    <label htmlFor="listarInativos" className="ml-2">
+                                                        Listar Desativadas
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </FilterOverlay>
+                                    </div>
+                                    <div className='container-button-primary-novo'>
+                                        <Button icon="pi pi-plus" label='Novo' onClick={handleNavigate} className="p-button-primary-novo" />
+                                    </div>
+                                </div>
+                                <div className='mt-2'>
+                                    <ListarEmpresas
+                                        loading={loading}
+                                        listPaginationEmpresa={listPaginationEmpresa}
+                                        deletar={(id) => deletarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
+                                        ativar={(id) => ativarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
+                                        setSelectedEmpresa={setSelectedEmpresa}
+                                        selectedEmpresa={selectedEmpresa}
+                                        setLoading={setLoading}
+                                        searchTerm={searchTerm}
+                                        setListPaginationEmpresa={setListPaginationEmpresa}
+                                        listarInativos={listarInativos}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div style={{ marginTop: 'auto' }}>
+                            <Paginator
+                                first={listPaginationEmpresa.pageable.pageNumber * listPaginationEmpresa.pageable.pageSize}
+                                rows={pageSize}
+                                totalRecords={listPaginationEmpresa.totalElements}
+                                onPageChange={onPageChange}
                             />
                         </div>
-                        <div className="checkbox-container">
-                            <Checkbox
-                                inputId="listarInativos"
-                                onChange={handleCheckboxChange}
-                                checked={listarInativos}
-                            />
-                            <label htmlFor="listarInativos" className="ml-2">
-                                Listar Desativadas
-                            </label>
-                        </div>
-                        <div className='container-button-primary-novo'>
-                            <Button icon="pi pi-plus" label='Novo' onClick={handleNavigate} className="p-button-primary-novo" />
-                        </div>
                     </div>
-                    <div className='mt-2'>
-                        <ListarEmpresas
-                            loading={loading}
-                            listPaginationEmpresa={listPaginationEmpresa}
-                            deletar={(id) => deletarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
-                            ativar={(id) => ativarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
-                            setSelectedEmpresa={setSelectedEmpresa}
-                            selectedEmpresa={selectedEmpresa}
-                            setLoading={setLoading}
-                            searchTerm={searchTerm}
-                            setListPaginationEmpresa={setListPaginationEmpresa}
-                            listarInativos={listarInativos}
-                        />
-                    </div>
-                    </div>
-                </div>
-                  <div style={{ marginTop: 'auto' }}>
-                        <Paginator
-                            first={listPaginationEmpresa.pageable.pageNumber * listPaginationEmpresa.pageable.pageSize}
-                            rows={pageSize}
-                            totalRecords={listPaginationEmpresa.totalElements}
-                            onPageChange={onPageChange}
-                        />
-                    </div>
-  </div>
                 </>
             }
         </div>

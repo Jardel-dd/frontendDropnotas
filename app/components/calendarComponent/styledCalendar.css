@@ -3,6 +3,47 @@
     min-width: 200px;
 
 }
+.single-date-picker-wrapper {
+    width: 100%;
+    min-width: 200px;
+}
+.single-date-picker-shell {
+    min-height: var(--form-control-height);
+}
+.single-date-picker-calendar,
+.single-date-picker-calendar.p-calendar-w-btn {
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+}
+.single-date-picker-calendar .p-inputtext {
+    height: var(--form-control-height);
+    padding: 0.65rem 0.875rem;
+    font-size: 0.95rem;
+    border: 0 !important;
+    border-radius: 6px 0 0 6px;
+}
+.single-date-picker-calendar .p-datepicker-trigger {
+    width: var(--form-control-height);
+    min-width: var(--form-control-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid #ced4da !important;
+}
+.single-date-picker-shell-dark .single-date-picker-calendar .p-datepicker-trigger {
+    border-left-color: #3e4f62 !important;
+}
+.single-date-picker-calendar .p-datepicker-trigger .pi {
+    font-size: 1rem;
+}
+.single-date-picker-input::placeholder {
+    color: #6b7280;
+    opacity: 1;
+}
+.single-date-picker-input-dark::placeholder {
+    color: #cbd5e1;
+}
 .p-calendar .p-datepicker-trigger {
     background: transparent !important;
     border: none !important;
@@ -12,8 +53,8 @@
     color: inherit !important;
 }
 .p-calendar .p-inputtext {
-    height: 32px;
-    font-size: 13px;
+    height: var(--form-control-height);
+    font-size: 0.95rem;
 }
 .periodo-calendar-panel {
     max-width: 520px;
