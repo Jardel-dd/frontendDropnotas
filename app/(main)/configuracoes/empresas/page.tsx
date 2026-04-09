@@ -151,12 +151,7 @@ const Empresas: React.FC = () => {
         }));
         handleListCompany(selectedPage, searchTerm, listarInativos);
     };
-    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        const newValue = e.checked ?? false;
-        setListarInativos(newValue);
-        handleListCompany(0, searchTerm, newValue);
-        setVisible(false);
-    };
+   
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);

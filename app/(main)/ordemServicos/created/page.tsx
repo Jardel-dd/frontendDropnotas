@@ -2,11 +2,11 @@
 import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
 import { useSearchParams } from 'next/navigation';
+import { OrdemServicoFormRef } from '../types/ordemServico';
 import { Formas_recebimento } from '@/app/entity/FormaPagamento';
 import { DetalServiceOSEntity } from '@/app/entity/ServiceEntity';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
-import { OrdemServicoFormRef } from '../types/ordemServico';
-import OrdemServicoForm from '@/app/(main)/ordemServicos/form/ordemServico';
+import { FormOrdemServicoCreated } from '../form/controller';
 
 export default function CriarOrdemServico() {
     const searchParams = useSearchParams();
@@ -56,7 +56,7 @@ export default function CriarOrdemServico() {
     };
     return (
         <div className="card styled-container-main-all-routes">
-            <OrdemServicoForm
+            <FormOrdemServicoCreated
                 msgs={msgs}
                 ref={formRef}
                 ordemServico={ordemServico}

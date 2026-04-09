@@ -2,6 +2,7 @@ import { RefObject } from "react";
 import { Messages } from "primereact/messages";
 import { DropdownChangeEvent } from "primereact/dropdown";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
+import { EnderecoEntity } from "@/app/entity/enderecoEntity";
 
 export interface VendedorFormRef {
     handleSave: () => Promise<void>;
@@ -43,3 +44,27 @@ export interface VendedorDropdownFieldProps {
     errorMessage?: string;
 }
 export type FormCreatedVendedorProps = VendedorFieldsProps | VendedorFormProps;
+export const createEmptyVendedor = () =>
+    new VendedorEntity({
+        id: 0,
+        razao_social: '',
+        nome_fantasia: '',
+        cpf: null,
+        rg: null,
+        email: '',
+        documento_estrangeiro: null,
+        cnpj: null,
+        inscricao_estadual: '',
+        inscricao_municipal: '',
+        atividade_principal: '',
+        codigo_regime_tributario: '',
+        tipo_pessoa: 'PESSOA_JURIDICA',
+        contribuinte: '',
+        telefone: '',
+        endereco: {} as EnderecoEntity,
+        arquivo_contrato: '',
+        percentual_comissao: 0,
+        id_vendedor_padrao: null,
+        ativo: true,
+        pais: ''
+    });

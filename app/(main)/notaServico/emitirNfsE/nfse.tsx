@@ -5,8 +5,11 @@ import BlocoServico from './components/BlocoServico';
 import BlocoTomador from './components/BlocoTomador';
 import { TabView, TabPanel } from 'primereact/tabview';
 import BlocoPrestador from './components/BlocoPrestador';
+import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 
 export function NotaServico(props: any) {
+    const { isDarkMode } = useTheme();
+    
     const {
         nfseGerada,
         handleAllChanges,
@@ -31,7 +34,7 @@ export function NotaServico(props: any) {
     } = props;
     return (
         <div>
-            <TabView className="nota-servico-tabs">
+            <TabView className={`nota-servico-tabs ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
                 <TabPanel header="Empresa  (Prestador)">
                     <BlocoPrestador
                         nfseGerada={nfseGerada}

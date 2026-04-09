@@ -69,7 +69,7 @@ export default function BlocoPrestador({
                         topLabel="CNPJ:"
                     />
                 </div>
-                <div className="col-12 mb-1 lg:col-5">
+                <div className="col-12 lg:col-5">
                     <Input
                         id="razao_social"
                         value={nfseGerada.prestador?.razao_social || ''}
@@ -82,7 +82,7 @@ export default function BlocoPrestador({
                         topLabel="Razão Social do Prestador:"
                     />
                 </div>
-                <div className="col-12 mb-1 lg:col-4">
+                <div className="col-12 lg:col-4">
                     <Input
                         id="nome_fantasia"
                         value={nfseGerada.prestador?.nome_fantasia || ''}
@@ -95,7 +95,7 @@ export default function BlocoPrestador({
                         topLabel="Nome Fantasia do Prestador:"
                     />
                 </div>
-                <div className="col-12 mb-1 lg:col-3 lg:mb-0">
+                <div className="col-12 lg:col-3">
                     <Input
                         value={nfseGerada.prestador?.inscricao_municipal || ''}
                         onChange={(e) => handleAllChanges(e, 'prestador')}
@@ -109,7 +109,7 @@ export default function BlocoPrestador({
                         topLabel="Inscrição Municipal:"
                     />
                 </div>
-                <div className="col-12 mb-1 lg:col-3 lg:mb-0">
+                <div className="col-12 lg:col-3 ">
                     <Dropdown
                         id="prestacao_sus"
                         value={nfseGerada.prestador?.prestacao_sus ?? null}
@@ -123,7 +123,7 @@ export default function BlocoPrestador({
                         topLabel="Selecione a Prestação SUS"
                     />
                 </div>
-                <div className="col-12 mb-1 lg:col-3 lg:mb-0">
+                <div className="col-12 lg:col-3">
                     <Dropdown
                         id="incentivo_fiscal"
                         value={nfseGerada.prestador?.incentivo_fiscal ?? null}
@@ -137,7 +137,7 @@ export default function BlocoPrestador({
                         topLabel="Incentivo Fiscal:"
                     />
                 </div>
-                <div className="col-12 mb-1 lg:col-3 lg:mb-0">
+                <div className="col-12 lg:col-3">
                     <Dropdown
                         id="optante_simples_nacional"
                         value={nfseGerada.prestador?.optante_simples_nacional ?? null}
@@ -151,7 +151,7 @@ export default function BlocoPrestador({
                         topLabel="Optante Simples Nacional:"
                     />
                 </div>
-                <div className="col-12 mb-1 lg:col-12 lg:mb-0">
+                <div className="col-12 lg:col-12">
                     <Input
                         value={nfseGerada.prestador?.email || ''}
                         onChange={(e) => handleAllChanges(e, 'prestador')}
@@ -166,7 +166,7 @@ export default function BlocoPrestador({
                 </div>
             </div>
             <div className="grid formgrid ">
-                <div className="col-12 mb-1 lg:col-12">
+                <div className="col-12 lg:col-12">
                     <EnderecoForm
                         endereco={nfseGerada.prestador?.endereco}
                         telefone={nfseGerada.prestador?.telefone}

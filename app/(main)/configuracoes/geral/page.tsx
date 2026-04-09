@@ -154,15 +154,12 @@ const AppConfig = () => {
                         <Divider align="center" className="form-divider mt-1">
                             <span>Aparencia do Sistema</span>
                         </Divider>
-                        <div className="field flex align-items-center gap-2">
+                        <div className="field primary-color-switch-row">
                             <InputSwitch
                                 inputId="primaryColorSwitch"
                                 checked={isPrimaryColorEnabled}
                                 onChange={(e) => {
                                     const checked = Boolean(e.value ?? e.checked);
-
-                                    console.log('[Configuracoes/Geral] Switch Cor Primaria mudou:', checked);
-
                                     setLayoutConfig((prev) => ({
                                         ...prev,
                                         layoutTheme: checked ? 'primaryColor' : 'colorScheme'
@@ -170,13 +167,9 @@ const AppConfig = () => {
                                 }}
                                 disabled={layoutConfig.colorScheme === 'dark'}
                             />
-
                             <label
+                                className="primary-color-switch-label"
                                 htmlFor="primaryColorSwitch"
-                                style={{
-                                    cursor: 'pointer',
-                                    marginBottom: 0
-                                }}
                             >
                                 Cor Primaria (Somente no modo claro)
                             </label>

@@ -1,6 +1,13 @@
 import { CompanyEntity } from "@/app/entity/CompanyEntity";
+import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
+import { UsuarioContaEntity } from "@/app/entity/UsuarioContaEntity";
+import { DropdownChangeEvent } from "primereact/dropdown";
+import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
+import { InputNumberValueChangeEvent } from "primereact/inputnumber";
 import { Messages } from "primereact/messages";
-import { RefObject } from "react";
+import { MultiSelectChangeEvent } from "primereact/multiselect";
+import { Toast } from "primereact/toast";
+import { ChangeEvent, RefObject } from "react";
 
 export interface EmpresaDropdownFieldProps {
     selectedCompany: CompanyEntity | null;
@@ -33,3 +40,39 @@ export interface EmpresaFormProps {
 export interface EmpresaFormRef {
     handleSave: () => Promise<void>;
 }
+
+export interface EmpresaFieldsProps {
+    empresa: CompanyEntity;
+    empresaId?: string | null;
+    errors: Record<string, string>;
+    loadingCnpj: boolean;
+    loadingCep: boolean;
+    loadingFileUpload: boolean;
+    isMobile: boolean;
+    isDesktop: boolean;
+    isDarkMode: boolean;
+    isPasswordVisible: boolean;
+    selectedCNAE: TableCNAEEntity | null;
+    userConta: UsuarioContaEntity[];
+    selectedUserConta: UsuarioContaEntity[];
+    toastRef: RefObject<Toast | null>;
+    fileUploadRef: RefObject<FileUpload | null>;
+    fileInputRef: RefObject<HTMLInputElement | null>;
+    onChange: (event: any) => void;
+    onDropdownChange: (event: DropdownChangeEvent) => void;
+    onDropdownChangeEndereco: (event: DropdownChangeEvent) => void;
+    onNumberChange: (event: InputNumberValueChangeEvent) => void;
+    onUserChange: (event: MultiSelectChangeEvent) => void;
+    onCNAEChange: (cnae: TableCNAEEntity | null) => void;
+    onSearchCnpj: () => Promise<void>;
+    onValidateCnpj: () => void;
+    onLogoChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    onDeleteLogo: () => void;
+    onRemoveFile: () => void;
+    onFileChangeCertificado: (event: FileUploadSelectEvent) => void;
+    onClearCertificado: () => void;
+    onTogglePasswordVisibility: () => void;
+    onCepSearch: () => void;
+}
+
+export type FormEmpresaCreatedProps = EmpresaFieldsProps | EmpresaFormProps;

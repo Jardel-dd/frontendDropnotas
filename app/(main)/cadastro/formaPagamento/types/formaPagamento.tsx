@@ -1,8 +1,23 @@
-import { FormaPagamentoEntity } from "@/app/entity/FormaPagamento";
-import { DropdownChangeEvent } from "primereact/dropdown";
 import { Messages } from "primereact/messages";
+import { DropdownChangeEvent } from "primereact/dropdown";
 import { Dispatch, RefObject, SetStateAction } from "react";
-
+import { FormaPagamentoEntity, TipoFormaPagamento } from "@/app/entity/FormaPagamento";
+export const createEmptyFormaPagamento = () =>
+    new FormaPagamentoEntity({
+        ativo: true,
+        id: 0,
+        descricao: '',
+        observacao: '',
+        aplicar_taxa_servico: false,
+        tipo_forma_pagamento: '' as TipoFormaPagamento,
+        tipo_taxa: '',
+        valor_taxa: 0
+    });
+export const toFormaPagamentoEntity = (formaPagamento?: Partial<FormaPagamentoEntity> | null) =>
+    new FormaPagamentoEntity({
+        ...createEmptyFormaPagamento(),
+        ...(formaPagamento ?? {})
+    });
 export interface FormaPagamentoFormProps {
     formaPagamento: FormaPagamentoEntity;
     initialId?: string | null;
@@ -23,11 +38,9 @@ export interface FormaPagamentoFormProps {
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
 }
-
 export interface FormaPagamentoFormRef {
     handleSave: () => Promise<void>;
 }
-
 export interface FormaPagamentoFieldsProps {
     formaPagamento: FormaPagamentoEntity;
     errors: Record<string, string>;
@@ -37,11 +50,6 @@ export interface FormaPagamentoFieldsProps {
     onDropdownChange: (event: DropdownChangeEvent) => void;
     onValidateDescricao: () => void;
 }
-
-export type FormCreatedFormaPagamentoProps =
-    | FormaPagamentoFieldsProps
-    | FormaPagamentoFormProps;
-
 export interface FormaPagamentoDropdownFieldProps {
     selectedFormaPagamento: FormaPagamentoEntity | null;
     selectedFormaPagamentoId?: number | null;
@@ -55,3 +63,4 @@ export interface FormaPagamentoDropdownFieldProps {
     onAddClick?: () => void;
     autoSelectSingle?: boolean;
 }
+export type FormCreatedFormaPagamentoProps = | FormaPagamentoFieldsProps| FormaPagamentoFormProps;

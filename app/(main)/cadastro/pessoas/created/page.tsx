@@ -5,6 +5,7 @@ import '@/app/styles/styledGlobal.css';
 import { Divider } from 'primereact/divider';
 import { Messages } from 'primereact/messages';
 import { useEffect, useRef, useState } from 'react';
+import { FormCreatedPessoa } from '../form/controller';
 import { getCitiesFromState } from '@/app/entity/maps';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { DropdownChangeEvent } from 'primereact/dropdown';
@@ -12,32 +13,28 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
-import LoadingScreenComponent from '@/app/loading/loadingComponent';
-import FormPessoaCreated   from '../form/pessoa';
 import { VendedorFormRef } from '../../vendedores/types/vendedor';
-import { handleSearchCep } from '../../../../components/seachs/searchCep/controller';
-import VendedorForm from '../../vendedores/form/vendedor';
-import { handleSearchCNPJ } from '../../../../components/seachs/searchCnpj/controller';
+import LoadingScreenComponent from '@/app/loading/loadingComponent';
+import { FormCreatedVendedor } from '../../vendedores/form/controller';
 import VendedorDropdownField from '../../vendedores/dropDown/DropdownVendedor';
+import { handleSearchCep } from '../../../../components/seachs/searchCep/controller';
+import { handleSearchCNPJ } from '../../../../components/seachs/searchCnpj/controller';
 import { validateFieldsPessoa } from '@/app/(main)/cadastro/pessoas/controller/validate';
 import DialogFilter from '../../../../components/dialogs/dialogFilterComponents/dialogFilter';
 import EnderecoForm from '../../../../components/enderecos/enderecoFormComponent/enderecoForm';
 import BTNPGCreatedAll from '../../../../components/buttonsComponent/btnCreatedAll/btn-created-all';
 import { fetchAllCnae, fetchFilteredCnae } from '../../../../components/fetchAll/listAllCnae/controller';
 import { createdPessoa, fetchPessoasById, updatePessoa } from '@/app/(main)/cadastro/pessoas/controller/controller';
-
 const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string | null => {
     if (pessoa.pessoa_cliente && pessoa.pessoa_fornecedor) return 'AMBOS';
     if (pessoa.pessoa_cliente) return 'pessoa_cliente';
     if (pessoa.pessoa_fornecedor) return 'pessoa_fornecedor';
     return null;
 };
-
 const mapContatoSelectionToFlags = (selectedContato: string | null) => ({
     pessoa_cliente: selectedContato === 'AMBOS' || selectedContato === 'pessoa_cliente',
     pessoa_fornecedor: selectedContato === 'AMBOS' || selectedContato === 'pessoa_fornecedor'
 });
-
 export default function PessoaPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -111,7 +108,6 @@ export default function PessoaPage() {
         })
     );
     const validatePessoaForm = () => validateFieldsPessoa(pessoa, setErrors, msgs, selectedVendedor);
-
     const handleAllChanges = (event: any) => {
         const id = event?.target?.id;
         const type = event?.target?.type;
@@ -284,7 +280,7 @@ export default function PessoaPage() {
             <Messages ref={msgs} className="custom-messages" />
             <div className="scrollable-container">
                 <div className="custom-flex-col">
-                    <FormPessoaCreated  
+                    <FormCreatedPessoa
                         pessoa={pessoa}
                         errors={errors}
                         selectedContato={selectedContato}
@@ -337,7 +333,7 @@ export default function PessoaPage() {
                 />
             </div>
             <DialogFilter header="Adicionar Vendedor" visible={showModalVendedor} onHide={() => setShowModalVendedor(false)}>
-                <VendedorForm
+                <FormCreatedVendedor
                     msgs={msgs}
                     ref={formRef}
                     vendedor={vendedor}

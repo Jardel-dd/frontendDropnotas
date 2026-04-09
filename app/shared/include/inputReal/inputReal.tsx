@@ -31,7 +31,7 @@ export function CustomInputNumber({
     const inputBackground = isDarkMode ? '#293B51' : '#FFFFFF';
     const inputTextColor = isDarkMode ? '#E3E6E8' : '#495057';
     return (
-        <div className="p-field" style={{ width: '100%' }}>
+        <div className="p-field"style={{ width: '100%', height:'85px', maxHeight:"85px"}}>
             {showTopLabel && topLabel && (
                 <div style={{ height: 'var(--form-label-height)', display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
@@ -91,5 +91,4 @@ export function CustomInputNumber({
         </div> 
     );
 }
-
 export default CustomInputNumber;

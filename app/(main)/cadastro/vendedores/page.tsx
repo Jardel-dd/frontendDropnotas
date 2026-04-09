@@ -269,6 +269,9 @@ const Vendedores: React.FC = () => {
                                         </div>
                                     </FilterOverlay>
                                 </div>
+                                <div className="container-button-primary-novo">
+                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                    </div>
                                 </div>
                                 </div>
                                 <div className="mt-2">

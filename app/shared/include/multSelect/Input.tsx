@@ -6,47 +6,10 @@ import { useDebouncedCallback } from 'use-debounce';
 import { MultiSelect } from 'primereact/multiselect';
 import { Mandatory } from '../../mandatory/InputMandatory';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import {  useContext, useEffect, useRef, useState } from 'react';
 import LoadingScreenComponent from '@/app/loading/loadingComponent';
-import { ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import { ensureSelectedItemsInList, MultiSelectProps, normalize } from './types/types';
 
-const normalize = (value: unknown) => (value === null || value === undefined ? null : String(value));
-
-type MultiSelectProps = {
-    selectedItems: any[];
-    id: string;
-    onChange: (e: any) => void;
-    options: any[];
-    optionLabel: string;
-    placeholder: string;
-    maxSelectedLabels?: number;
-    className?: string;
-    showChips: boolean;
-    errorMessage?: string;
-    hasError?: boolean;
-    fetchFilteredItems?: (filter: string) => Promise<any[]>;
-    fetchAllItems?: () => Promise<any[]>;
-    autoSelectSingle?: boolean;
-    dataKey?: string;
-    initialSelectedValues?: Array<string | number>;
-    showAddButton?: boolean;
-    onAddClick?: () => void;
-    minSearchChars?: number;
-    maxResults?: number;
-    showTopLabel?: boolean;
-    topLabel?: string | ReactNode;
-    required?: boolean;
-};
-
-function ensureSelectedItemsInList(list: any[], selectedItems: any[], dataKey?: string) {
-    if (!dataKey || !Array.isArray(selectedItems) || selectedItems.length === 0) {
-        return list;
-    }
-
-    const existingKeys = new Set(list.map((item) => normalize(item?.[dataKey])));
-    const missingItems = selectedItems.filter((item) => !existingKeys.has(normalize(item?.[dataKey])));
-
-    return missingItems.length > 0 ? [...missingItems, ...list] : list;
-}
 
 function CustomMultiSelect({
     selectedItems,

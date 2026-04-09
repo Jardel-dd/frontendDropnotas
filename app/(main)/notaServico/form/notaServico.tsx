@@ -1,5 +1,4 @@
 'use client';
-
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { Messages } from 'primereact/messages';
@@ -8,100 +7,21 @@ import { DropdownChangeEvent } from 'primereact/dropdown';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
-import { DatePicker } from '@/app/components/calendarComponent/datePicker';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import NotaServico from '@/app/(main)/notaServico/emitirNfsE/nfse';
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { DatePicker } from '@/app/components/calendarComponent/datePicker';
 import { DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
+import {  DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { validateFieldsNotaServico } from '@/app/(main)/notaServico/controller/validation';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdNotaServico, normalizeNfseServiceValores, prepararNotaServico } from '@/app/(main)/notaServico/controller/controller';
-import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { incentivoFiscal, prestacaoSus, regimeEspecialTributarioOptionsCompany, tipo_rps } from '@/app/shared/optionsDropDown/options';
-import { validateFieldsNotaServico } from '@/app/(main)/notaServico/controller/validation';
-import type { FormCreatedNotaServicoProps, NotaServicoFieldsProps, NotaServicoFormProps, NotaServicoFormRef } from '../types/notaServico';
-
+import { createEmptyNfse, type FormCreatedNotaServicoProps, type NotaServicoFieldsProps, type NotaServicoFormProps, type NotaServicoFormRef } from '../types/notaServico';
 export type { FormCreatedNotaServicoProps, NotaServicoFieldsProps, NotaServicoFormProps, NotaServicoFormRef } from '../types/notaServico';
 
-const createEmptyNfse = () =>
-    new NfsEntity({
-        referencia: '',
-        competencia: '',
-        regime_especial_tributacao: '',
-        prestador: new DetalPrestadorEntity({
-            cpf_cnpj: 0,
-            inscricao_municipal: '',
-            razao_social: '',
-            nome_fantasia: '',
-            telefone: 0,
-            email: '',
-            prestacao_sus: false,
-            optante_simples_nacional: false,
-            incentivo_fiscal: false,
-            endereco: new EnderecoEntity({
-                cep: '',
-                logradouro: '',
-                complemento: '',
-                numero: '',
-                bairro: '',
-                municipio: '',
-                codigo_municipio: '',
-                codigo_pais: '',
-                nome_pais: '',
-                uf: '',
-                telefone: ''
-            })
-        }),
-        servico: new DetalServiceEntity({
-            id_servico: 0,
-            descricao: '',
-            codigo: '',
-            iss_retido: '',
-            item_lista_servico: '',
-            codigo_municipio: '',
-            numero_processo: '',
-            exigibilidade_iss: '',
-            responsavel_retencao: '',
-            municipio_incidencia: '',
-            codigo_nbs: '',
-            codigo_tributacao_municipio: '',
-            tributacao_issqn: '',
-            valor_total: 0,
-            valores: new DetalPrestadorValoresEntity({
-                base_calculo: 0,
-                valor_servico: 0,
-                aliquota_iss: 0,
-                aliquota_deducoes: 0,
-                aliquota_pis: 0,
-                aliquota_cofins: 0,
-                aliquota_inss: 0,
-                aliquota_ir: 0,
-                aliquota_csll: 0,
-                aliquota_outras_retencoes: 0,
-                percentual_desconto_incondicionado: 0,
-                percentual_desconto_condicionado: 0
-            })
-        }),
-        tomador: new DetalTomadorEntity({
-            cpf_cnpj: 0,
-            razao_social: '',
-            email: '',
-            endereco: new EnderecoEntity({
-                cep: '',
-                logradouro: '',
-                complemento: '',
-                numero: '',
-                bairro: '',
-                municipio: '',
-                codigo_municipio: '',
-                codigo_pais: '',
-                nome_pais: '',
-                uf: '',
-                telefone: ''
-            })
-        })
-    });
 
 export function NotaServicoFields({
     gerarNfse,
@@ -355,7 +275,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
 
         validateFieldsNotaServico(gerarNfse, setErrors);
     }, [gerarNfse, isValidationActive]);
-
     useEffect(() => {
         const id_empresa = Number(searchParams.get('id_empresa'));
         const id_cliente = Number(searchParams.get('id_cliente'));
@@ -404,11 +323,9 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
 
         prepararEmissao();
     }, [msgs, router, searchParams, selectedCliente, selectedEmpresa, selectedServico]);
-
     if (loading) {
         return <LoadingScreen loadingText={loadingText} />;
     }
-
     const isDialogMode = Boolean(showBTNPGCreatedDialog);
     const isSubmitDisabled = isLoadingBtnCreated || (isValidationActive && Object.keys(errors).length > 0);
 

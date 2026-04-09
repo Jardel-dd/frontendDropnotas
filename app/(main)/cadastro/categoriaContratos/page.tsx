@@ -17,8 +17,8 @@ import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import CategoriaContratoForm from '@/app/(main)/cadastro/categoriaContratos/form/categoriaContratos';
 import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
+import FormCategoriaContratoCreated from './form/controller';
 
 const CategoriaContrato: React.FC = () => {
     const pageSize = usePageSize();
@@ -290,6 +290,9 @@ const CategoriaContrato: React.FC = () => {
                                             </div>
                                         </FilterOverlay>
                                     </div>
+                                    <div className="container-button-primary-novo">
+                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                    </div>
                                 </div>
                             </div>
                             <div className="mt-2">
@@ -330,7 +333,7 @@ const CategoriaContrato: React.FC = () => {
                     '640px': '95vw'
                 }}
             >
-                <CategoriaContratoForm
+                <FormCategoriaContratoCreated
                     ref={formRef}
                     msgs={msgs}
                     initialId={selectedCategoriaId}

@@ -25,7 +25,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
 
     return (
         <div className="grid formgrid ">
-            <div className="col-12 mt-1 lg:col-9">
+            <div className="col-12 lg:col-9">
                 <Input
                     id="descricao"
                     value={nfseGerada.servico?.descricao || ''}
@@ -38,7 +38,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     topLabel="Descricao"
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <CustomInputNumber
                     id="valor_servico"
                     value={nfseGerada.servico.valores?.valor_servico ?? 0}
@@ -54,7 +54,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     topLabel="Valor Serviço"
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Dropdown
                     id="exigibilidade_iss"
                     value={nfseGerada.servico?.exigibilidade_iss ?? ''}
@@ -68,7 +68,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     topLabel="Exigibilidade ISS:"
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Dropdown
                     value={nfseGerada.servico?.iss_retido ?? ''}
                     onChange={(e) => handleDropdownChange(e, 'servico')}
@@ -82,7 +82,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Dropdown
                     id="tributacao_issqn"
                     value={nfseGerada.servico.tributacao_issqn ?? 0}
@@ -96,7 +96,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     topLabel="Tributação ISSQN:"
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <DropdownSearch<ServiceEntity>
                     id="codigo_nbs"
                     selectedItem={selectedCodigoNBS}
@@ -124,7 +124,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <ServicoDropdownField
                     id="item_lista_servico"
                     selectedService={selectedService}
@@ -159,7 +159,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     errorMessage={servicoErrors.item_lista_servico}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Dropdown
                     id="responsavel_retencao"
                     value={nfseGerada.servico.responsavel_retencao ?? ''}
@@ -173,7 +173,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     topLabel="Responsavel Retenção:"
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="codigo_municipio"
                     label="Código do Municí­pio"
@@ -186,7 +186,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="municipio_incidencia"
                     value={nfseGerada.servico?.municipio_incidencia || ''}
@@ -199,7 +199,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     errorMessage={servicoErrors.municipio_incidencia}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="codigo_tributacao_municipio"
                     label="Código do Tributação Municipal"
@@ -212,7 +212,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     required
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="base_calculo"
                     value={nfseGerada.servico?.valores?.base_calculo ?? 0}
@@ -225,7 +225,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="aliquota_iss"
                     value={nfseGerada.servico?.valores.aliquota_iss ?? 0}
@@ -238,7 +238,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="aliquota_deducoes"
                     value={nfseGerada.servico?.valores.aliquota_deducoes ?? 0}
@@ -251,7 +251,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="aliquota_pis"
                     value={nfseGerada.servico?.valores.aliquota_pis ?? 0}
@@ -264,7 +264,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="aliquota_cofins"
                     value={nfseGerada.servico?.valores.aliquota_cofins ?? 0}
@@ -277,7 +277,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="aliquota_inss"
                     value={nfseGerada.servico?.valores.aliquota_inss ?? 0}
@@ -290,7 +290,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="aliquota_ir"
                     value={nfseGerada.servico?.valores.aliquota_ir ?? 0}
@@ -303,7 +303,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="aliquota_csll"
                     value={nfseGerada.servico?.valores.aliquota_csll ?? 0}
@@ -316,7 +316,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="aliquota_outras_retencoes"
                     value={nfseGerada.servico?.valores.aliquota_outras_retencoes ?? 0}
@@ -329,7 +329,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="percentual_desconto_incondicionado"
                     value={nfseGerada.servico?.valores.percentual_desconto_incondicionado ?? 0}
@@ -342,7 +342,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-            <div className="col-12 mt-1 lg:col-3">
+            <div className="col-12 lg:col-3">
                 <Input
                     id="percentual_desconto_condicionado"
                     value={nfseGerada.servico?.valores.percentual_desconto_condicionado ?? 0}

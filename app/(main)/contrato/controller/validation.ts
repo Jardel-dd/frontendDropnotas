@@ -38,6 +38,9 @@ export const validateFieldsContrato = (
     } else if (!contrato.valor_servico || String(contrato.valor_servico).trim().length < 1) {
         newErrors.valor_servico = 'O Preço deve ter pelo menos 1 digíto.';
         valid = false;
+    } else if (!contrato.periodicidade) {
+        newErrors.periodicidade = 'A periodicidade deve ter pelo menos 1 digíto.';
+        valid = false;
     } else if (!hasSelectedCompany && !hasSavedCompanyId) {
         newErrors.selectedCompany = 'Este Campo deve ser selecionado.';
         valid = false;
@@ -52,9 +55,6 @@ export const validateFieldsContrato = (
         valid = false;
     } else if (!hasSelectedPessoa && !hasSavedPessoaIds) {
         newErrors.selectedPessoa = 'Este Campo deve ser selecionado.';
-        valid = false;
-    } else if (!contrato.periodicidade) {
-        newErrors.periodicidade = 'A periodicidade deve ter pelo menos 1 digíto.';
         valid = false;
     } else {
         valid = true;

@@ -14,7 +14,7 @@ export default function ServicoDropdownField({
     placeholder = "Selecione o Serviço",
     topLabel = "Serviço:",
     showTopLabel = true,
-    required = true,
+    required = false,
     showAddButton = false,
     onAddClick,
     autoSelectSingle = false,

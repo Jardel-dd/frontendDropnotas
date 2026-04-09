@@ -2,6 +2,7 @@ import { FormaPagamentoEntity } from "@/app/entity/FormaPagamento";
 import { FormaPagamentoDropdownFieldProps } from "../types/formaPagamento";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
 import { fetchFilteredFormaPagamento, fetchFormaPagamentoByID, listTheFormaPagamento } from "../controller/controller";
+
 export default function FormaPagamentoDropdownField({
     selectedFormaPagamento,
     selectedFormaPagamentoId,
@@ -11,8 +12,10 @@ export default function FormaPagamentoDropdownField({
     errorMessage,
     showAddButton = false,
     onAddClick,
-    autoSelectSingle = false
-}: FormaPagamentoDropdownFieldProps) {
+    autoSelectSingle = false,
+    required = false
+}: FormaPagamentoDropdownFieldProps & { required?: boolean }) {
+
     return (
         <DropdownSearch<FormaPagamentoEntity>
             id="selectedFormadePagamento"
@@ -36,7 +39,7 @@ export default function FormaPagamentoDropdownField({
             onAddClick={onAddClick}
             topLabel="Forma de pagamento:"
             showTopLabel
-            required
+            required={required}
         />
     );
 }

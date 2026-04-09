@@ -9,8 +9,7 @@ import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { validateFieldsVendedor } from '../controller/validate';
 import { VendedorFormRef } from '../types/vendedor';
-import VendedorForm from '../form/vendedor';
-
+import { FormCreatedVendedor } from '../form/controller';
 export default function Vendedores() {
     const searchParams = useSearchParams();
     const vendedorId = searchParams.get('id');
@@ -52,7 +51,7 @@ export default function Vendedores() {
     }, [vendedor]);
     return (
         <div className="card styled-container-main-all-routes"  >
-            <VendedorForm
+            <FormCreatedVendedor
                 msgs={msgs}
                 ref={formRef}
                 vendedor={vendedor}

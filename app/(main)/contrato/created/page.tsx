@@ -1,23 +1,16 @@
 'use client';
-import './styledContrato.css';
 import 'primeicons/primeicons.css';
 import '@/app/styles/styledGlobal.css';
-import { Toast } from 'primereact/toast';
 import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
+import { useSearchParams } from 'next/navigation';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { VendedorFormRef } from '@/app/(main)/cadastro/vendedores/types/vendedor';
-import { ContratoFormCreated } from '../form/contrato';
-
-
+import { ContratoFormCreated, ContratoFormRef } from '../form/controller';
 export default function CriarContrato() {
-    const router = useRouter();
-    const toast = useRef<Toast>(null);
     const msgs = useRef<Messages>(null);
     const searchParams = useSearchParams();
     const contratoId = searchParams.get('id');
-    const formRef = useRef<VendedorFormRef>(null);
+    const formRef = useRef<ContratoFormRef>(null);
     const [contrato, setContrato] = useState<ContratoEntity>(
         new ContratoEntity({
             ativo: true,

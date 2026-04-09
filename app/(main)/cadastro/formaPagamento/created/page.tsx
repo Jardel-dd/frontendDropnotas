@@ -5,8 +5,9 @@ import '@/app/styles/styledGlobal.css';
 import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
 import { useSearchParams } from 'next/navigation';
+import { FormaPagamentoFormRef } from '../types/formaPagamento';
+import { FormCreatedFormaPagamento } from '../form/controller';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
-import FormaPagamentoForm, { FormaPagamentoFormRef } from '@/app/(main)/cadastro/formaPagamento/form/formaPagamento';
 
 export default function CriarFormaPagamentos() {
     const searchParams = useSearchParams();
@@ -33,7 +34,7 @@ export default function CriarFormaPagamentos() {
     };
     return (
         <div className="card styled-container-main-all-routes">
-                <FormaPagamentoForm
+                <FormCreatedFormaPagamento
                     msgs={msgs}
                     ref={formRef}
                     formaPagamento={formaPagamento}

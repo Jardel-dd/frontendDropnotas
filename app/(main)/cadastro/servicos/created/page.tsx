@@ -5,8 +5,8 @@ import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
 import { useSearchParams } from 'next/navigation';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import ServiceForm from '../form/servico';
 import { ServiceFormRef } from '../types/servico';
+import { FormCreatedServico } from '../form/controller';
 
 export default function CriarServicos() {
     const searchParams = useSearchParams();
@@ -56,7 +56,7 @@ export default function CriarServicos() {
     };
     return (
         <div className="card styled-container-main-all-routes">
-            <ServiceForm msgs={msgs} ref={formRef} servico={servico} initialId={servicosID} setServico={setServico} onServicoChange={handleServicoChange} onErrorsChange={handleErrorsChange} redirectAfterSave={true} showBTNPGCreatedAll={true} />
+            <FormCreatedServico msgs={msgs} ref={formRef} servico={servico} initialId={servicosID} setServico={setServico} onServicoChange={handleServicoChange} onErrorsChange={handleErrorsChange} redirectAfterSave={true} showBTNPGCreatedAll={true} />
         </div>
     );
 }

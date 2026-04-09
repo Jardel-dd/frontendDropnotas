@@ -1,5 +1,4 @@
 'use client';
-import './styledUsuarios.css';
 import 'primeicons/primeicons.css';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
@@ -15,13 +14,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
 import { validateFieldsUserConta } from '../controller/validation';
+import FormPermissoesCreated from '../../permissoes/form/controller';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import PerfilUserDropdownField from '../../permissoes/dropdown/perfilUsuario';
-import FormEmpresaCreated from '@/app/(main)/configuracoes/empresas/form/empresa';
+import FormEmpresaCreated from '@/app/(main)/configuracoes/empresas/form/controller';
+import  { PermissoesFormRef } from '@/app/(main)/cadastro/permissoes/form/permissoes';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
-import PerfilUserChangeForm, { PermissoesFormRef } from '@/app/(main)/cadastro/permissoes/form/permissoes';
 import { fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { convertProfileUserToBase64, createUsuario, fetchUserContaCreated, updateUsuario } from '../controller/controller';
 
@@ -303,10 +303,9 @@ export default function CriarUserConta() {
             <div className="p-fluid">
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="card styled-container-main-all-routes shared-form-layout shared-form-page-layout">
-                    <div className="scrollable-container shared-form-content">
-                        <div className="custom-flex-row">
-                            <div className="w-full">
-                                <div className="centered-container">
+                    <div className="scrollable-container ">
+                        <div className="custom-flex-col">
+                             <div className="centered-container">
                                     <div style={{ flexDirection: 'column', display: 'flex' }}>
                                         <div
                                             className="image-upload-containerDeskTopFotoUserConta"
@@ -334,7 +333,8 @@ export default function CriarUserConta() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-12 lg:col-12 mt-1">
+                            <div className="grid formgrid">
+                                <div className="col-12 lg:col-12 ">
                                     <Input
                                         id="nome"
                                         value={userConta.nome || ''}
@@ -356,7 +356,7 @@ export default function CriarUserConta() {
                                         required
                                     />
                                 </div>
-                                <div className="col-12 lg:col-12 mt-1">
+                                <div className="col-12 lg:col-12 ">
                                     <Input
                                         id="email"
                                         value={userConta.email || ''}
@@ -380,7 +380,7 @@ export default function CriarUserConta() {
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="col-12 lg:col-12 mt-1">
+                                        <div className="col-12 lg:col-12 ">
                                             <Input
                                                 value={userConta.senha || ''}
                                                 onChange={handleAllChanges}
@@ -417,7 +417,7 @@ export default function CriarUserConta() {
                                                 }
                                             />
                                         </div>
-                                        <div className="col-12 lg:col-12 mt-1">
+                                        <div className="col-12 lg:col-12 ">
                                             <Input
                                                 value={confirmPassword}
                                                 label="Digite a Confirmação de senha"
@@ -462,7 +462,7 @@ export default function CriarUserConta() {
                                         </div>
                                     </>
                                 )}
-                                <div className="col-12 lg:col-12 mt-1">
+                                <div className="col-12 lg:col-12 ">
                                     <PerfilUserDropdownField
                                         selectedPerfilUser={selectedPerfilUser}
                                         onPerfilUserChange={handlePerfilUserChange}
@@ -474,7 +474,7 @@ export default function CriarUserConta() {
                                         autoSelectSingle
                                     />
                                 </div>
-                                <div className="col-12 lg:col-12 mt-1">
+                                <div className="col-12 lg:col-12 ">
                                     <CustomMultiSelect
                                         id="selectedEmpresa"
                                         selectedItems={selectedEmpresa}
@@ -505,7 +505,7 @@ export default function CriarUserConta() {
                         <BTNPGCreatedAll onClick={async () => await handleSubmit()} label="Salvar" disabled={isSubmitDisabled} icon="" />
                     </div>
                     <DialogFilter header="Adicionar Perfil deste Usuário" visible={showModalPerfilUser} onHide={() => setShowModalPerfilUser(false)}>
-                        <PerfilUserChangeForm
+                        <FormPermissoesCreated
                             msgs={msgs}
                             ref={formRef}
                             perfilUser={perfilUser}

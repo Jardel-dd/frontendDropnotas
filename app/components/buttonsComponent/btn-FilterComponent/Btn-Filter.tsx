@@ -47,7 +47,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                         icon={buttonIcon}
                         outlined
                         onClick={toggle}
-                        style={{ boxShadow: "none",height: "42px" }}
+                        style={{ boxShadow: "none",height: "40px" }}
                     />
                     </div>
                 <Dialog header="Filtros" visible={mobileVisible} onHide={hide} modal
@@ -63,13 +63,13 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
             )}
              {!isMobile && (
                 <>
-                <div style={{ height: "40px"}}>
+                <div style={{ height: "38px"}}>
                     <Button
                         label={isMobile ? undefined : buttonLabel}
                         icon={buttonIcon}
                         outlined
                         onClick={toggle}
-                        style={{ boxShadow: "none", height:"42px", borderRadius:23 }}
+                        style={{ boxShadow: "none", height:"38px", borderRadius:23 }}
                     />
                     </div>
                     <OverlayPanel ref={op} dismissable className="filter-overlay" >

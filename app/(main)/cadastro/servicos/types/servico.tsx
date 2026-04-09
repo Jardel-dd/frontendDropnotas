@@ -5,7 +5,40 @@ import { DropdownChangeEvent } from "primereact/dropdown";
 import { InputNumberValueChangeEvent } from "primereact/inputnumber";
 import { Messages } from "primereact/messages";
 import { Dispatch, RefObject, SetStateAction } from "react";
-
+export const createEmptyServico = () =>
+    new ServiceEntity({
+        ativo: true,
+        id: 0,
+        descricao: '',
+        descricao_completa: '',
+        codigo: '',
+        item_lista_servico: '010501',
+        exigibilidade_iss: '',
+        iss_retido: '',
+        observacoes: '',
+        codigo_municipio: '',
+        numero_processo: '',
+        responsavel_retencao: '',
+        codigo_cnae: '',
+        codigo_nbs: '',
+        codigo_inter_contr: '',
+        codigo_indicador_operacao: '',
+        tipo_operacao: 0,
+        finalidade_nfse: 0,
+        indicador_finalidade: 0,
+        indicador_destinatario: 0,
+        codigo_situacao_tributaria: '',
+        codigo_classificacao_tributaria: '',
+        codigo_situacao_tributaria_regular: '',
+        codigo_classificacao_tributaria_regular: '',
+        codigo_credito_presumido: '',
+        percentual_diferencial_uf: 0,
+        percentual_diferencial_municipal: 0,
+        percentual_diferencial_cbs: 0,
+        valor_servico: null,
+        valor_desconto: 0,
+        aliquota_deducoes: 0
+    });
 export interface ServiceFormProps {
     servico: ServiceEntity;
     initialId?: string | null;
@@ -63,5 +96,4 @@ export interface ServicoDropdownFieldProps {
     fetchAllItems?: () => Promise<ServiceEntity[]>;
     fetchFilteredItems?: (filter: string) => Promise<ServiceEntity[]>;
 }
-
 export type FormCreatedServicoProps = ServicoFieldsProps | ServiceFormProps;

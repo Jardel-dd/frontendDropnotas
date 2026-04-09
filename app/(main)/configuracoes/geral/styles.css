@@ -1,3 +1,11 @@
-.p-inputswitch.p-highlight .p-inputswitch-slider{
-background-color: var(--primary-color);
+.primary-color-switch-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.primary-color-switch-label {
+    display: block;
+    cursor: pointer;
+    margin-top: 3px;
 }

@@ -1,7 +1,7 @@
 import { CategoryContratosEntity } from "@/app/entity/CategoryContratEntity";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
-import { fetchCategoriaContratoByID, fetchFilteredCategoriaContrato, listTheCategoriaContrato } from "../controller/controller";
 import { CategoriaContratoDropdownFieldProps } from "../types/categoriaContratos";
+import { fetchCategoriaContratoByID, fetchFilteredCategoriaContrato, listTheCategoriaContrato } from "../controller/controller";
 
 export default function CategoriaContratoDropdownField({
     selectedCategoriaContrato,
@@ -12,8 +12,9 @@ export default function CategoriaContratoDropdownField({
     errorMessage,
     showAddButton = false,
     onAddClick,
-    autoSelectSingle = true
-}: CategoriaContratoDropdownFieldProps) {
+    autoSelectSingle = true,
+    required = false
+}: CategoriaContratoDropdownFieldProps & { required?: boolean }) {
     return (
         <DropdownSearch<CategoryContratosEntity>
             id="selectedCategoriaContrato"
@@ -37,7 +38,7 @@ export default function CategoriaContratoDropdownField({
             onAddClick={onAddClick}
             topLabel="Categoria de Contratos:"
             showTopLabel
-            required
+            required={required}
         />
     );
 }

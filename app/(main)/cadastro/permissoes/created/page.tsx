@@ -5,7 +5,8 @@ import { Messages } from 'primereact/messages';
 import React, { useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
-import PerfilUserChangeForm, { PermissoesFormRef } from '@/app/(main)/cadastro/permissoes/form/permissoes';
+import { PermissoesFormRef } from '../types/perfilUsuario';
+import FormPermissoesCreated from '../form/controller';
 
 export default function PerfilUserPage() {
     const msgs = useRef<Messages>(null);
@@ -81,7 +82,8 @@ export default function PerfilUserPage() {
     };
     return (
         <div className="card styled-container-main-all-routes">
-            <PerfilUserChangeForm msgs={msgs} ref={formRef} perfilUser={perfilUser} initialId={perfilUserId} setPerfilUser={setPerfilUser} onPerfilUserChange={handlePerfilUserChange} onErrorsChange={handleErrorsChange} showBTNPGCreatedAll={true} />
+            <FormPermissoesCreated msgs={msgs} ref={formRef} perfilUser={perfilUser} initialId={perfilUserId} setPerfilUser={setPerfilUser} onPerfilUserChange={handlePerfilUserChange} onErrorsChange={handleErrorsChange} showBTNPGCreatedAll={true} />
         </div>
     );
 }
+

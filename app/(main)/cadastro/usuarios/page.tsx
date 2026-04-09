@@ -255,7 +255,9 @@ const Usuarios: React.FC = () => {
                                         </div>
                                     </FilterOverlay>
                                 </div>
-                                  
+                                  <div className="container-button-primary-novo">
+                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                    </div>
                                 </div>
                                 <div className='mt-3'>
                                     <ListarUserConta

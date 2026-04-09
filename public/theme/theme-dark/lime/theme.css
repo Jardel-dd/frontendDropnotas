@@ -1037,13 +1037,47 @@
   }
 
   .p-inputswitch {
+    position: relative;
+    display: inline-block;
     width: 3rem;
     height: 1.75rem;
+  }
+  .p-inputswitch-input {
+    appearance: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    z-index: 1;
+    outline: 0 none;
+    cursor: pointer;
+  }
+  .p-inputswitch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid transparent;
+  }
+  .p-inputswitch-slider:before {
+    position: absolute;
+    content: "";
+    top: 50%;
+  }
+  .p-inputswitch .p-inputswitch-input {
+    border-radius: 30px;
   }
   .p-inputswitch .p-inputswitch-slider {
     background: #3e4f62;
     transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
     border-radius: 30px;
+    outline-color: transparent;
   }
   .p-inputswitch .p-inputswitch-slider:before {
     background: rgba(255, 255, 255, 0.6);
@@ -1054,27 +1088,25 @@
     border-radius: 50%;
     transition-duration: 0.2s;
   }
-  .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider:before {
+  .p-inputswitch.p-highlight .p-inputswitch-slider {
+    background: #a3d44e;
+  }
+  .p-inputswitch.p-highlight .p-inputswitch-slider:before {
+    background: rgba(255, 255, 255, 0.87);
     transform: translateX(1.25rem);
   }
-  .p-inputswitch.p-focus .p-inputswitch-slider {
+  .p-inputswitch:not(.p-disabled) .p-inputswitch-input:hover + .p-inputswitch-slider {
+    background: #3e4f62;
+  }
+  .p-inputswitch:not(.p-disabled).p-highlight .p-inputswitch-input:hover + .p-inputswitch-slider {
+    background: #93bf46;
+  }
+  .p-inputswitch:not(.p-disabled) .p-inputswitch-input:focus-visible + .p-inputswitch-slider {
     outline: 0 none;
     outline-offset: 0;
     box-shadow: 0 0 0 0.2rem #daeeb8;
   }
-  .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
-    background: #3e4f62;
-  }
-  .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
-    background: #a3d44e;
-  }
-  .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider:before {
-    background: rgba(255, 255, 255, 0.87);
-  }
-  .p-inputswitch.p-inputswitch-checked:not(.p-disabled):hover .p-inputswitch-slider {
-    background: #93bf46;
-  }
-  .p-inputswitch.p-invalid .p-inputswitch-slider {
+  .p-inputswitch.p-invalid > .p-inputswitch-slider {
     border-color: #fca5a5;
   }
 

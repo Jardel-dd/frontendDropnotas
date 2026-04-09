@@ -1,57 +1,57 @@
+import { useContext } from 'react';
+import { InputTextareaProps } from './types/types';
 import { Mandatory } from '../../mandatory/InputMandatory';
 import { LayoutContext } from '@/layout/context/layoutcontext';
-import React, { ChangeEventHandler, ReactNode, useContext } from 'react';
 import { InputTextarea as PrimeInputTextarea } from 'primereact/inputtextarea';
 
-type InputTextareaProps = {
-    value: string;
-    onChange: ChangeEventHandler<HTMLTextAreaElement>;
-    label: string;
-    rows?: number;
-    cols?: number;
-    placeholder?: string;
-    disabled?: boolean;
-    id?: string;
-    maxLength?: number;
-    className?: string;
-    style?: React.CSSProperties;
-    showTopLabel?: boolean;
-    topLabel?: string | ReactNode;
-    required?: boolean;
-};
-const InputTextarea: React.FC<InputTextareaProps> = ({ value, onChange, label, rows = 5, cols = 30, placeholder, disabled = false, id, maxLength, className, style, showTopLabel, topLabel, required }) => {
+const InputTextarea: React.FC<InputTextareaProps> = ({
+    value,
+    onChange,
+    label,
+    rows = 10,
+    cols = 50,
+    placeholder,
+    disabled = false,
+    id,
+    maxLength,
+    className,
+    style,
+    showTopLabel,
+    topLabel,
+    required
+}) => {
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
+
     return (
-        <>
-         {showTopLabel && topLabel && (
-                <label className="filter-label flex mt-2 items-center">
+        <div>
+            {showTopLabel && topLabel && (
+              <div style={{ height: 'var(--form-label-height)', display:"flex", alignItems:"center" }}>
+                    <label className="filter-label">
                     {topLabel}
-                    <div>
-                    {required && <Mandatory />}
-                    </div>
+                        {required && <Mandatory />}
                 </label>
+                  </div>
             )}
-        <div className={`p-inputgroup flex-1 ${className}`}>
             <PrimeInputTextarea
                 id={id}
                 value={value}
                 onChange={onChange}
-                rows={rows}
-                cols={cols}
                 placeholder={placeholder || label}
                 disabled={disabled}
+                rows={rows}
+                cols={cols}
                 maxLength={maxLength}
                 className={className}
                 style={{
                     background: isDarkMode ? '#293B51' : '#FFFFFF',
                     boxShadow: 'none',
                     borderRadius: '6px',
+                    width: '100%',
                     ...style
                 }}
             />
         </div>
-        </>
     );
 };
 

@@ -10,7 +10,6 @@
   padding-right: 10px;
   margin-bottom: 1rem;
 }
-
 .footer-fixed {
   padding-top: 1rem;
   border-top: 1px solid #ccc;
@@ -19,14 +18,24 @@
   bottom: 0;
   z-index: 1;
 }
-
 .nota-servico-container {
   display: flex;
   flex-direction: column;
 }
-
 .nota-servico-tabs.p-tabview {
   width: 100%;
+  border-radius: 0.75rem;
+  background-color: var(--nota-servico-tab-bg, #ffffff);
+}
+
+.nota-servico-tabs.dark-mode.p-tabview {
+  --nota-servico-tab-bg: #293b51;
+  --nota-servico-tab-border: rgba(255, 255, 255, 0.12);
+}
+
+.nota-servico-tabs.light-mode.p-tabview {
+  --nota-servico-tab-bg: #ffffff;
+  --nota-servico-tab-border: #d7dde5;
 }
 
 .nota-servico-tabs.p-tabview .p-tabview-nav {
@@ -39,8 +48,8 @@
   margin: 0;
   padding: 0 0 0.75rem;
   list-style: none;
-  background: #fff;
-  border-bottom: 1px solid var(--surface-border, #d7dde5);
+  background-color: var(--nota-servico-tab-bg, #ffffff);
+  border-bottom: 1px solid var(--nota-servico-tab-border, #d7dde5);
   z-index: 10;
   overflow-x: auto;
   overflow-y: hidden;
@@ -95,7 +104,7 @@
 
 .nota-servico-tabs.p-tabview .p-tabview-panels {
   padding: 1rem 0 0;
-  background: transparent;
+  background-color: var(--nota-servico-tab-bg, #ffffff);
 }
 
 .tab-content {
