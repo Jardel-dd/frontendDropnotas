@@ -6,12 +6,11 @@ import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 import { CategoriaContratoFormRef } from './types/categoriaContratos';
 import { validateFieldsCategoriaContrato } from './controller/validate';
 import ListarCategoriaContrato from './tabela/categoriaContratoListagem';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
@@ -19,13 +18,14 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
 import FormCategoriaContratoCreated from './form/controller';
+import { Divider } from 'primereact/divider';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
 
 const CategoriaContrato: React.FC = () => {
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
-    const { isDarkMode } = useTheme();
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -167,13 +167,15 @@ const CategoriaContrato: React.FC = () => {
         setVisible(false);
     };
     useEffect(() => {
+        // Carrega a listagem inicial uma vez ao montar a página.
         handleListCategoriaContrato();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     useEffect(() => {
         if (Object.values(touchedFields).some((touched) => touched)) {
             validateFieldsCategoriaContrato(categoriaContrato, setErrors, msgs);
         }
-    }, [categoriaContrato]);
+    }, [categoriaContrato, touchedFields, msgs]);
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
@@ -231,23 +233,12 @@ const CategoriaContrato: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationCategoriaContrato.pageable.pageNumber * listPaginationCategoriaContrato.pageable.pageSize}
                                     rows={pageSize}
                                     totalRecords={listPaginationCategoriaContrato.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
-                                    style={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
+                                    isMobile
                                 />
                             </div>
                         </div>
@@ -310,7 +301,8 @@ const CategoriaContrato: React.FC = () => {
                             </div>
                         </div>
                         <div className="p-2" style={{ marginTop: 'auto' }}>
-                            <Paginator
+                            <Divider style={{margin:"0 0"}}/>
+                            <CustomPaginator
                                 first={listPaginationCategoriaContrato.pageable.pageNumber * listPaginationCategoriaContrato.pageable.pageSize}
                                 rows={pageSize}
                                 totalRecords={listPaginationCategoriaContrato.totalElements}
@@ -353,3 +345,5 @@ const CategoriaContrato: React.FC = () => {
 };
 
 export default CategoriaContrato;
+
+

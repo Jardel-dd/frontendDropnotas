@@ -19,7 +19,9 @@ import {createEmptyVendedor, FormCreatedVendedorProps, VendedorFormProps, Vended
 import { createdVendedor, fetchVendedor, updateVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 
 export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormProps>(
-    ({ initialId, msgs, onVendedorChange, onErrorsChange, redirectAfterSave, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
+    ({ initialId, msgs, onVendedorChange, 
+        onErrorsChange, redirectAfterSave, onClose, onSaved, 
+        showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
         const router = useRouter();
         const vendedorId = initialId;
         const onVendedorChangeRef = useRef(onVendedorChange);

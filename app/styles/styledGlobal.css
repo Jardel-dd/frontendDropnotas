@@ -228,7 +228,7 @@ height: 66px;
 .styled-container-main-all-routes {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 4.375rem - 3.8rem);
+    height: calc(100vh - 4.375rem - 2.8rem);
     padding: 0.5rem;
 }
 
@@ -598,11 +598,11 @@ height: 66px;
     justify-content: center;
 }
 
-.custom-container-main-routes {
+/* .custom-container-main-routes {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 4.375rem - 3.8rem);
-}
+    height: calc(100vh - 4.375rem - 2.8rem);
+} */
 
 .custom-sub-container-main-routes {
     flex-direction: row;

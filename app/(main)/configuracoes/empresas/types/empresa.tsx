@@ -63,6 +63,7 @@ export interface EmpresaFieldsProps {
     onDropdownChangeEndereco: (event: DropdownChangeEvent) => void;
     onNumberChange: (event: InputNumberValueChangeEvent) => void;
     onUserChange: (event: MultiSelectChangeEvent) => void;
+    onOpenUserContaModal: () => void;
     onCNAEChange: (cnae: TableCNAEEntity | null) => void;
     onSearchCnpj: () => Promise<void>;
     onValidateCnpj: () => void;

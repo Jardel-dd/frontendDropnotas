@@ -151,7 +151,7 @@ const AppConfig = () => {
             <div className="card styled-container-main-all-routes">
                 <div className="p-2">
                     <div className="mb-4 lg:mb-0 custom-container">
-                        <Divider align="center" className="form-divider mt-1">
+                        <Divider align="center" className="form-divider">
                             <span>Aparencia do Sistema</span>
                         </Divider>
                         <div className="field primary-color-switch-row">

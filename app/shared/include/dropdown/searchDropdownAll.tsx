@@ -78,6 +78,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [filterValue, setFilterValue] = useState<string>('');
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<Dropdown>(null);
     const selectedItemRef = useRef<T | null>(selectedItem);
     const optionValueRef = useRef<keyof T | undefined>(optionValue);
     const initialOptionValueRef = useRef<string | number | null | undefined>(initialOptionValue);
@@ -202,6 +203,27 @@ export const DropdownSearch = <T extends Record<string, any>>({
         event.stopPropagation();
         onAddClick?.();
     };
+    const handleCloseButtonMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+    const handleCloseButtonClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        dropdownRef.current?.hide();
+        onBlur?.();
+    };
+    const handleClearButtonMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+    const handleClearButtonClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onItemChangeRef.current?.(null);
+    };
+    const hasSelectedValue = selectedItem !== null;
+    const showHeaderButtons = showAddButton || hasSelectedValue;
 
     useEffect(() => {
         if (!selectedItem) return;
@@ -226,6 +248,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
             <div className={`p-inputgroup flex-1 custom-input-number styled-on-focus styled-on-hover ${hasError ? 'input-error' : ''}`}
                   style={{ border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da' , borderRadius: '6px' }}>
                 <Dropdown
+                    ref={dropdownRef}
                     id={id}
                     onShow={handleShow}
                     emptyMessage={
@@ -266,7 +289,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
                         
                     }}
                     filterTemplate={() => (
-                        <div className="p-2 flex align-items-center gap-2" style={{ width: '100%' }}>
+                        <div className="p-2 flex align-items-center gap-2" style={{ width: '100%',height:"40px" }}>
                             <InputText
                                 autoFocus
                                 type="text"
@@ -279,23 +302,61 @@ export const DropdownSearch = <T extends Record<string, any>>({
                                     boxShadow: 'none'
                                 }}
                             />
-                            {showAddButton && (
-                                <Button
-                                    type="button"
-                                    style={{
-                                        height: '15px',
-                                        width: '25px',
-                                        background: 'var(--primary-color)',
-                                        borderColor: 'var(--primary-color)',
-                                        color: 'var(--primary-color-text)',
-                                        boxShadow: 'none'
-                                    }}
-                                    tooltip="Adicionar"
-                                    icon="pi pi-plus"
-                                    aria-label="Adicionar"
-                                    onMouseDown={handleAddButtonMouseDown}
-                                    onClick={handleAddButtonClick}
-                                />
+                            {showHeaderButtons && (
+                                <>
+                                    {showAddButton && (
+                                        <Button
+                                            type="button"
+                                            style={{
+                                                height: '30px',
+                                                width: '40px',
+                                                background: 'var(--primary-color)',
+                                                borderColor: 'var(--primary-color)',
+                                                color: 'var(--primary-color-text)',
+                                                boxShadow: 'none'
+                                            }}
+                                            tooltip="Adicionar"
+                                            icon="pi pi-plus"
+                                            aria-label="Adicionar"
+                                            onMouseDown={handleAddButtonMouseDown}
+                                            onClick={handleAddButtonClick}
+                                        />
+                                    )}
+                                    {hasSelectedValue && (
+                                        <Button
+                                            type="button"
+                                            style={{
+                                                height: '30px',
+                                                width: '40px',
+                                                boxShadow: 'none'
+                                            }}
+                                            tooltip="Limpar"
+                                            icon="pi pi-trash"
+                                            aria-label="Limpar"
+                                            severity="danger"
+                                            outlined
+                                            raised
+                                            onMouseDown={handleClearButtonMouseDown}
+                                            onClick={handleClearButtonClick}
+                                        />
+                                    )}
+                                    <Button
+                                        type="button"
+                                        style={{
+                                            height: '30px',
+                                            width: '40px',
+                                            boxShadow: 'none'
+                                        }}
+                                        tooltip="Fechar"
+                                        icon="pi pi-times"
+                                        aria-label="Fechar"
+                                        severity="danger"
+                                        raised
+                                        outlined
+                                        onMouseDown={handleCloseButtonMouseDown}
+                                        onClick={handleCloseButtonClick}
+                                    />
+                                </>
                             )}
                         </div>
                     )}

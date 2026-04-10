@@ -6,7 +6,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { MultiSelect } from 'primereact/multiselect';
 import { Mandatory } from '../../mandatory/InputMandatory';
 import { LayoutContext } from '@/layout/context/layoutcontext';
-import {  useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import LoadingScreenComponent from '@/app/loading/loadingComponent';
 import { ensureSelectedItemsInList, MultiSelectProps, normalize } from './types/types';
 
@@ -42,6 +42,7 @@ function CustomMultiSelect({
     const [filteredOptions, setFilteredOptions] = useState<any[]>(options);
     const [loading, setLoading] = useState(false);
     const [hasLoadedAllOptions, setHasLoadedAllOptions] = useState(false);
+    const multiSelectRef = useRef<MultiSelect>(null);
 
     const didAutoSelectRef = useRef(false);
     const selectedItemsRef = useRef<any[]>(selectedItems);
@@ -113,11 +114,18 @@ function CustomMultiSelect({
         }
     }, [options, fetchAllItems, autoSelectSingle, filterValue, onChange, dataKey]);
     const handleShow = async () => {
-        if (fetchAllItems && !loading && !hasLoadedAllOptions) {
-            await loadAll();
-        } else {
-            setFilteredOptions(ensureSelectedItemsInList(options, selectedItemsRef.current, dataKey));
+        if (fetchAllItems && !loading) {
+            if (!hasLoadedAllOptions || filteredOptions.length === 0 || filterValue.trim().length === 0) {
+                setFilterValue('');
+                await loadAll();
+                return;
+            }
+
+            setFilteredOptions((prev) => ensureSelectedItemsInList(prev, selectedItemsRef.current, dataKey));
+            return;
         }
+
+        setFilteredOptions(ensureSelectedItemsInList(options, selectedItemsRef.current, dataKey));
     };
     const debouncedFilter = useDebouncedCallback(async (value: string) => {
         setFilterValue(value);
@@ -126,6 +134,8 @@ function CustomMultiSelect({
             await loadAll();
             return;
         }
+
+        if (trimmed.length < minSearchChars) return;
 
         if (fetchFilteredItems) {
             setLoading(true);
@@ -141,7 +151,6 @@ function CustomMultiSelect({
             } finally {
                 setLoading(false);
             }
-            if (trimmed.length < minSearchChars) return;
         } else {
             const v = trimmed.toLowerCase();
             const base = fetchAllItems ? filteredOptions : options;
@@ -161,10 +170,45 @@ function CustomMultiSelect({
     useEffect(() => {
         setFilteredOptions((prev) => ensureSelectedItemsInList(prev, selectedItems, dataKey));
     }, [selectedItems, dataKey]);
+    const handleAddButtonMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+    const handleAddButtonClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onAddClick?.();
+    };
+    const handleCloseButtonMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+    const handleCloseButtonClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        multiSelectRef.current?.hide();
+    };
+    const handleClearButtonMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+    const handleClearButtonClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onChange({
+            value: [],
+            target: {
+                id,
+                value: []
+            }
+        });
+    };
+    const hasSelectedValues = Array.isArray(selectedItems) && selectedItems.length > 0;
+    const showHeaderButtons = showAddButton || hasSelectedValues;
     return (
-        <div className="p-field" style={{ width: '100%', height:'85px', maxHeight:"85px"}}>
+        <div className="p-field" style={{ width: '100%', height: '85px', maxHeight: "85px" }}>
             {showTopLabel && topLabel && (
-                <div style={{ height:25, display:"flex", alignItems:"center" }}>
+                <div style={{ height: 25, display: "flex", alignItems: "center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -174,6 +218,7 @@ function CustomMultiSelect({
             <div>
                 <div style={{ width: '100%' }}>
                     <MultiSelect
+                        ref={multiSelectRef}
                         id={id}
                         value={selectedItems}
                         onChange={onChange}
@@ -182,8 +227,7 @@ function CustomMultiSelect({
                         dataKey={dataKey}
                         placeholder={loading ? 'Carregando...' : placeholder}
                         selectedItemsLabel="{0} itens selecionados"
-                        style={{ boxShadow: 'none', background: isDarkMode ? '#293B51' : '#FFFFFF',display:"flex" }}
-
+                        style={{ boxShadow: 'none', background: isDarkMode ? '#293B51' : '#FFFFFF', display: "flex" }}
                         maxSelectedLabels={maxSelectedLabels}
                         panelFooterTemplate={
                             loading ? (
@@ -196,6 +240,17 @@ function CustomMultiSelect({
                         filter
                         onShow={handleShow}
                         appendTo={typeof window !== 'undefined' ? document.body : null}
+                        pt={
+                            showHeaderButtons
+                                ? {
+                                    closeButton: {
+                                        style: {
+                                            display: 'none'
+                                        }
+                                    }
+                                }
+                                : undefined
+                        }
                         filterTemplate={() => (
                             <div className="p-2 flex align-items-center gap-2 w-full">
                                 <InputText
@@ -209,26 +264,64 @@ function CustomMultiSelect({
                                     }}
                                     placeholder="Digite para filtrar..."
                                     className="p-inputtext-sm w-full"
-                                    style={{ boxShadow: 'none',display:"flex" }}
+                                    style={{ boxShadow: 'none', display: "flex", background: "transparent" }}
                                 />
-                                {showAddButton && (
-                                    <Button
-                                        type="button"
-                                        icon="pi pi-plus"
-                                        tooltip="Adicionar"
-                                        severity="success"
-                                        aria-label="Adicionar"
-                                        onMouseDown={(event) => {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-                                        }}
-                                        onClick={(event) => {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-                                            onAddClick?.();
-                                        }}
-                                        style={{ height: 28, width: 32 }}
-                                    />
+                                {showHeaderButtons && (
+                                    <>
+                                        {showAddButton && (
+                                            <Button
+                                                type="button"
+                                                style={{
+                                                    height: '30px',
+                                                    width: '40px',
+                                                    background: 'var(--primary-color)',
+                                                    borderColor: 'var(--primary-color)',
+                                                    color: 'var(--primary-color-text)',
+                                                    boxShadow: 'none'
+                                                }}
+                                                tooltip="Adicionar"
+                                                icon="pi pi-plus"
+                                                aria-label="Adicionar"
+                                                onMouseDown={handleAddButtonMouseDown}
+                                                onClick={handleAddButtonClick}
+                                            />
+                                        )}
+                                        {hasSelectedValues && (
+                                            <Button
+                                                type="button"
+                                                style={{
+                                                    height: '30px',
+                                                    width: '40px',
+                                                    boxShadow: 'none'
+                                                }}
+
+                                                tooltip="Limpar"
+                                                icon="pi pi-trash"
+                                                aria-label="Limpar"
+                                                severity="danger"
+                                                outlined
+                                                raised
+                                                onMouseDown={handleClearButtonMouseDown}
+                                                onClick={handleClearButtonClick}
+                                            />
+                                        )}
+                                        <Button
+                                            type="button"
+                                            style={{
+                                                height: '30px',
+                                                width: '40px',
+                                                boxShadow: 'none'
+                                            }}
+                                            tooltip="Fechar"
+                                            icon="pi pi-times"
+                                            aria-label="Fechar"
+                                            severity="danger"
+                                            raised
+                                            outlined
+                                            onMouseDown={handleCloseButtonMouseDown}
+                                            onClick={handleCloseButtonClick}
+                                        />
+                                    </>
                                 )}
                             </div>
                         )}

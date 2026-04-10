@@ -43,48 +43,37 @@ const DialogFilter: React.FC<BaseDialogProps> = ({
     header = "Dialog",
     onHide,
     children,
-
     onSave,
     onCancel,
     onClear,
-
     saveLabel = "Salvar",
     cancelLabel = "Cancelar",
     clearLabel = "Limpar filtros",
-
     showSaveButton = false,
     showCancelButton = false,
     showClearButton = false,
-
     saveDisabled = false,
     cancelDisabled = false,
     clearDisabled = false,
-
     dismissableMask = true,
     closable = true,
     draggable = false,
-
     className = "",
     style = {},
     contentStyle = {},
-
     width = "80%",
     height = "auto",
-
     breakpoints = {}
 }) => {
-
     const handleCancelClick = () => {
         if (onCancel) onCancel();
         else onHide();
     };
-
     const handleSaveClick = () => onSave?.();
     const handleClearClick = () => onClear?.();
 
     const hasFooter =
         showSaveButton || showCancelButton || showClearButton;
-
     const footer = hasFooter ? (
         <div className="flex justify-content-between align-items-center gap-2 w-full">
             <div className="flex gap-2" style={{ height: "32px" }}>

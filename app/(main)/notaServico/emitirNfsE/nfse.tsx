@@ -8,7 +8,7 @@ import BlocoPrestador from './components/BlocoPrestador';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 
 export function NotaServico(props: any) {
-    const { isDarkMode } = useTheme();
+const { isDarkMode } = useTheme();
     
     const {
         nfseGerada,
@@ -34,7 +34,7 @@ export function NotaServico(props: any) {
     } = props;
     return (
         <div>
-            <TabView className={`nota-servico-tabs ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <TabView className="nota-servico-tabs" >
                 <TabPanel header="Empresa  (Prestador)">
                     <BlocoPrestador
                         nfseGerada={nfseGerada}

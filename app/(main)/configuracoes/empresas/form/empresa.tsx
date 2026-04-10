@@ -4,23 +4,23 @@ import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Divider } from 'primereact/divider';
+import { FileUpload } from 'primereact/fileupload';
 import IconVisible from '@/app/shared/IconVisible';
 import { getCitiesFromState } from '@/app/entity/maps';
 import Input from '@/app/shared/include/input/input-all';
 import { IconPorcentagem } from '@/app/utils/icons/icons';
+import type { EmpresaFieldsProps } from '../types/empresa';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
-import { FileUpload } from 'primereact/fileupload';
 import { CustomInputNumber } from '@/app/shared/include/inputReal/inputReal';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
 import { fetchAllCnae, fetchFilteredCnae } from '@/app/components/fetchAll/listAllCnae/controller';
 import { incentivoFiscal, prestacaoSus, regimeEspecialTributarioOptionsCompany, regimeTributarioOptions, tipo_rps } from '@/app/shared/optionsDropDown/options';
 import { fetchFilteredUserConta, fetchUserConta } from '@/app/(main)/cadastro/usuarios/controller/controller';
-import type { EmpresaFieldsProps, EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
 
 export type { EmpresaFieldsProps, EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
 
@@ -46,6 +46,7 @@ export function EmpresaFields({
     onDropdownChangeEndereco,
     onNumberChange,
     onUserChange,
+    onOpenUserContaModal,
     onCNAEChange,
     onSearchCnpj,
     onValidateCnpj,
@@ -156,14 +157,41 @@ export function EmpresaFields({
                         </div>
                     )}
                 </div>
-                <EnderecoForm endereco={empresa.endereco} telefone={empresa.telefone} errors={errors} onChange={onChange} onCepSearch={onCepSearch} onDropdownChange={onDropdownChange} onDropdownChangeEndereco={onDropdownChangeEndereco} getCitiesFromState={getCitiesFromState} loadingCep={loadingCep} />
+                <EnderecoForm 
+                endereco={empresa.endereco} 
+                telefone={empresa.telefone} 
+                errors={errors} 
+                onChange={onChange} 
+                onCepSearch={onCepSearch} 
+                onDropdownChange={onDropdownChange} 
+                onDropdownChangeEndereco={onDropdownChangeEndereco} 
+                getCitiesFromState={getCitiesFromState} 
+                loadingCep={loadingCep} />
                 <Divider align="center" className="form-divider">
                     <span>Acesso a Empresa</span>
                 </Divider>
                 <div className="grid formgrid">
                     <div className="col-12 mb-1 lg:col-6 lg:mb-0">
                         <div className="p-field">
-                            <CustomMultiSelect id="" selectedItems={selectedUserConta} onChange={onUserChange} fetchAllItems={fetchUserConta} fetchFilteredItems={fetchFilteredUserConta} options={userConta} hasError={!!errors.selectedUserConta} errorMessage={errors.selectedUserConta} optionLabel="nome" dataKey="id" initialSelectedValues={empresa.id_usuarios_acesso ?? []} placeholder="Selecione os Usuários" showChips topLabel="Usuários:" showTopLabel required />
+                            <CustomMultiSelect 
+                            id="" 
+                            selectedItems={selectedUserConta} 
+                            onChange={onUserChange} 
+                            fetchAllItems={fetchUserConta}
+                            fetchFilteredItems={fetchFilteredUserConta}
+                            options={userConta}
+                            hasError={!!errors.selectedUserConta} 
+                            errorMessage={errors.selectedUserConta} 
+                            optionLabel="nome" 
+                            dataKey="id" 
+                            showAddButton
+                            onAddClick={onOpenUserContaModal}
+                            initialSelectedValues={empresa.id_usuarios_acesso ?? []} 
+                            placeholder="Selecione os Usuários" showChips 
+                            topLabel="Usuários:" 
+                            showTopLabel 
+                            required 
+                            />
                         </div>
                     </div>
                 </div>

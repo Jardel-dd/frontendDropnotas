@@ -283,7 +283,7 @@ const Contratos: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-3">
+                            <div >
                                 <ListarContratos
                                     loading={loading}
                                     listPaginationContratos={listPaginationContratos}

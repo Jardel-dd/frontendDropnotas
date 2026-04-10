@@ -1,21 +1,13 @@
 'use client';
 import "./style.css";
+import {useRef, useState} from 'react';
 import "@/app/styles/styledGlobal.css";
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
+import { FilterOverlayProps } from "./types/types";
 import { OverlayPanel } from 'primereact/overlaypanel';
-import { ReactNode, useRef, useState, useEffect } from 'react';
 import { useIsDesktop, useIsMobile } from "../../responsiveCelular/responsive";
-type FilterOverlayProps = {
-    children: ReactNode;
-    onApply?: () => void;
-    onClear?: () => void;
-    width?: string;
-    mobileBreakpoint?: number;
-    buttonLabel?: string;
-    buttonIcon?: string;
-    buttonClassName?: string;
-};
+
 export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply, onClear, width = '300px', mobileBreakpoint = 768, buttonLabel = 'Filtros', buttonIcon = 'pi pi-filter', buttonClassName = '' }) => {
     const op = useRef<OverlayPanel>(null);
     const [mobileVisible, setMobileVisible] = useState(false);

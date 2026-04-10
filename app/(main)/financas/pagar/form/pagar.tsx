@@ -103,7 +103,7 @@ export function ContasPagarFields({
 }: ContasPagarFieldsProps) {
     return (
         <div className="grid formgrid">
-            <div className="col-12 mt-1">
+            <div className="col-12">
                 <Input
                     id="descricao"
                     value={contasPagar.descricao || ''}
@@ -118,7 +118,7 @@ export function ContasPagarFields({
                     required
                 />
             </div>
-            <div className="col-12 lg:col-4 mt-1">
+            <div className="col-12 lg:col-4 ">
                 <DropdownSearch<PessoaEntity>
                     id="selectedCliente"
                     selectedItem={selectedCliente}
@@ -135,7 +135,7 @@ export function ContasPagarFields({
                     required
                 />
             </div>
-            <div className="col-12 lg:col-4 mt-1">
+            <div className="col-12 lg:col-4 ">
                 <CustomInputNumber
                     id="valor_original"
                     value={Number(contasPagar.valor_original ?? 0)}
@@ -147,7 +147,7 @@ export function ContasPagarFields({
                     required
                 />
             </div>
-            <div className="col-12 lg:col-4 mt-1">
+            <div className="col-12 lg:col-4 ">
                 <CustomInputNumber
                     id="valor_total"
                     value={Number(contasPagar.valor_total ?? 0)}
@@ -159,7 +159,7 @@ export function ContasPagarFields({
                     required
                 />
             </div>
-            <div className="col-12 lg:col-4 mt-1">
+            <div className="col-12 lg:col-4 ">
                 <Input
                     id="data_vencimento"
                     value={contasPagar.data_vencimento || ''}
@@ -173,7 +173,7 @@ export function ContasPagarFields({
                     required
                 />
             </div>
-            <div className="col-12 mt-1">
+            <div className="col-12 ">
                 <InputTextarea
                     id="observacao"
                     value={contasPagar.observacao || ''}

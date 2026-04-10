@@ -100,7 +100,7 @@ const SignIn: React.FC = () => {
                             required
                         />
                     </div>
-                    <div className="col-12 lg:col-12 mt-1">
+                    <div className="col-12 lg:col-12">
                         <Input
                             value={userConta.senha || ''}
                             onChange={handleAllChanges}

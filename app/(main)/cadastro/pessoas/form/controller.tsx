@@ -52,7 +52,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         ref
     ) => {
         const router = useRouter();
-        const searchParams = useSearchParams();
         const pessoaId = initialId;
         const formRef = useRef<VendedorFormRef>(null);
         const onPessoaChangeRef = useRef(onPessoaChange);

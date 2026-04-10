@@ -126,7 +126,6 @@ const Usuarios: React.FC = () => {
         handleListUsersConta(0, searchTerm, listarInativos);
         setVisible(false);
     };
-   
     const handleClearFilters = () => {
         setListarInativos(false);
         handleListUsersConta(0, searchTerm, listarInativos);

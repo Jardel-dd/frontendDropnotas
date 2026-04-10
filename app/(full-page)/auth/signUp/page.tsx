@@ -154,7 +154,7 @@ function SignUp() {
                     </div>
                     <div className="sign-up-card__body">
                         <div className="grid formgrid w-full">
-                            <div className="col-12 lg:col-12 mt-1">
+                            <div className="col-12 lg:col-12">
                                 <InputMaskDrop
                                     id="cnpj"
                                     value={userConta.cnpj || ''}
@@ -187,7 +187,7 @@ function SignUp() {
                                 />
 
                             </div>
-                            <div className="col-12 lg:col-12 mt-1">
+                            <div className="col-12 lg:col-12">
                                 <Input
                                     id="razao_social"
                                     value={userConta.razao_social || ''}
@@ -203,7 +203,7 @@ function SignUp() {
                                     required
                                 />
                             </div>
-                            <div className="col-12 lg:col-12 mt-1">
+                            <div className="col-12 lg:col-12 ">
                                 <Input
                                     id="nome"
                                     value={userConta.nome || ''}
@@ -219,7 +219,7 @@ function SignUp() {
                                     required
                                 />
                             </div>
-                            <div className="col-12 lg:col-12 mt-1">
+                            <div className="col-12 lg:col-12 ">
                                 <Input
                                     id="email"
                                     value={userConta.email || ''}
@@ -236,7 +236,7 @@ function SignUp() {
                                     required
                                 />
                             </div>
-                            <div className="col-12 lg:col-12 mt-1">
+                            <div className="col-12 lg:col-12 ">
                                 <Input
                                     value={userConta.senha || ''}
                                     onChange={handleAllChanges}
@@ -255,7 +255,7 @@ function SignUp() {
                                     required
                                 />
                             </div>
-                            <div className="col-12 lg:col-12 mt-1">
+                            <div className="col-12 lg:col-12 ">
                                 <Input
                                     className="w-70"
                                     label="Digite a Confirmação de senha"
