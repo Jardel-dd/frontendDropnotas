@@ -1,4 +1,5 @@
 'use client';
+import dayjs from 'dayjs';
 import './fotter.css';
 import '@/app/styles/styledGlobal.css';
 import { Button } from 'primereact/button';
@@ -11,21 +12,23 @@ import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import ListarOrdemServico from './tabela/ordemServicoListagem';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { Formas_recebimento } from '@/app/entity/FormaPagamento';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { DetalServiceOSEntity } from '@/app/entity/ServiceEntity';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 import { deletar, fetchOrdemServico, list, preparar } from './controller/controller';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
+import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DropDownFilterOrdemOrdemServico } from '@/app/shared/optionsDropDown/options';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
 const OrdemServicos: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
@@ -78,9 +81,12 @@ const OrdemServicos: React.FC = () => {
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [dateRange, setDateRange] = useState<DateRangeValue>(todayRange);
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
+    const [draftSelectedPessoa, setDraftSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity | null>(null);
+    const [draftSelectedEmpresa, setDraftSelectedEmpresa] = useState<CompanyEntity | null>(null);
     const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [selectedStatusOrdemServico, setSelectedStatusOrdemServico] = useState<string>('');
+    const [draftSelectedStatusOrdemServico, setDraftSelectedStatusOrdemServico] = useState<string>('');
     const [listPaginationOrdemServico, setListPaginationOrdemServico] = useState<Record<string, any>>({
         pageable: {
             pageNumber: 0,
@@ -108,7 +114,20 @@ const OrdemServicos: React.FC = () => {
         first: true,
         empty: false
     });
-    const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
+    const { debouncedSearch, searchNow } = useGenericSearch({
+        setter: setEmitirOS,
+        field: 'descricao',
+        onSearch: (value) => handleListOrdemServico(0, value, listarInativos)
+    });
+    const syncDraftFilters = () => {
+        setDraftSelectedEmpresa(selectedEmpresa);
+        setDraftSelectedPessoa(selectedPessoa);
+        setDraftSelectedStatusOrdemServico(selectedStatusOrdemServico);
+    };
+    const handleDesktopDateRangeSearch = (inicio: Date, fim: Date) => {
+        setDateRange([dayjs(inicio), dayjs(fim)]);
+    };
+     const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
         let value = event.target.value;
         if (event.target.type === 'checkbox' || event.target.type === 'switch') {
             value = event.target.checked;
@@ -146,29 +165,13 @@ const OrdemServicos: React.FC = () => {
             setLoading(false);
         }
     };
-    const onPageChange = (event: PaginatorPageChangeEvent) => {
-        const selectedPage = event.page;
-        setListPaginationOrdemServico((prev) => ({
-            ...prev,
-            pageable: {
-                ...prev.pageable,
-                pageNumber: selectedPage
-            }
-        }));
-        handleListOrdemServico(selectedPage, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
-    };
-    const { debouncedSearch, searchNow } = useGenericSearch({
-        setter: setEmitirOS,
-        field: 'descricao',
-        onSearch: (value) => handleListOrdemServico(0, value, listarInativos)
-    });
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
         debouncedSearch(value);
     };
     const handleCompanyChange = (empresa: CompanyEntity | null) => {
-        setSelectedEmpresa(empresa);
+        setDraftSelectedEmpresa(empresa);
         if (empresa) {
             handleAllChanges({
                 target: {
@@ -185,7 +188,7 @@ const OrdemServicos: React.FC = () => {
         });
     };
     const handlePessoaChange = (pessoa: PessoaEntity | null) => {
-        setSelectedPessoa(pessoa);
+        setDraftSelectedPessoa(pessoa);
         if (pessoa) {
             handleAllChanges({
                 target: { id: 'id_pessoa', value: pessoa.id, type: 'input' }
@@ -199,12 +202,20 @@ const OrdemServicos: React.FC = () => {
     };
     const handleClearFilters = () => {
         setSelectedEmpresa(null);
+        setDraftSelectedEmpresa(null);
         setSelectedPessoa(null);
+        setDraftSelectedPessoa(null);
         setSelectedStatusOrdemServico('');
-        buscar();
+        setDraftSelectedStatusOrdemServico('');
+        handleListOrdemServico(0, searchTerm, listarInativos, '', dateRange);
+        search(null, null, '');
         setVisible(false);
     };
-    const buscar = async () => {
+    const search = async (
+        empresa: CompanyEntity | null = selectedEmpresa,
+        pessoa: PessoaEntity | null = selectedPessoa,
+        status: string = selectedStatusOrdemServico
+    ) => {
         if (!dateRange) return;
         const [inicio, fim] = dateRange;
         if (!inicio || !fim) return;
@@ -213,10 +224,10 @@ const OrdemServicos: React.FC = () => {
             const { data_hora_inicio, data_hora_fim } = mapDateRangeToParams([inicio, fim]);
             const params: OrdemServicoParams = {
                 termo: searchTerm,
-                idEmpresa: selectedEmpresa?.id ?? null,
-                idCliente: selectedPessoa?.id ?? null,
+                idEmpresa: empresa?.id ?? null,
+                idCliente: pessoa?.id ?? null,
                 idVendedor: selectedVendedor?.id ?? null,
-                status: selectedStatusOrdemServico,
+                status,
                 data_hora_inicio,
                 data_hora_fim
             };
@@ -226,12 +237,28 @@ const OrdemServicos: React.FC = () => {
             setLoading(false);
         }
     };
-    useEffect(() => {
-        buscar();
-    }, [searchTerm, selectedEmpresa, selectedPessoa, selectedVendedor, selectedStatusOrdemServico, dateRange]);
+    const handleApplyFilters = () => {
+        setSelectedEmpresa(draftSelectedEmpresa);
+        setSelectedPessoa(draftSelectedPessoa);
+        setSelectedStatusOrdemServico(draftSelectedStatusOrdemServico);
+        handleListOrdemServico(0, searchTerm, listarInativos, draftSelectedStatusOrdemServico, dateRange);
+        search(draftSelectedEmpresa, draftSelectedPessoa, draftSelectedStatusOrdemServico);
+        setVisible(false);
+    };
+    const onPageChange = (event: PaginatorPageChangeEvent) => {
+        const selectedPage = event.page;
+        setListPaginationOrdemServico((prev) => ({
+            ...prev,
+            pageable: {
+                ...prev.pageable,
+                pageNumber: selectedPage
+            }
+        }));
+        handleListOrdemServico(selectedPage, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
+    };
     useEffect(() => {
         handleListOrdemServico(0, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
-    }, [dateRange]);
+    });
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
@@ -259,7 +286,8 @@ const OrdemServicos: React.FC = () => {
                                     <div className="col-4 mb-0 lg:col-2 p-0 " >
                                         <div className="container-BTN-Filter-Created">
                                             <FilterOverlay 
-                                            onApply={buscar}
+                                            onOpen={syncDraftFilters}
+                                            onApply={handleApplyFilters}
                                              onClear={handleClearFilters}
                                               buttonClassName="height-2-8rem-ml-1rem-mobile">
                                                 <div className="col-12 lg:col-12 ">
@@ -273,7 +301,7 @@ const OrdemServicos: React.FC = () => {
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
-                                                        selectedCompany={selectedEmpresa}
+                                                        selectedCompany={draftSelectedEmpresa}
                                                         onCompanyChange={handleCompanyChange}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
@@ -284,7 +312,7 @@ const OrdemServicos: React.FC = () => {
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <PessoaDropdownField
-                                                        selectedPessoa={selectedPessoa}
+                                                        selectedPessoa={draftSelectedPessoa}
                                                         onPessoaChange={handlePessoaChange}
                                                         reloadKey={reloadKeyPessoa}
                                                         hasError={!!errors.selectedPessoa}
@@ -294,12 +322,12 @@ const OrdemServicos: React.FC = () => {
                                                 <div className="col-12 lg:col-12 ">
                                                     <Dropdown
                                                         id="selectedstatusOrdemServico"
-                                                        value={selectedStatusOrdemServico}
+                                                        value={draftSelectedStatusOrdemServico}
                                                         options={DropDownFilterOrdemOrdemServico}
                                                         optionLabel="label"
                                                         optionValue="value"
                                                         placeholder="Selecione"
-                                                        onChange={(e) => setSelectedStatusOrdemServico(e.value)}
+                                                        onChange={(e) => setDraftSelectedStatusOrdemServico(e.value)}
                                                         className="custom-multiselect w-full"
                                                         label={''}
                                                         topLabel="Status:"
@@ -340,22 +368,12 @@ const OrdemServicos: React.FC = () => {
                             </div>
                             <div style={{ marginTop: 'auto' }}>
                                 <div className="custom-paginator">
-                                    <Paginator
+                                    <CustomPaginator
                                         first={listPaginationOrdemServico.pageable.pageNumber * listPaginationOrdemServico.pageable.pageSize}
                                         rows={listPaginationOrdemServico.pageable.pageSize}
                                         totalRecords={listPaginationOrdemServico.totalElements}
                                         onPageChange={onPageChange}
-                                        template={{
-                                            layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                            CurrentPageReport: (options) => {
-                                                const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                                return (
-                                                    <span>
-                                                        Página {pageNumber} de {options.totalPages}
-                                                    </span>
-                                                );
-                                            }
-                                        }}
+                                       isMobile
                                     />
                                 </div>
                             </div>
@@ -384,16 +402,18 @@ const OrdemServicos: React.FC = () => {
                                             />
                                         </div>
                                         <div>
-                                            <DateRangePicker showTopLabel topLabel="Filtar por Data:" onBuscar={buscar} />
+                                            <DateRangePicker showTopLabel topLabel="Filtar por Data:" onBuscar={handleDesktopDateRangeSearch} />
                                         </div>
                                         <div className="Container-Btn-Filter-Desktop">
                                             <FilterOverlay 
-                                            onApply={buscar} 
+                                            onOpen={syncDraftFilters}
+                                            onApply={handleApplyFilters} 
                                             onClear={handleClearFilters} 
                                             buttonClassName="Btn-Filter-Desktop">
+                                                <div className="grid formgrid">
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
-                                                        selectedCompany={selectedEmpresa}
+                                                        selectedCompany={draftSelectedEmpresa}
                                                         onCompanyChange={handleCompanyChange}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
@@ -401,7 +421,7 @@ const OrdemServicos: React.FC = () => {
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <PessoaDropdownField
-                                                        selectedPessoa={selectedPessoa}
+                                                        selectedPessoa={draftSelectedPessoa}
                                                         onPessoaChange={handlePessoaChange}
                                                         reloadKey={reloadKeyPessoa}
                                                         hasError={!!errors.selectedPessoa}
@@ -411,17 +431,18 @@ const OrdemServicos: React.FC = () => {
                                                 <div className="col-12 lg:col-12 ">
                                                     <Dropdown
                                                         id="selectedstatusOrdemServico"
-                                                        value={selectedStatusOrdemServico}
+                                                        value={draftSelectedStatusOrdemServico}
                                                         options={DropDownFilterOrdemOrdemServico}
                                                         optionLabel="label"
                                                         optionValue="value"
                                                         placeholder="Selecione"
-                                                        onChange={(e) => setSelectedStatusOrdemServico(e.value)}
+                                                        onChange={(e) => setDraftSelectedStatusOrdemServico(e.value)}
                                                         className="custom-multiselect w-full"
                                                         label={''}
                                                         topLabel="Status:"
                                                         showTopLabel
                                                     />
+                                                </div>
                                                 </div>
                                             </FilterOverlay>
                                         </div>
@@ -458,7 +479,7 @@ const OrdemServicos: React.FC = () => {
                                 </div>
                             </div>
                             <div style={{ marginTop: 'auto' }}>
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationOrdemServico.pageable.pageNumber * listPaginationOrdemServico.pageable.pageSize}
                                     rows={listPaginationOrdemServico.pageable.pageSize}
                                     totalRecords={listPaginationOrdemServico.totalElements}

@@ -4,6 +4,7 @@ export type FilterOverlayProps = {
     children: ReactNode;
     onApply?: () => void;
     onClear?: () => void;
+    onOpen?: () => void;
     width?: string;
     mobileBreakpoint?: number;
     buttonLabel?: string;

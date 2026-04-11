@@ -1,6 +1,6 @@
 'use client'
 import api from '@/app/services/api';
-import { DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
+import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 
 type RelatorioServicosPrestadosParams = {
     idEmpresa?: number | null;

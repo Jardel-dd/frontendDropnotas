@@ -9,30 +9,30 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
-import { NotaFiscalParams } from './types/notaServico';
 import { listNotaServico} from './controller/controller';
 import Input from '@/app/shared/include/input/input-all';
 import ListarNotaServico from './tabela/notaServicoListagem';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { validateFieldsPrepararNfs } from './controller/validation';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
 import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
+import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { DropDownFilterNotaServico } from '@/app/shared/optionsDropDown/options';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
+import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { DateRangePicker, DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 
@@ -50,12 +50,17 @@ const NotaServico: React.FC = () => {
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [dateRange, setDateRange] = useState<DateRangeValue>([null, null]);
+    const [draftDateRange, setDraftDateRange] = useState<DateRangeValue>([null, null]);
     const [showDialogPreparaNfs, setShowDialogPreparaNfs] = useState(false);
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
+    const [draftSelectedPessoa, setDraftSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity | null>(null);
+    const [draftSelectedEmpresa, setDraftSelectedEmpresa] = useState<CompanyEntity | null>(null);
     const [stateDisableBtnPrepararNfse, setStateDisableBtnPrepararNfse] = useState(false);
     const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
+    const [draftSelectedVendedor, setDraftSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [selectedStatusNotaServico, setSelectedStatusNotaServico] = useState<string>('');
+    const [draftSelectedStatusNotaServico, setDraftSelectedStatusNotaServico] = useState<string>('');
     const [selectedPessoaDialog, setSelectedPessoaDialog] = useState<PessoaEntity | null>(null);
     const [selectedServicoDialog, setSelectedServicoDialog] = useState<ServiceEntity | null>(null);
     const [selectedEmpresaDialog, setSelectedEmpresaDialog] = useState<CompanyEntity | null>(null);
@@ -172,18 +177,35 @@ const NotaServico: React.FC = () => {
         field: ['razao_social_cliente'],
         onSearch: (value) => handleListNotaServico(0, value)
     });
-    const handleListNotaServico = async (pageNumber = 0, termo = searchTerm) => {
+    const handleListNotaServico = async (
+        pageNumber = 0,
+        termo = searchTerm,
+        filters?: {
+            dateRange: DateRangeValue;
+            selectedEmpresa: CompanyEntity | null;
+            selectedPessoa: PessoaEntity | null;
+            selectedVendedor: VendedorEntity | null;
+            selectedStatusNotaServico: string;
+        }
+    ) => {
         setLoading(true);
         try {
+            const appliedFilters = filters ?? {
+                dateRange,
+                selectedEmpresa,
+                selectedPessoa,
+                selectedVendedor,
+                selectedStatusNotaServico
+            };
             const data = await listNotaServico({
                 page: pageNumber,
                 size: pageSize,
                 termo,
-                status: selectedStatusNotaServico,
-                dateRange,
-                id_empresa: selectedEmpresa?.id,
-                id_cliente: selectedPessoa?.id,
-                id_vendedor: selectedVendedor?.id
+                status: appliedFilters.selectedStatusNotaServico,
+                dateRange: appliedFilters.dateRange,
+                id_empresa: appliedFilters.selectedEmpresa?.id,
+                id_cliente: appliedFilters.selectedPessoa?.id,
+                id_vendedor: appliedFilters.selectedVendedor?.id
             });
 
             setListPaginationNotaServico(data);
@@ -200,8 +222,7 @@ const NotaServico: React.FC = () => {
         handleListNotaServico(event.page);
     };
     const handleVendedorChange = (vendedor: VendedorEntity | null) => {
-        if (!vendedor) return;
-        setSelectedVendedor(vendedor);
+        setDraftSelectedVendedor(vendedor);
     };
     const validatePrepararNfsDialog = (empresa = selectedEmpresaDialog, servico = selectedServicoDialog, cliente = selectedPessoaDialog) => 
     validateFieldsPrepararNfs(prepararNfs, empresa, servico, cliente, setErrors, msgs);
@@ -251,15 +272,38 @@ const NotaServico: React.FC = () => {
         }
     };
     const handleClearFilters = () => {
+        const clearedDateRange: DateRangeValue = [null, null];
         setSelectedEmpresa(null);
+        setDraftSelectedEmpresa(null);
         setSelectedPessoa(null);
+        setDraftSelectedPessoa(null);
+        setSelectedVendedor(null);
+        setDraftSelectedVendedor(null);
+        setSelectedStatusNotaServico('');
+        setDraftSelectedStatusNotaServico('');
+        setDateRange(clearedDateRange);
+        setDraftDateRange(clearedDateRange);
+        handleListNotaServico(0, searchTerm, {
+            dateRange: clearedDateRange,
+            selectedEmpresa: null,
+            selectedPessoa: null,
+            selectedVendedor: null,
+            selectedStatusNotaServico: ''
+        });
         setVisible(false);
     };
+    const syncDraftFilters = () => {
+        setDraftDateRange(dateRange);
+        setDraftSelectedEmpresa(selectedEmpresa);
+        setDraftSelectedPessoa(selectedPessoa);
+        setDraftSelectedVendedor(selectedVendedor);
+        setDraftSelectedStatusNotaServico(selectedStatusNotaServico);
+    };
     const handleEmpresaChange = (empresa: CompanyEntity | null) => {
-        setSelectedEmpresa(empresa);
+        setDraftSelectedEmpresa(empresa);
     };
     const handlePessoaChange = (pessoa: PessoaEntity | null) => {
-        setSelectedPessoa(pessoa);
+        setDraftSelectedPessoa(pessoa);
     };
     const handleEmpresaChangeDialog = (empresa: CompanyEntity | null) => {
         setSelectedEmpresaDialog(empresa);
@@ -273,31 +317,56 @@ const NotaServico: React.FC = () => {
         setSelectedPessoaDialog(pessoa);
         handlePrepararNfsChange('id_cliente', pessoa?.id ?? 0);
     };
-    const buscar = async () => {
-        setLoading(true);
-        try {
-            const params: NotaFiscalParams = {
-                termo: searchTerm ?? null,
-                id_empresa: selectedEmpresa?.id ?? null,
-                id_cliente: selectedPessoa?.id ?? null,
-                id_vendedor: selectedVendedor?.id ?? null,
-                status: selectedStatusNotaServico ?? null,
-                ...mapDateRangeToParams(dateRange)
-            };
-            const resultado = await listNotaServico({
-                page: 0,
-                size: pageSize,
-                termo: searchTerm,
-                status: selectedStatusNotaServico,
-                dateRange,
-                id_empresa: selectedEmpresa?.id,
-                id_cliente: selectedPessoa?.id,
-                id_vendedor: selectedVendedor?.id
-            });
-            setListPaginationNotaServico(resultado);
-        } finally {
-            setLoading(false);
-        }
+    const search = async (filters?: {
+        dateRange: DateRangeValue;
+        selectedEmpresa: CompanyEntity | null;
+        selectedPessoa: PessoaEntity | null;
+        selectedVendedor: VendedorEntity | null;
+        selectedStatusNotaServico: string;
+    }) => {
+        await handleListNotaServico(0, searchTerm, filters);
+    };
+    const handleApplyFilters = () => {
+        const nextFilters = {
+            dateRange: draftDateRange,
+            selectedEmpresa: draftSelectedEmpresa,
+            selectedPessoa: draftSelectedPessoa,
+            selectedVendedor: draftSelectedVendedor,
+            selectedStatusNotaServico: draftSelectedStatusNotaServico
+        };
+        setDateRange(draftDateRange);
+        setSelectedEmpresa(draftSelectedEmpresa);
+        setSelectedPessoa(draftSelectedPessoa);
+        setSelectedVendedor(draftSelectedVendedor);
+        setSelectedStatusNotaServico(draftSelectedStatusNotaServico);
+        search(nextFilters);
+        setVisible(false);
+    };
+    const handleDesktopDateRangeSearch = (inicio: Date, fim: Date) => {
+        const nextDateRange: DateRangeValue = [dayjs(inicio), dayjs(fim)];
+        const nextFilters = {
+            dateRange: nextDateRange,
+            selectedEmpresa,
+            selectedPessoa,
+            selectedVendedor,
+            selectedStatusNotaServico
+        };
+        setDateRange(nextDateRange);
+        setDraftDateRange(nextDateRange);
+        search(nextFilters);
+    };
+    const handleDesktopDateRangeClear = () => {
+        const clearedDateRange: DateRangeValue = [null, null];
+        const nextFilters = {
+            dateRange: clearedDateRange,
+            selectedEmpresa,
+            selectedPessoa,
+            selectedVendedor,
+            selectedStatusNotaServico
+        };
+        setDateRange(clearedDateRange);
+        setDraftDateRange(clearedDateRange);
+        search(nextFilters);
     };
     const handleConfirmPreparaNfs = async () => {
         const isValid = validatePrepararNfsDialog();
@@ -323,9 +392,6 @@ const NotaServico: React.FC = () => {
 
         validatePrepararNfsDialog();
     }, [showDialogPreparaNfs, selectedEmpresaDialog, selectedPessoaDialog, selectedServicoDialog]);
-    useEffect(() => {
-        buscar();
-    }, [selectedEmpresa, selectedPessoa, selectedVendedor, selectedStatusNotaServico, dateRange]);
     useEffect(() => {
         handleListNotaServico();
     }, []);
@@ -379,7 +445,8 @@ const NotaServico: React.FC = () => {
                                         </div>
                                         <div className="container-BTN-Filter-Created nota-servico-mobile-actions">
                                             <FilterOverlay
-                                                onApply={buscar}
+                                                onOpen={syncDraftFilters}
+                                                onApply={handleApplyFilters}
                                                 onClear={handleClearFilters}
                                                 buttonClassName="height-2-8rem-ml-1rem-mobile"
                                             >
@@ -387,26 +454,27 @@ const NotaServico: React.FC = () => {
                                                     <DateRangePicker
                                                         showTopLabel
                                                         topLabel="Filtar por Data:"
+                                                        onClear={() => setDraftDateRange([null, null])}
                                                         onBuscar={(inicio: Date, fim: Date) => {
-                                                            setDateRange([dayjs(inicio), dayjs(fim)]);
+                                                            setDraftDateRange([dayjs(inicio), dayjs(fim)]);
                                                         }}
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
-                                                        selectedCompany={selectedEmpresa}
+                                                        selectedCompany={draftSelectedEmpresa}
                                                         onCompanyChange={handleEmpresaChange}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <PessoaDropdownField selectedPessoa={selectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
+                                                    <PessoaDropdownField selectedPessoa={draftSelectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
                                                 </div>
                                                 <div className="col-12 lg:col-12">
                                                     <DropdownSearch<VendedorEntity>
                                                         id="selectedVendedor"
-                                                        selectedItem={selectedVendedor}
+                                                        selectedItem={draftSelectedVendedor}
                                                         onItemChange={handleVendedorChange}
                                                         fetchAllItems={listTheVendedor}
                                                         fetchFilteredItems={fetchFilteredVendedor}
@@ -421,12 +489,12 @@ const NotaServico: React.FC = () => {
                                                 <div className="col-12 lg:col-12 ">
                                                     <Dropdown
                                                         id="selectedStatusNotaServico"
-                                                        value={selectedStatusNotaServico}
+                                                        value={draftSelectedStatusNotaServico}
                                                         options={DropDownFilterNotaServico}
                                                         optionLabel="label"
                                                         optionValue="value"
                                                         placeholder="Selecione"
-                                                        onChange={(e) => setSelectedStatusNotaServico(e.value)}
+                                                        onChange={(e) => setDraftSelectedStatusNotaServico(e.value)}
                                                         className="custom-multiselect w-full"
                                                         label={''}
                                                         topLabel="Status:"
@@ -457,22 +525,12 @@ const NotaServico: React.FC = () => {
                             </div>
                             <div style={{ marginTop: 'auto' }}>
                                 <div className="custom-paginator">
-                                    <Paginator
+                                    <CustomPaginator
                                         first={listPaginationNotaServico.pageable.pageNumber * listPaginationNotaServico.pageable.pageSize}
                                         rows={listPaginationNotaServico.pageable.pageSize}
                                         totalRecords={listPaginationNotaServico.totalElements}
                                         onPageChange={onPageChange}
-                                        template={{
-                                            layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                            CurrentPageReport: (options) => {
-                                                const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                                return (
-                                                    <span>
-                                                        Página {pageNumber} de {options.totalPages}
-                                                    </span>
-                                                );
-                                            }
-                                        }}
+                                        isMobile
                                     />
                                 </div>
                             </div>
@@ -503,30 +561,30 @@ const NotaServico: React.FC = () => {
                                         <DateRangePicker
                                             showTopLabel
                                             topLabel="Filtar por Data:"
+                                            onClear={handleDesktopDateRangeClear}
                                             onBuscar={(inicio: Date, fim: Date) => {
-                                                setDateRange([dayjs(inicio), dayjs(fim)]);
+                                                handleDesktopDateRangeSearch(inicio, fim);
                                             }}
                                         />
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
-                                        <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
+                                        <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
+                                            <div className="grid formgrid">
                                             <div className="col-12 lg:col-12 ">
                                                 <EmpresaDropdownField
-                                                    selectedCompany={selectedEmpresa}
+                                                    selectedCompany={draftSelectedEmpresa}
                                                     onCompanyChange={handleEmpresaChange}
                                                     hasError={!!errors.selectedCompany}
                                                     errorMessage={errors.selectedCompany}
-                                                    showAddButton
-                                                    autoSelectSingle={true}
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
-                                                <PessoaDropdownField selectedPessoa={selectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
+                                                <PessoaDropdownField selectedPessoa={draftSelectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
                                             </div>
                                             <div className="col-12 lg:col-12">
                                                 <DropdownSearch<VendedorEntity>
                                                     id="selectedVendedor"
-                                                    selectedItem={selectedVendedor}
+                                                    selectedItem={draftSelectedVendedor}
                                                     onItemChange={handleVendedorChange}
                                                     fetchAllItems={listTheVendedor}
                                                     fetchFilteredItems={fetchFilteredVendedor}
@@ -541,17 +599,18 @@ const NotaServico: React.FC = () => {
                                             <div className="col-12 lg:col-12 ">
                                                 <Dropdown
                                                     id="selectedStatusNotaServico"
-                                                    value={selectedStatusNotaServico}
+                                                    value={draftSelectedStatusNotaServico}
                                                     options={DropDownFilterNotaServico}
                                                     optionLabel="label"
                                                     optionValue="value"
                                                     placeholder="Selecione"
-                                                    onChange={(e) => setSelectedStatusNotaServico(e.value)}
+                                                    onChange={(e) => setDraftSelectedStatusNotaServico(e.value)}
                                                     className="custom-multiselect w-full"
                                                     label={''}
                                                     topLabel="Status:"
                                                     showTopLabel
                                                 />
+                                            </div>
                                             </div>
                                         </FilterOverlay>
                                     </div>
@@ -576,7 +635,7 @@ const NotaServico: React.FC = () => {
                                 />
                             </div>
                             <div style={{ marginTop: 'auto' }}>
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationNotaServico.pageable.pageNumber * listPaginationNotaServico.pageable.pageSize}
                                     rows={listPaginationNotaServico.pageable.pageSize}
                                     totalRecords={listPaginationNotaServico.totalElements}
@@ -588,6 +647,7 @@ const NotaServico: React.FC = () => {
                             header="Preparar NFS-e"
                             visible={showDialogPreparaNfs}
                             style={{ width: '500px' }}
+                            draggable={false}
                             onHide={() => {
                                 clearPreparaNfsDialog();
                                 setShowDialogPreparaNfs(false);
@@ -595,7 +655,6 @@ const NotaServico: React.FC = () => {
                             footer={
                                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0.5rem' }}>
                                     <Button label="Confirmar" style={{ boxShadow: 'none' }} disabled={disableConfirmarPrepararNfs} onClick={handleConfirmPreparaNfs} outlined />
-
                                     <Button
                                         label="Cancelar"
                                         onClick={() => {
@@ -615,12 +674,17 @@ const NotaServico: React.FC = () => {
                                     onCompanyChange={handleEmpresaChangeDialog}
                                     hasError={!!errors.selectedEmpresa}
                                     errorMessage={errors.selectedEmpresa}
-                                    showAddButton
                                     autoSelectSingle={true}
                                 />
                             </div>
                             <div className="col-12 lg:col-12 ">
-                                <PessoaDropdownField id="selectedCliente" selectedPessoa={selectedPessoaDialog} onPessoaChange={handlePessoaChangeDialog} hasError={!!errors.selectedCliente} errorMessage={errors.selectedCliente} />
+                                <PessoaDropdownField 
+                                id="selectedCliente" 
+                                selectedPessoa={selectedPessoaDialog} 
+                                onPessoaChange={handlePessoaChangeDialog} 
+                                hasError={!!errors.selectedCliente} 
+                                errorMessage={errors.selectedCliente} 
+                                />
                             </div>
                             <div className="col-12 lg:col-12">
                                 <ServicoDropdownField
@@ -630,7 +694,7 @@ const NotaServico: React.FC = () => {
                                     placeholder="Selecione o serviço"
                                     topLabel="Serviço:"
                                     showTopLabel
-                                    required
+                                    autoSelectSingle={true}
                                     hasError={!!errors.selectedServico}
                                     errorMessage={errors.selectedServico}
                                 />

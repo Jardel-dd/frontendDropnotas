@@ -5,16 +5,18 @@ import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import ListarPessoa from './tabela/pessoaListagem';
+import { ClienteFornecedorFilter } from './types/pessoa';
 import Input from '@/app/shared/include/input/input-all';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
+import { CheckboxChangeEvent } from 'primereact/checkbox';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
-import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarPessoa, deletarPessoa, listPessoa } from './controller/controller';
 import { DropDownFilterClienteFornecedor } from '@/app/shared/optionsDropDown/options';
@@ -26,7 +28,6 @@ const ClientesFornecedores: React.FC = () => {
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
-    const { isDarkMode } = useTheme();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
@@ -58,17 +59,14 @@ const ClientesFornecedores: React.FC = () => {
         })
     );
     const [visible, setVisible] = useState<boolean>(false);
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [isClientesFornecedoresCreated, setIsClientesFornecedoresCreated] = useState(false);
-    type ClienteFornecedorFilter = {
-        cliente: boolean;
-        fornecedor: boolean;
-    };
-    const [selectedClienteFornecedor, setSelectedClienteFornecedor] = useState<ClienteFornecedorFilter>({
+    const defaultClienteFornecedorFilter: ClienteFornecedorFilter = {
         cliente: true,
         fornecedor: true
-    });
+    };
+    const [selectedClienteFornecedor, setSelectedClienteFornecedor] = useState<ClienteFornecedorFilter>(defaultClienteFornecedorFilter);
+    const [draftClienteFornecedor, setDraftClienteFornecedor] = useState<ClienteFornecedorFilter>(defaultClienteFornecedorFilter);
+    const [listarInativos, setListarInativos] = useState<boolean>(false);
     const { cliente, fornecedor } = selectedClienteFornecedor;
     const [listPaginationClientesFornecedores, setListPaginationClientesFornecedores] = useState<Record<string, any>>({
         content: [],
@@ -105,10 +103,7 @@ const ClientesFornecedores: React.FC = () => {
         onSearch: (value) => handleListClientesFornecedores(0, value, selectedClienteFornecedor, listarInativos)
     });
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        const newValue = e.checked ?? false;
-        setListarInativos(newValue);
-        handleListClientesFornecedores(0, searchTerm, selectedClienteFornecedor, newValue);
-        setVisible(false);
+        setListarInativos(e.checked ?? false);
     };
     const handleListClientesFornecedores = async (pageNumber?: number, _searchTerm?: string, filter?: { cliente: boolean; fornecedor: boolean }, listarInativos = false) => {
         setLoading(true);
@@ -157,24 +152,24 @@ const ClientesFornecedores: React.FC = () => {
         debouncedSearch(value);
     };
     const handleClienteFornecedorChange = (e: DropdownChangeEvent) => {
-        const value = e.value;
-        setSelectedClienteFornecedor(value);
-        handleListClientesFornecedores(0, searchTerm, value, listarInativos);
+        setDraftClienteFornecedor(e.value);
+    };
+    const syncDraftFilters = () => {
+        setDraftClienteFornecedor(selectedClienteFornecedor);
+        setListarInativos(listarInativos);
     };
     const handleClearFilters = () => {
-        const defaultFilter = {
-            cliente: true,
-            fornecedor: true
-        };
-        setSelectedClienteFornecedor(defaultFilter);
+        setSelectedClienteFornecedor(defaultClienteFornecedorFilter);
+        setDraftClienteFornecedor(defaultClienteFornecedorFilter);
         setListarInativos(false);
-        handleListClientesFornecedores(0, searchTerm, defaultFilter, false);
-
+        handleListClientesFornecedores(0, searchTerm, defaultClienteFornecedorFilter, false);
         setVisible(false);
     };
     const handleApplyFilters = () => {
         const firstPage = 0;
-        handleListClientesFornecedores(firstPage, searchTerm, selectedClienteFornecedor, listarInativos);
+        setSelectedClienteFornecedor(draftClienteFornecedor);
+        setListarInativos(listarInativos);
+        handleListClientesFornecedores(firstPage, searchTerm, draftClienteFornecedor, listarInativos);
         setVisible(false);
     };
     useEffect(() => {
@@ -205,28 +200,25 @@ const ClientesFornecedores: React.FC = () => {
                             <div className="col-4 mb-0 lg:col-3 lg:mb-0">
                                 <div className="container-BTN-Filter-Created">
                                     <FilterOverlay
+                                        onOpen={syncDraftFilters}
                                         onApply={handleApplyFilters}
                                         onClear={handleClearFilters}
                                         buttonClassName="height-2-8rem-ml-1rem-mobile">
-                                        <div>
-                                            <Dropdown
-                                                value={selectedClienteFornecedor}
-                                                options={DropDownFilterClienteFornecedor}
-                                                onChange={handleClienteFornecedorChange}
-                                                placeholder="Selecione o tipo"
-                                                topLabel="Cliente ou Fornecedor:"
-                                                showTopLabel
-                                                label={''}
-                                            />
-                                            <div className="checkBoxMobile-width-max-10rem">
-                                                <div className="checkbox-container">
-                                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                                    <label htmlFor="listarInativos" className="ml-2">
-                                                        Listar Desativadas
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <Dropdown
+                                            value={draftClienteFornecedor}
+                                            options={DropDownFilterClienteFornecedor}
+                                            onChange={handleClienteFornecedorChange}
+                                            placeholder="Selecione o tipo"
+                                            topLabel="Cliente ou Fornecedor:"
+                                            showTopLabel
+                                            label={''}
+                                        />
+                                        <CheckBoxField
+                                            inputId="listarInativos"
+                                            label="Listar Desativadas"
+                                            checked={listarInativos}
+                                            onChange={handleCheckboxChange}
+                                        />
                                     </FilterOverlay>
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
@@ -250,23 +242,12 @@ const ClientesFornecedores: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationClientesFornecedores.pageable.pageNumber * listPaginationClientesFornecedores.pageable.pageSize}
                                     rows={pageSize}
                                     totalRecords={listPaginationClientesFornecedores.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
-                                    style={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
+                                    isMobile
                                 />
                             </div>
                         </div>
@@ -295,26 +276,27 @@ const ClientesFornecedores: React.FC = () => {
                                         />
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
-                                        <FilterOverlay onApply={handleApplyFilters}
+                                        <FilterOverlay onOpen={syncDraftFilters}
+                                            onApply={handleApplyFilters}
                                             onClear={handleClearFilters}
                                             buttonClassName="Btn-Filter-Desktop">
-                                            <div className="col-12 lg:col-12 ">
-                                                <Dropdown
-                                                    value={selectedClienteFornecedor}
-                                                    options={DropDownFilterClienteFornecedor}
-                                                    onChange={handleClienteFornecedorChange}
-                                                    placeholder="Selecione o tipo"
-                                                    topLabel="Cliente ou Fornecedor:"
-                                                    showTopLabel
-                                                    label={''}
-                                                />
-                                                <div className="checkBoxMobile-width-max-10rem">
-                                                    <div className="checkbox-container">
-                                                        <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                                        <label htmlFor="listarInativos" className="ml-2">
-                                                            Listar Desativadas
-                                                        </label>
-                                                    </div>
+                                            <div className="grid formgrid">
+                                                <div className="col-12 lg:col-12 ">
+                                                    <Dropdown
+                                                        value={draftClienteFornecedor}
+                                                        options={DropDownFilterClienteFornecedor}
+                                                        onChange={handleClienteFornecedorChange}
+                                                        placeholder="Selecione o tipo"
+                                                        topLabel="Cliente ou Fornecedor:"
+                                                        showTopLabel
+                                                        label={''}
+                                                    />
+                                                    <CheckBoxField
+                                                        inputId="listarInativos"
+                                                        label="Listar Desativadas"
+                                                        checked={listarInativos}
+                                                        onChange={handleCheckboxChange}
+                                                    />
                                                 </div>
                                             </div>
                                         </FilterOverlay>
@@ -323,7 +305,7 @@ const ClientesFornecedores: React.FC = () => {
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
                                 </div>
-                                <div className="mt-2">
+                                <div>
                                     <ListarPessoa
                                         loading={loading}
                                         listPaginationClientesFornecedores={listPaginationClientesFornecedores}
@@ -342,7 +324,7 @@ const ClientesFornecedores: React.FC = () => {
                             </div>
                         </div>
                         <div className="p-2" style={{ marginTop: 'auto' }}>
-                            <Paginator
+                            <CustomPaginator
                                 first={listPaginationClientesFornecedores.pageable.pageNumber * listPaginationClientesFornecedores.pageable.pageSize}
                                 rows={pageSize}
                                 totalRecords={listPaginationClientesFornecedores.totalElements}

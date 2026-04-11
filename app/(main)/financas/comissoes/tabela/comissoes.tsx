@@ -1,16 +1,14 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
-import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
-import { NfsEntity } from '@/app/entity/NfsEntity';
+import { ComissaoEntity } from '@/app/entity/comissoesEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { Dispatch, SetStateAction, useContext, useRef } from 'react';
-import {  highlightSearchTerm } from '@/app/components/dataTableComponent/DataTableComponent';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { ComissaoEntity } from '@/app/entity/comissoesEntity';
 import DataTableMultiSelect from '@/app/components/dataTableComponent/DataTableMultiSelect';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 
 export function ListarComissoes({
     listPaginationComissoes,

@@ -7,14 +7,16 @@ import { Messages } from 'primereact/messages';
 import ListarServicos from './tabela/servicoListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarServico, deletarServico, listServico } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 function Servicos() {
     const router = useRouter();
@@ -151,7 +153,7 @@ function Servicos() {
         handleListServicos(0, searchTerm, listarInativos);
         setVisible(false);
     };
-    const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
+    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
     useEffect(() => {
@@ -185,14 +187,13 @@ function Servicos() {
                                         onApply={handleSalvarFiltro}
                                         onClear={handleClearFilters}
                                         buttonClassName="height-2-8rem-ml-1rem-mobile">
-                                        <div className="checkBoxMobile-width-max-10rem">
-                                            <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
-                                            </div>
-                                        </div>
+                                        <CheckBoxField
+                                            inputId="listarInativos"
+                                            label="Listar Desativadas"
+                                            checked={listarInativos}
+                                            onChange={handleCheckboxChange}
+                                        />
+
                                     </FilterOverlay>
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
@@ -212,22 +213,12 @@ function Servicos() {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationServicos.pageable.pageNumber * listPaginationServicos.pageable.pageSize}
                                     rows={pageSize}
                                     totalRecords={listPaginationServicos.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
+                                    isMobile
                                 />
                             </div>
                         </div>
@@ -260,14 +251,12 @@ function Servicos() {
                                             onApply={handleSalvarFiltro}
                                             onClear={handleClearFilters}
                                             buttonClassName="Btn-Filter-Desktop">
-                                            <div className="checkBoxMobile-width-max-10rem">
-                                                <div className="checkbox-container">
-                                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                    <label htmlFor="listarInativos" className="ml-2">
-                                                        Listar Desativadas
-                                                    </label>
-                                                </div>
-                                            </div>
+                                            <CheckBoxField
+                                                inputId="listarInativos"
+                                                label="Listar Desativadas"
+                                                checked={listarInativos}
+                                                onChange={handleCheckboxChange}
+                                            />
                                         </FilterOverlay>
                                     </div>
                                     <div className="container-button-primary-novo">
@@ -289,7 +278,11 @@ function Servicos() {
                             </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>
-                            <Paginator first={listPaginationServicos.pageable.pageNumber * listPaginationServicos.pageable.pageSize} rows={pageSize} totalRecords={listPaginationServicos.totalElements} onPageChange={onPageChange} />
+                            <CustomPaginator
+                                first={listPaginationServicos.pageable.pageNumber * listPaginationServicos.pageable.pageSize}
+                                rows={pageSize}
+                                totalRecords={listPaginationServicos.totalElements}
+                                onPageChange={onPageChange} />
                         </div>
                     </div>
                 </>

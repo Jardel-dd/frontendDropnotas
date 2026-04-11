@@ -10,66 +10,14 @@ import { useRouter } from 'next/navigation';
 import { Divider } from 'primereact/divider';
 import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
-import Input from '@/app/shared/include/input/input-all';
 import { IconReal } from '@/app/utils/icons/icons';
-import { NfsEntity } from '@/app/entity/NfsEntity';
 import { ChangeEvent, useRef, useState } from 'react';
 import { confirmDialog } from 'primereact/confirmdialog';
+import Input from '@/app/shared/include/input/input-all';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { DataTable, DataTableRowToggleEvent } from 'primereact/datatable';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
-type CancelarNfsActionProps = {
-    nota: NfsEntity;
-    msgs: React.RefObject<Messages | null>;
-};
-export interface ColumnProps {
-    field: string;
-    header: string;
-    body: (data: any) => React.ReactNode;
-}
-export interface DataTableComponentProps<T> {
-    value: T[];
-    loading: boolean;
-    totalRecords: number;
-    expandedRows: any[] | false;
-    setExpandedRows: React.Dispatch<React.SetStateAction<any[]>>;
-    rowExpansionTemplate: (data: any) => React.ReactNode;
-    expandButtonTemplate: (rowData: T) => React.ReactNode;
-    editButtonTemplate?: (rowData: any) => React.ReactNode;
-    toggleStatusOrDeleteButtonTemplate?: (rowData: any) => React.ReactNode;
-    columns: ColumnProps[];
-    isDarkMode: boolean;
-    searchTerm: string;
-    showExpandButton?: boolean;
-    listarInativos: boolean;
-    cliente?: boolean;
-    fornecedor?: boolean;
-    selectionMode?: 'multiple' | 'checkbox';
-    rowClick?: boolean;
-    extraActionsTemplate?: (rowData: T) => React.ReactNode;
-}
-export interface Identifiable {
-    id: number | string;
-}
-export interface ToggleButtonProps<T> {
-    entity: T & { ativo: boolean };
-    onToggle: (entity: T) => Promise<void>;
-    entityType: string;
-}
-export const highlightSearchTerm = (text: any, searchTerm: string) => {
-    if (!searchTerm) return text;
-    const safeText = String(text);
-    const parts = safeText.split(new RegExp(`(${searchTerm})`, 'gi'));
-    return parts.map((part, index) =>
-        part.toLowerCase() === searchTerm.toLowerCase() ? (
-            <span key={index} style={{ color: 'var(--primary-color)' }}>
-                {part}
-            </span>
-        ) : (
-            part
-        )
-    );
-};
+import { CancelarNfsActionProps, DataTableComponentProps, Identifiable, ToggleButtonProps } from './types/types';
 export const DataTableComponent = <T extends Identifiable>({
     value,
     loading,
@@ -93,7 +41,7 @@ export const DataTableComponent = <T extends Identifiable>({
 }: DataTableComponentProps<T>) => {
     const msgs = useRef<Messages>(null);
     return (
-        <>
+        <div className='mt-1'>
             <Messages ref={msgs} className="custom-messages" />
             <DataTable
                 value={value}
@@ -138,7 +86,7 @@ export const DataTableComponent = <T extends Identifiable>({
                     className="width-3rem-Collum-Btn-Plus-Desktop-Rigth"
                 />
             </DataTable>
-        </>
+        </div>
     );
 };
 export const handleEdit = <T extends { id?: number | string }>(entity: T, basePath: string, router: ReturnType<typeof useRouter>) => {

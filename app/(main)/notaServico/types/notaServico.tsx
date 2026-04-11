@@ -4,8 +4,8 @@ import { NfsEntity } from '@/app/entity/NfsEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { DetalTomadorEntity } from '@/app/entity/PessoaEntity';
 import { DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
-import { DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DetalPrestadorValoresEntity, DetalServiceEntity } from '@/app/entity/ServiceEntity';
+import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 
 export interface NotaServicoFormRef {
     handleSave: () => Promise<void>;

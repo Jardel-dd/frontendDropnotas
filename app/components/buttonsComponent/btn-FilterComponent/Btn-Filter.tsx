@@ -1,6 +1,6 @@
 'use client';
 import "./style.css";
-import {useRef, useState} from 'react';
+import { useRef, useState } from 'react';
 import "@/app/styles/styledGlobal.css";
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
@@ -8,7 +8,7 @@ import { FilterOverlayProps } from "./types/types";
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { useIsDesktop, useIsMobile } from "../../responsiveCelular/responsive";
 
-export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply, onClear, width = '300px', mobileBreakpoint = 768, buttonLabel = 'Filtros', buttonIcon = 'pi pi-filter', buttonClassName = '' }) => {
+export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply, onClear, onOpen, width = '300px', mobileBreakpoint = 768, buttonLabel = 'Filtros', buttonIcon = 'pi pi-filter', buttonClassName = '' }) => {
     const op = useRef<OverlayPanel>(null);
     const [mobileVisible, setMobileVisible] = useState(false);
     const isMobile = useIsMobile();
@@ -42,7 +42,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                         style={{ boxShadow: "none",height: "40px" }}
                     />
                     </div>
-                <Dialog header="Filtros" visible={mobileVisible} onHide={hide} modal
+                <Dialog header="Filtros" visible={mobileVisible} onHide={hide} onShow={onOpen} modal
                     style={{ width: '90vw', maxWidth: '420px' }}
                     contentStyle={{ paddingBottom: '1rem' }}>
                     <div className="flex flex-column">{children}</div>
@@ -64,7 +64,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                         style={{ boxShadow: "none", height:"38px", borderRadius:23 }}
                     />
                     </div>
-                    <OverlayPanel ref={op} dismissable className="filter-overlay" >
+                    <OverlayPanel ref={op} dismissable className="filter-overlay" onShow={onOpen}>
                         <div className="flex flex-column">
                             {children}
                             <div className="flex justify-content-between  p-2 gap-3">

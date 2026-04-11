@@ -8,9 +8,10 @@ import { StatusNota } from '../types/statusClassNfs';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { Dispatch, SetStateAction, useContext, useRef } from 'react';
-import { CancelarNfs, highlightSearchTerm } from '@/app/components/dataTableComponent/DataTableComponent';
+import { CancelarNfs} from '@/app/components/dataTableComponent/DataTableComponent';
 import { DataTableSelectable, downloadPdfButton, downloadXmlButton, visualiarButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 
 export function ListarNotaServico({
     listPaginationNotaServico,

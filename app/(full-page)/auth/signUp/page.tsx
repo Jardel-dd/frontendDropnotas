@@ -279,7 +279,7 @@ function SignUp() {
                             </div>
                         </div>
                     </div>
-                    <div className='p-2 mt-2'>
+                    <div className='ml-2 mr-2'>
                         <Button
                             type="submit"
                             label={isLoadingBtnCreated ? 'Criando conta...' : 'Criar conta'}

@@ -14,10 +14,10 @@ import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
 import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
+import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { DateRangePicker, DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
-
 const ComponentDashboard: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -117,7 +117,7 @@ const ComponentDashboard: React.FC = () => {
         handleCompanyChange(null);
         handlePessoaChange(null);
     };
-    const buscar = async () => {
+    const search = async () => {
         if (!dateRange) return;
         const [inicio, fim] = dateRange;
         if (!inicio || !fim) return;
@@ -145,7 +145,7 @@ const ComponentDashboard: React.FC = () => {
         }
     };
     useEffect(() => {
-        buscar();
+        search();
     }, []);
     return (
         <div className="p-fluid">
@@ -168,7 +168,7 @@ const ComponentDashboard: React.FC = () => {
                                     <div className="col-3 mb-0 lg:col-3"  >
                                         <div className="container-BTN-Filter-Created">
                                             <FilterOverlay 
-                                            onApply={buscar}
+                                            onApply={search}
                                             onClear={handleClearFilters}>
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
@@ -177,8 +177,6 @@ const ComponentDashboard: React.FC = () => {
                                                         reloadKey={reloadKeyEmpresa}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
-                                                        showAddButton
-                                                        autoSelectSingle={true}
                                                     />
 
                                                 </div>
@@ -245,7 +243,7 @@ const ComponentDashboard: React.FC = () => {
                                             />
                                         </div>
                                         <div className="Container-Btn-Filter-Desktop">
-                                            <FilterOverlay onApply={buscar} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
+                                            <FilterOverlay onApply={search} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
                                                         selectedCompany={selectedCompany}

@@ -2,24 +2,25 @@
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
+import { Divider } from 'primereact/divider';
 import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
+import FormCategoriaContratoCreated from './form/controller';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 import { CategoriaContratoFormRef } from './types/categoriaContratos';
 import { validateFieldsCategoriaContrato } from './controller/validate';
 import ListarCategoriaContrato from './tabela/categoriaContratoListagem';
-import { PaginatorPageChangeEvent } from 'primereact/paginator';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
-import FormCategoriaContratoCreated from './form/controller';
-import { Divider } from 'primereact/divider';
-import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const CategoriaContrato: React.FC = () => {
     const pageSize = usePageSize();
@@ -144,7 +145,7 @@ const CategoriaContrato: React.FC = () => {
         );
         setShowModalCategoriaContrato(true);
     };
-    const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
+    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
     const handleEditCategoria = (categoria: CategoryContratosEntity) => {
@@ -167,9 +168,7 @@ const CategoriaContrato: React.FC = () => {
         setVisible(false);
     };
     useEffect(() => {
-        // Carrega a listagem inicial uma vez ao montar a página.
         handleListCategoriaContrato();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     useEffect(() => {
         if (Object.values(touchedFields).some((touched) => touched)) {
@@ -205,14 +204,13 @@ const CategoriaContrato: React.FC = () => {
                                         onApply={handleApplyFilters}
                                         onClear={handleClearFilters}
                                         buttonClassName="height-2-8rem-ml-1rem-mobile">
-                                        <div className="checkBox-width-max-10rem">
-                                            <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
-                                            </div>
-                                        </div>
+                                        <CheckBoxField
+                                            inputId="listarInativos"
+                                            label="Listar Desativadas"
+                                            checked={listarInativos}
+                                            onChange={handleCheckboxChange}
+                                        />
+
                                     </FilterOverlay>
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
@@ -271,14 +269,12 @@ const CategoriaContrato: React.FC = () => {
                                             onApply={handleSalvarFiltro}
                                             onClear={handleClearFilters}
                                             buttonClassName="Btn-Filter-Desktop">
-                                            <div className="checkBoxMobile-width-max-10rem">
-                                                <div className="checkbox-container">
-                                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                    <label htmlFor="listarInativos" className="ml-2">
-                                                        Listar Desativadas
-                                                    </label>
-                                                </div>
-                                            </div>
+                                            <CheckBoxField
+                                                inputId="listarInativos"
+                                                label="Listar Desativadas"
+                                                checked={listarInativos}
+                                                onChange={handleCheckboxChange}
+                                            />
                                         </FilterOverlay>
                                     </div>
                                     <div className="container-button-primary-novo">
@@ -286,7 +282,7 @@ const CategoriaContrato: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-2">
+                            <div>
                                 <ListarCategoriaContrato
                                     loading={loading}
                                     listPaginationCategoriaContrato={listPaginationCategoriaContrato}
@@ -301,7 +297,7 @@ const CategoriaContrato: React.FC = () => {
                             </div>
                         </div>
                         <div className="p-2" style={{ marginTop: 'auto' }}>
-                            <Divider style={{margin:"0 0"}}/>
+                            <Divider style={{ margin: "0 0" }} />
                             <CustomPaginator
                                 first={listPaginationCategoriaContrato.pageable.pageNumber * listPaginationCategoriaContrato.pageable.pageSize}
                                 rows={pageSize}

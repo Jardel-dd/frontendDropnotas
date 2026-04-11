@@ -12,13 +12,15 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import ListarFormaPagamento from './tabela/formaPagamentoListagem';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { tipo_forma_pagamento } from '@/app/shared/optionsDropDown/options';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { ativarFormaPagamento, deletarFormaPagamento, listFormaPagamento } from './controller/controller';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const CategoriaContrato: React.FC = () => {
     const router = useRouter();
@@ -44,7 +46,8 @@ const CategoriaContrato: React.FC = () => {
         })
     );
     const [isFormaPagamentoCreated, setIsFormaPagamentoCreated] = useState(false);
-    const [selectedFormaPagamento, setSelectedFormaPagamento] = useState<{ label: string; value: string } | null>(null);
+    const [selectedFormaPagamento, setSelectedFormaPagamento] = useState<string | null>(null);
+    const [draftSelectedFormaPagamento, setDraftSelectedFormaPagamento] = useState<string | null>(null);
     const [listPaginationFormaPagamento, setListPaginationFormaPagamento] = useState<Record<string, any>>({
         content: [],
         pageable: {
@@ -75,7 +78,7 @@ const CategoriaContrato: React.FC = () => {
         setIsFormaPagamentoCreated(true);
     };
     const handleListFormaPagamento = async (pageNumber?: number, _searchTerm?: string, listarInativos = false, tipo_forma_pagamento?: string) => {
-        const tipoFinal = tipo_forma_pagamento ?? selectedFormaPagamento?.value ?? '';
+        const tipoFinal = tipo_forma_pagamento ?? selectedFormaPagamento ?? '';
         setLoading(true);
         try {
             const formaPagamento = await listFormaPagamento(
@@ -120,30 +123,33 @@ const CategoriaContrato: React.FC = () => {
         }));
         handleListFormaPagamento(selectedPage, searchTerm, listarInativos);
     };
-    const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
-        const newValue = e.checked ?? false;
-        setListarInativos(newValue);
-        handleListFormaPagamento(0, searchTerm, newValue);
-        setVisible(false);
+    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
+        setListarInativos(e.checked ?? false);
     };
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
         debouncedSearch(value);
     };
+    const syncDraftFilters = () => {
+        setListarInativos(listarInativos);
+        setDraftSelectedFormaPagamento(selectedFormaPagamento);
+    };
     const handleClearFilters = () => {
         setListarInativos(false);
+        setListarInativos(false);
         setSelectedFormaPagamento(null);
+        setDraftSelectedFormaPagamento(null);
         handleListFormaPagamento(0, '', false, '');
     };
     const handleTipoFormaPagamentoChange = (e: DropdownChangeEvent) => {
-        const value = e.value ?? '';
-        setSelectedFormaPagamento(value);
-        handleListFormaPagamento(0, searchTerm, listarInativos, value);
+        setDraftSelectedFormaPagamento(e.value ?? null);
     };
     const handleApplyFilters = () => {
         const firstPage = 0;
-        handleListFormaPagamento(firstPage, searchTerm, listarInativos, selectedFormaPagamento?.value);
+        setListarInativos(listarInativos);
+        setSelectedFormaPagamento(draftSelectedFormaPagamento);
+        handleListFormaPagamento(firstPage, searchTerm, listarInativos, draftSelectedFormaPagamento ?? '');
         setVisible(false);
     };
     useEffect(() => {
@@ -171,34 +177,33 @@ const CategoriaContrato: React.FC = () => {
                                     showTopLabel
                                 />
                             </div>
-                           <div className="col-4 mb-0 lg:col-3 lg:mb-0">
+                            <div className="col-4 mb-0 lg:col-3 lg:mb-0">
                                 <div className="container-BTN-Filter-Created">
-                                    <FilterOverlay 
-                                    onClear={handleClearFilters} 
-                                    onApply={handleApplyFilters}
-                                    buttonClassName="height-2-8rem-ml-1rem-mobile"
-                                     >
+                                    <FilterOverlay
+                                        onOpen={syncDraftFilters}
+                                        onClear={handleClearFilters}
+                                        onApply={handleApplyFilters}
+                                        buttonClassName="height-2-8rem-ml-1rem-mobile"
+                                    >
                                         <div>
                                             <Dropdown
-                                                value={selectedFormaPagamento}
+                                                value={draftSelectedFormaPagamento}
                                                 options={tipo_forma_pagamento}
                                                 onChange={handleTipoFormaPagamentoChange}
-                                                placeholder="Selecione o tipo"
+                                                placeholder="Selecione a Forma de Pagamento:"
                                                 optionLabel="label"
                                                 optionValue="value"
-                                                topLabel="Cliente ou Fornecedor:"
+                                                topLabel="Forma de Pagamento:"
                                                 showTopLabel
                                                 label=""
                                             />
                                         </div>
-                                          <div className="checkBoxMobile-width-max-10rem">
-                                            <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
-                                            </div>
-                                        </div>
+                                        <CheckBoxField
+                                            inputId="listarInativos"
+                                            label="Listar Desativadas"
+                                            checked={listarInativos}
+                                            onChange={handleCheckboxChange}
+                                        />
                                     </FilterOverlay>
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
@@ -214,28 +219,17 @@ const CategoriaContrato: React.FC = () => {
                                 listPaginationFormaPagamento={listPaginationFormaPagamento}
                                 deletar={(id) => deletarFormaPagamento(id, msgs, listPaginationFormaPagamento, listarInativos, setLoading, searchTerm)}
                                 ativar={(id) => ativarFormaPagamento(id, msgs, listPaginationFormaPagamento, listarInativos, setLoading, searchTerm)}
-                                tipo_forma_pagamento={selectedFormaPagamento?.value ?? ''}
+                                tipo_forma_pagamento={selectedFormaPagamento ?? ''}
                             />
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationFormaPagamento.pageable.pageNumber * listPaginationFormaPagamento.pageable.pageSize}
                                     rows={pageSize}
                                     totalRecords={listPaginationFormaPagamento.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
-                                    style={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
+                                    isMobile
                                 />
                             </div>
                         </div>
@@ -264,35 +258,33 @@ const CategoriaContrato: React.FC = () => {
                                         />
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
-                                        <FilterOverlay onClear={handleClearFilters} onApply={handleApplyFilters} buttonClassName="Btn-Filter-Desktop">
+                                        <FilterOverlay onOpen={syncDraftFilters} onClear={handleClearFilters} onApply={handleApplyFilters} buttonClassName="Btn-Filter-Desktop">
                                             <div>
                                                 <Dropdown
-                                                    value={selectedFormaPagamento}
+                                                    value={draftSelectedFormaPagamento}
                                                     options={tipo_forma_pagamento}
                                                     onChange={handleTipoFormaPagamentoChange}
-                                                    placeholder="Selecione o tipo"
+                                                    placeholder="Selecione a Forma de pagamento"
                                                     optionLabel="label"
                                                     optionValue="value"
-                                                    topLabel="Cliente ou Fornecedor:"
+                                                    topLabel="Forma de Pagamento:"
                                                     showTopLabel
                                                     label=""
                                                 />
                                             </div>
-                                            <div className="checkBoxMobile-width-max-10rem">
-                                            <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
-                                            </div>
-                                        </div>
+                                            <CheckBoxField
+                                                inputId="listarInativos"
+                                                label="Listar Desativadas"
+                                                checked={listarInativos}
+                                                onChange={handleCheckboxChange}
+                                            />
                                         </FilterOverlay>
                                     </div>
                                     <div className="container-button-primary-novo">
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
                                 </div>
-                                <div className="mt-2">
+                                <div >
                                     <ListarFormaPagamento
                                         loading={loading}
                                         searchTerm={searchTerm}
@@ -302,13 +294,18 @@ const CategoriaContrato: React.FC = () => {
                                         listPaginationFormaPagamento={listPaginationFormaPagamento}
                                         deletar={(id) => deletarFormaPagamento(id, msgs, listPaginationFormaPagamento, listarInativos, setLoading, searchTerm)}
                                         ativar={(id) => ativarFormaPagamento(id, msgs, listPaginationFormaPagamento, listarInativos, setLoading, searchTerm)}
-                                        tipo_forma_pagamento={selectedFormaPagamento?.value ?? ''}
+                                        tipo_forma_pagamento={selectedFormaPagamento ?? ''}
                                     />
                                 </div>
                             </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>
-                            <Paginator first={listPaginationFormaPagamento.pageable.pageNumber * listPaginationFormaPagamento.pageable.pageSize} rows={pageSize} totalRecords={listPaginationFormaPagamento.totalElements} onPageChange={onPageChange} />
+                            <CustomPaginator
+                                first={listPaginationFormaPagamento.pageable.pageNumber * listPaginationFormaPagamento.pageable.pageSize}
+                                rows={pageSize}
+                                totalRecords={listPaginationFormaPagamento.totalElements}
+                                onPageChange={onPageChange}
+                            />
                         </div>
                     </div>
                 </>

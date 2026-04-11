@@ -8,15 +8,17 @@ import ListarVendedores from './tabela/vendedorListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarVendedor, deletarVendedor, listVendedor } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const Vendedores: React.FC = () => {
     const router = useRouter();
@@ -147,7 +149,7 @@ const Vendedores: React.FC = () => {
         handleListVendedores(0, searchTerm, listarInativos);
         setVisible(false);
     };
-    const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
+    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
     const handleSalvarFiltro = () => {
@@ -182,15 +184,12 @@ const Vendedores: React.FC = () => {
                             <div className="col-4 mb-0 lg:col-3 lg:mb-0">
                                 <div className="container-BTN-Filter-Created">
                                     <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
-                                        <div className="checkBoxMobile-width-max-10rem">
-                                            <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} 
-                                                checked={listarInativos} />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
-                                            </div>
-                                        </div>
+                                        <CheckBoxField
+                                            inputId="listarInativos"
+                                            label="Listar Desativadas"
+                                            checked={listarInativos}
+                                            onChange={handleCheckboxChange}
+                                        />
                                     </FilterOverlay>
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
@@ -210,23 +209,12 @@ const Vendedores: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationVendedores.pageable.pageNumber * listPaginationVendedores.pageable.pageSize}
                                     rows={pageSize}
                                     totalRecords={listPaginationVendedores.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
-                                    style={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
+                                    isMobile
                                 />
                             </div>
                         </div>
@@ -255,40 +243,39 @@ const Vendedores: React.FC = () => {
                                         />
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
-                                    <FilterOverlay
-                                        onApply={handleSalvarFiltro}
-                                        onClear={handleClearFilters}
-                                        buttonClassName="Btn-Filter-Desktop">
-                                        <div className="checkBoxMobile-width-max-10rem">
-                                            <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </FilterOverlay>
-                                </div>
-                                <div className="container-button-primary-novo">
+                                        <FilterOverlay
+                                            onApply={handleSalvarFiltro}
+                                            onClear={handleClearFilters}
+                                            buttonClassName="Btn-Filter-Desktop">
+                                            <CheckBoxField
+                                                inputId="listarInativos"
+                                                label="Listar Desativadas"
+                                                checked={listarInativos}
+                                                onChange={handleCheckboxChange}
+                                            />
+
+                                        </FilterOverlay>
+                                    </div>
+                                    <div className="container-button-primary-novo">
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
                                 </div>
-                                </div>
-                                <div className="mt-2">
-                                    <ListarVendedores
-                                        loading={loading}
-                                        listPaginationVendedores={listPaginationVendedores}
-                                        deletar={(id) => deletarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
-                                        ativar={(id) => ativarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
-                                        setLoading={setLoading}
-                                        searchTerm={searchTerm}
-                                        listarInativos={listarInativos}
-                                        setListPaginationVendedores={setListPaginationVendedores}
-                                    />
-                                </div>
                             </div>
+                            <div>
+                                <ListarVendedores
+                                    loading={loading}
+                                    listPaginationVendedores={listPaginationVendedores}
+                                    deletar={(id) => deletarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
+                                    ativar={(id) => ativarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
+                                    setLoading={setLoading}
+                                    searchTerm={searchTerm}
+                                    listarInativos={listarInativos}
+                                    setListPaginationVendedores={setListPaginationVendedores}
+                                />
+                            </div>
+                        </div>
                         <div style={{ marginTop: 'auto' }}>
-                            <Paginator first={listPaginationVendedores.pageable.pageNumber * listPaginationVendedores.pageable.pageSize} rows={pageSize} totalRecords={listPaginationVendedores.totalElements} onPageChange={onPageChange} />
+                            <CustomPaginator first={listPaginationVendedores.pageable.pageNumber * listPaginationVendedores.pageable.pageSize} rows={pageSize} totalRecords={listPaginationVendedores.totalElements} onPageChange={onPageChange} />
                         </div>
                     </div>
                 </>

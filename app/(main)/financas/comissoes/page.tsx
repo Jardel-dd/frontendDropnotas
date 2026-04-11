@@ -11,24 +11,25 @@ import Input from '@/app/shared/include/input/input-all';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { ComissaoEntity } from '@/app/entity/comissoesEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { listComissoes, ListComissoesFilters } from './controller/controller';
 import { DropDownFilterTipoOrigem } from '@/app/shared/optionsDropDown/options';
 import VendedorDropdownField from '../../cadastro/vendedores/dropDown/DropdownVendedor';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { DateRangePicker, DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
+import { DateRangePicker} from '@/app/components/calendarComponent/dataRangerPicker';
+import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 
 const Comissoes: React.FC = () => {
     const router = useRouter();
     const isMobile = useIsMobile();
     const pageSize = usePageSize();
     const isDesktop = useIsDesktop();
-    const { isDarkMode } = useTheme();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
@@ -290,23 +291,12 @@ const Comissoes: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationComissoes.pageable.pageNumber * listPaginationComissoes.pageable.pageSize}
                                     rows={pageSize}
                                     totalRecords={listPaginationComissoes.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
-                                    style={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
+                                    isMobile
                                 />
                             </div>
                         </div>
@@ -384,7 +374,7 @@ const Comissoes: React.FC = () => {
                                     </div>
 
                                 </div>
-                                <div className="mt-2">
+                                <div >
                                     <ListarComissoes
                                         loading={loading}
                                         searchTerm={searchTerm}
@@ -399,7 +389,7 @@ const Comissoes: React.FC = () => {
                             </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>
-                            <Paginator first={listPaginationComissoes.pageable.pageNumber * listPaginationComissoes.pageable.pageSize} rows={pageSize} totalRecords={listPaginationComissoes.totalElements} onPageChange={onPageChange} />
+                            <CustomPaginator first={listPaginationComissoes.pageable.pageNumber * listPaginationComissoes.pageable.pageSize} rows={pageSize} totalRecords={listPaginationComissoes.totalElements} onPageChange={onPageChange} />
                         </div>
                     </div>
                 </>

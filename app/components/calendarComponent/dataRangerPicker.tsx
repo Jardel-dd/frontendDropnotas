@@ -1,29 +1,14 @@
 'use client';
-
+import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import './styledCalendar.css';
-import dayjs, { Dayjs } from 'dayjs';
+import {  useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
-import type { Calendar as CalendarRef } from 'primereact/calendar';
-import { ReactNode, useRef, useState } from 'react';
+import { Periodo, Props } from './types/types';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
-
-type Periodo = Date[] | null;
-export type DateRangeValue = [Dayjs | null, Dayjs | null];
-
-type Props = {
-    onBuscar: (inicio: Date, fim: Date) => void;
-    onPeriodoChange?: (periodo: Date[] | null) => void;
-    onClear?: () => void;
-    showTopLabel?: boolean;
-    topLabel?: string;
-    required?: boolean;
-    topRightElement?: ReactNode;
-};
-
-export const todayRange: DateRangeValue = [dayjs().startOf('day'), dayjs().endOf('day')];
+import type { Calendar as CalendarRef } from 'primereact/calendar';
 
 export const DateRangePicker = ({ onBuscar, onPeriodoChange, onClear, showTopLabel = false, topLabel, required = false, topRightElement }: Props) => {
     const calendarRef = useRef<CalendarRef>(null);

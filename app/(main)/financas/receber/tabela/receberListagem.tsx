@@ -5,13 +5,14 @@ import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import { Skeleton } from 'primereact/skeleton';
-import { LayoutContext } from '@/layout/context/layoutcontext';
 import { Dispatch, SetStateAction, useContext } from 'react';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
-import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { DataTableComponent, editButton, highlightSearchTerm } from '@/app/components/dataTableComponent/DataTableComponent';
+import { LayoutContext } from '@/layout/context/layoutcontext';
 import { ContasReceberEntity } from '@/app/entity/contasReceberEntity';
 import { StatusNota } from '@/app/(main)/notaServico/types/statusClassNfs';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { DataTableComponent, editButton } from '@/app/components/dataTableComponent/DataTableComponent';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 
 const formatDate = (value?: string | null, includeTime = false) => {
     if (!value) {
@@ -33,20 +34,19 @@ const formatDate = (value?: string | null, includeTime = false) => {
         'pt-BR',
         includeTime
             ? {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-              }
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }
             : {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric'
-              }
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }
     ).format(dateObj);
 };
-
 const formatCurrency = (value?: number | null) =>
     new Intl.NumberFormat('pt-BR', {
         style: 'currency',
@@ -88,7 +88,7 @@ export function ListarContasReceber({
                                 loading={loading}
                                 totalRecords={listPaginationContasReceber?.totalElements ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={() => null}
                                 isDarkMode={isDarkMode}
@@ -104,6 +104,26 @@ export function ListarContasReceber({
                                                 <Skeleton />
                                             ) : (
                                                 <span>{highlightSearchTerm(limitarText(data.descricao, 25), searchTerm)}</span>
+                                            )
+                                    },
+                                    {
+                                        field: 'nome_cliente',
+                                        header: 'Cliente',
+                                        body: (data) =>
+                                            loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span>{highlightSearchTerm(limitarText(data.nome_cliente, 25), searchTerm)}</span>
+                                            )
+                                    },
+                                    {
+                                        field: 'nome_vendedor',
+                                        header: 'Vendedor',
+                                        body: (data) =>
+                                            loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span>{highlightSearchTerm(limitarText(data.nome_vendedor, 25), searchTerm)}</span>
                                             )
                                     },
                                     {
@@ -132,7 +152,7 @@ export function ListarContasReceber({
                                 loading={loading}
                                 totalRecords={listPaginationContasReceber?.totalElements ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={() => null}
                                 isDarkMode={isDarkMode}

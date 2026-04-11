@@ -12,7 +12,8 @@ import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { handleActiveOrInativeUserConta } from '../controller/controller';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { DataTableComponent, defaultExpandButtonTemplate, editButton, highlightSearchTerm, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
+import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 export function ListarUserConta(
     {
         listPaginationUserConta,

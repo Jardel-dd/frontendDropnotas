@@ -1,25 +1,21 @@
 'use client';
 import './styled.css';
-import dayjs from 'dayjs';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
 import { mapDateRangeToIso } from './controller';
 import React, { useEffect, useState } from 'react';
-import PieChart from '@/app/components/chartsComponent/charts';
-import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
+import Dropdown from '@/app/shared/include/dropdown/dropdown';
+import PieChart from '@/app/components/chartsComponent/charts';
 import { filterOptions } from '@/app/shared/optionsDropDown/options';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
 import { fetchRelatorioRecebimentos } from '../recebimentos/controller';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
-import { fetchFilteredCompany, listTheCompany } from '../../configuracoes/empresas/controller/controller';
-import EmpresaDropdownField from '../../configuracoes/empresas/dropDown/empresa';
 import PessoaDropdownField from '../../cadastro/pessoas/dropDown/pessoa';
+import EmpresaDropdownField from '../../configuracoes/empresas/dropDown/empresa';
+import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
 const RelatoriosServicos: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState<CompanyEntity | null>(null);
@@ -134,7 +130,7 @@ const RelatoriosServicos: React.FC = () => {
     };
     useEffect(() => {
         if (!dateRange) return;
-        const buscar = async () => {
+        const search = async () => {
             try {
                 setLoading(true);
 
@@ -153,7 +149,7 @@ const RelatoriosServicos: React.FC = () => {
                 setLoading(false);
             }
         };
-        buscar();
+        search();
     }, [dateRange, selectedCompany, selectedPessoa]);
     return (
         <div className="p-fluid">

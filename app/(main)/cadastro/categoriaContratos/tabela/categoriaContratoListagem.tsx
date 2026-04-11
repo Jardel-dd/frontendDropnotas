@@ -1,18 +1,18 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
+import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
-import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import { Skeleton } from 'primereact/skeleton';
-import LoadingScreen from '@/app/loading';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { LayoutContext } from '@/layout/context/layoutcontext';
-import { handleActiveOrInativeCategoriaContrato } from '../controller/controller';
-import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
-import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { DataTableComponent, defaultExpandButtonTemplate, highlightSearchTerm, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
+import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
+import { handleActiveOrInativeCategoriaContrato } from '../controller/controller';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
+import { DataTableComponent, defaultExpandButtonTemplate, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
 
 export function ListarCategoriaContrato({
     listPaginationCategoriaContrato,
@@ -33,7 +33,6 @@ export function ListarCategoriaContrato({
     listarInativos: boolean;
     onCategoriaClick?: (categoria: CategoryContratosEntity) => void;
 }) {
-    const router = useRouter();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);

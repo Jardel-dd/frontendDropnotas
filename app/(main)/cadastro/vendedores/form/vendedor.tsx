@@ -40,7 +40,7 @@ export function VendedorFields({
             </div>
             {vendedor?.tipo_pessoa === 'PESSOA_JURIDICA' && (
                 <>
-                    <div className="col-12 lg:col-3 ">
+                    <div className="col-12 lg:col-4 ">
                         <InputMaskDrop
                             id="cnpj"
                             value={vendedor.cnpj || ''}
@@ -71,7 +71,7 @@ export function VendedorFields({
                             topLabel="CNPJ:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 ">
+                    <div className="col-12 lg:col-5 ">
                         <Input
                             id="razao_social"
                             value={vendedor?.razao_social || ''}
@@ -84,7 +84,7 @@ export function VendedorFields({
                             topLabel="Razao Social:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 ">
+                    <div className="col-12 lg:col-6 ">
                         <Input
                             value={vendedor?.nome_fantasia || ''}
                             onChange={onChange}
@@ -94,7 +94,7 @@ export function VendedorFields({
                             topLabel="Nome Fantasia:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 ">
+                    <div className="col-12 lg:col-2 ">
                         <Input
                             value={vendedor.percentual_comissao ?? 0}
                             onChange={onChange}
@@ -110,7 +110,7 @@ export function VendedorFields({
                             topLabel="Comissao:"
                         />
                     </div>
-                    <div className="col-12 lg:col-3 ">
+                    <div className="col-12 lg:col-4 ">
                         <InputMaskDrop
                             id="telefone"
                             value={vendedor.telefone || ''}

@@ -11,7 +11,8 @@ import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { handleActiveOrInativeFormaPagamento, } from '../controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { DataTableComponent, defaultExpandButtonTemplate, editButton, highlightSearchTerm, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
+import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 export function ListarFormaPagamento(
     {
         listPaginationFormaPagamento,

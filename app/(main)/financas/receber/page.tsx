@@ -5,17 +5,18 @@ import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
+import { listContasReceber } from './controller/controller';
+import { ListarContasReceber } from './tabela/receberListagem';
+import {  PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
-import { ListarContasReceber } from './tabela/receberListagem';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import { ContasReceberEntity } from '@/app/entity/contasReceberEntity';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { listContasReceber } from './controller/controller';
-import { ContasReceberEntity } from '@/app/entity/contasReceberEntity';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
 
 const ContasReceber: React.FC = () => {
     const router = useRouter();
@@ -186,23 +187,13 @@ const ContasReceber: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationContasReceber.pageable.pageNumber * listPaginationContasReceber.pageable.pageSize}
                                     rows={pageSize}
                                     totalRecords={listPaginationContasReceber.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
-                                    style={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
+                                    isMobile
+                                    
                                 />
                             </div>
                         </div>
@@ -239,7 +230,7 @@ const ContasReceber: React.FC = () => {
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
                                 </div>
-                                <div className="mt-2">
+                                <div >
                                     <ListarContasReceber
                                         loading={loading}
                                         searchTerm={searchTerm}
@@ -252,7 +243,7 @@ const ContasReceber: React.FC = () => {
                             </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>
-                            <Paginator first={listPaginationContasReceber.pageable.pageNumber * listPaginationContasReceber.pageable.pageSize} rows={pageSize} totalRecords={listPaginationContasReceber.totalElements} onPageChange={onPageChange} />
+                            <CustomPaginator first={listPaginationContasReceber.pageable.pageNumber * listPaginationContasReceber.pageable.pageSize} rows={pageSize} totalRecords={listPaginationContasReceber.totalElements} onPageChange={onPageChange} />
                         </div>
                     </div>
                 </>

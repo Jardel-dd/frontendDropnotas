@@ -1,18 +1,18 @@
 'use client';
-import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
+import { confirmDialog } from 'primereact/confirmdialog';
+import { getStatusClassOs } from '../types/statusClassNfs';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import { useIsDesktop } from '@/app/components/responsiveCelular/responsive';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
-import { DataTableComponent, defaultExpandButtonTemplate, editButton, highlightSearchTerm } from '@/app/components/dataTableComponent/DataTableComponent';
-import { confirmDialog } from 'primereact/confirmdialog';
-import { getStatusClassOs } from '../types/statusClassNfs';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
+import { DataTableComponent, defaultExpandButtonTemplate, editButton } from '@/app/components/dataTableComponent/DataTableComponent';
 
 export function ListarOrdemServico(
     {

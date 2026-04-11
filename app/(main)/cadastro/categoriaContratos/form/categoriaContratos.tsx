@@ -10,8 +10,8 @@ export function CategoriaContratoFields({
 }: CategoriaContratoFieldsProps) {
     return (
         <div className="scrollable-container">
-            <div className="custom-flex-col">
-                <div className="col-12 mb-1 lg:col-4 lg:mb-0 w-full">
+            <div className="grid formgrid">
+                <div className="col-12 ">
                     <Input
                         value={categoriaContrato.descricao || ''}
                         onChange={onChange}
@@ -23,7 +23,7 @@ export function CategoriaContratoFields({
                         onBlur={onValidateDescricao}
                     />
                 </div>
-                <div className="col-12 mb-1 lg:col-4 lg:mb-0 w-full">
+                <div className="col-12">
                     <Input
                         value={categoriaContrato.observacoes || ''}
                         onChange={onChange}

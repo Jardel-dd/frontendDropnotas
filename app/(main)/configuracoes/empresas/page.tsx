@@ -17,6 +17,8 @@ import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarEmpresa, deletarEmpresa, listEmpresa } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const Empresas: React.FC = () => {
     const router = useRouter();
@@ -151,7 +153,6 @@ const Empresas: React.FC = () => {
         }));
         handleListCompany(selectedPage, searchTerm, listarInativos);
     };
-   
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
@@ -166,7 +167,7 @@ const Empresas: React.FC = () => {
         handleListCompany(0, searchTerm, listarInativos);
         setVisible(false);
     };
-    const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
+    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
     useEffect(() => {
@@ -198,18 +199,12 @@ const Empresas: React.FC = () => {
                                 <div className="col-4 mb-0 lg:col-2 p-0">
                                     <div className="container-BTN-Filter-Created ">
                                         <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
-                                            <div className='checkBoxMobile-width-max-10rem'>
-                                                <div className="checkbox-container">
-                                                    <Checkbox
-                                                        inputId="listarInativos"
-                                                        onChange={handleCheckboxChangeMobile}
-                                                        checked={listarInativos}
-                                                    />
-                                                    <label htmlFor="listarInativos" className="ml-2">
-                                                        Listar Desativadas
-                                                    </label>
-                                                </div>
-                                            </div>
+                                            <CheckBoxField
+                                                inputId="listarInativos"
+                                                label="Listar Desativadas"
+                                                checked={listarInativos}
+                                                onChange={handleCheckboxChange}
+                                            />
                                         </FilterOverlay>
                                         <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                     </div>
@@ -232,23 +227,12 @@ const Empresas: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationEmpresa.pageable.pageNumber * listPaginationEmpresa.pageable.pageSize}
                                     rows={pageSize}
                                     totalRecords={listPaginationEmpresa.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
-                                    style={{ background: isDarkMode ? "#162A41" : "#EFF3F8" }}
+                                    isMobile
                                 />
                             </div>
                         </div>
@@ -281,21 +265,20 @@ const Empresas: React.FC = () => {
                                             onApply={handleSalvarFiltro}
                                             onClear={handleClearFilters}
                                             buttonClassName="Btn-Filter-Desktop">
-                                            <div className="checkBoxMobile-width-max-10rem">
-                                                <div className="checkbox-container">
-                                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                    <label htmlFor="listarInativos" className="ml-2">
-                                                        Listar Desativadas
-                                                    </label>
-                                                </div>
-                                            </div>
+                                            <CheckBoxField
+                                                inputId="listarInativos"
+                                                label="Listar Desativadas"
+                                                checked={listarInativos}
+                                                onChange={handleCheckboxChange}
+                                            />
+
                                         </FilterOverlay>
                                     </div>
                                     <div className='container-button-primary-novo'>
                                         <Button icon="pi pi-plus" label='Novo' onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
                                 </div>
-                                <div className='mt-2'>
+                                <div>
                                     <ListarEmpresas
                                         loading={loading}
                                         listPaginationEmpresa={listPaginationEmpresa}
@@ -312,7 +295,7 @@ const Empresas: React.FC = () => {
                             </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>
-                            <Paginator
+                            <CustomPaginator
                                 first={listPaginationEmpresa.pageable.pageNumber * listPaginationEmpresa.pageable.pageSize}
                                 rows={pageSize}
                                 totalRecords={listPaginationEmpresa.totalElements}

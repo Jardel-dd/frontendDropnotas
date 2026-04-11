@@ -3,19 +3,20 @@ import '@/app/styles/styledGlobal.css'
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import ListarUserConta from './tabela/usuarioListagem';
 import { Messages } from 'primereact/messages';
+import ListarUserConta from './tabela/usuarioListagem';
 import Input from '@/app/shared/include/input/input-all';
-import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
-import { ativarUsuario, deletarUsuario, listUsuario } from './controller/controller';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
+import { ativarUsuario, deletarUsuario, listUsuario } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const Usuarios: React.FC = () => {
     const router = useRouter();
@@ -131,7 +132,7 @@ const Usuarios: React.FC = () => {
         handleListUsersConta(0, searchTerm, listarInativos);
         setVisible(false);
     };
-    const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
+    const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
     const handleApplyFilters = () => {
@@ -166,18 +167,12 @@ const Usuarios: React.FC = () => {
                             <div className="col-4 mb-0 lg:col-3 lg:mb-0">
                                 <div className="container-BTN-Filter-Created">
                                     <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
-                                        <div className='checkBoxMobile-width-max-10rem'>
-                                            <div className="checkbox-container">
-                                                <Checkbox
-                                                    inputId="listarInativos"
-                                                    onChange={handleCheckboxChangeMobile}
-                                                    checked={listarInativos}
-                                                />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
-                                            </div>
-                                        </div>
+                                        <CheckBoxField
+                                            inputId="listarInativos"
+                                            label="Listar Desativadas"
+                                            checked={listarInativos}
+                                            onChange={handleCheckboxChange}
+                                        />
                                     </FilterOverlay>
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
@@ -197,22 +192,12 @@ const Usuarios: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationUsersConta.pageable.pageNumber * listPaginationUsersConta.pageable.pageSize}
                                     rows={listPaginationUsersConta.pageable.pageSize}
                                     totalRecords={listPaginationUsersConta.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
+                                    isMobile
                                 />
                             </div>
                         </div>
@@ -239,22 +224,20 @@ const Usuarios: React.FC = () => {
                                             topLabel="Usuário:"
                                             showTopLabel />
                                     </div>
-                                     <div className="Container-Btn-Filter-Desktop">
-                                    <FilterOverlay
-                                        onApply={handleSalvarFiltro}
-                                        onClear={handleClearFilters}
-                                        buttonClassName="Btn-Filter-Desktop">
-                                        <div className="checkBoxMobile-width-max-10rem">
-                                            <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </FilterOverlay>
-                                </div>
-                                  <div className="container-button-primary-novo">
+                                    <div className="Container-Btn-Filter-Desktop">
+                                        <FilterOverlay
+                                            onApply={handleSalvarFiltro}
+                                            onClear={handleClearFilters}
+                                            buttonClassName="Btn-Filter-Desktop">
+                                            <CheckBoxField
+                                                inputId="listarInativos"
+                                                label="Listar Desativadas"
+                                                checked={listarInativos}
+                                                onChange={handleCheckboxChange}
+                                            />
+                                        </FilterOverlay>
+                                    </div>
+                                    <div className="container-button-primary-novo">
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
                                 </div>
@@ -273,7 +256,7 @@ const Usuarios: React.FC = () => {
                             </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>
-                            <Paginator
+                            <CustomPaginator
                                 first={listPaginationUsersConta.pageable.pageNumber * listPaginationUsersConta.pageable.pageSize}
                                 rows={listPaginationUsersConta.pageable.pageSize}
                                 totalRecords={listPaginationUsersConta.totalElements}

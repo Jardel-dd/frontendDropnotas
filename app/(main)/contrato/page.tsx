@@ -7,14 +7,16 @@ import { Messages } from 'primereact/messages';
 import ListarContratos from './tabela/contratoListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarContrato, deletarContrato, listContrato } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const Contratos: React.FC = () => {
     const router = useRouter();
@@ -135,9 +137,6 @@ const Contratos: React.FC = () => {
         handleListContratos(0, searchTerm, listarInativos);
         setVisible(false);
     };
-    const handleCheckboxChangeMobile = (e: CheckboxChangeEvent) => {
-        setListarInativos(e.checked ?? false);
-    };
     const handleClearFilters = () => {
         setSearchTerm('');
         setListarInativos(false);
@@ -192,14 +191,13 @@ const Contratos: React.FC = () => {
                                 <div className="col-4 mb-0 lg:col-2 p-0 ">
                                     <div className="container-BTN-Filter-Created">
                                         <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
-                                            <div className="checkBoxMobile-width-max-10rem">
-                                                <div className="checkbox-container">
-                                                    <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                    <label htmlFor="listarInativos" className="ml-2">
-                                                        Listar Desativadas
-                                                    </label>
-                                                </div>
-                                            </div>
+
+                                            <CheckBoxField
+                                                inputId="listarInativos"
+                                                label="Listar Desativadas"
+                                                checked={listarInativos}
+                                                onChange={handleCheckboxChange}
+                                            />
                                         </FilterOverlay>
                                         <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                     </div>
@@ -220,22 +218,12 @@ const Contratos: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
-                                <Paginator
+                                <CustomPaginator
                                     first={listPaginationContratos.pageable.pageNumber * listPaginationContratos.pageable.pageSize}
                                     rows={listPaginationContratos.pageable.pageSize}
                                     totalRecords={listPaginationContratos.totalElements}
                                     onPageChange={onPageChange}
-                                    template={{
-                                        layout: 'PrevPageLink CurrentPageReport NextPageLink',
-                                        CurrentPageReport: (options) => {
-                                            const pageNumber = Math.floor(options.first / options.rows) + 1;
-                                            return (
-                                                <span>
-                                                    Página {pageNumber} de {options.totalPages}
-                                                </span>
-                                            );
-                                        }
-                                    }}
+                                    isMobile
                                 />
                             </div>
                         </div>
@@ -263,22 +251,20 @@ const Contratos: React.FC = () => {
                                             showTopLabel
                                         />
                                     </div>
-                                     <div className="Container-Btn-Filter-Desktop">
-                                    <FilterOverlay
-                                        onApply={handleSalvarFiltro}
-                                        onClear={handleClearFilters}
-                                        buttonClassName="Btn-Filter-Desktop">
-                                        <div className="checkBoxMobile-width-max-10rem">
-                                            <div className="checkbox-container">
-                                                <Checkbox inputId="listarInativos" onChange={handleCheckboxChangeMobile} checked={listarInativos} />
-                                                <label htmlFor="listarInativos" className="ml-2">
-                                                    Listar Desativadas
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </FilterOverlay>
-                                </div>
-                                <div className="container-button-primary-novo">
+                                    <div className="Container-Btn-Filter-Desktop">
+                                        <FilterOverlay
+                                            onApply={handleSalvarFiltro}
+                                            onClear={handleClearFilters}
+                                            buttonClassName="Btn-Filter-Desktop">
+                                            <CheckBoxField
+                                                inputId="listarInativos"
+                                                label="Listar Desativadas"
+                                                checked={listarInativos}
+                                                onChange={handleCheckboxChange}
+                                            />
+                                        </FilterOverlay>
+                                    </div>
+                                    <div className="container-button-primary-novo">
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
                                 </div>
@@ -297,7 +283,7 @@ const Contratos: React.FC = () => {
                             </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>
-                            <Paginator
+                            <CustomPaginator
                                 first={listPaginationContratos.pageable.pageNumber * listPaginationContratos.pageable.pageSize}
                                 rows={listPaginationContratos.pageable.pageSize}
                                 totalRecords={listPaginationContratos.totalElements}

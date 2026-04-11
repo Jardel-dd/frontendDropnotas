@@ -8,8 +8,8 @@ import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import { ApiListItem, OrdemServicoParams } from '../types/ordemServico';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
-import { DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
+import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 
 export const fetchOrdemServico = async (params: OrdemServicoParams) => {
     const searchParams = new URLSearchParams();

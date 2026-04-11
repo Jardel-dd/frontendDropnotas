@@ -1,5 +1,5 @@
-import { DateRangeValue } from '@/app/components/calendarComponent/dataRangerPicker';
 import api from '@/app/services/api';
+import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 
 type RelatorioRecebimentosParams = {
     idEmpresa?: number | null;

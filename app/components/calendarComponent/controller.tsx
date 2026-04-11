@@ -1,5 +1,5 @@
 import { Dayjs } from "dayjs";
-import { DateRangeValue } from "./dataRangerPicker";
+import { DateRangeValue } from "./types/types";
 export type DateRangeDesktop = [Dayjs | null, Dayjs | null];
 export const mapDateRangeToParams = (dateRange?: DateRangeValue) => {
     if (!dateRange?.[0] || !dateRange?.[1]) return {};

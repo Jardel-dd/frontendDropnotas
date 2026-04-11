@@ -2,22 +2,19 @@
 import './styled.css';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
+import { Button } from 'primereact/button';
 import React, { useEffect, useState } from 'react';
-import Dropdown from '@/app/shared/include/dropdown/dropdown';
-import PieChart from '@/app/components/chartsComponent/charts';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
+import Dropdown from '@/app/shared/include/dropdown/dropdown';
+import PieChart from '@/app/components/chartsComponent/charts';
 import { filterOptions } from '@/app/shared/optionsDropDown/options';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
 import { fetchRelatorioRecebimentos, mapDateRangeToIso } from './controller';
-import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { Button } from 'primereact/button';
-import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/dataRangerPicker';
-import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { fetchFilteredCompany, listTheCompany } from '../../configuracoes/empresas/controller/controller';
 import EmpresaDropdownField from '../../configuracoes/empresas/dropDown/empresa';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
 const RelatoriosRecebimentos: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -137,7 +134,7 @@ const RelatoriosRecebimentos: React.FC = () => {
     useEffect(() => {
         if (!dateRange) return;
 
-        const buscar = async () => {
+        const search = async () => {
             try {
                 setLoading(true);
 
@@ -157,7 +154,7 @@ const RelatoriosRecebimentos: React.FC = () => {
             }
         };
 
-        buscar();
+        search();
     }, [dateRange, selectedCompany, selectedPessoa]);
     return (
         <div className="p-fluid">
@@ -205,8 +202,6 @@ const RelatoriosRecebimentos: React.FC = () => {
                                         onCompanyChange={handleCompanyChange}
                                         hasError={!!errors.selectedCompany}
                                         errorMessage={errors.selectedCompany}
-                                        showAddButton
-                                        autoSelectSingle={true}
                                     />
 
                                 </div>

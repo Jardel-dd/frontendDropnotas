@@ -10,7 +10,8 @@ import { LayoutContext } from '@/layout/context/layoutcontext';
 import { ContasPagarEntity } from '@/app/entity/contasPagarEntity';
 import { StatusNota } from '@/app/(main)/notaServico/types/statusClassNfs';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { DataTableComponent, editButton, highlightSearchTerm } from '@/app/components/dataTableComponent/DataTableComponent';
+import { DataTableComponent, editButton } from '@/app/components/dataTableComponent/DataTableComponent';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 const formatDate = (value?: string | null, includeTime = false) => {
     if (!value) {
         return '-';
@@ -97,6 +98,16 @@ export function ListarContasPagar({
                                                 <Skeleton />
                                             ) : (
                                                 <span>{highlightSearchTerm(limitarText(data.descricao, 25), searchTerm)}</span>
+                                            )
+                                    },
+                                      {
+                                        field: 'nome_fornecedor',
+                                        header: 'Nome',
+                                        body: (data) =>
+                                            loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span>{highlightSearchTerm(limitarText(data.nome_fornecedor, 25), searchTerm)}</span>
                                             )
                                     },
                                     {

@@ -23,7 +23,10 @@ export interface PessoaFormRef {
     handleSave: () => Promise<void>;
 }
 export type FormPessoaCreatedProps = PessoaFieldsProps | PessoaFormProps;
-
+export type ClienteFornecedorFilter = {
+        cliente: boolean;
+        fornecedor: boolean;
+    };
 export interface PessoaFieldsProps {
     pessoa: PessoaEntity;
     errors: Record<string, string>;
@@ -41,7 +44,6 @@ export interface PessoaFieldsProps {
     fetchAllCnae: (...args: any[]) => any;
     fetchFilteredCnae: (...args: any[]) => any;
 }
-
 export interface PessoaDropdownFieldProps {
     selectedPessoa: PessoaEntity | null;
     selectedPessoaId?: number | null;
