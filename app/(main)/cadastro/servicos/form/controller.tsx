@@ -10,15 +10,17 @@ import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
-import { searchServiceTable } from '@/app/components/fetchAll/listAllTableService/controller';
+import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import { validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createServico, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
-import {createEmptyServico, FormCreatedServicoProps, ServiceFormProps, ServiceFormRef} from '../types/servico';
-import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import { createEmptyServico, FormCreatedServicoProps, ServiceFormProps, ServiceFormRef } from '../types/servico';
+import { fetchAllCodigoNBS, fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
 import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
+import { TableService } from '@/app/entity/TableServiceEntity';
+
 
 export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>(
     ({ initialId, msgs, onServicoChange, onErrorsChange, redirectAfterSave, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
@@ -34,6 +36,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         const [selectedService, setSelectedService] = useState<ServiceEntity | null>(null);
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [stateDisableBtnCreatedService, setStateDisableBtnCreatedService] = useState(false);
+        const [selectedCodigoServico, setSelectedCodigoServico] = useState<TableService | null>(null);
         const [selectedCodigoNBS, setSelectedCodigoNBS] = useState<TableCodigoNBSEntity | null>(null);
         const [selectedClassificacaoTributaria, setSelectedClassificacaoTributaria] = useState<TableClassificacaoTributariaEntity | null>(null);
 
@@ -83,6 +86,29 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                 return newErrors;
             });
         };
+        const handleCodigoServiceChange = (codigoService: TableService | null) => {
+            const selectedCodigo =
+                codigoService?.codigo ||
+                codigoService?.descricao?.split(' - ')[0]?.trim() ||
+                '';
+
+            setSelectedCodigoServico(codigoService);
+            const updatedCodigoService = servico.copyWith({ item_lista_servico: selectedCodigo });
+            setServico(updatedCodigoService);
+            console.log('[Cadastro/Servicos] Codigo do servico selecionado:', {
+                selectedOption: codigoService,
+                item_lista_servico: selectedCodigo
+            });
+            setErrors((prevErrors) => {
+                const newErrors = { ...prevErrors };
+                delete newErrors.item_lista_servico;
+                return newErrors;
+            });
+            setTouchedFields((prev) => ({
+                ...prev,
+                item_lista_servico: true
+            }));
+        };
         const handleCodigoNBSChange = (codigoNBS: TableCodigoNBSEntity | null) => {
             setSelectedCodigoNBS(codigoNBS);
             const updatedCodigoNBS = servico.copyWith({ codigo_nbs: codigoNBS?.codigo || '' });
@@ -108,7 +134,6 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                 setSelectedService(null);
                 return;
             }
-
             setSelectedService(service);
             setServico((prev) => {
                 const updated = {
@@ -138,24 +163,28 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                 setIsLoading(true);
                 const { servico } = await fetchServicesByID(id);
                 const entidade = new ServiceEntity(servico);
-
+                const [allServices, codigoNBSOptions] = await Promise.all([
+                    fetchAllTabelaServico(),
+                    entidade.codigo_nbs ? fetchFilteredCodigoNBS(entidade.codigo_nbs) : Promise.resolve([] as TableCodigoNBSEntity[])
+                ]);
                 setServico(
                     new ServiceEntity({
                         ...entidade,
-                        item_lista_servico: '010501'
                     })
                 );
-
                 if (entidade.codigo_nbs) {
+                    const matchedCodigoNBS = findCodigoNBS(entidade.codigo_nbs, codigoNBSOptions);
                     setSelectedCodigoNBS(
+                        matchedCodigoNBS ??
                         new TableCodigoNBSEntity({
                             id: 0,
                             codigo: entidade.codigo_nbs,
                             descricao: entidade.codigo_nbs
                         })
                     );
+                } else {
+                    setSelectedCodigoNBS(null);
                 }
-
                 if (entidade.codigo_classificacao_tributaria) {
                     setSelectedClassificacaoTributaria(
                         new TableClassificacaoTributariaEntity({
@@ -166,11 +195,21 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                         })
                     );
                 }
+                if (entidade.item_lista_servico) {
+                    setSelectedCodigoServico(
+                        new TableService({
+                            id: 0,
+                            codigo: entidade.item_lista_servico,
+                            descricao: entidade.item_lista_servico,
+                        })
+                    );
+                }
+                const itemCodigo = entidade.item_lista_servico;
+                const matchedServico = allServices.find(
+                    option => option.codigo === itemCodigo
+                );
 
-                const allServices = await searchServiceTable();
-                const itemCodigo = entidade.item_lista_servico?.split(' - ')[0];
-                const matchedServico = allServices.find((option: ServiceEntity) => option.codigo === itemCodigo);
-                setSelectedService(matchedServico ?? null);
+                setSelectedCodigoServico(matchedServico ?? null);
             } finally {
                 setIsLoading(false);
             }
@@ -237,15 +276,18 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                             onDropdownChange={handleDropdownChange}
                             onNumberChange={handleNumberChange}
                             onServicoChange={handleServicoChange}
-                            onCodigoNBSChange={handleCodigoNBSChange}
                             onClassificacaoTributariaChange={handleClassificacaoTributariaChange}
                             onDescriptionBlur={handleDescriptionBlur}
-                            fetchServiceTable={searchServiceTable}
+                            fetchServiceTable={fetchAllTabelaServico}
                             fetchAllClassificacaoTributaria={fetchAllClassificacaoTributaria}
                             fetchFilteredClassificacaoTributaria={fetchFilteredClassificacaoTributaria}
+                            onCodigoServicoChange={handleCodigoServiceChange}
+                            onCodigoNBSChange={handleCodigoNBSChange}
+                            fetchAllCodigoServico={fetchAllTabelaServico}
+                            fetchFilteredCodigoServico={fetchFilteredTabelaServico}
                             fetchAllCodigoNBS={fetchAllCodigoNBS}
                             fetchFilteredCodigoNBS={fetchFilteredCodigoNBS}
-                        />
+                            selectedCodigoServico={selectedCodigoServico} />
                     </div>
                 </div>
                 <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>

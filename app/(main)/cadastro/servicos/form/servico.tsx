@@ -10,17 +10,22 @@ import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
 import { codigoIndicadorOperacao, codigoSituacaoTributariaRegular, exigibilidadeISSServico, issRetido, responsavelRetencao, situacaoTributaria} from '@/app/shared/optionsDropDown/options';
+import { TableService } from '@/app/entity/TableServiceEntity';
+import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
 export function ServicoFields({
     servico,
     errors,
     selectedService,
     selectedCodigoNBS,
+    selectedCodigoServico,
     selectedClassificacaoTributaria,
     onChange,
     onDropdownChange,
     onNumberChange,
     onServicoChange,
     onCodigoNBSChange,
+    onCodigoServicoChange,
+
     onClassificacaoTributariaChange,
     onDescriptionBlur,
     fetchServiceTable,
@@ -202,6 +207,22 @@ export function ServicoFields({
                     required
                 />
             </div>
+             <div className="col-12  lg:col-4">
+                <DropdownSearch<TableService>
+                    id="item_lista_servico"
+                    selectedItem={selectedCodigoServico}
+                    onItemChange={onCodigoServicoChange}
+                    fetchAllItems={fetchAllTabelaServico}
+                    fetchFilteredItems={fetchFilteredTabelaServico}
+                    optionValue="codigo"
+                    optionLabel="descricao"
+                    hasError={!!errors.item_lista_servico}
+                    errorMessage={errors.item_lista_servico}
+                    topLabel="Codigo do Serviço:"
+                    showTopLabel
+                    required
+                />
+            </div>
             <div className="col-12  lg:col-4">
                 <Dropdown
                     id="codigo_situacao_tributaria_regular"
@@ -212,34 +233,10 @@ export function ServicoFields({
                     filterBy={false}
                     hasError={!!errors.codigo_situacao_tributaria_regular}
                     errorMessage={errors.codigo_situacao_tributaria_regular}
-                    topLabel="Classificacao Tributaria Regular"
+                    topLabel="Classificacao Tributaria Regular:"
                     showTopLabel
                     required
                 />
-            </div>
-            <div className="col-12  lg:col-4">
-                <Input
-                    id="item_lista_servico"
-                    value={servico.item_lista_servico || '010501'}
-                    onChange={onChange}
-                    topLabel="Descricao da Atividade do Servico:"
-                    useRightButton
-                    outlined
-                    hasError={!!errors.item_lista_servico}
-                    errorMessage={errors.item_lista_servico}
-                    showTopLabel
-                    required
-                    label=""
-                />
-                {/* <ServicoDropdownField
-                    id="item_lista_servico"
-                    selectedService={selectedService}
-                    onServiceChange={onServicoChange}
-                    placeholder="Selecione um servico"
-                    showTopLabel
-                    required
-                  
-                /> */}
             </div>
             <div className="col-12  lg:col-4">
                 <Input
@@ -321,4 +318,3 @@ export function ServicoFields({
         </div>
     );
 }
-

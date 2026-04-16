@@ -13,11 +13,10 @@ import { ComissaoEntity } from '@/app/entity/comissoesEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
-import { listComissoes, ListComissoesFilters } from './controller/controller';
+import { aprovarComissoes, listComissoes, ListComissoesFilters } from './controller/controller';
 import { DropDownFilterTipoOrigem } from '@/app/shared/optionsDropDown/options';
 import VendedorDropdownField from '../../cadastro/vendedores/dropDown/DropdownVendedor';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
@@ -32,6 +31,7 @@ const Comissoes: React.FC = () => {
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
+    const hasLoadedInitialList = useRef(false);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [listarInativos, setListarInativos] = useState<boolean>(false);
@@ -82,7 +82,8 @@ const Comissoes: React.FC = () => {
         first: true,
         empty: false
     });
-    const buildDateRangeFilters = (periodo: DateRangeValue = dateRange): Pick<ListComissoesFilters, 'data_inicio' | 'data_fim'> => {
+    const selectedComissoesPendentes = selectedComissoes.filter((comissao) => !comissao.comissao_fechada);
+    const buildDateRangeFilters = useCallback((periodo: DateRangeValue = dateRange): Pick<ListComissoesFilters, 'data_inicio' | 'data_fim'> => {
         const [inicio, fim] = periodo;
 
         if (!inicio || !fim) {
@@ -96,19 +97,19 @@ const Comissoes: React.FC = () => {
             data_inicio: inicio.startOf('day').format('YYYY-MM-DDTHH:mm:ss'),
             data_fim: fim.endOf('day').format('YYYY-MM-DDTHH:mm:ss')
         };
-    };
-    const buildCurrentFilters = (overrides: Partial<ListComissoesFilters> = {}, periodo: DateRangeValue = dateRange): ListComissoesFilters => ({
+    }, [dateRange]);
+    const buildCurrentFilters = useCallback((overrides: Partial<ListComissoesFilters> = {}, periodo: DateRangeValue = dateRange): ListComissoesFilters => ({
         id_vendedor: selectedVendedor?.id ?? null,
         tipo_origem: selectedTipoOrigem || null,
         comissao_fechada: filtrarComissaoFechada ? true : null,
         ...buildDateRangeFilters(periodo),
         ...overrides
-    });
+    }), [buildDateRangeFilters, dateRange, filtrarComissaoFechada, selectedTipoOrigem, selectedVendedor]);
 
     const handleVendedorChange = (vendedorSelecionado: VendedorEntity | null) => {
         setSelectedVendedor(vendedorSelecionado);
     };
-    const handleListComissoes = async (
+    const handleListComissoes = useCallback(async (
         pageNumber?: number,
         _searchTerm?: string,
         listarInativosParam = listarInativos,
@@ -141,7 +142,7 @@ const Comissoes: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [buildCurrentFilters, listPaginationComissoes, listarInativos, pageSize, searchTerm]);
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setComissoes,
         field: 'valor_comissao',
@@ -203,11 +204,44 @@ const Comissoes: React.FC = () => {
         const firstPage = 0;
         handleListComissoes(firstPage, searchTerm, listarInativos, buildCurrentFilters());
     };
+    const handleAprovarComissoes = useCallback(async () => {
+        if (selectedComissoesPendentes.length === 0) return;
+
+        setLoading(true);
+        try {
+            await aprovarComissoes(selectedComissoesPendentes);
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: `${selectedComissoesPendentes.length} comiss${selectedComissoesPendentes.length > 1 ? 'ões aprovadas' : 'ão aprovada'} com sucesso.`,
+                life: 3000
+            });
+            setSelectedComissoes([]);
+            await handleListComissoes(
+                listPaginationComissoes.pageable.pageNumber,
+                searchTerm,
+                listarInativos,
+                buildCurrentFilters()
+            );
+        } catch (error) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Erro',
+                detail: 'Não foi possível aprovar as comissões selecionadas.',
+                life: 3000
+            });
+        } finally {
+            setLoading(false);
+        }
+    }, [buildCurrentFilters, handleListComissoes, listPaginationComissoes, listarInativos, searchTerm, selectedComissoesPendentes]);
     useEffect(() => {
+        if (hasLoadedInitialList.current) return;
+        hasLoadedInitialList.current = true;
         handleListComissoes();
-    }, []);
+    }, [handleListComissoes]);
     return (
         <div className="w-full">
+            <Toast ref={toast} />
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <>
@@ -278,6 +312,17 @@ const Comissoes: React.FC = () => {
                             </div>
                         </div>
                         <div>
+                            {selectedComissoesPendentes.length > 0 && (
+                                <div className="flex justify-content-end mb-3">
+                                    <Button
+                                        icon="pi pi-check"
+                                        label={`Aprovar ${selectedComissoesPendentes.length} comissão${selectedComissoesPendentes.length > 1 ? 'ões' : ''}`}
+                                        onClick={handleAprovarComissoes}
+                                        outlined
+                                        severity="success"
+                                    />
+                                </div>
+                            )}
                             <ListarComissoes
                                 loading={loading}
                                 searchTerm={searchTerm}
@@ -324,7 +369,7 @@ const Comissoes: React.FC = () => {
                                             showTopLabel
                                         />
                                     </div>
-                                    <div className="col-12 lg:col-2 p-0">
+                                    <div>
                                                 <DateRangePicker
                                                     key={`desktop-${dateRangePickerKey}`}
                                                     showTopLabel
@@ -375,6 +420,17 @@ const Comissoes: React.FC = () => {
 
                                 </div>
                                 <div >
+                                    {selectedComissoesPendentes.length > 0 && (
+                                        <div className="flex justify-content-end mb-3">
+                                            <Button
+                                                icon="pi pi-check"
+                                                label={`Aprovar ${selectedComissoesPendentes.length} comissão${selectedComissoesPendentes.length > 1 ? 'ões' : ''}`}
+                                                onClick={handleAprovarComissoes}
+                                                outlined
+                                                severity="success"
+                                            />
+                                        </div>
+                                    )}
                                     <ListarComissoes
                                         loading={loading}
                                         searchTerm={searchTerm}

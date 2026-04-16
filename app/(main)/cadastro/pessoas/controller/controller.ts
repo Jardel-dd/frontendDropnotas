@@ -10,7 +10,14 @@ const nullableString = (value?: string | null) => {
     if (value === undefined || value === null) return null;
     return value.trim().length > 0 ? value : null;
 };
-
+const buildPessoaPayload = (pessoa: PessoaEntity) => ({
+    ...pessoa,
+    cnpj: pessoa.cnpj && pessoa.cnpj.replace(/\D/g, '').length > 0 ? pessoa.cnpj : null,
+    cpf: pessoa.cpf && pessoa.cpf.replace(/\D/g, '').length > 0 ? pessoa.cpf : null,
+    cnae_fiscal: nullableString(pessoa.cnae_fiscal),
+    inscricao_estadual: nullableString(pessoa.inscricao_estadual),
+    inscricao_municipal: nullableString(pessoa.inscricao_municipal),
+});
 export const listPessoa = async (
     listPaginationClientesFornecedores: Record<string, any>,
     listarInativos: boolean,
@@ -44,10 +51,7 @@ export const updatePessoa = async (
     setPessoa: React.Dispatch<React.SetStateAction<PessoaEntity>>,
 ) => {
     try {
-        const pessoaDataToUpdate = {
-            ...pessoa,
-            cnae_fiscal: nullableString(pessoa.cnae_fiscal),
-        };
+        const pessoaDataToUpdate = buildPessoaPayload(pessoa);
         console.log('Dados pessoa):', pessoaDataToUpdate);
         await api.put(`/pessoa`, pessoaDataToUpdate);
         msgs.current?.show({
@@ -157,12 +161,7 @@ export const createdPessoa = async (
     redirectAfterSave: boolean,
 ) => {
     try {
-        const pessoaData = {
-            ...pessoa,
-            cnpj: pessoa.cnpj && pessoa.cnpj.replace(/\D/g, '').length > 0 ? pessoa.cnpj : null,
-            cpf: pessoa.cpf && pessoa.cpf.replace(/\D/g, '').length > 0 ? pessoa.cpf : null,
-            cnae_fiscal: nullableString(pessoa.cnae_fiscal),
-        };
+        const pessoaData = buildPessoaPayload(pessoa);
         console.log('Dados pessoa):', pessoaData);
         const response = await api.post('/pessoa', pessoaData);
         const created = new PessoaEntity(response.data?.pessoa ?? response.data);

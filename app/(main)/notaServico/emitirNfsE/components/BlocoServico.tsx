@@ -5,10 +5,10 @@ import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { searchServiceTable } from '@/app/components/fetchAll/listAllTableService/controller';
 import { exigibilidadeISSServico, issRetido, responsavelRetencao, tributacaoISSQN } from '@/app/shared/optionsDropDown/options';
 import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation';
+import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
 
 type Props = {
     nfseGerada: any;
@@ -113,8 +113,8 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                             'servico'
                         );
                     }}
-                    fetchAllItems={searchServiceTable}
-                    fetchFilteredItems={searchServiceTable}
+                    fetchAllItems={fetchAllCodigoNBS}
+                    fetchFilteredItems={fetchFilteredCodigoNBS}
                     optionLabel={'descricao' as keyof ServiceEntity}
                     placeholder="Selecione Código NBS"
                     hasError={!!servicoErrors.codigo_nbs}

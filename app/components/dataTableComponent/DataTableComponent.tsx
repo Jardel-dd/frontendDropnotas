@@ -35,11 +35,14 @@ export const DataTableComponent = <T extends Identifiable>({
     cliente = false,
     fornecedor = false,
     showExpandButton = true,
+    showActionsColumn,
     rowClick = false,
     selectionMode = 'multiple',
     extraActionsTemplate
 }: DataTableComponentProps<T>) => {
     const msgs = useRef<Messages>(null);
+    const shouldShowActionsColumn =
+        showActionsColumn ?? Boolean(editButtonTemplate || toggleStatusOrDeleteButtonTemplate || extraActionsTemplate);
     return (
         <div className='mt-1'>
             <Messages ref={msgs} className="custom-messages" />
@@ -64,27 +67,29 @@ export const DataTableComponent = <T extends Identifiable>({
                 {columns.map((col) => (
                     <Column key={col.field} field={col.field} header={col.header} body={col.body} headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }} className="custom-title-column-list" />
                 ))}
-                <Column
-                    header="Ações"
-                    body={(rowData) => (
-                        <div className="flex-gap-0-5rem">
-                            {loading ? (
-                                <>
-                                    <Skeleton shape="circle" width="2rem" height="2rem" />
-                                    <Skeleton shape="circle" width="2rem" height="2rem" />
-                                </>
-                            ) : (
-                                <>
-                                    {editButtonTemplate?.(rowData)}
-                                    {toggleStatusOrDeleteButtonTemplate?.(rowData)}
-                                    {extraActionsTemplate?.(rowData)}
-                                </>
-                            )}
-                        </div>
-                    )}
-                    headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
-                    className="width-3rem-Collum-Btn-Plus-Desktop-Rigth"
-                />
+                {shouldShowActionsColumn && (
+                    <Column
+                        header="Ações"
+                        body={(rowData) => (
+                            <div className="flex-gap-0-5rem">
+                                {loading ? (
+                                    <>
+                                        <Skeleton shape="circle" width="2rem" height="2rem" />
+                                        <Skeleton shape="circle" width="2rem" height="2rem" />
+                                    </>
+                                ) : (
+                                    <>
+                                        {editButtonTemplate?.(rowData)}
+                                        {toggleStatusOrDeleteButtonTemplate?.(rowData)}
+                                        {extraActionsTemplate?.(rowData)}
+                                    </>
+                                )}
+                            </div>
+                        )}
+                        headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
+                        className="width-3rem-Collum-Btn-Plus-Desktop-Rigth"
+                    />
+                )}
             </DataTable>
         </div>
     );

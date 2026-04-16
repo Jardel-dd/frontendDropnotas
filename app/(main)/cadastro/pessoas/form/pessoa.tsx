@@ -141,7 +141,6 @@ export function PessoaFields({
                             hasError={!!errors.inscricao_estadual}
                             errorMessage={errors.inscricao_estadual}
                             showTopLabel
-                            required
                             topLabel="Inscricao Estadual:"
                         />
                     </div>
@@ -154,7 +153,6 @@ export function PessoaFields({
                             hasError={!!errors.inscricao_municipal}
                             errorMessage={errors.inscricao_municipal}
                             showTopLabel
-                            required
                             topLabel="Inscricao Municipal:"
                         />
                     </div>
@@ -262,7 +260,6 @@ export function PessoaFields({
                             hasError={!!errors.inscricao_estadual}
                             errorMessage={errors.inscricao_estadual}
                             showTopLabel
-                            required
                             topLabel="Inscricao Estadual:"
                         />
                     </div>
@@ -275,7 +272,6 @@ export function PessoaFields({
                             hasError={!!errors.inscricao_municipal}
                             errorMessage={errors.inscricao_municipal}
                             showTopLabel
-                            required
                             topLabel="Inscricao Municipal:"
                         />
                     </div>
@@ -392,4 +388,3 @@ export function PessoaFields({
         </div>
     );
 }
-

@@ -252,7 +252,10 @@ const NotaServico: React.FC = () => {
     };
     const handleEmitirNotas = async () => {
         if (selectedNotas.length === 0) return;
-        const notaIds = selectedNotas.map((nota) => nota.id);
+        const notaIds = selectedNotas
+            .filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE')
+            .map((nota) => nota.id);
+        if (notaIds.length === 0) return;
         console.log('IDs das notas selecionadas para emissão:', notaIds);
         try {
             const response = await api.post('/nfse/emitir-pendentes', { ids: notaIds });
@@ -270,6 +273,11 @@ const NotaServico: React.FC = () => {
                 detail: 'Falha ao emitir notas pendentes.'
             });
         }
+    };
+    const handleSelectedNotasChange = (notas: NfsEntity[]) => {
+        setSelectedNotas(
+            notas.filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE')
+        );
     };
     const handleClearFilters = () => {
         const clearedDateRange: DateRangeValue = [null, null];
@@ -519,7 +527,7 @@ const NotaServico: React.FC = () => {
                                     setListPaginationNotaServico={setListPaginationNotaServico}
                                     searchTerm={searchTerm}
                                     selectedNotas={selectedNotas}
-                                    setSelectedNotas={setSelectedNotas}
+                                    setSelectedNotas={handleSelectedNotasChange}
                                     listarInativos={false}
                                 />
                             </div>
@@ -630,7 +638,7 @@ const NotaServico: React.FC = () => {
                                     setListPaginationNotaServico={setListPaginationNotaServico}
                                     searchTerm={searchTerm}
                                     selectedNotas={selectedNotas}
-                                    setSelectedNotas={setSelectedNotas}
+                                    setSelectedNotas={handleSelectedNotasChange}
                                     listarInativos={false}
                                 />
                             </div>

@@ -30,11 +30,11 @@ export const validateFieldsServicos = (
    } else if (!service.codigo_nbs || service.codigo_nbs.trim().length < 2) {
         newErrors.codigo_nbs = 'Este Campo deve ser selecionado.';
         valid = false;
+    } else if (!service.item_lista_servico || service.item_lista_servico.trim().length === 0) {
+        newErrors.item_lista_servico = 'Este Campo deve ser selecionado.';
+        valid = false;
     } else if (!service.codigo_situacao_tributaria_regular || service.codigo_situacao_tributaria_regular.trim().length < 2) {
         newErrors.codigo_situacao_tributaria_regular = 'Este Campo deve ser selecionado.';
-        valid = false;
-    } else if (!service.item_lista_servico) {
-        newErrors.item_lista_servico = 'Este Campo deve ser selecionado.';
         valid = false;
     } else if (!service.responsavel_retencao || service.responsavel_retencao.trim().length < 2) {
         newErrors.responsavel_retencao = 'Este Campo deve ser selecionado.';

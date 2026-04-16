@@ -3,7 +3,6 @@ import api from '@/app/services/api';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 
-const FIXED_ITEM_LISTA_SERVICO = '010501';
 
 export const listServico = async (
     listPaginationServicos: Record<string, any>,
@@ -111,7 +110,6 @@ export const createServico = async (
     try {
         const dataServiceCreated = {
             ...service,
-            item_lista_servico: FIXED_ITEM_LISTA_SERVICO,
             codigo: service.codigo?.trim() ? service.codigo : null,
             aliquota_deducoes: service.aliquota_deducoes ?? 0,
         };
@@ -145,7 +143,6 @@ export const updateServico = async (
     try {
         const dataServiceUpdate = {
             ...service,
-            item_lista_servico: FIXED_ITEM_LISTA_SERVICO,
             aliquota_deducoes: service.aliquota_deducoes ?? 0,
         };
         console.log('[Cadastro/Servicos] Payload enviado ao atualizar servico:', dataServiceUpdate);
@@ -213,20 +210,6 @@ export const fetchServicesByID = async (id: string): Promise<{ servico: ServiceE
     } catch (error) {
         console.error("Erro ao buscar serviço:", error);
         throw error;
-    }
-};
-export const searchServicesByParam = async (searchTerm?: string) => {
-    try {
-        const termo = searchTerm ? `?termo=${searchTerm}` : '';
-        const response = await api.get(`/tabela-servico/buscar${termo}`);
-        const services = Array.isArray(response.data.content) ? response.data.content : [];
-        return services.map((service:any ) => {
-            service.descricao = `${service.codigo} - ${service.descricao}`;
-            return service;
-        })
-    } catch (error) {
-        console.error("Erro ao buscar serviços filtrados:", error);
-        return [];
     }
 };
 export const listTheService = async () => {

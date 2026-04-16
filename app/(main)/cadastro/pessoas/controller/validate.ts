@@ -4,6 +4,8 @@ import { VendedorEntity } from "@/app/entity/VendedorEntity";
 type ErrorsMap = Record<string, string>;
 
 const hasValidEmail = (email?: string) => !!email?.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const hasMinLengthWhenFilled = (value: string | null | undefined, minLength: number) =>
+    !value?.trim() || value.trim().length >= minLength;
 
 const validateEnderecoPessoa = (pessoa: PessoaEntity): ErrorsMap => {
     if (!pessoa.endereco?.cep || pessoa.endereco.cep.replace(/\D/g, '').length < 8) {
@@ -46,10 +48,10 @@ const validateCamposComunsPessoa = (
     if (!pessoa.contribuinte) {
         return { contribuinte: 'Este Campo deve ser selecionado.' };
     }
-    if (!pessoa.inscricao_estadual || pessoa.inscricao_estadual.trim().length < 6) {
+    if (!hasMinLengthWhenFilled(pessoa.inscricao_estadual, 6)) {
         return { inscricao_estadual: 'Campo deve ter no minimo 6 caracteres.' };
     }
-    if (!pessoa.inscricao_municipal || pessoa.inscricao_municipal.trim().length < 6) {
+    if (!hasMinLengthWhenFilled(pessoa.inscricao_municipal, 6)) {
         return { inscricao_municipal: 'Campo deve ter no minimo 6 caracteres.' };
     }
     if (!pessoa.pessoa_cliente && !pessoa.pessoa_fornecedor) {

@@ -24,6 +24,7 @@ export interface DataTableComponentProps<T> {
     isDarkMode: boolean;
     searchTerm: string;
     showExpandButton?: boolean;
+    showActionsColumn?: boolean;
     listarInativos: boolean;
     cliente?: boolean;
     fornecedor?: boolean;

@@ -87,7 +87,6 @@ export function ListarContasPagar({
                                 expandButtonTemplate={() => null}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => editButton(rowData, '/financas/pagar/created', router)}
                                 showExpandButton={false}
                                 columns={[
                                     {
@@ -141,7 +140,6 @@ export function ListarContasPagar({
                                 expandButtonTemplate={() => null}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => editButton(rowData, '/financas/pagar/created', router)}
                                 showExpandButton={false}
                                 columns={[
                                     {

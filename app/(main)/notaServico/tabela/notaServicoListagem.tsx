@@ -30,7 +30,7 @@ export function ListarNotaServico({
     setLoading: (state: boolean) => void;
     listarInativos: boolean;
     selectedNotas: NfsEntity[];
-    setSelectedNotas: Dispatch<SetStateAction<NfsEntity[]>>;
+    setSelectedNotas: (selected: NfsEntity[]) => void;
 }) {
     const msgs = useRef<Messages>(null);
     const isMobile = useIsMobile();
@@ -49,6 +49,7 @@ export function ListarNotaServico({
                             data={listPaginationNotaServico?.content || []}
                             selected={selectedNotas}
                             onSelectionChange={setSelectedNotas}
+                            isRowSelectable={(nota) => nota.status_nota === 'PENDENTE'}
                             dataKey="id"
                             loading={loading}
                             isDarkMode={isDarkMode}
@@ -131,6 +132,7 @@ export function ListarNotaServico({
                             data={listPaginationNotaServico?.content || []}
                             selected={selectedNotas}
                             onSelectionChange={setSelectedNotas}
+                            isRowSelectable={(nota) => nota.status_nota === 'PENDENTE'}
                             dataKey="id"
                             loading={loading}
                             isDarkMode={isDarkMode}

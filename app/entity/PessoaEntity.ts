@@ -33,8 +33,8 @@ export class PessoaEntity {
     email?: string;
     documento_estrangeiro: string | null = null;
     cnpj!: null | string;
-    inscricao_estadual?: string;
-    inscricao_municipal?: string;
+    inscricao_estadual?: string | null;
+    inscricao_municipal?: string | null;
     atividade_principal?: string;
     cnae_fiscal?: string | null;
     data_fundacao?: string;
@@ -84,8 +84,8 @@ export class PessoaEntity {
         email?: string;
         documento_estrangeiro: string | null;
         cnpj: null | string;
-        inscricao_estadual?: string;
-        inscricao_municipal?: string;
+        inscricao_estadual?: string | null;
+        inscricao_municipal?: string | null;
         atividade_principal?: string;
         cnae_fiscal?: string | null;
         data_fundacao?: string;
@@ -163,8 +163,8 @@ export class PessoaEntity {
         email?: string;
         documento_estrangeiro?: string | null;
         cnpj?: null | string;
-        inscricao_estadual?: string;
-        inscricao_municipal?: string;
+        inscricao_estadual?: string | null;
+        inscricao_municipal?: string | null;
         atividade_principal?: string;
         cnae_fiscal?: string | null;
         data_fundacao?: string;

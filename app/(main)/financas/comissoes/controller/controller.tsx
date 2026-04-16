@@ -1,4 +1,6 @@
+import axios from 'axios';
 import api from "@/app/services/api";
+import { ComissaoEntity } from '@/app/entity/comissoesEntity';
 
 export interface ListComissoesFilters {
     id_vendedor?: number | null;
@@ -60,5 +62,27 @@ export const listComissoes= async (
         return response.data;
     } finally {
         setLoading(false);
+    }
+};
+
+export const aprovarComissoes = async (comissoes: ComissaoEntity[]) => {
+    const ids = comissoes
+        .map((comissao) => comissao.id_comissao ?? comissao.id)
+        .filter((id): id is number => typeof id === 'number' && Number.isFinite(id));
+
+    if (ids.length === 0) {
+        return;
+    }
+
+    try {
+        const response = await api.post('/financeiro/comissoes/fechar', { ids });
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+            const fallbackResponse = await api.post('/financeiro/comissoes/aprovar', { ids });
+            return fallbackResponse.data;
+        }
+
+        throw error;
     }
 };

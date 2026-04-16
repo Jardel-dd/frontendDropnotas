@@ -27,6 +27,7 @@ interface DataTableSelectableProps<T extends NfsEntity> {
     isDarkMode: boolean;
     className?: string;
     extraActionsTemplate?: (rowData: T) => React.ReactNode;
+    isRowSelectable?: (rowData: T) => boolean;
 }
 export function DataTableSelectable<T extends NfsEntity>({
     data,
@@ -40,10 +41,17 @@ export function DataTableSelectable<T extends NfsEntity>({
     isDarkMode,
     selected,
     extraActionsTemplate,
-    className
+    className,
+    isRowSelectable = (rowData) => rowData.status_nota !== "REJEITADA"
 }: DataTableSelectableProps<T>) {
+    const selectableRows = data.filter(isRowSelectable);
+    const allSelectableRowsSelected =
+        selectableRows.length > 0 &&
+        selectableRows.every((n) => selected.some((s) => s.id === n.id));
 
     const toggleSelection = (rowData: T, checked: boolean) => {
+        if (!isRowSelectable(rowData)) return;
+
         if (checked) {
             if (!selected.some((n) => n.id === rowData.id)) {
                 onSelectionChange([...selected, rowData]);
@@ -53,21 +61,19 @@ export function DataTableSelectable<T extends NfsEntity>({
         }
     };
     const handleSelectAllToggle = () => {
-        const selectableNotas = data.filter((n) => n.status_nota !== "REJEITADA");
-        const allSelected = selectableNotas.every((n) =>
-            selected.some((s) => s.id === n.id)
-        );
-        if (allSelected) {
+        if (selectableRows.length === 0) return;
+
+        if (allSelectableRowsSelected) {
             const updatedSelection = selected.filter(
-                (s) => !selectableNotas.some((n) => n.id === s.id)
+                (s) => !selectableRows.some((n) => n.id === s.id)
             );
             onSelectionChange(updatedSelection);
         } else {
             const updatedSelection = [
                 ...selected.filter(
-                    (s) => !selectableNotas.some((n) => n.id === s.id)
+                    (s) => !selectableRows.some((n) => n.id === s.id)
                 ),
-                ...selectableNotas,
+                ...selectableRows,
             ];
             onSelectionChange(updatedSelection);
         }
@@ -89,16 +95,14 @@ export function DataTableSelectable<T extends NfsEntity>({
                 headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
                 header={
                     <Checkbox
-                        checked={data
-                            .filter((nota) => nota.status_nota !== "REJEITADA")
-                            .every((n) => selected.some((s) => s.id === n.id))
-                        }
+                        checked={allSelectableRowsSelected}
+                        disabled={selectableRows.length === 0}
                         onChange={handleSelectAllToggle}
                     />
                 }
                 body={(rowData) => (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        {rowData.status_nota !== "REJEITADA" && (
+                        {isRowSelectable(rowData) && (
                             <Checkbox
                                 checked={selected.some((n) => n.id === rowData.id)}
                                 onChange={(e) => toggleSelection(rowData, e.checked!)}

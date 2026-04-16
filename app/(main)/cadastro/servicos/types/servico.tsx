@@ -5,6 +5,7 @@ import { DropdownChangeEvent } from "primereact/dropdown";
 import { InputNumberValueChangeEvent } from "primereact/inputnumber";
 import { Messages } from "primereact/messages";
 import { Dispatch, RefObject, SetStateAction } from "react";
+import { TableService } from "@/app/entity/TableServiceEntity";
 export const createEmptyServico = () =>
     new ServiceEntity({
         ativo: true,
@@ -12,7 +13,7 @@ export const createEmptyServico = () =>
         descricao: '',
         descricao_completa: '',
         codigo: '',
-        item_lista_servico: '010501',
+        item_lista_servico: '',
         exigibilidade_iss: '',
         iss_retido: '',
         observacoes: '',
@@ -63,10 +64,12 @@ export interface ServicoFieldsProps {
     errors: Record<string, string>;
     selectedService: ServiceEntity | null;
     selectedCodigoNBS: TableCodigoNBSEntity | null;
+    selectedCodigoServico: TableService | null;
     selectedClassificacaoTributaria: TableClassificacaoTributariaEntity | null;
     onChange: (event: any) => void;
     onDropdownChange: (event: DropdownChangeEvent) => void;
     onNumberChange: (event: InputNumberValueChangeEvent) => void;
+    onCodigoServicoChange: (service: TableService  | null) => void;
     onServicoChange: (service: ServiceEntity | null) => void;
     onCodigoNBSChange: (codigoNBS: TableCodigoNBSEntity | null) => void;
     onClassificacaoTributariaChange: (classificacaoTributaria: TableClassificacaoTributariaEntity | null) => void;
@@ -76,6 +79,9 @@ export interface ServicoFieldsProps {
     fetchFilteredClassificacaoTributaria: (...args: any[]) => any;
     fetchAllCodigoNBS: (...args: any[]) => any;
     fetchFilteredCodigoNBS: (...args: any[]) => any;
+    fetchAllCodigoServico: (...args: any[]) => any;
+    fetchFilteredCodigoServico: (...args: any[]) => any;
+
 }
 
 export interface ServicoDropdownFieldProps {

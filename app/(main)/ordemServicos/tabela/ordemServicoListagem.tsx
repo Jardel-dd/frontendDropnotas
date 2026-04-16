@@ -61,34 +61,6 @@ export function ListarOrdemServico(
                                     }
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) =>
-                                        rowData.status !== "CANCELADA" && rowData.status !== "FINALIZADA"
-                                            ? editButton(rowData, "/ordemServicos/created", router)
-                                            : null
-                                    }
-                                    extraActionsTemplate={(rowData) =>
-                                        rowData.status !== "CANCELADA" && rowData.status !== "FINALIZADA" && (
-                                            <Button
-                                                icon="pi pi-times"
-                                                tooltip="Cancelar"
-                                                className="p-button-text bottom-All-plus-datatableDetails"
-                                                style={{ color: "red", boxShadow: "none" }}
-                                                onClick={() => {
-                                                    confirmDialog({
-                                                        message: "Tem certeza que deseja cancelar esta NFS-e?",
-                                                        header: "Confirmação",
-                                                        icon: "pi pi-exclamation-triangle",
-                                                        acceptLabel: "Sim",
-                                                        rejectLabel: "Não",
-                                                        acceptClassName: "p-button-danger",
-                                                        rejectClassName: "p-button-outlined",
-                                                        accept: () => deletar(rowData.id),
-                                                    });
-                                                }}
-                                            />
-                                        )
-                                    }
-
                                     showExpandButton={false}
                                     columns={[
                                         {

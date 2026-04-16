@@ -15,7 +15,7 @@ import ListarOrdemServico from './tabela/ordemServicoListagem';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { Formas_recebimento } from '@/app/entity/FormaPagamento';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { DetalServiceOSEntity } from '@/app/entity/ServiceEntity';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
@@ -35,6 +35,7 @@ const OrdemServicos: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
     const msgs = useRef<Messages | null>(null);
+    const hasLoadedInitialList = useRef(false);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
@@ -125,7 +126,9 @@ const OrdemServicos: React.FC = () => {
         setDraftSelectedStatusOrdemServico(selectedStatusOrdemServico);
     };
     const handleDesktopDateRangeSearch = (inicio: Date, fim: Date) => {
-        setDateRange([dayjs(inicio), dayjs(fim)]);
+        const nextDateRange: DateRangeValue = [dayjs(inicio), dayjs(fim)];
+        setDateRange(nextDateRange);
+        handleListOrdemServico(0, searchTerm, listarInativos, selectedStatusOrdemServico, nextDateRange);
     };
      const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
         let value = event.target.value;
@@ -137,7 +140,7 @@ const OrdemServicos: React.FC = () => {
         const _empresa = emitirOS!.copyWith({ [event.target.id]: value });
         setEmitirOS(_empresa);
     };
-    const handleListOrdemServico = async (pageNumber?: number, _searchTerm?: string, listarInativos = false, status?: string, periodo?: DateRangeValue) => {
+    const handleListOrdemServico = useCallback(async (pageNumber?: number, _searchTerm?: string, listarInativos = false, status?: string, periodo?: DateRangeValue) => {
         setLoading(true);
         try {
             const periodoToSend = periodo ?? dateRange;
@@ -157,14 +160,13 @@ const OrdemServicos: React.FC = () => {
                 statusToSend,
                 periodoToSend
             );
-            setListPaginationOrdemServico((prev) => ({
-                ...prev,
-                ...(ordemServicos ?? {})
-            }));
+            if (ordemServicos) {
+                setListPaginationOrdemServico(ordemServicos);
+            }
         } finally {
             setLoading(false);
         }
-    };
+    }, [dateRange, listPaginationOrdemServico, pageSize, searchTerm, selectedStatusOrdemServico]);
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
@@ -257,8 +259,10 @@ const OrdemServicos: React.FC = () => {
         handleListOrdemServico(selectedPage, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
     };
     useEffect(() => {
+        if (hasLoadedInitialList.current) return;
+        hasLoadedInitialList.current = true;
         handleListOrdemServico(0, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
-    });
+    }, [dateRange, handleListOrdemServico, listarInativos, searchTerm, selectedStatusOrdemServico]);
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />

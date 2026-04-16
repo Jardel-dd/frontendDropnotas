@@ -84,6 +84,8 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const initialOptionValueRef = useRef<string | number | null | undefined>(initialOptionValue);
     const onItemChangeRef = useRef(onItemChange);
     const didAutoSelectRef = useRef(false);
+    const loadingRef = useRef(false);
+    const hasLoadedAllItemsRef = useRef(false);
     useEffect(() => {
         selectedItemRef.current = selectedItem;
     }, [selectedItem]);
@@ -97,6 +99,12 @@ export const DropdownSearch = <T extends Record<string, any>>({
     useEffect(() => {
         onItemChangeRef.current = onItemChange;
     }, [onItemChange]);
+    useEffect(() => {
+        loadingRef.current = loading;
+    }, [loading]);
+    useEffect(() => {
+        hasLoadedAllItemsRef.current = hasLoadedAllItems;
+    }, [hasLoadedAllItems]);
     const selectedValue = optionValue && selectedItem ? selectedItem[optionValue] ?? null : selectedItem ?? null;
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -109,6 +117,9 @@ export const DropdownSearch = <T extends Record<string, any>>({
     }, [onBlur]);
 
     const loadAll = async () => {
+        if (loadingRef.current) return;
+
+        loadingRef.current = true;
         setLoading(true);
         try {
             const data = await fetchAllItems();
@@ -143,18 +154,26 @@ export const DropdownSearch = <T extends Record<string, any>>({
             }
 
             setHasLoadedAllItems(true);
+            hasLoadedAllItemsRef.current = true;
         } catch (err) {
             console.error('Erro ao carregar os itens:', err);
             setItems([]);
         } finally {
+            loadingRef.current = false;
             setLoading(false);
         }
     };
+    const loadAllIfNeeded = async () => {
+        if (hasLoadedAllItemsRef.current || loadingRef.current) return;
+        await loadAll();
+    };
 
     const handleShow = async () => {
-        if (!hasLoadedAllItems && !loading) {
-            await loadAll();
-        }
+        await loadAllIfNeeded();
+    };
+    const handleFocus = async () => {
+        if (filterValue.trim().length > 0) return;
+        await loadAllIfNeeded();
     };
 
     const debouncedFilter = useDebouncedCallback(async (value: string) => {
@@ -250,6 +269,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
                 <Dropdown
                     ref={dropdownRef}
                     id={id}
+                    onFocus={handleFocus}
                     onShow={handleShow}
                     emptyMessage={
                         loading ? (

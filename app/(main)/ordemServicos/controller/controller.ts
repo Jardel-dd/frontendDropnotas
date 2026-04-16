@@ -10,6 +10,7 @@ import { ApiListItem, OrdemServicoParams } from '../types/ordemServico';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
+import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 
 export const fetchOrdemServico = async (params: OrdemServicoParams) => {
     const searchParams = new URLSearchParams();
@@ -43,13 +44,15 @@ export const fetchOrdemServico = async (params: OrdemServicoParams) => {
 export const list = async (pagination: any, listarInativos: boolean, setLoading: (v: boolean) => void, termo?: string, status?: string, periodo?: DateRangeValue) => {
     const params: any = {
         page: pagination.pageable.pageNumber,
-        size: pagination.pageable.pageSize
+        size: pagination.pageable.pageSize,
+        ...mapDateRangeToParams(periodo)
     };
     if (termo) params.termo = termo;
     if (status !== undefined && status !== null && status !== '') {
         params.status = status;
     }
-    return api.get('/ordem-servico', { params });
+    const response = await api.get('/ordem-servico', { params });
+    return response.data;
 };
 export const deletar = async (id: number, msgs: any, setLoading: (state: boolean) => void, searchTerm: string) => {
     try {

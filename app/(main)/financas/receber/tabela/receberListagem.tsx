@@ -1,5 +1,4 @@
 'use client';
-
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
@@ -10,9 +9,9 @@ import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { ContasReceberEntity } from '@/app/entity/contasReceberEntity';
 import { StatusNota } from '@/app/(main)/notaServico/types/statusClassNfs';
-import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { DataTableComponent, editButton } from '@/app/components/dataTableComponent/DataTableComponent';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { DataTableComponent} from '@/app/components/dataTableComponent/DataTableComponent';
 
 const formatDate = (value?: string | null, includeTime = false) => {
     if (!value) {
@@ -93,7 +92,6 @@ export function ListarContasReceber({
                                 expandButtonTemplate={() => null}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => editButton(rowData, '/financas/receber/created', router)}
                                 showExpandButton={false}
                                 columns={[
                                     {
@@ -157,7 +155,6 @@ export function ListarContasReceber({
                                 expandButtonTemplate={() => null}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => editButton(rowData, '/financas/receber/created', router)}
                                 showExpandButton={false}
                                 columns={[
                                     {
@@ -168,6 +165,26 @@ export function ListarContasReceber({
                                                 <Skeleton />
                                             ) : (
                                                 <span>{highlightSearchTerm(limitarText(data.descricao, 40), searchTerm)}</span>
+                                            )
+                                    },
+                                     {
+                                        field: 'nome_cliente',
+                                        header: 'Cliente',
+                                        body: (data) =>
+                                            loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span>{highlightSearchTerm(limitarText(data.nome_cliente, 25), searchTerm)}</span>
+                                            )
+                                    },
+                                    {
+                                        field: 'nome_vendedor',
+                                        header: 'Vendedor',
+                                        body: (data) =>
+                                            loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span>{highlightSearchTerm(limitarText(data.nome_vendedor, 25), searchTerm)}</span>
                                             )
                                     },
                                     {
@@ -190,21 +207,22 @@ export function ListarContasReceber({
                                         header: 'Data do Pagamento',
                                         body: (data) => <span>{formatDate(data.data_hora_pagamento, true)}</span>
                                     },
+                                     {
+                                        field: 'valor_juros',
+                                        header: 'Juros',
+                                        body: (data) => <span>{highlightSearchTerm(limitarText(data.valor_juros, 40), searchTerm)}</span>
+                                    },
                                     {
                                         field: 'valor_original',
                                         header: 'Valor Original',
                                         body: (data) => <span>{formatCurrency(data.valor_original)}</span>
                                     },
                                     {
-                                        field: 'valor_juros',
-                                        header: 'Juros',
-                                        body: (data) => <span>{highlightSearchTerm(limitarText(data.valor_juros, 40), searchTerm)}</span>
-                                    },
-                                    {
                                         field: 'valor_total',
                                         header: 'Valor Total',
                                         body: (data) => <span>{formatCurrency(data.valor_total ?? data.valor_original)}</span>
                                     },
+                                    
                                     {
                                         field: 'situacao',
                                         header: 'Status',
