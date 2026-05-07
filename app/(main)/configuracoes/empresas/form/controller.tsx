@@ -500,7 +500,6 @@ export const FormEmpresaCreated = forwardRef<EmpresaFormRef, FormEmpresaCreatedP
 
     return <EmpresaFields {...props} />;
 });
-
 FormEmpresaCreated.displayName = 'FormEmpresaCreated';
 
 export default FormEmpresaCreated;

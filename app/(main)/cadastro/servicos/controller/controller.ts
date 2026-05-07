@@ -3,6 +3,26 @@ import api from '@/app/services/api';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 
+const normalizeEmptyValuesToNull = <T,>(value: T): T => {
+    if (Array.isArray(value)) {
+        return value.map((item) => normalizeEmptyValuesToNull(item)) as T;
+    }
+
+    if (value && typeof value === 'object') {
+        const normalizedEntries = Object.entries(value as Record<string, unknown>).map(([key, entryValue]) => [
+            key,
+            normalizeEmptyValuesToNull(entryValue)
+        ]);
+
+        return Object.fromEntries(normalizedEntries) as T;
+    }
+
+    if (typeof value === 'string') {
+        return (value.trim() === '' ? null : value) as T;
+    }
+
+    return value;
+};
 
 export const listServico = async (
     listPaginationServicos: Record<string, any>,
@@ -108,11 +128,11 @@ export const createServico = async (
     redirectAfterSave: boolean,
 ): Promise<ServiceEntity> => {
     try {
-        const dataServiceCreated = {
+        const dataServiceCreated = normalizeEmptyValuesToNull({
             ...service,
             codigo: service.codigo?.trim() ? service.codigo : null,
             aliquota_deducoes: service.aliquota_deducoes ?? 0,
-        };
+        });
         console.log('[Cadastro/Servicos] Payload enviado ao criar servico:', dataServiceCreated);
         const resp = await api.post('/servico', dataServiceCreated);
         const created = new ServiceEntity(resp.data?.servico ?? resp.data);
@@ -141,10 +161,10 @@ export const updateServico = async (
     redirectAfterSave: boolean
 ) => {
     try {
-        const dataServiceUpdate = {
+        const dataServiceUpdate = normalizeEmptyValuesToNull({
             ...service,
             aliquota_deducoes: service.aliquota_deducoes ?? 0,
-        };
+        });
         console.log('[Cadastro/Servicos] Payload enviado ao atualizar servico:', dataServiceUpdate);
         await api.put(`/servico`, dataServiceUpdate);
         msgs.current?.show({

@@ -222,6 +222,11 @@ export const codigoSituacaoTributariaRegular = [
   { label: 'Tributação Regime Específico', value: 'TRIBUTACAO_REGIME_ESPECIFICO' },
   { label: 'Exclusão da Base de Cálculo', value: 'EXCLUSAO_BASE_CALCULO' }
 ];
+export const IndicadorDestinatario = [
+  { label: 'Destinatário', value: 'TOMADOR_DESTINATARIO' },
+  { label: 'Destinatário Diferente', value: 'DESTINATARIO_DIFERENTE' },
+ 
+];
 export const regimeTributarioOptions = [
     { label: 'Simples Nacional', value: 'SIMPLES_NACIONAL' },
     { label: 'Simples Nacional Excesso Sublimite', value: 'SIMPLES_NACIONAL_EXCESSO_SUBLIMITE' },

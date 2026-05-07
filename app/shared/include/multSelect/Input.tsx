@@ -6,6 +6,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { MultiSelect } from 'primereact/multiselect';
 import { Mandatory } from '../../mandatory/InputMandatory';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import { useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { useContext, useEffect, useRef, useState } from 'react';
 import LoadingScreenComponent from '@/app/loading/loadingComponent';
 import { ensureSelectedItemsInList, MultiSelectProps, normalize } from './types/types';
@@ -37,6 +38,7 @@ function CustomMultiSelect({
     required
 }: MultiSelectProps) {
     const { layoutConfig } = useContext(LayoutContext);
+    const isMobile = useIsMobile();
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [filterValue, setFilterValue] = useState('');
     const [filteredOptions, setFilteredOptions] = useState<any[]>(options);
@@ -236,8 +238,11 @@ function CustomMultiSelect({
                                 </div>
                             ) : null
                         }
+                        panelClassName="custom-multiselect-panel"
                         className={`w-full ${className ?? ''} ${hasError ? 'p-invalid' : ''}`}
                         filter
+                        filterInputAutoFocus={false}
+                        showSelectAll={!isMobile}
                         onShow={handleShow}
                         appendTo={typeof window !== 'undefined' ? document.body : null}
                         pt={
@@ -252,9 +257,9 @@ function CustomMultiSelect({
                                 : undefined
                         }
                         filterTemplate={() => (
-                            <div className="p-2 flex align-items-center gap-2 w-full">
+                            <div className="custom-multiselect-filter">
                                 <InputText
-                                    autoFocus
+                                    autoFocus={!isMobile}
                                     type="text"
                                     value={filterValue}
                                     onChange={(e) => {
@@ -263,11 +268,11 @@ function CustomMultiSelect({
                                         debouncedFilter(value);
                                     }}
                                     placeholder="Digite para filtrar..."
-                                    className="p-inputtext-sm w-full"
+                                    className="p-inputtext-sm custom-multiselect-filter-input"
                                     style={{ boxShadow: 'none', display: "flex", background: "transparent" }}
                                 />
                                 {showHeaderButtons && (
-                                    <>
+                                    <div className="custom-multiselect-filter-actions">
                                         {showAddButton && (
                                             <Button
                                                 type="button"
@@ -282,9 +287,9 @@ function CustomMultiSelect({
                                                 tooltip="Adicionar"
                                                 icon="pi pi-plus"
                                                 aria-label="Adicionar"
-                                                onMouseDown={handleAddButtonMouseDown}
-                                                onClick={handleAddButtonClick}
-                                            />
+                                            onMouseDown={handleAddButtonMouseDown}
+                                            onClick={handleAddButtonClick}
+                                        />
                                         )}
                                         {hasSelectedValues && (
                                             <Button
@@ -298,11 +303,11 @@ function CustomMultiSelect({
                                                 tooltip="Limpar"
                                                 icon="pi pi-trash"
                                                 aria-label="Limpar"
-                                                severity="danger"
+                                                severity="secondary"
                                                 outlined
                                                 raised
-                                                onMouseDown={handleClearButtonMouseDown}
-                                                onClick={handleClearButtonClick}
+                                            onMouseDown={handleClearButtonMouseDown}
+                                            onClick={handleClearButtonClick}
                                             />
                                         )}
                                         <Button
@@ -315,13 +320,13 @@ function CustomMultiSelect({
                                             tooltip="Fechar"
                                             icon="pi pi-times"
                                             aria-label="Fechar"
-                                            severity="danger"
+                                            severity="secondary"
                                             raised
                                             outlined
                                             onMouseDown={handleCloseButtonMouseDown}
                                             onClick={handleCloseButtonClick}
                                         />
-                                    </>
+                                    </div>
                                 )}
                             </div>
                         )}

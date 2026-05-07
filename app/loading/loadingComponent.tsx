@@ -1,10 +1,10 @@
-'use client'
+'use client';
+
 import './LoadingScreen.css';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { useRive } from '@rive-app/react-canvas';
 import loadingLogoDropDesk from '@/src/rives/dropdesk.riv';
-import React, { useState, useEffect, useContext } from 'react';
-import { LayoutContext } from '@/layout/context/layoutcontext';
 import { useTheme } from '../components/isDarkMode/isDarkMode';
 
 interface LoadingScreenProps {
@@ -13,58 +13,131 @@ interface LoadingScreenProps {
     fullScreen?: boolean;
 }
 
-const LoadingScreenComponent: React.FC<LoadingScreenProps> = ({
+type ContainerSize = {
+    width: number;
+    height: number;
+};
+
+const INLINE_MIN_HEIGHT = 88;
+const INLINE_TEXT_EXTRA_HEIGHT = 44;
+
+function LoadingScreenComponent({
     loadingText,
     height,
-    fullScreen = true,
-}) => {
+    fullScreen = true
+}: LoadingScreenProps) {
     const { isDarkMode, textColor } = useTheme();
-    const { layoutConfig } = useContext(LayoutContext);
-
-    const animationName = `loading-grey`;
-    const { RiveComponent } = useRive({
-        src: loadingLogoDropDesk,
-        animations: animationName,
-        autoplay: true,
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const [mounted, setMounted] = React.useState(false);
+    const [containerSize, setContainerSize] = React.useState<ContainerSize>({
+        width: 0,
+        height: 0
     });
 
-    const [mounted, setMounted] = useState(false);
+    const { RiveComponent } = useRive({
+        src: loadingLogoDropDesk,
+        animations: 'loading-grey',
+        autoplay: true
+    });
 
-    useEffect(() => {
+    React.useEffect(() => {
         setMounted(true);
     }, []);
 
-    if (!mounted) return null;
+    React.useEffect(() => {
+        if (!mounted) {
+            return;
+        }
 
-    const opacity = 0.7;
-    const bgColor = isDarkMode ? '#293B51' : '#fff';
+        const element = containerRef.current;
+
+        if (!element) {
+            return;
+        }
+
+        const updateContainerSize = () => {
+            if (fullScreen) {
+                setContainerSize({
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                });
+
+                return;
+            }
+
+            const elementRect = element.getBoundingClientRect();
+            const parentRect = element.parentElement?.getBoundingClientRect();
+
+            setContainerSize({
+                width: Math.max(elementRect.width, parentRect?.width ?? 0, 0),
+                height: Math.max(elementRect.height, parentRect?.height ?? 0, INLINE_MIN_HEIGHT)
+            });
+        };
+
+        updateContainerSize();
+
+        const resizeObserver = new ResizeObserver(() => {
+            updateContainerSize();
+        });
+
+        resizeObserver.observe(element);
+
+        if (element.parentElement) {
+            resizeObserver.observe(element.parentElement);
+        }
+
+        window.addEventListener('resize', updateContainerSize);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', updateContainerSize);
+        };
+    }, [fullScreen, mounted]);
+
+    if (!mounted) {
+        return null;
+    }
+
+    const backgroundColor = isDarkMode ? '#293B51' : '#FFFFFF';
+    const fallbackWidth = fullScreen ? 1280 : 320;
+    const fallbackHeight = fullScreen ? 720 : INLINE_MIN_HEIGHT;
+    const availableWidth = containerSize.width || fallbackWidth;
+    const availableHeight = containerSize.height || fallbackHeight;
+
+    const computedSize = fullScreen
+        ? Math.max(140, Math.min(availableWidth * 0.24, availableHeight * 0.28, 300))
+        : Math.max(42, Math.min(availableWidth * 0.24, availableHeight * 0.5, 140));
+
+    const loaderSize = typeof height === 'number' && Number.isFinite(height) ? height : computedSize;
+    const loaderSizeStyle = height ?? `${computedSize}px`;
+    const minInlineHeight = Math.max(
+        INLINE_MIN_HEIGHT,
+        Math.round(loaderSize + (loadingText ? INLINE_TEXT_EXTRA_HEIGHT : 20))
+    );
+    const textSize = fullScreen
+        ? Math.max(1, Math.min(loaderSize / 10, 1.2))
+        : Math.max(0.75, Math.min(loaderSize / 8.5, 0.95));
 
     const content = (
         <div
-            className="loading-container"
-            style={
-                fullScreen
-                    ? {
-                        backgroundColor: bgColor,
-                        opacity,
-                        position: 'fixed',
-                        inset: 0,
-                        width: '100vw',
-                        height: '100vh',
-                        zIndex: 9999,
-                    }
-                    : {
-                        backgroundColor: bgColor,
-                        opacity,
-                        position: 'absolute',
-                        inset: 0,
-                        width: '100%',
-                        height: '100%',
-                        zIndex: 10,
-                    }
-            }
+            ref={containerRef}
+            className={`loading-container ${fullScreen ? 'loading-container-fullscreen' : 'loading-container-inline'}`}
+            style={{
+                backgroundColor,
+                opacity: 0.7,
+                width: fullScreen ? '100vw' : '100%',
+                height: fullScreen ? '100vh' : '100%',
+                minHeight: fullScreen ? '100vh' : `${minInlineHeight}px`,
+                position: fullScreen ? 'fixed' : 'relative',
+                inset: fullScreen ? 0 : 'auto',
+                zIndex: fullScreen ? 9999 : 'auto',
+                '--loading-rive-size': `${loaderSize}px`,
+                '--loading-text-size': `${textSize}rem`
+            } as React.CSSProperties}
         >
-            <RiveComponent style={{ height: height || 300 }} />
+            <div className="loading-rive-shell" style={{ width: loaderSizeStyle, height: loaderSizeStyle, maxWidth: '100%' }}>
+                <RiveComponent className="loading-rive" />
+            </div>
 
             {loadingText && (
                 <div className="loading-text" style={{ color: textColor }}>
@@ -75,6 +148,7 @@ const LoadingScreenComponent: React.FC<LoadingScreenProps> = ({
     );
 
     return fullScreen ? ReactDOM.createPortal(content, document.body) : content;
-};
+}
 
+export type { LoadingScreenProps };
 export default LoadingScreenComponent;

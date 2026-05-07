@@ -9,7 +9,7 @@ import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
-import { codigoIndicadorOperacao, codigoSituacaoTributariaRegular, exigibilidadeISSServico, issRetido, responsavelRetencao, situacaoTributaria} from '@/app/shared/optionsDropDown/options';
+import { codigoIndicadorOperacao, codigoSituacaoTributariaRegular, exigibilidadeISSServico, IndicadorDestinatario, issRetido, responsavelRetencao, situacaoTributaria} from '@/app/shared/optionsDropDown/options';
 import { TableService } from '@/app/entity/TableServiceEntity';
 import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
 export function ServicoFields({
@@ -234,6 +234,21 @@ export function ServicoFields({
                     hasError={!!errors.codigo_situacao_tributaria_regular}
                     errorMessage={errors.codigo_situacao_tributaria_regular}
                     topLabel="Classificacao Tributaria Regular:"
+                    showTopLabel
+                    required
+                />
+            </div>
+            <div className="col-12  lg:col-4">
+                <Dropdown
+                    id="indicador_destinatario"
+                    value={servico.indicador_destinatario ?? ''}
+                    options={IndicadorDestinatario}
+                    onChange={onDropdownChange}
+                    label="Selecione uma opcao"
+                    filterBy={false}
+                    hasError={!!errors.indicador_destinatario}
+                    errorMessage={errors.indicador_destinatario}
+                    topLabel="Indicação Destinatário:"
                     showTopLabel
                     required
                 />

@@ -1,17 +1,66 @@
 .p-multiselect.p-invalid {
     border: 1px solid #FCA5A5 !important; 
 }
-.p-multiselect-panel {
+.p-multiselect-panel,
+.custom-multiselect-panel {
     max-height: 60vh;
     overflow-y: auto;
+    overflow-x: hidden;
+    max-width: calc(100vw - 1rem);
 }
 .p-multiselect-panel .p-component .p-ripple-disabled .p-connected-overlay-enter-done{
 
 
     background-color: red;
 }
+.custom-multiselect-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0.75rem;
+}
+
+.custom-multiselect-filter-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto !important;
+}
+
+.custom-multiselect-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
-    .p-multiselect-panel {
+    .p-multiselect-panel,
+    .custom-multiselect-panel {
         max-height: 60vh;
+    }
+
+    .custom-multiselect-filter {
+        flex-wrap: nowrap;
+        gap: 0.375rem;
+    }
+
+    .custom-multiselect-filter-input {
+        flex: 1 1 0;
+        width: 0 !important;
+    }
+
+    .custom-multiselect-filter-actions {
+        width: auto;
+        justify-content: flex-end;
+        margin-left: auto;
+    }
+
+    .custom-multiselect-filter-actions .p-button {
+        width: 2.25rem !important;
+        min-width: 2.25rem !important;
+        height: 2.25rem !important;
+        padding: 0 !important;
     }
 }

@@ -9,6 +9,11 @@ import { mapDateRangeToParams } from '@/app/components/calendarComponent/control
 import { DetalPrestadorValoresEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams } from '../types/notaServico';
 
+type ExportarPdfNfsePayload = {
+    data_hora_inicio: string;
+    data_hora_fim: string;
+};
+
 const normalizeOptionalNumberToZero = (value: unknown): number => {
     if (value === null || value === undefined || value === '') {
         return 0;
@@ -244,6 +249,36 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
             severity: 'error',
             summary: 'Erro',
             detail: 'Não foi possível abrir o PDF da nota.',
+            sticky: true
+        });
+    }
+};
+
+export const exportarPdfNotasServico = async (
+    payload: ExportarPdfNfsePayload,
+    msgs: React.RefObject<Messages | null>
+) => {
+    try {
+        const response = await api.post('/nfse/exportar-pdf', payload, {
+            responseType: 'blob'
+        });
+
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const fileURL = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = fileURL;
+        link.setAttribute('download', 'notas-servico.pdf');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(fileURL);
+    } catch (error) {
+        console.error('Erro ao exportar PDF das notas:', error);
+        msgs.current?.show({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Não foi possível exportar o PDF das notas.',
             sticky: true
         });
     }

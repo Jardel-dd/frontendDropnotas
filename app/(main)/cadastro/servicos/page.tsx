@@ -48,7 +48,7 @@ function Servicos() {
             tipo_operacao: 0,
             finalidade_nfse: 0,
             indicador_finalidade: 0,
-            indicador_destinatario: 0,
+            indicador_destinatario: '',
             codigo_situacao_tributaria: '',
             codigo_classificacao_tributaria: '',
             codigo_situacao_tributaria_regular: '',

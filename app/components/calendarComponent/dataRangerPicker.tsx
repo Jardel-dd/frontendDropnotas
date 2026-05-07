@@ -75,8 +75,8 @@ export const DateRangePicker = ({ onBuscar, onPeriodoChange, onClear, showTopLab
                 />
                 <Button
                     label="Limpar filtro"
-                    icon="pi pi-trash"
-                    severity="danger"
+                    icon="pi pi-search-minus"
+                    severity="secondary"
                     outlined
                     onClick={() => {
                         clearPeriodo();

@@ -9,7 +9,7 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
-import { listNotaServico} from './controller/controller';
+import { exportarPdfNotasServico, listNotaServico } from './controller/controller';
 import Input from '@/app/shared/include/input/input-all';
 import ListarNotaServico from './tabela/notaServicoListagem';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
@@ -30,6 +30,7 @@ import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { DropDownFilterNotaServico } from '@/app/shared/optionsDropDown/options';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
@@ -64,6 +65,7 @@ const NotaServico: React.FC = () => {
     const [selectedPessoaDialog, setSelectedPessoaDialog] = useState<PessoaEntity | null>(null);
     const [selectedServicoDialog, setSelectedServicoDialog] = useState<ServiceEntity | null>(null);
     const [selectedEmpresaDialog, setSelectedEmpresaDialog] = useState<CompanyEntity | null>(null);
+    const [loadingExportPdf, setLoadingExportPdf] = useState(false);
     const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>({
         pageable: {
             pageNumber: 0,
@@ -279,6 +281,48 @@ const NotaServico: React.FC = () => {
             notas.filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE')
         );
     };
+    const getActiveFilters = () => ({
+        dateRange,
+        selectedEmpresa,
+        selectedPessoa,
+        selectedVendedor,
+        selectedStatusNotaServico
+    });
+    const handleExportPdf = async () => {
+        if (loadingExportPdf) return;
+        const activeFilters = getActiveFilters();
+        setLoadingExportPdf(true);
+        try {
+            const totalRegistros = Number(listPaginationNotaServico?.totalElements ?? 0);
+            const response = await listNotaServico({
+                page: 0,
+                size: Math.max(totalRegistros, pageSize, 1),
+                termo: searchTerm,
+                status: activeFilters.selectedStatusNotaServico,
+                dateRange: activeFilters.dateRange,
+                id_empresa: activeFilters.selectedEmpresa?.id,
+                id_cliente: activeFilters.selectedPessoa?.id,
+                id_vendedor: activeFilters.selectedVendedor?.id
+            });
+
+            const referencias = (response?.content ?? [])
+                .map((nota: NfsEntity) => nota.referencia?.trim())
+                .filter((referencia: string | undefined): referencia is string => Boolean(referencia));
+          
+
+            const dateParams = mapDateRangeToParams(activeFilters.dateRange);
+
+            await exportarPdfNotasServico(
+                {
+                    data_hora_inicio: dateParams.data_hora_inicio ?? '',
+                    data_hora_fim: dateParams.data_hora_fim ?? '',
+                },
+                msgs
+            );
+        } finally {
+            setLoadingExportPdf(false);
+        }
+    };
     const handleClearFilters = () => {
         const clearedDateRange: DateRangeValue = [null, null];
         setSelectedEmpresa(null);
@@ -409,6 +453,7 @@ const NotaServico: React.FC = () => {
     const disableConfirmarPrepararNfs = stateDisableBtnPrepararNfse || Object.keys(errors).length > 0 || !selectedEmpresaDialog || !selectedPessoaDialog || !selectedServicoDialog;
     return (
         <div className="w-full">
+            <Toast ref={toast} />
             <Messages ref={msgs} className="custom-messages" />
             <div className="p-0">
                 {isMobile && (
@@ -511,7 +556,17 @@ const NotaServico: React.FC = () => {
                                                 </div>
                                             </FilterOverlay>
                                             <div className="nota-servico-mobile-buttons">
-
+                                                <Button
+                                                    label=""
+                                                    icon="pi pi-file-pdf"
+                                                    severity="secondary"
+                                                    outlined
+                                                    tooltip="Exportar PDF"
+                                                    loading={loadingExportPdf}
+                                                    disabled={loadingExportPdf}
+                                                    className="ml-1rem"
+                                                    onClick={handleExportPdf}
+                                                />
                                                 <Button label="" icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                             </div>
                                         </div>
@@ -624,6 +679,19 @@ const NotaServico: React.FC = () => {
                                     </div>
                                     <div className="container-button-primary-novo">
                                         <div className="p-2">{selectedNotas.length > 0 && <Button label={`Emitir ${selectedNotas.length} Nota${selectedNotas.length > 1 ? 's' : ''}`} icon="pi pi-send" onClick={handleEmitirNotas} outlined />}</div>
+                                        <div className="p-2">
+                                            <Button
+                                                icon="pi pi-file-pdf"
+                                                severity="secondary"
+                                                outlined
+                                                tooltip="Exportar PDF"
+                                                aria-label="Exportar PDF"
+                                                loading={loadingExportPdf}
+                                                disabled={loadingExportPdf}
+                                                style={{ width: '2.8rem', height: '38px', boxShadow: 'none' }}
+                                                onClick={handleExportPdf}
+                                            />
+                                        </div>
                                         <div>
                                             <Button label="Novo" icon="pi pi-plus" onClick={handleNavigate} className="p-button-primary-novo" />
                                         </div>

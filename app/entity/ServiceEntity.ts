@@ -309,7 +309,7 @@ export class ServiceEntity {
     tipo_operacao?: number;
     finalidade_nfse?: number;
     indicador_finalidade?: number;
-    indicador_destinatario?: number;
+    indicador_destinatario?: string;
     codigo_situacao_tributaria?: string;
     codigo_classificacao_tributaria?: string;
     codigo_situacao_tributaria_regular?: string;
@@ -383,7 +383,7 @@ export class ServiceEntity {
         tipo_operacao?: number;
         finalidade_nfse?: number;
         indicador_finalidade?: number;
-        indicador_destinatario?: number;
+        indicador_destinatario?: string;
 
         codigo_situacao_tributaria?: string;
         codigo_classificacao_tributaria?: string;
@@ -489,7 +489,7 @@ export class ServiceEntity {
         tipo_operacao?: number;
         finalidade_nfse?: number;
         indicador_finalidade?: number;
-        indicador_destinatario?: number;
+        indicador_destinatario?: string;
         codigo_situacao_tributaria?: string;
         codigo_classificacao_tributaria?: string;
         codigo_situacao_tributaria_regular?: string;

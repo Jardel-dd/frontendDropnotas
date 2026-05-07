@@ -342,24 +342,6 @@ export const DropdownSearch = <T extends Record<string, any>>({
                                             onClick={handleAddButtonClick}
                                         />
                                     )}
-                                    {hasSelectedValue && (
-                                        <Button
-                                            type="button"
-                                            style={{
-                                                height: '30px',
-                                                width: '40px',
-                                                boxShadow: 'none'
-                                            }}
-                                            tooltip="Limpar"
-                                            icon="pi pi-trash"
-                                            aria-label="Limpar"
-                                            severity="danger"
-                                            outlined
-                                            raised
-                                            onMouseDown={handleClearButtonMouseDown}
-                                            onClick={handleClearButtonClick}
-                                        />
-                                    )}
                                     <Button
                                         type="button"
                                         style={{
@@ -370,7 +352,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
                                         tooltip="Fechar"
                                         icon="pi pi-times"
                                         aria-label="Fechar"
-                                        severity="danger"
+                                        severity="secondary"
                                         raised
                                         outlined
                                         onMouseDown={handleCloseButtonMouseDown}

@@ -48,7 +48,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                     <div className="flex flex-column">{children}</div>
                     <div className="flex gap-2 mt-1 p-2">
                         <Button label="Aplicar Filtro" icon="pi pi-search" outlined className="btn-filter-Component-Mobile" onClick={handleApply} />
-                        <Button label="Limpar Filtro" icon="pi pi-trash" severity="danger"  outlined className="btn-filter-Component-Mobile" onClick={handleClear} />
+                        <Button label="Limpar Filtro" icon="pi pi-search-minus" severity="secondary"  outlined className="btn-filter-Component-Mobile" onClick={handleClear} />
                     </div>
                 </Dialog>
                 </>
@@ -69,7 +69,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                             {children}
                             <div className="flex justify-content-between  p-2 gap-3">
                                 <Button label="Aplicar Filtro" icon="pi pi-search" outlined onClick={handleApply} className="btn-filter-Component-Desktop" />
-                                <Button label="Limpar Filtro" icon="pi pi-trash" severity="danger" outlined onClick={handleClear} className="btn-filter-Component-Desktop" />
+                                <Button label="Limpar Filtro" icon="pi pi-search-minus" severity="secondary" outlined onClick={handleClear} className="btn-filter-Component-Desktop" />
                             </div>
                         </div>
                     </OverlayPanel>
