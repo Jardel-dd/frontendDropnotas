@@ -379,18 +379,18 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                             <BTNPGCreatedAll
                                 onClick={async () => await handleSubmit()}
                                 disabled={isSubmitDisabled}
-                                icon=""
                                 label="Salvar"
+                                icon="pi pi-save"
                             />
                         )}
                         {showBTNPGCreatedDialog && (
                             <BTNPGCreatedDialog
                                 onClick={async () => await handleSubmit()}
                                 disabled={isSubmitDisabled}
-                                icon=""
                                 onBackClick={onBackClick}
                                 onClose={onClose}
                                 label="Salvar"
+                                icon="pi pi-save"
                             />
                         )}
                     </div>

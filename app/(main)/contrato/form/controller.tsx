@@ -530,13 +530,14 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                                 onClick={async () => await handleSubmit()}
                                 label="Salvar"
                                 disabled={isSubmitDisabled}
+                                icon="pi pi-save"
                             />
                         )}
                         {showBTNPGCreatedDialog && (
                             <BTNPGCreatedDialog
                                 onClick={async () => await handleSubmit()}
                                 disabled={isSubmitDisabled}
-                                icon=""
+                                icon="pi pi-save"
                                 onBackClick={onBackClick}
                                 onClose={onClose}
                                 label="Salvar"

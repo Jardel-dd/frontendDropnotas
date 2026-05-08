@@ -260,7 +260,7 @@ const CategoriaContrato: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Categoria:"
+                                            topLabel="Buscar Descrição:"
                                             showTopLabel
                                         />
                                     </div>

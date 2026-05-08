@@ -354,8 +354,9 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                 />
             </div>
             <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`} style={{ marginTop: 'auto' }}>
-                {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Emitir NFS-E" disabled={isSubmitDisabled} icon="" />}
-                {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Emitir NFS-E" disabled={isSubmitDisabled} icon="" onBackClick={onBackClick} onClose={onClose} />}
+                {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Emitir" disabled={isSubmitDisabled} icon="pi pi-save" />}
+                {showBTNPGCreatedDialog && <BTNPGCreatedDialog 
+                onClick={handleSubmit} label="Emitir" disabled={isSubmitDisabled} icon="pi pi-save" onBackClick={onBackClick} onClose={onClose} />}
             </div>
         </div>
     );

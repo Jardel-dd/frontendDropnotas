@@ -96,7 +96,6 @@ export const ativarPessoa = async (
         msgs.current?.show([
             {
                 className: 'messages-center',
-                sticky: true,
                 severity: 'success',
                 summary: 'Sucesso',
                 detail: `Cliente ou Fornecedor ativado com sucesso.`,
@@ -110,7 +109,6 @@ export const ativarPessoa = async (
         msgs.current?.show([
             {
                 className: 'messages-center',
-                sticky: true,
                 severity: 'error',
                 summary: 'Erro',
                 detail: `Houve um erro ao tentar ativar este Cliente ou Fornecedor , tente novamente.`,

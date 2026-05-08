@@ -9,6 +9,7 @@ import { exigibilidadeISSServico, issRetido, responsavelRetencao, tributacaoISSQ
 import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation';
 import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 
 type Props = {
     nfseGerada: any;

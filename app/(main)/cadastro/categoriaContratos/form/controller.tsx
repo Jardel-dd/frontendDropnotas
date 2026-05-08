@@ -254,6 +254,7 @@ export const CategoriaContratoFormContainer = forwardRef<CategoriaContratoFormRe
                                 !categoriaContrato.descricao
                             }
                             onClick={handleSubmit}
+                            icon="pi pi-save"
                         />
                     )}
                     {showBTNPGCreatedDialog && (
@@ -267,6 +268,7 @@ export const CategoriaContratoFormContainer = forwardRef<CategoriaContratoFormRe
                             onClick={handleSubmit}
                             onBackClick={onBackClick}
                             onClose={onClose}
+                            icon="pi pi-save"
                         />
                     )}
                 </div>

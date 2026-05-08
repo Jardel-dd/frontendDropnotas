@@ -48,8 +48,8 @@ function BTNPGCreatedAll({
             label={loading ? loadingLabel : label}        
             icon={icon}
             onClick={onClick}
-             loading={loading}
-             disabled={disabled || loading} 
+            loading={loading}
+            disabled={disabled || loading} 
           />
         </div>
 

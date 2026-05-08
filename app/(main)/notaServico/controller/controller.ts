@@ -113,14 +113,14 @@ export const prepararNotaServico = async (
                 severity: 'error',
                 summary: 'Erro',
                 detail: msg,
-                sticky: true
+                life: 5000
             });
         } else {
             msgs.current?.show({
                 severity: 'error',
                 summary: 'Erro',
                 detail: 'Erro inesperado ao preparar NFS-e.',
-                sticky: true
+                life: 5000
             });
         }
     }
@@ -197,9 +197,8 @@ export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
         console.log('Erro ao baixar PDF:', error);
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
-            detail: 'Não foi possível baixar o PDF da nota.',
-            sticky: true
+           detail: 'Erro ao baixar PDF da Nota Fiscal. Tente novamente em instantes. Caso o problema persista, entre em contato com o suporte.',
+            life: 5000
         });
     }
 };
@@ -222,9 +221,9 @@ export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
         console.error(' Erro ao baixar XML:', error);
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
-            detail: 'Não foi possível baixar o XML da nota.',
-            sticky: true
+            detail: 'Erro ao baixar XML da Nota Fiscal. Tente novamente em instantes. Caso o problema persista, entre em contato com o suporte.',
+            life: 5000
+
         });
     }
 };
@@ -240,7 +239,7 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
                 severity: 'warn',
                 summary: 'Aviso',
                 detail: 'O navegador bloqueou a abertura automática do PDF. Clique para permitir pop-ups.',
-                sticky: true
+                life: 5000
             });
         }
         setTimeout(() => window.URL.revokeObjectURL(fileURL), 5000);
@@ -249,7 +248,7 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
             severity: 'error',
             summary: 'Erro',
             detail: 'Não foi possível abrir o PDF da nota.',
-            sticky: true
+            life: 5000
         });
     }
 };
@@ -262,7 +261,6 @@ export const exportarPdfNotasServico = async (
         const response = await api.post('/nfse/exportar-pdf', payload, {
             responseType: 'blob'
         });
-
         const blob = new Blob([response.data], { type: 'application/pdf' });
         const fileURL = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -279,7 +277,7 @@ export const exportarPdfNotasServico = async (
             severity: 'error',
             summary: 'Erro',
             detail: 'Não foi possível exportar o PDF das notas.',
-            sticky: true
+            life: 5000
         });
     }
 };

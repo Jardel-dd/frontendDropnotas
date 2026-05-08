@@ -383,8 +383,9 @@ const ContasReceberFormContainer = forwardRef<ContasReceberFormRef, ContasRecebe
                     </div>
                 </div>
                 <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
-                    {showBTNPGCreatedAll && <BTNPGCreatedAll label="Salvar" disabled={isSubmitDisabled} onClick={handleSubmit} />}
-                    {showBTNPGCreatedDialog && <BTNPGCreatedDialog label="Salvar" disabled={isSubmitDisabled} onClick={handleSubmit} onBackClick={onBackClick} onClose={onClose} />}
+                    {showBTNPGCreatedAll && <BTNPGCreatedAll label="Salvar" disabled={isSubmitDisabled} onClick={handleSubmit} icon="pi pi-save"/>}
+                    {showBTNPGCreatedDialog && <BTNPGCreatedDialog 
+                    label="Salvar" disabled={isSubmitDisabled} onClick={handleSubmit} onBackClick={onBackClick} onClose={onClose} icon="pi pi-save"/>}
                 </div>
             </div>
         );

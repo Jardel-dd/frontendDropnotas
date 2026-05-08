@@ -296,6 +296,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                             onClick={handleSubmit}
                             label="Salvar"
                             disabled={isSubmitDisabled}
+                            icon="pi pi-save"
                         />
                     )}
 
@@ -306,6 +307,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                             onBackClick={onBackClick}
                             onClose={onClose}
                             disabled={isSubmitDisabled}
+                            icon="pi pi-save"
                         />
                     )}
                 </div>

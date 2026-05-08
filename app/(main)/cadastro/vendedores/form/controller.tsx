@@ -201,6 +201,7 @@ export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormPro
                             label="Salvar"
                             disabled={isSubmitDisabled}
                             onClick={handleSubmit}
+                            icon="pi pi-save"
                         />
                     )}
                     {showBTNPGCreatedDialog && (
@@ -210,6 +211,7 @@ export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormPro
                             onBackClick={onBackClick}
                             onClose={onClose}
                             disabled={isSubmitDisabled}
+                            icon="pi pi-save"
                         />
                     )}
                 </div>

@@ -455,6 +455,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                             label="Salvar"
                             disabled={isSubmitDisabled || isLoadingBtnCreated}
                             onClick={handleSubmit}
+                            icon="pi pi-save"
                         />
                     )}
                     {showBTNPGCreatedDialog && (
@@ -464,6 +465,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                             onClick={handleSubmit}
                             onBackClick={onBackClick}
                             onClose={onClose}
+                            icon="pi pi-save"
                         />
                     )}
                 </div>

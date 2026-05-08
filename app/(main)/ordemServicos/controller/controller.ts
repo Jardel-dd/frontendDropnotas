@@ -91,14 +91,12 @@ export const preparar = async (msgs: any) => {
                 severity: 'error',
                 summary: 'Erro',
                 detail: msg,
-                sticky: true
             });
         } else {
             msgs.current?.show({
                 severity: 'error',
                 summary: 'Erro',
                 detail: 'Erro inesperado ao preparar Ordem de Serviço.',
-                sticky: true
             });
         }
     }

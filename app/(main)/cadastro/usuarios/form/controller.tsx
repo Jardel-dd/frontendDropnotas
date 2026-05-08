@@ -303,8 +303,8 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
                     </div>
                 </div>
                 <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
-                    {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Salvar" disabled={isSubmitDisabled} icon="" />}
-                    {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Salvar" onBackClick={onBackClick} onClose={onClose} disabled={isSubmitDisabled} />}
+                    {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Salvar" disabled={isSubmitDisabled} icon="pi pi-save"/>}
+                    {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Salvar" onBackClick={onBackClick} onClose={onClose} disabled={isSubmitDisabled} icon="pi pi-save"/>}
                 </div>
 
                 <DialogFilter header="Adicionar Perfil deste Usuário" visible={showModalPerfilUser} onHide={() => setShowModalPerfilUser(false)}>
