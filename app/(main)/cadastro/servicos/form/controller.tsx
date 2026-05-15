@@ -12,7 +12,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
 import { fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
-import { validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
+import { getServicoValidationErrors, validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createServico, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
@@ -271,23 +271,14 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
         if (isLoading && initialId) {
-            return <LoadingScreen loadingText="Carregando informacoes do Servico selecionado..." />;
+            return <LoadingScreen loadingText="Carregando informações do Serviço selecionado..." />;
         }
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
+        const isSubmitDisabledByValidation = Object.keys(getServicoValidationErrors(servico)).length > 0;
         const isSubmitDisabled =
             stateDisableBtnCreatedService ||
             isLoadingBtnCreated ||
-            Object.keys(errors).length > 0 ||
-            !servico.descricao?.trim() ||
-            !servico.valor_servico ||
-            !servico.codigo_situacao_tributaria ||
-            !servico.codigo_classificacao_tributaria ||
-            !servico.codigo_situacao_tributaria_regular ||
-            !servico.item_lista_servico ||
-            !servico.iss_retido ||
-            !servico.exigibilidade_iss ||
-            !servico.responsavel_retencao ||
-            !servico.codigo_indicador_operacao;
+            isSubmitDisabledByValidation;
         return (
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
                 <Messages ref={msgs} className="custom-messages" />

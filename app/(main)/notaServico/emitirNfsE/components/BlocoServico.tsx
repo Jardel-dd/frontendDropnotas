@@ -9,6 +9,7 @@ import { exigibilidadeISSServico, issRetido, responsavelRetencao, tributacaoISSQ
 import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation';
 import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 
 
 type Props = {
@@ -180,8 +181,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Código do Municí­pio"
                     value={nfseGerada.servico.codigo_municipio || ''}
                     onChange={(e) => handleAllChanges(e, 'servico')}
+                    hasError={!!servicoErrors.codigo_municipio}
+                    errorMessage={servicoErrors.codigo_municipio}
                     topLabel="Código do Municí­pio:"
                     showTopLabel
+                    required
                 />
             </div>
             <div className="col-12 lg:col-3">
@@ -191,7 +195,10 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Municí­pio Incidência"
                     onChange={(e) => handleAllChanges(e, 'servico')}
                     showTopLabel
+                    required
                     topLabel="Código Municí­pio Incidência:"
+                    hasError={!!servicoErrors.municipio_incidencia}
+                    errorMessage={servicoErrors.municipio_incidencia}
                 />
             </div>
             <div className="col-12 lg:col-3">
@@ -348,6 +355,18 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     topLabel="Percentual desconto Condicionado:"
                     type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
+                />
+            </div>
+             <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-full">
+                <InputTextarea
+                    value={nfseGerada.servico?.descricao_completa || ''}
+                    onChange={(e) => handleAllChanges(e, 'servico')}
+                    rows={5}
+                    cols={30}
+                    label=""
+                    id="descricao_completa"
+                    topLabel="Descrição Complementar:"
+                    showTopLabel
                 />
             </div>
         </div>

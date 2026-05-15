@@ -168,7 +168,7 @@ const SignIn: React.FC = () => {
                             </Dialog>
                         </div>
                     </div>
-                    <span>Versão: Prod 0.0.1</span>
+                    <span>Versão: Prod 0.0.2</span>
                 </div>
             </div>
         </PrivateRoute>

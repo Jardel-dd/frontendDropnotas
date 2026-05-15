@@ -19,6 +19,7 @@ export const createEmptyServico = () =>
         iss_retido: '',
         observacoes: '',
         codigo_municipio: '',
+        municipio_incidencia: '',
         numero_processo: '',
         responsavel_retencao: '',
         codigo_cnae: '',

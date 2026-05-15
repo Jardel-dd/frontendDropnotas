@@ -299,6 +299,7 @@ export class ServiceEntity {
     iss_retido!: string;
     observacoes?: string;
     codigo_municipio!: string;
+    municipio_incidencia!: string;
     numero_processo?: string;
     responsavel_retencao!: string;
     codigo_cnae?: string;
@@ -333,6 +334,7 @@ export class ServiceEntity {
         iss_retido,
         observacoes,
         codigo_municipio,
+        municipio_incidencia,
         numero_processo,
         responsavel_retencao,
         codigo_cnae,
@@ -371,6 +373,7 @@ export class ServiceEntity {
      aliquota_deducoes?: number;
 
         codigo_municipio?: string;
+        municipio_incidencia?: string;
         numero_processo?: string;
         responsavel_retencao?: string;
 
@@ -410,6 +413,7 @@ export class ServiceEntity {
             iss_retido,
             observacoes,
             codigo_municipio,
+            municipio_incidencia,
             numero_processo,
             responsavel_retencao,
             codigo_cnae,
@@ -446,6 +450,7 @@ export class ServiceEntity {
         iss_retido,
         observacoes,
         codigo_municipio,
+        municipio_incidencia,
         numero_processo,
         responsavel_retencao,
         codigo_cnae,
@@ -480,6 +485,7 @@ export class ServiceEntity {
         iss_retido?: string;
         observacoes?: string;
         codigo_municipio?: string;
+        municipio_incidencia?: string;
         numero_processo?: string;
         responsavel_retencao?: string;
         codigo_cnae?: string;
@@ -508,13 +514,13 @@ export class ServiceEntity {
             descricao: descricao ?? this.descricao,
             descricao_completa: descricao_completa ?? this.descricao_completa,
             codigo: codigo ?? this.codigo,
-                        aliquota_deducoes: aliquota_deducoes ?? this.aliquota_deducoes,
-
+            aliquota_deducoes: aliquota_deducoes ?? this.aliquota_deducoes,
             item_lista_servico: item_lista_servico ?? this.item_lista_servico,
             exigibilidade_iss: exigibilidade_iss ?? this.exigibilidade_iss,
             iss_retido: iss_retido ?? this.iss_retido,
             observacoes: observacoes ?? this.observacoes,
             codigo_municipio: codigo_municipio ?? this.codigo_municipio,
+            municipio_incidencia: municipio_incidencia ?? this.municipio_incidencia,
             numero_processo: numero_processo ?? this.numero_processo,
             responsavel_retencao: responsavel_retencao ?? this.responsavel_retencao,
             codigo_cnae: codigo_cnae ?? this.codigo_cnae,

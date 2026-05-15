@@ -250,11 +250,8 @@ export function ServicoFields({
                     onChange={onDropdownChange}
                     label="Selecione uma opção"
                     filterBy={false}
-                    hasError={!!errors.codigo_situacao_tributaria_regular}
-                    errorMessage={errors.codigo_situacao_tributaria_regular}
                     topLabel="Classificação Tributária Regular:"
                     showTopLabel
-                    required
                 />
             </div>
             <div className="col-12  lg:col-4">
@@ -293,11 +290,8 @@ export function ServicoFields({
                     onChange={onDropdownChange}
                     label="Selecione uma opção"
                     filterBy={false}
-                    hasError={!!errors.responsavel_retencao}
-                    errorMessage={errors.responsavel_retencao}
                     topLabel="Retenção:"
                     showTopLabel
-                    required
                 />
             </div>
             <div className="col-12  lg:col-4">
@@ -308,11 +302,8 @@ export function ServicoFields({
                     onChange={onDropdownChange}
                     label="Selecione uma opção"
                     filterBy={false}
-                    hasError={!!errors.codigo_indicador_operacao}
-                    errorMessage={errors.codigo_indicador_operacao}
-                    topLabel="Indicador de Operacao:"
+                    topLabel="Indicador de Operação:"
                     showTopLabel
-                    required
                 />
             </div>
             <div className="col-12  lg:col-4">
@@ -325,6 +316,20 @@ export function ServicoFields({
                     errorMessage={errors.codigo_municipio}
                     topLabel="Código do Município:"
                     showTopLabel
+                    required
+                />
+            </div>
+             <div className="col-12  lg:col-4">
+                <Input
+                    value={servico.municipio_incidencia || ''}
+                    onChange={onChange}
+                    label="Código do Município Incidência"
+                    id="municipio_incidencia"
+                    hasError={!!errors.municipio_incidencia}
+                    errorMessage={errors.municipio_incidencia}
+                    topLabel="Código do Município Incidência:"
+                    showTopLabel
+                    required
                 />
             </div>
             <div className="col-12  lg:col-4">
