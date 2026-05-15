@@ -5,29 +5,28 @@ import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import Input from '@/app/shared/include/input/input-all';
+import { CheckboxChangeEvent } from 'primereact/checkbox';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import ListarFormaPagamento from './tabela/formaPagamentoListagem';
-import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { PaginatorPageChangeEvent } from 'primereact/paginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { tipo_forma_pagamento } from '@/app/shared/optionsDropDown/options';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPagamento';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { ativarFormaPagamento, deletarFormaPagamento, listFormaPagamento } from './controller/controller';
-import CustomPaginator from '@/app/components/paginator/customPaginator';
-import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const CategoriaContrato: React.FC = () => {
     const router = useRouter();
     const isMobile = useIsMobile();
     const pageSize = usePageSize();
     const isDesktop = useIsDesktop();
-    const { isDarkMode } = useTheme();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
@@ -164,7 +163,7 @@ const CategoriaContrato: React.FC = () => {
                         <div className="grid formgrid p-2" >
                             <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
                                 <Input
-                                    label="Buscar"
+                                    label="Pesquisar Descrição"
                                     outlined={true}
                                     useRightButton={true}
                                     iconRight={'pi pi-search'}
@@ -173,7 +172,7 @@ const CategoriaContrato: React.FC = () => {
                                     value={searchTerm}
                                     loading={loading}
                                     onClickSearch={() => searchNow(searchTerm)}
-                                    topLabel="Descrição:"
+                                    topLabel="Pesquisar:"
                                     showTopLabel
                                 />
                             </div>
@@ -244,7 +243,7 @@ const CategoriaContrato: React.FC = () => {
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input
-                                            label="Buscar "
+                                            label="Pesquisar Descrição "
                                             outlined={true}
                                             id="descricao"
                                             useRightButton={true}
@@ -253,7 +252,7 @@ const CategoriaContrato: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Descrição:"
+                                            topLabel="Pesquisar:"
                                             showTopLabel
                                         />
                                     </div>

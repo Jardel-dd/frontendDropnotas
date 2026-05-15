@@ -18,6 +18,9 @@ export function CategoriaContratoFields({
                         label="Descrição da Categoria"
                         id="descricao"
                         autoFocus
+                        topLabel="Descrição:"
+                        required
+                        showTopLabel
                         hasError={!!errors.descricao}
                         errorMessage={errors.descricao}
                         onBlur={onValidateDescricao}
@@ -27,6 +30,8 @@ export function CategoriaContratoFields({
                     <Input
                         value={categoriaContrato.observacoes || ''}
                         onChange={onChange}
+                        topLabel="Observações da Categoria:"
+                        showTopLabel
                         label="Observações da Categoria"
                         id="observacoes"
                     />

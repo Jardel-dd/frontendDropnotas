@@ -15,13 +15,13 @@ export function FormaPagamentoFields({ formaPagamento, errors, onChange, onDropd
                     <Input
                         value={formaPagamento.descricao || ''}
                         onChange={onChange}
-                        label="Descricao completa"
+                        label="Descrição"
                         id="descricao"
                         hasError={!!errors.descricao}
                         errorMessage={errors.descricao}
                         onBlur={onValidateDescricao}
                         autoFocus
-                        topLabel="Descricao:"
+                        topLabel="Descrição:"
                         showTopLabel
                         required
                     />
@@ -74,7 +74,7 @@ export function FormaPagamentoFields({ formaPagamento, errors, onChange, onDropd
                     onChange={onChange} rows={5} 
                     cols={30} label="" 
                     id="observacao" 
-                    topLabel="Consideracoes finais:" 
+                    topLabel="Considerações finais:" 
                     showTopLabel />
                 </div>
             </div>
@@ -94,7 +94,7 @@ export function FormaPagamentoFields({ formaPagamento, errors, onChange, onDropd
                     }
                 />
                 <label htmlFor="aplicar_taxa_servico" >
-                    Aplicar Taxa Servico
+                    Aplicar Taxa Serviço
                 </label>
             </div>
         </>

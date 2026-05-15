@@ -9,7 +9,7 @@ import Input from '@/app/shared/include/input/input-all';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
+import {  CheckboxChangeEvent } from 'primereact/checkbox';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarUsuario, deletarUsuario, listUsuario } from './controller/controller';
@@ -151,7 +151,7 @@ const Usuarios: React.FC = () => {
                         <div className="grid formgrid p-2">
                             <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                 <Input
-                                    label="Buscar"
+                                    label="Pesquisar Nome"
                                     outlined={true}
                                     useRightButton={true}
                                     iconRight={'pi pi-search'}
@@ -160,7 +160,7 @@ const Usuarios: React.FC = () => {
                                     value={searchTerm}
                                     loading={loading}
                                     onClickSearch={() => searchNow(searchTerm)}
-                                    topLabel="Usuário:"
+                                    topLabel="Pesquisar:"
                                     showTopLabel
                                 />
                             </div>
@@ -212,7 +212,7 @@ const Usuarios: React.FC = () => {
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all" >
                                         <Input
-                                            label="Buscar"
+                                            label="Pesquisar Nome"
                                             outlined={true}
                                             useRightButton={true}
                                             iconRight={'pi pi-search'}
@@ -221,7 +221,7 @@ const Usuarios: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Usuário:"
+                                            topLabel="Pesquisar:"
                                             showTopLabel />
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">

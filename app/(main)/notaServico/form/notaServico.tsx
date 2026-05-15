@@ -49,9 +49,9 @@ export function NotaServicoFields({
                     <DatePicker
                      value={dateRange ? dateRange[0] : new Date()} 
                      onChange={onDateChange} 
-                     label="Competencia:" 
+                     label="Competência:" 
                      showTopLabel 
-                     topLabel="Competencia:" 
+                     topLabel="Competência:" 
                      required
                      />
                      </div>
@@ -66,7 +66,7 @@ export function NotaServicoFields({
                         errorMessage={errors.regime_especial_tributacao}
                         showTopLabel
                         required
-                        topLabel="Regime Especial Tributario:"
+                        topLabel="Regime Especial Tributário:"
                     />
                 </div>
             </div>

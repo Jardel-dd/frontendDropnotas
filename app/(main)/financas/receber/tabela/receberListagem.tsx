@@ -95,8 +95,8 @@ export function ListarContasReceber({
                                 showExpandButton={false}
                                 columns={[
                                     {
-                                        field: 'descricao',
-                                        header: 'Descricao',
+                                        field: 'Descrição',
+                                        header: 'Descrição',
                                         body: (data) =>
                                             loading ? (
                                                 <Skeleton />
@@ -158,8 +158,8 @@ export function ListarContasReceber({
                                 showExpandButton={false}
                                 columns={[
                                     {
-                                        field: 'descricao',
-                                        header: 'Descricao',
+                                        field: 'Descrição',
+                                        header: 'Descrição',
                                         body: (data) =>
                                             loading ? (
                                                 <Skeleton />

@@ -82,12 +82,12 @@ export function PessoaFields({
                             id="razao_social"
                             value={pessoa?.razao_social || ''}
                             onChange={onChange}
-                            label="Nome ou Razao Social do contato:"
+                            label="Nome ou Razão Social:"
                             hasError={!!errors.razao_social}
                             errorMessage={errors.razao_social}
                             showTopLabel
                             required
-                            topLabel="Nome ou Razao Social do contato:"
+                            topLabel="Nome ou Razão Social:"
                         />
                     </div>
                     <div className="col-12 lg:col-6 ">
@@ -109,12 +109,12 @@ export function PessoaFields({
                             value={pessoa?.codigo_regime_tributario ?? ''}
                             options={regimeTributarioPessoaOptions}
                             onChange={onDropdownChange}
-                            label="Selecione um Regime Tributario"
+                            label="Selecione um Regime Tributário"
                             hasError={!!errors.selectedRegime}
                             errorMessage={errors.selectedRegime}
                             showTopLabel
                             required
-                            topLabel="Codigo Regime Tributario:"
+                            topLabel="Código Regime Tributário:"
                         />
                     </div>
                     <div className="col-12 lg:col-3 ">
@@ -128,7 +128,7 @@ export function PessoaFields({
                             hasError={!!errors.contribuinte}
                             errorMessage={errors.contribuinte}
                             showTopLabel
-                            topLabel="Contribuinte:"
+                            topLabel="Selecione o Contribuinte:"
                             required
                         />
                     </div>
@@ -136,24 +136,24 @@ export function PessoaFields({
                         <Input
                             value={pessoa.inscricao_estadual || ''}
                             onChange={onChange}
-                            label="Inscricao Estadual"
+                            label="Inscrição Estadual"
                             id="inscricao_estadual"
                             hasError={!!errors.inscricao_estadual}
                             errorMessage={errors.inscricao_estadual}
                             showTopLabel
-                            topLabel="Inscricao Estadual:"
+                            topLabel="Inscrição Estadual:"
                         />
                     </div>
                     <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.inscricao_municipal || ''}
                             onChange={onChange}
-                            label="Inscricao Municipal"
+                            label="Inscrição Municipal"
                             id="inscricao_municipal"
                             hasError={!!errors.inscricao_municipal}
                             errorMessage={errors.inscricao_municipal}
                             showTopLabel
-                            topLabel="Inscricao Municipal:"
+                            topLabel="Inscrição Municipal:"
                         />
                     </div>
                     <div className="col-12 lg:col-3 ">
@@ -232,7 +232,7 @@ export function PessoaFields({
                             errorMessage={errors.selectedRegime}
                             showTopLabel
                             required
-                            topLabel="Codigo Regime Tributario:"
+                            topLabel="Código Regime Tributario:"
                         />
                     </div>
                     <div className="col-12 lg:col-3 ">
@@ -248,46 +248,32 @@ export function PessoaFields({
                             errorMessage={errors.contribuinte}
                             showTopLabel
                             required
-                            topLabel="Contribuinte:"
+                            topLabel="Selecione o Contribuinte:"
                         />
                     </div>
                     <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.inscricao_estadual || ''}
                             onChange={onChange}
-                            label="Inscricao Estadual"
+                            label="Inscrição Estadual"
                             id="inscricao_estadual"
                             hasError={!!errors.inscricao_estadual}
                             errorMessage={errors.inscricao_estadual}
                             showTopLabel
-                            topLabel="Inscricao Estadual:"
+                            topLabel="Inscrição Estadual:"
                         />
                     </div>
                     <div className="col-12 lg:col-3 ">
                         <Input
                             value={pessoa.inscricao_municipal || ''}
                             onChange={onChange}
-                            label="Inscricao Municipal"
+                            label="Inscrição Municipal"
                             id="inscricao_municipal"
                             hasError={!!errors.inscricao_municipal}
                             errorMessage={errors.inscricao_municipal}
                             showTopLabel
-                            topLabel="Inscricao Municipal:"
+                            topLabel="Inscrição Municipal:"
                         />
-                    </div>
-                    <div className="col-12 lg:col-3 ">
-                        <div className="p-field">
-                            <CNAEDropdownField
-                                selectedCNAE={selectedCNAE}
-                                onCNAEChange={onCNAEChange}
-                                fetchAllCnae={fetchAllCnae}
-                                fetchFilteredCnae={fetchFilteredCnae}
-                                hasError={!!errors.cnae_fiscal}
-                                errorMessage={errors.cnae_fiscal}
-                                showTopLabel
-                                topLabel="CNAE Fiscal:"
-                            />
-                        </div>
                     </div>
                 </>
             )}

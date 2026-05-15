@@ -10,7 +10,7 @@ import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
+import { CheckboxChangeEvent } from 'primereact/checkbox';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarContrato, deletarContrato, listContrato } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
@@ -175,7 +175,7 @@ const Contratos: React.FC = () => {
                             <div className="grid formgrid" style={{ maxHeight: '74px' }}>
                                 <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                     <Input
-                                        label="Buscar"
+                                        label="Pesquisar Descrição/Razão Social"
                                         outlined={true}
                                         id="descricao"
                                         useRightButton={true}
@@ -184,7 +184,7 @@ const Contratos: React.FC = () => {
                                         value={searchTerm}
                                         loading={loading}
                                         onClickSearch={() => searchNow(searchTerm)}
-                                        topLabel="Contratos:"
+                                        topLabel="Pesquisar:"
                                         showTopLabel
                                     />
                                 </div>
@@ -238,7 +238,7 @@ const Contratos: React.FC = () => {
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input
-                                            label="Buscar"
+                                            label="Pesquisar Descrição/Razão Social"
                                             outlined={true}
                                             id="descricao"
                                             useRightButton={true}
@@ -247,7 +247,7 @@ const Contratos: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Contratos:"
+                                            topLabel="Pesquisar:"
                                             showTopLabel
                                         />
                                     </div>

@@ -3,7 +3,7 @@ import { TableClassificacaoTributariaEntity } from "@/app/entity/TableClassifica
 
 export const fetchFilteredClassificacaoTributaria= async (searchTerm: string) => {
     try {
-        const response = await api.get(`/tabela-classificacao-tributaria/buscar?termo=${searchTerm}`);
+        const response = await api.get(`/tabela-classificacao-tributaria/buscar?busca=${searchTerm}`);
         if (Array.isArray(response.data.content)) {
             return response.data.content.map((item: { codigo: any; descricao: any; }) => ({
                 ...item,
@@ -13,17 +13,20 @@ export const fetchFilteredClassificacaoTributaria= async (searchTerm: string) =>
             return [];
         }
     } catch (error) {
-        console.error("Erro ao buscar CNAE filtrados:", error);
+        console.error("Erro ao buscar Classificacao Tributaria filtrados:", error);
         return [];
     }
 };
-export const fetchAllClassificacaoTributaria = async () => {
+export const fetchAllClassificacaoTributaria = async (searchTerm?: string) => {
     try {
-        const response = await api.get("/tabela-classificacao-tributaria/buscar");
+        const query = searchTerm?.trim()
+            ? `?termo=${encodeURIComponent(searchTerm.trim())}`
+            : '';
+        const response = await api.get(`/tabela-classificacao-tributaria/buscar${query}`);
         if (response.data && Array.isArray(response.data.content)) {
             return response.data.content.map((item: { codigo: any; descricao: any; }) => ({
                 ...item,
-                codigo: String(item.codigo), 
+                codigo: String(item.codigo ?? ''), 
                 descricao: `${item.codigo} - ${item.descricao}`
             }));
         } else {
@@ -53,7 +56,11 @@ export function findClassificacaoTributariaByCodigo(
 }
 export const listTheClassificacaoTributaria = async (searchTerm: string): Promise<TableClassificacaoTributariaEntity[]> => {
     try {
-        const response = await api.get(`/classificacao-tributaria/buscar?termo=${searchTerm}`);
+        const trimmedSearchTerm = searchTerm.trim();
+        const query = trimmedSearchTerm
+            ? `?termo=${encodeURIComponent(trimmedSearchTerm)}`
+            : '';
+        const response = await api.get(`/classificacao-tributaria/buscar${query}`);
         if (Array.isArray(response.data.content)) {
             return response.data.content.map((item: { codigo: any; descricao: any }) => ({
                 ...item,

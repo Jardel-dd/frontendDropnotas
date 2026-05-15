@@ -9,7 +9,7 @@ import { exigibilidadeISSServico, issRetido, responsavelRetencao, tributacaoISSQ
 import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation';
 import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
-import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
+
 
 type Props = {
     nfseGerada: any;
@@ -30,13 +30,13 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 <Input
                     id="descricao"
                     value={nfseGerada.servico?.descricao || ''}
-                    label="DescriÃ§Ã£o"
+                    label="Descrição"
                     onChange={(e) => handleAllChanges(e, 'servico')}
                     hasError={!!servicoErrors.descricao}
                     errorMessage={servicoErrors.descricao}
                     showTopLabel
                     required
-                    topLabel="Descricao"
+                    topLabel="Descrição:"
                 />
             </div>
             <div className="col-12 lg:col-3">
@@ -78,7 +78,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     id="iss_retido"
                     hasError={!!servicoErrors.iss_retido}
                     errorMessage={servicoErrors.iss_retido}
-                    topLabel="Iss Retido:"
+                    topLabel="ISS Retido:"
                     showTopLabel
                     required
                 />
@@ -152,8 +152,8 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                             'servico'
                         );
                     }}
-                    placeholder="Selecione um servico"
-                    topLabel="Descricao da Atividade do Servico:"
+                    placeholder="Selecione um serviço"
+                    topLabel="Descrição da Atividade do Serviço:"
                     showTopLabel
                     required
                     hasError={!!servicoErrors.item_lista_servico}
@@ -217,11 +217,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 <Input
                     id="base_calculo"
                     value={nfseGerada.servico?.valores?.base_calculo ?? 0}
-                    label="Base de Calculo"
+                    label="Base de Cálculo"
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
                     required
-                    topLabel="Base de Calculo:"
+                    topLabel="Base de Cálculo:"
                     type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
@@ -234,7 +234,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
                     required
-                    topLabel="Alíquota  ISS:"
+                    topLabel="Alíquota ISS:"
                     type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />

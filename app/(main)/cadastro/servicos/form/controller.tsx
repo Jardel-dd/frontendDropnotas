@@ -20,6 +20,8 @@ import { createEmptyServico, FormCreatedServicoProps, ServiceFormProps, ServiceF
 import { fetchAllCodigoNBS, fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
 import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
 import { TableService } from '@/app/entity/TableServiceEntity';
+import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
+import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 
 
 export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>(
@@ -38,6 +40,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         const [stateDisableBtnCreatedService, setStateDisableBtnCreatedService] = useState(false);
         const [selectedCodigoServico, setSelectedCodigoServico] = useState<TableService | null>(null);
         const [selectedCodigoNBS, setSelectedCodigoNBS] = useState<TableCodigoNBSEntity | null>(null);
+        const [selectedCodigoCNAE, setSelectedCodigoCNAE] = useState<TableCNAEEntity | null>(null);
         const [selectedClassificacaoTributaria, setSelectedClassificacaoTributaria] = useState<TableClassificacaoTributariaEntity | null>(null);
 
         const handleSubmit = async (event?: React.FormEvent) => {
@@ -119,6 +122,16 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                 return newErrors;
             });
         };
+        const handleCodigoCNAEChange = (codigoCNAE: TableCNAEEntity | null) => {
+            setSelectedCodigoCNAE(codigoCNAE);
+            const updatedCodigoCNAE = servico.copyWith({ codigo_cnae: codigoCNAE?.codigo || '' });
+            setServico(updatedCodigoCNAE);
+            setErrors((prevErrors) => {
+                const newErrors = { ...prevErrors };
+                delete newErrors.codigo_cnae;
+                return newErrors;
+            });
+        };
         const handleDropdownChange = (event: DropdownChangeEvent) => {
             const updatedService = servico.copyWith({ [event.target.id]: event.value });
             setServico(updatedService);
@@ -163,9 +176,10 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                 setIsLoading(true);
                 const { servico } = await fetchServicesByID(id);
                 const entidade = new ServiceEntity(servico);
-                const [allServices, codigoNBSOptions] = await Promise.all([
+                const [allServices, codigoNBSOptions, codigoCNAEOptions] = await Promise.all([
                     fetchAllTabelaServico(),
-                    entidade.codigo_nbs ? fetchFilteredCodigoNBS(entidade.codigo_nbs) : Promise.resolve([] as TableCodigoNBSEntity[])
+                    entidade.codigo_nbs ? fetchFilteredCodigoNBS(entidade.codigo_nbs) : Promise.resolve([] as TableCodigoNBSEntity[]),
+                    entidade.codigo_cnae ? fetchFilteredCnae(entidade.codigo_cnae) : Promise.resolve([] as TableCNAEEntity[])
                 ]);
                 setServico(
                     new ServiceEntity({
@@ -184,6 +198,19 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                     );
                 } else {
                     setSelectedCodigoNBS(null);
+                }
+                if (entidade.codigo_cnae) {
+                    const matchedCodigoCNAE = findCNAEByCodigo(entidade.codigo_cnae, codigoCNAEOptions);
+                    setSelectedCodigoCNAE(
+                        matchedCodigoCNAE ??
+                        new TableCNAEEntity({
+                            id: 0,
+                            codigo: entidade.codigo_cnae,
+                            descricao: entidade.codigo_cnae
+                        })
+                    );
+                } else {
+                    setSelectedCodigoCNAE(null);
                 }
                 if (entidade.codigo_classificacao_tributaria) {
                     setSelectedClassificacaoTributaria(
@@ -270,6 +297,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                             servico={servico}
                             errors={errors}
                             selectedService={selectedService}
+                            selectedCodigoCNAE={selectedCodigoCNAE}
                             selectedCodigoNBS={selectedCodigoNBS}
                             selectedClassificacaoTributaria={selectedClassificacaoTributaria}
                             onChange={handleAllChanges}
@@ -277,6 +305,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                             onNumberChange={handleNumberChange}
                             onServicoChange={handleServicoChange}
                             onClassificacaoTributariaChange={handleClassificacaoTributariaChange}
+                            onCodigoCNAEChange={handleCodigoCNAEChange}
                             onDescriptionBlur={handleDescriptionBlur}
                             fetchServiceTable={fetchAllTabelaServico}
                             fetchAllClassificacaoTributaria={fetchAllClassificacaoTributaria}

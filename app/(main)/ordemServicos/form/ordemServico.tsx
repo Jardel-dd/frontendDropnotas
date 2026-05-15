@@ -46,19 +46,22 @@ export function OrdemServicoFields({
         <>
             <div className="grid formgrid">
                 <div className="col-12 lg:col-3">
-                    <Input value={emitirOS.numero || ''} onChange={onChange} label="Numero" id="numero" disabled iconLeft={<IconNumero isDarkMode={false} />} showTopLabel required topLabel="Numero:" />
+                    <Input value={emitirOS.numero || ''} 
+                    onChange={onChange} label="Número"
+                     id="numero" disabled iconLeft={<IconNumero isDarkMode={false} />}
+                      showTopLabel required topLabel="Número:" />
                 </div>
                 <div className="col-12 lg:col-12 ">
                     <Input
                         value={emitirOS.descricao || ''}
                         onChange={onChange}
-                        label="Descricao"
+                        label="Descrição"
                         id="descricao"
                         hasError={!!errors.descricao}
                         errorMessage={errors.descricao}
                         showTopLabel
                         required
-                        topLabel="Descricao:"
+                        topLabel="Descrição:"
                         autoFocus
                         onBlur={onValidateDescricao}
                     />
@@ -128,7 +131,7 @@ export function OrdemServicoFields({
                         reloadKey={reloadKeyServico}
                         fetchAllItems={listTheService}
                         fetchFilteredItems={fetchFilteredService}
-                        placeholder="Selecione o Servico"
+                        placeholder="Selecione o Serviço"
                         hasError={!!errors.selectedService}
                         errorMessage={errors.selectedService}
                         autoSelectSingle
@@ -136,7 +139,7 @@ export function OrdemServicoFields({
                         onAddClick={onAddServico}
                         showTopLabel
                         required
-                        topLabel="Servico:"
+                        topLabel="Serviço:"
                     />
                 </div>
                 <div className="col-12 lg:col-2">
@@ -156,7 +159,8 @@ export function OrdemServicoFields({
             </div>
             <div className="grid formgrid w-full">
                 <div className="col-12 lg:col-4 ">
-                    <DatePicker value={emitirOS.data_hora_inicio ?? null} onChange={(date) => onDateChange('data_hora_inicio', date)} showTopLabel topLabel="Data inicio" />
+                    <DatePicker value={emitirOS.data_hora_inicio ?? null}
+                     onChange={(date) => onDateChange('data_hora_inicio', date)} showTopLabel topLabel="Data inicio" />
                 </div>
                 <div className="col-12 lg:col-4 ">
                     <DatePicker
@@ -171,7 +175,7 @@ export function OrdemServicoFields({
                         value={emitirOS.data_hora_conclusao ?? null}
                         onChange={(date) => onDateChange('data_hora_conclusao', date)}
                         showTopLabel
-                        topLabel="Data conclusao"
+                        topLabel="Data conclusão"
                     />
                 </div>
             </div>
@@ -185,14 +189,14 @@ export function OrdemServicoFields({
                         label=""
                         id="consideracoes_finais"
                         showTopLabel
-                        topLabel="Consideracoes finais:"
+                        topLabel="Considerações finais:"
                     />
                 </div>
                 <div className="col-12 lg:col-12 ">
-                    <InputTextarea value={emitirOS.observacao_interna || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao_interna" showTopLabel topLabel="Observacoes internas:" />
+                    <InputTextarea value={emitirOS.observacao_interna || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao_interna" showTopLabel topLabel="Observações internas:" />
                 </div>
                 <div className="col-12 lg:col-12 ">
-                    <InputTextarea value={emitirOS.observacao_servico || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao_servico" showTopLabel topLabel="Observacoes do Servico:" />
+                    <InputTextarea value={emitirOS.observacao_servico || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao_servico" showTopLabel topLabel="Observações do Serviço:" />
                 </div>
                 <div className="col-12 lg:col-12 ">
                     <div className="switchRow">

@@ -12,11 +12,15 @@ import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassifica
 import { codigoIndicadorOperacao, codigoSituacaoTributariaRegular, exigibilidadeISSServico, IndicadorDestinatario, issRetido, responsavelRetencao, situacaoTributaria} from '@/app/shared/optionsDropDown/options';
 import { TableService } from '@/app/entity/TableServiceEntity';
 import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
+import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
+import { fetchAllCnae, fetchFilteredCnae } from '@/app/components/fetchAll/listAllCnae/controller';
 export function ServicoFields({
     servico,
     errors,
     selectedService,
     selectedCodigoNBS,
+    selectedCodigoCNAE,
+    onCodigoCNAEChange,
     selectedCodigoServico,
     selectedClassificacaoTributaria,
     onChange,
@@ -25,7 +29,6 @@ export function ServicoFields({
     onServicoChange,
     onCodigoNBSChange,
     onCodigoServicoChange,
-
     onClassificacaoTributariaChange,
     onDescriptionBlur,
     fetchServiceTable,
@@ -40,13 +43,13 @@ export function ServicoFields({
                 <Input
                     value={servico.descricao || ''}
                     onChange={onChange}
-                    label="Descricao completa do servico"
+                    label="Descrição completa do serviço"
                     id="descricao"
                     hasError={!!errors.descricao}
                     errorMessage={errors.descricao}
                     onBlur={onDescriptionBlur}
                     autoFocus
-                    topLabel="Descricao:"
+                    topLabel="Descrição:"
                     showTopLabel
                     required
                 />
@@ -56,18 +59,18 @@ export function ServicoFields({
                     id="valor_servico"
                     value={servico.valor_servico || 0}
                     onChange={onNumberChange}
-                    label="Valor Servicos"
+                    label="Valor Serviços"
                     useRightButton
                     outlined
                     hasError={!!errors.valor_servico}
                     errorMessage={errors.valor_servico}
                     iconLeft={<IconReal isDarkMode={false} />}
-                    topLabel="Valor Servico:"
+                    topLabel="Valor Serviço:"
                     showTopLabel
                     required
                 />
             </div>
-            <div className="col-12  lg:col-4">
+            <div className="col-12 lg:col-4">
                 <CustomInputNumber
                     id="percentual_diferencial_municipal"
                     value={servico.percentual_diferencial_municipal || 0}
@@ -88,12 +91,12 @@ export function ServicoFields({
                     id="aliquota_deducoes"
                     value={servico.aliquota_deducoes || 0}
                     onChange={onNumberChange}
-                    label="Aliquota Deduções"
+                    label="Alíquota Deduções"
                     useRightButton
                     outlined
                     hasError={!!errors.aliquota_deducoes}
                     errorMessage={errors.aliquota_deducoes}
-                    topLabel="Aliquota Deduções:"
+                    topLabel="Alíquota Deduções:"
                     showTopLabel
                     required
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
@@ -151,7 +154,7 @@ export function ServicoFields({
                     value={servico.exigibilidade_iss ?? ''}
                     options={exigibilidadeISSServico}
                     onChange={onDropdownChange}
-                    label="Selecione uma opcao"
+                    label="Selecione uma opção"
                     filterBy={false}
                     hasError={!!errors.exigibilidade_iss}
                     errorMessage={errors.exigibilidade_iss}
@@ -166,11 +169,11 @@ export function ServicoFields({
                     value={servico.codigo_situacao_tributaria ?? ''}
                     options={situacaoTributaria}
                     onChange={onDropdownChange}
-                    label="Selecione uma opcao"
+                    label="Selecione uma opção"
                     filterBy={false}
                     hasError={!!errors.codigo_situacao_tributaria}
                     errorMessage={errors.codigo_situacao_tributaria}
-                    topLabel="Situacao Tributaria:"
+                    topLabel="Situação Tributária:"
                     showTopLabel
                     required
                 />
@@ -186,7 +189,7 @@ export function ServicoFields({
                     optionLabel="descricao"
                     hasError={!!errors.codigo_classificacao_tributaria}
                     errorMessage={errors.codigo_classificacao_tributaria}
-                    topLabel="Classificacao Tributaria:"
+                    topLabel="Classificação Tributária:"
                     showTopLabel
                     required
                 />
@@ -202,7 +205,23 @@ export function ServicoFields({
                     optionLabel="descricao"
                     hasError={!!errors.codigo_nbs}
                     errorMessage={errors.codigo_nbs}
-                    topLabel="Codigo NBS:"
+                    topLabel="Código NBS:"
+                    showTopLabel
+                    required
+                />
+            </div>
+             <div className="col-12  lg:col-4">
+                <DropdownSearch<TableCNAEEntity>
+                    id="codigo_cnae"
+                    selectedItem={selectedCodigoCNAE}
+                    onItemChange={onCodigoCNAEChange}
+                    fetchAllItems={fetchAllCnae}
+                    fetchFilteredItems={fetchFilteredCnae}
+                    optionValue="codigo"
+                    optionLabel="descricao"
+                    hasError={!!errors.codigo_cnae}
+                    errorMessage={errors.codigo_cnae}
+                    topLabel="Código CNAE:"
                     showTopLabel
                     required
                 />
@@ -218,7 +237,7 @@ export function ServicoFields({
                     optionLabel="descricao"
                     hasError={!!errors.item_lista_servico}
                     errorMessage={errors.item_lista_servico}
-                    topLabel="Codigo do Serviço:"
+                    topLabel="Código do Serviço:"
                     showTopLabel
                     required
                 />
@@ -229,11 +248,11 @@ export function ServicoFields({
                     value={servico.codigo_situacao_tributaria_regular || ''}
                     options={codigoSituacaoTributariaRegular}
                     onChange={onDropdownChange}
-                    label="Selecione uma opcao"
+                    label="Selecione uma opção"
                     filterBy={false}
                     hasError={!!errors.codigo_situacao_tributaria_regular}
                     errorMessage={errors.codigo_situacao_tributaria_regular}
-                    topLabel="Classificacao Tributaria Regular:"
+                    topLabel="Classificação Tributária Regular:"
                     showTopLabel
                     required
                 />
@@ -244,7 +263,7 @@ export function ServicoFields({
                     value={servico.indicador_destinatario ?? ''}
                     options={IndicadorDestinatario}
                     onChange={onDropdownChange}
-                    label="Selecione uma opcao"
+                    label="Selecione uma opção"
                     filterBy={false}
                     hasError={!!errors.indicador_destinatario}
                     errorMessage={errors.indicador_destinatario}
@@ -257,11 +276,11 @@ export function ServicoFields({
                 <Input
                     value={servico.codigo_credito_presumido || ''}
                     onChange={onChange}
-                    label="Codigo do credito presumido"
+                    label="Código do crédito presumido"
                     id="codigo_credito_presumido"
                     hasError={!!errors.codigo_credito_presumido}
                     errorMessage={errors.codigo_credito_presumido}
-                    topLabel="Credito presumido:"
+                    topLabel="Crédito presumido:"
                     maxLength={20}
                     showTopLabel
                 />
@@ -272,11 +291,11 @@ export function ServicoFields({
                     value={servico.responsavel_retencao ?? ''}
                     options={responsavelRetencao}
                     onChange={onDropdownChange}
-                    label="Selecione uma opcao"
+                    label="Selecione uma opção"
                     filterBy={false}
                     hasError={!!errors.responsavel_retencao}
                     errorMessage={errors.responsavel_retencao}
-                    topLabel="Retencao:"
+                    topLabel="Retenção:"
                     showTopLabel
                     required
                 />
@@ -287,7 +306,7 @@ export function ServicoFields({
                     value={servico.codigo_indicador_operacao ?? ''}
                     options={codigoIndicadorOperacao}
                     onChange={onDropdownChange}
-                    label="Selecione uma opcao"
+                    label="Selecione uma opção"
                     filterBy={false}
                     hasError={!!errors.codigo_indicador_operacao}
                     errorMessage={errors.codigo_indicador_operacao}
@@ -300,11 +319,11 @@ export function ServicoFields({
                 <Input
                     value={servico.codigo_municipio || ''}
                     onChange={onChange}
-                    label="Codigo do Municipio"
+                    label="Código do Município"
                     id="codigo_municipio"
                     hasError={!!errors.codigo_municipio}
                     errorMessage={errors.codigo_municipio}
-                    topLabel="Codigo do Municipio:"
+                    topLabel="Código do Município:"
                     showTopLabel
                 />
             </div>
@@ -312,9 +331,9 @@ export function ServicoFields({
                 <Input
                     value={servico.numero_processo || ''}
                     onChange={onChange}
-                    label="Numero do Processo"
+                    label="Número do Processo"
                     id="numero_processo"
-                    topLabel="Numero do Processo:"
+                    topLabel="Número do Processo:"
                     showTopLabel
                 />
             </div>
@@ -326,7 +345,7 @@ export function ServicoFields({
                     cols={30}
                     label=""
                     id="descricao_completa"
-                    topLabel="Descricao Complementar:"
+                    topLabel="Descrição Complementar:"
                     showTopLabel
                 />
             </div>

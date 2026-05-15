@@ -168,7 +168,7 @@ const Vendedores: React.FC = () => {
                         <div className="grid formgrid p-2">
                             <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
                                 <Input
-                                    label="Buscar"
+                                    label="Pesquisar Nome"
                                     outlined={true}
                                     useRightButton={true}
                                     iconRight={'pi pi-search'}
@@ -177,7 +177,7 @@ const Vendedores: React.FC = () => {
                                     value={searchTerm}
                                     loading={loading}
                                     onClickSearch={() => searchNow(searchTerm)}
-                                    topLabel="Vendedores:"
+                                    topLabel="Pesquisar:"
                                     showTopLabel
                                 />
                             </div>
@@ -229,7 +229,7 @@ const Vendedores: React.FC = () => {
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input
-                                            label="Buscar"
+                                            label="Pesquisar Nome"
                                             outlined={true}
                                             id="razao_social"
                                             useRightButton={true}
@@ -238,7 +238,7 @@ const Vendedores: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Vendedores:"
+                                            topLabel="Pesquisar:"
                                             showTopLabel
                                         />
                                     </div>

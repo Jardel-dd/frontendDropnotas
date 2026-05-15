@@ -6,6 +6,7 @@ import { InputNumberValueChangeEvent } from "primereact/inputnumber";
 import { Messages } from "primereact/messages";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { TableService } from "@/app/entity/TableServiceEntity";
+import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
 export const createEmptyServico = () =>
     new ServiceEntity({
         ativo: true,
@@ -63,6 +64,7 @@ export interface ServicoFieldsProps {
     servico: ServiceEntity;
     errors: Record<string, string>;
     selectedService: ServiceEntity | null;
+    selectedCodigoCNAE: TableCNAEEntity | null;
     selectedCodigoNBS: TableCodigoNBSEntity | null;
     selectedCodigoServico: TableService | null;
     selectedClassificacaoTributaria: TableClassificacaoTributariaEntity | null;
@@ -72,6 +74,7 @@ export interface ServicoFieldsProps {
     onCodigoServicoChange: (service: TableService  | null) => void;
     onServicoChange: (service: ServiceEntity | null) => void;
     onCodigoNBSChange: (codigoNBS: TableCodigoNBSEntity | null) => void;
+    onCodigoCNAEChange: (codigoCNAE: TableCNAEEntity | null) => void;
     onClassificacaoTributariaChange: (classificacaoTributaria: TableClassificacaoTributariaEntity | null) => void;
     onDescriptionBlur: () => void;
     fetchServiceTable: (...args: any[]) => any;

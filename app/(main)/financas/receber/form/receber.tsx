@@ -79,12 +79,12 @@ export function ContasReceberFields({
                     id="descricao"
                     value={contasReceber.descricao || ''}
                     onChange={onChange}
-                    label="Descricao completa"
+                    label="Descrição completa"
                     hasError={!!errors.descricao}
                     errorMessage={errors.descricao}
                     onBlur={onValidateDescricao}
                     autoFocus
-                    topLabel="Descricao:"
+                    topLabel="Descrição:"
                     showTopLabel
                     required
                 />
@@ -162,10 +162,10 @@ export function ContasReceberFields({
                     id="observacao"
                     value={contasReceber.observacao || ''}
                     onChange={onChange}
-                    label="Observacao"
+                    label="Observação"
                     rows={5}
                     cols={30}
-                    topLabel="Observacao:"
+                    topLabel="Observação:"
                     showTopLabel
                 />
             </div>

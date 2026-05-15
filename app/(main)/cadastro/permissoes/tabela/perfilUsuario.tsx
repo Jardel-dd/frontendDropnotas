@@ -83,7 +83,7 @@ export function ListarPerfilUsers(
                                     columns={[
                                         {
                                             field: "nome",
-                                            header: "Nome",
+                                            header: "Descrição",
                                             body: (data) => {
                                                 const isStatusInactive = data.ativo === false;
                                                 return loading ? (
@@ -122,7 +122,7 @@ export function ListarPerfilUsers(
                                     columns={[
                                         {
                                             field: "nome",
-                                            header: "Nome",
+                                            header: "Descrição",
                                             body: (data) => {
                                                 const isStatusInactive = data.ativo === false;
                                                 return loading ? (

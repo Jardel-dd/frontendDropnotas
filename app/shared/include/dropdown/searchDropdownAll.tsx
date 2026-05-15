@@ -86,6 +86,27 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const didAutoSelectRef = useRef(false);
     const loadingRef = useRef(false);
     const hasLoadedAllItemsRef = useRef(false);
+    const requestSequenceRef = useRef(0);
+    const activeRequestCountRef = useRef(0);
+
+    const beginRequest = () => {
+        activeRequestCountRef.current += 1;
+        loadingRef.current = true;
+        setLoading(true);
+
+        requestSequenceRef.current += 1;
+        return requestSequenceRef.current;
+    };
+
+    const finishRequest = () => {
+        activeRequestCountRef.current = Math.max(0, activeRequestCountRef.current - 1);
+        const stillLoading = activeRequestCountRef.current > 0;
+
+        loadingRef.current = stillLoading;
+        setLoading(stillLoading);
+    };
+
+    const isLatestRequest = (requestId: number) => requestId === requestSequenceRef.current;
     useEffect(() => {
         selectedItemRef.current = selectedItem;
     }, [selectedItem]);
@@ -119,8 +140,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const loadAll = async () => {
         if (loadingRef.current) return;
 
-        loadingRef.current = true;
-        setLoading(true);
+        const requestId = beginRequest();
         try {
             const data = await fetchAllItems();
             let limited = Array.isArray(data) ? data.slice(0, maxResults) : [];
@@ -144,6 +164,8 @@ export const DropdownSearch = <T extends Record<string, any>>({
                 }
             }
 
+            if (!isLatestRequest(requestId)) return;
+
             limited = ensureSelectedInList(limited, resolvedSelectedItem, optionValueRef.current);
 
             setItems(limited);
@@ -156,11 +178,11 @@ export const DropdownSearch = <T extends Record<string, any>>({
             setHasLoadedAllItems(true);
             hasLoadedAllItemsRef.current = true;
         } catch (err) {
+            if (!isLatestRequest(requestId)) return;
             console.error('Erro ao carregar os itens:', err);
             setItems([]);
         } finally {
-            loadingRef.current = false;
-            setLoading(false);
+            finishRequest();
         }
     };
     const loadAllIfNeeded = async () => {
@@ -185,15 +207,18 @@ export const DropdownSearch = <T extends Record<string, any>>({
         }
         if (trimmed.length < minSearchChars) return;
 
-        setLoading(true);
+        const requestId = beginRequest();
         try {
             const data = await fetchFilteredItems(trimmed);
             let limited = Array.isArray(data) ? data.slice(0, maxResults) : [];
+
+            if (!isLatestRequest(requestId)) return;
 
             limited = ensureSelectedInList(limited, selectedItemRef.current, optionValueRef.current);
 
             setItems(limited);
             setHasLoadedAllItems(false);
+            hasLoadedAllItemsRef.current = false;
 
             if (optionValueRef.current && selectedItemRef.current) {
                 const ov = optionValueRef.current as keyof T;
@@ -201,10 +226,11 @@ export const DropdownSearch = <T extends Record<string, any>>({
                 if (match && match !== selectedItemRef.current) onItemChangeRef.current?.(match);
             }
         } catch (error) {
+            if (!isLatestRequest(requestId)) return;
             console.error('Erro ao filtrar os itens:', error);
             setItems([]);
         } finally {
-            setLoading(false);
+            finishRequest();
         }
     }, 1000);
 
@@ -253,6 +279,12 @@ export const DropdownSearch = <T extends Record<string, any>>({
             setItems((prev) => ensureSelectedInList(prev, selectedItem, optionValue));
         }
     }, [selectedItem, optionValue, items]);
+
+    useEffect(() => {
+        return () => {
+            debouncedFilter.cancel();
+        };
+    }, [debouncedFilter]);
 
     return (
         <div ref={wrapperRef} className="p-field" style={{ width: '100%', height:'85px', maxHeight:"85px"}}>

@@ -76,12 +76,12 @@ export function VendedorFields({
                             id="razao_social"
                             value={vendedor?.razao_social || ''}
                             onChange={onChange}
-                            label="Nome ou Razao Social do contato:"
+                            label="Nome ou Razao Social"
                             hasError={!!errors.razao_social}
                             errorMessage={errors.razao_social}
                             showTopLabel
                             required
-                            topLabel="Razao Social:"
+                            topLabel="Razão Social:"
                         />
                     </div>
                     <div className="col-12 lg:col-6 ">
@@ -98,7 +98,7 @@ export function VendedorFields({
                         <Input
                             value={vendedor.percentual_comissao ?? 0}
                             onChange={onChange}
-                            label="Comissao"
+                            label="Comissão"
                             id="percentual_comissao"
                             type="number"
                             useRightButton
@@ -107,7 +107,7 @@ export function VendedorFields({
                             iconLeft={<IconPorcentagem isDarkMode={false} />}
                             showTopLabel
                             required
-                            topLabel="Comissao:"
+                            topLabel="Comissão:"
                         />
                     </div>
                     <div className="col-12 lg:col-4 ">

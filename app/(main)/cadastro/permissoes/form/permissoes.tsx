@@ -15,13 +15,13 @@ export function PermissoesFields({ perfilUser, errors, selectedKeys, isLoading, 
                 <Input
                     value={perfilUser.nome || ''}
                     onChange={onChange}
-                    label="Digite o nome da permissao"
+                    label="Digite a descição da permissão"
                     id="nome"
                     hasError={!!errors.nome}
                     errorMessage={errors.nome}
                     onBlur={onValidateNome}
                     autoFocus
-                    topLabel="Nome da Permissao:"
+                    topLabel="Descrição da Permissão:"
                     showTopLabel
                     required
                 />
@@ -32,10 +32,10 @@ export function PermissoesFields({ perfilUser, errors, selectedKeys, isLoading, 
                     onChange={onDropdownChange}
                     options={tiposVisualizacaoPermissoes}
                     id="ordemServicoTipoVisualizacao"
-                    label="Selecione o tipo de visualizacao de ordens de servico"
+                    label="Selecione o tipo de visualização da ordem de servico"
                     hasError={!!errors.selectedordemServicoTipoVisualizacao}
                     errorMessage={errors.selectedordemServicoTipoVisualizacao}
-                    topLabel="Tipo de Visualizacao da Ordem de Servico:"
+                    topLabel="Tipo de Visualização da Ordem de Serviço:"
                     showTopLabel
                     required
                 />
@@ -46,10 +46,10 @@ export function PermissoesFields({ perfilUser, errors, selectedKeys, isLoading, 
                     onChange={onDropdownChange}
                     id="contratoTipoVisualizacao"
                     options={tiposVisualizacaoPermissoes}
-                    label="Selecione o tipo de visualizacao de contratos"
+                    label="Selecione o tipo de visualização de contratos"
                     hasError={!!errors.contratoTipoVisualizacao}
                     errorMessage={errors.contratoTipoVisualizacao}
-                    topLabel="Tipo de Visualizacao do Contrato:"
+                    topLabel="Tipo de Visualização do Contrato:"
                     showTopLabel
                     required
                 />
@@ -60,10 +60,10 @@ export function PermissoesFields({ perfilUser, errors, selectedKeys, isLoading, 
                     onChange={onDropdownChange}
                     id="nfseTipoVisualizacao"
                     options={tiposVisualizacaoPermissoes}
-                    label="Selecione o tipo de visualizacao da Nota Fiscal"
+                    label="Selecione o tipo de visualização da Nota Fiscal"
                     hasError={!!errors.nfseTipoVisualizacao}
                     errorMessage={errors.nfseTipoVisualizacao}
-                    topLabel="Tipo de Visualizacao da Nota Fiscal:"
+                    topLabel="Tipo de Visualização da Nota Fiscal:"
                     showTopLabel
                     required
                 />

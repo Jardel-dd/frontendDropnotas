@@ -11,8 +11,8 @@ import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
-import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import {  CheckboxChangeEvent } from 'primereact/checkbox';
+import {  PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarEmpresa, deletarEmpresa, listEmpresa } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
@@ -183,7 +183,7 @@ const Empresas: React.FC = () => {
                             <div className="grid formgrid" style={{ maxHeight: '74px' }}>
                                 <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                     <Input
-                                        label="Buscar"
+                                        label="Pesquisar CNPJ/Razão Social/Nome Fantasia"
                                         outlined={true}
                                         id="razao_social"
                                         useRightButton={true}
@@ -192,7 +192,7 @@ const Empresas: React.FC = () => {
                                         value={searchTerm}
                                         loading={loading}
                                         onClickSearch={() => searchNow(searchTerm)}
-                                        topLabel="Empresas:"
+                                        topLabel="Pesquisar:"
                                         showTopLabel
                                     />
                                 </div>
@@ -247,7 +247,7 @@ const Empresas: React.FC = () => {
                                 <div className="grid formgrid"  >
                                     <div className="col-12 lg:col-3 container-input-search-all" >
                                         <Input
-                                            label="Buscar"
+                                            label="Pesquisar CNPJ/Razão Social/Nome Fantasia"
                                             outlined={true}
                                             id="razao_social"
                                             useRightButton={true}
@@ -256,7 +256,7 @@ const Empresas: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Empresas:"
+                                            topLabel="Pesquisar:"
                                             showTopLabel
                                         />
                                     </div>

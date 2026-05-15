@@ -107,7 +107,7 @@ export function ListarContratos({
                                 columns={[
                                     {
                                         field: 'descricao',
-                                        header: 'Descrição do Contrato',
+                                        header: 'Descrição',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (
@@ -121,7 +121,7 @@ export function ListarContratos({
                                     },
                                     {
                                         field: 'NomeCompany',
-                                        header: 'Nome da Empresa',
+                                        header: 'Razão Social',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? <Skeleton /> : <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>{highlightSearchTerm(limitarText(data.nome_empresa, 25), searchTerm)}</span>;

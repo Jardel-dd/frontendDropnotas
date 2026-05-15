@@ -184,7 +184,7 @@ const ClientesFornecedores: React.FC = () => {
                         <div className="grid formgrid p-2">
                             <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
                                 <Input
-                                    label="Buscar"
+                                    label="Pesquisar Razão Social/CNPJ"
                                     outlined={true}
                                     id="razao_social"
                                     useRightButton={true}
@@ -193,7 +193,7 @@ const ClientesFornecedores: React.FC = () => {
                                     value={searchTerm}
                                     loading={loading}
                                     onClickSearch={() => searchNow(searchTerm)}
-                                    topLabel="Razão Social:"
+                                    topLabel="Pesquisar:"
                                     showTopLabel
                                 />
                             </div>
@@ -262,7 +262,7 @@ const ClientesFornecedores: React.FC = () => {
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-12 container-input-search-all">
                                         <Input
-                                            label="Buscar"
+                                            label="Pesquisar Razão Social/CNPJ"
                                             outlined={true}
                                             id="razao_social"
                                             useRightButton={true}
@@ -271,7 +271,7 @@ const ClientesFornecedores: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Razão social:"
+                                            topLabel="Pesquisar:"
                                             showTopLabel
                                         />
                                     </div>

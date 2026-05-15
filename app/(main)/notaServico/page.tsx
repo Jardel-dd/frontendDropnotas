@@ -463,7 +463,7 @@ const NotaServico: React.FC = () => {
                                 <div className="grid formgrid w-full" style={{ maxHeight: '74px' }}>
                                     <div className="col-8 mb-0 lg:col-8  ">
                                         <Input
-                                            label="Buscar"
+                                            label="Digite o nome Cliente"
                                             outlined={true}
                                             id="razao_social_cliente"
                                             useRightButton={true}
@@ -472,7 +472,7 @@ const NotaServico: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Buscar:"
+                                            topLabel="Pesquise:"
                                             showTopLabel
                                         />
                                     </div>
@@ -607,7 +607,7 @@ const NotaServico: React.FC = () => {
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input
-                                            label="Buscar"
+                                            label="Digite nome do Cliente"
                                             outlined={true}
                                             id="razao_social_cliente"
                                             useRightButton={true}
@@ -616,7 +616,7 @@ const NotaServico: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Buscar:"
+                                            topLabel="Pesquise:"
                                             showTopLabel
                                         />
                                     </div>

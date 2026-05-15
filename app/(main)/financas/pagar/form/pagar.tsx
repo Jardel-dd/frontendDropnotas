@@ -108,12 +108,12 @@ export function ContasPagarFields({
                     id="descricao"
                     value={contasPagar.descricao || ''}
                     onChange={onChange}
-                    label="Descricao completa"
+                    label="Descrição completa"
                     hasError={!!errors.descricao}
                     errorMessage={errors.descricao}
                     onBlur={onValidateDescricao}
                     autoFocus
-                    topLabel="Descricao:"
+                    topLabel="Descrição:"
                     showTopLabel
                     required
                 />
@@ -178,10 +178,10 @@ export function ContasPagarFields({
                     id="observacao"
                     value={contasPagar.observacao || ''}
                     onChange={onChange}
-                    label="Observacao"
+                    label="Observação"
                     rows={5}
                     cols={30}
-                    topLabel="Observacao:"
+                    topLabel="Observação:"
                     showTopLabel
                 />
             </div>

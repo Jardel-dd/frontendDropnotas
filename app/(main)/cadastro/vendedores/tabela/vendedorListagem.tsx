@@ -81,7 +81,7 @@ export function ListarVendedores(
                                     columns={[
                                         {
                                             field: "razaoSocial",
-                                            header: "Vendedores",
+                                            header: "Nome",
                                             body: (data) => {
                                                 const isStatusInactive = data.ativo === false;
                                                 return loading ? (
@@ -120,7 +120,7 @@ export function ListarVendedores(
                                 columns={[
                                     {
                                         field: "razaoSocial",
-                                        header: "Vendedores",
+                                        header: "Nome",
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (
