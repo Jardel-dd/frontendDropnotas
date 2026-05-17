@@ -290,8 +290,11 @@ export function ServicoFields({
                     onChange={onDropdownChange}
                     label="Selecione uma opção"
                     filterBy={false}
+                    hasError={!!errors.responsavel_retencao}
+                    errorMessage={errors.responsavel_retencao}
                     topLabel="Retenção:"
                     showTopLabel
+                    required
                 />
             </div>
             <div className="col-12  lg:col-4">

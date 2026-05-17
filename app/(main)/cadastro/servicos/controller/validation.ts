@@ -23,6 +23,8 @@ export const getServicoValidationErrors = (service: ServiceEntity) => {
         newErrors.item_lista_servico = 'Este Campo deve ser selecionado.';
     } else if (!service.indicador_destinatario || service.indicador_destinatario.trim().length < 2) {
         newErrors.indicador_destinatario = 'Este Campo deve ser selecionado.';
+    } else if (!service.responsavel_retencao || service.responsavel_retencao.trim().length < 2) {
+        newErrors.responsavel_retencao = 'Este Campo deve ser selecionado.';
     } else if (!service.codigo_municipio || service.codigo_municipio.trim().length === 0) {
         newErrors.codigo_municipio = 'Este Campo deve ser selecionado.';
     } else if (!service.municipio_incidencia || service.municipio_incidencia.trim().length === 0) {

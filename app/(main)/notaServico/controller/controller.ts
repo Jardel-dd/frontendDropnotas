@@ -62,7 +62,7 @@ export const listNotaServico = async (params: ListNotaServicoParams) => {
         id_empresa: params.id_empresa ?? undefined,
         id_cliente: params.id_cliente ?? undefined,
         id_vendedor: params.id_vendedor ?? undefined,
-        sort: 'asc',
+        sort: 'dataEmissao,desc',
         ...dateParams
     };
 
