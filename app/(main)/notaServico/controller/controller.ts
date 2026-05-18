@@ -252,7 +252,6 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
         });
     }
 };
-
 export const exportarPdfNotasServico = async (
     payload: ExportarPdfNfsePayload,
     msgs: React.RefObject<Messages | null>

@@ -198,8 +198,8 @@ const RelatoriosRecebimentos: React.FC = () => {
                             <>
                                 <div className="col-12 lg:col-3 p-3 w-2">
                                     <EmpresaDropdownField
-                                        selectedCompany={selectedCompany}
-                                        onCompanyChange={handleCompanyChange}
+                                        selectedEmpresa={selectedCompany}
+                                        onEmpresaChange={handleCompanyChange}
                                         hasError={!!errors.selectedCompany}
                                         errorMessage={errors.selectedCompany}
                                     />

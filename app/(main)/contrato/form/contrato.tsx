@@ -95,9 +95,9 @@ export function ContratoFields({
                         </div>
                         <div className="col-12 lg:col-4">
                             <EmpresaDropdownField
-                                selectedCompany={selectedCompany}
-                                selectedCompanyId={contrato.id_empresa ?? null}
-                                onCompanyChange={onCompanyChange}
+                                selectedEmpresa={selectedCompany}
+                                selectedEmpresaId={contrato.id_empresa ?? null}
+                                onEmpresaChange={onCompanyChange}
                                 reloadKey={reloadKeyEmpresa}
                                 hasError={!!errors.selectedCompany}
                                 errorMessage={errors.selectedCompany}

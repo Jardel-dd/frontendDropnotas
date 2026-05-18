@@ -68,8 +68,8 @@ export function OrdemServicoFields({
                 </div>
                 <div className="col-12 lg:col-4 ">
                     <EmpresaDropdownField
-                        selectedCompany={selectedEmpresa}
-                        onCompanyChange={onEmpresaChange}
+                        selectedEmpresa={selectedEmpresa}
+                        onEmpresaChange={onEmpresaChange}
                         reloadKey={reloadKeyEmpresa}
                         hasError={!!errors.selectedEmpresa}
                         errorMessage={errors.selectedEmpresa}

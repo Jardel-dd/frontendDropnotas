@@ -172,8 +172,8 @@ const ComponentDashboard: React.FC = () => {
                                             onClear={handleClearFilters}>
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
-                                                        selectedCompany={selectedCompany}
-                                                        onCompanyChange={handleCompanyChange}
+                                                        selectedEmpresa={selectedCompany}
+                                                        onEmpresaChange={handleCompanyChange}
                                                         reloadKey={reloadKeyEmpresa}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
@@ -246,8 +246,8 @@ const ComponentDashboard: React.FC = () => {
                                             <FilterOverlay onApply={search} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
-                                                        selectedCompany={selectedCompany}
-                                                        onCompanyChange={handleCompanyChange}
+                                                        selectedEmpresa={selectedCompany}
+                                                        onEmpresaChange={handleCompanyChange}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
                                                     />

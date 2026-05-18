@@ -9,6 +9,7 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { exportarPdfNotasServico, listNotaServico } from './controller/controller';
 import Input from '@/app/shared/include/input/input-all';
 import ListarNotaServico from './tabela/notaServicoListagem';
@@ -20,6 +21,7 @@ import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { validateFieldsPrepararNfs } from './controller/validation';
+import { FormCreatedPessoa } from '../cadastro/pessoas/form/controller';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
@@ -36,6 +38,37 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import { PessoaFormRef } from '../cadastro/pessoas/types/pessoa';
+import FormEmpresaCreated from '../configuracoes/empresas/form/controller';
+import { FormCreatedServico } from '../cadastro/servicos/form/controller';
+import { createEmptyEmpresa, createEmptyServico } from '../ordemServicos/types/ordemServico';
+
+const createEmptyPessoa = () =>
+    new PessoaEntity({
+        id: 0,
+        razao_social: '',
+        nome_fantasia: '',
+        cpf: null,
+        rg: null,
+        email: '',
+        documento_estrangeiro: null,
+        cnpj: null,
+        inscricao_estadual: '',
+        inscricao_municipal: '',
+        atividade_principal: '',
+        cnae_fiscal: null,
+        data_fundacao: '',
+        pessoa_cliente: false,
+        pessoa_fornecedor: false,
+        codigo_regime_tributario: '',
+        tipo_pessoa: 'PESSOA_JURIDICA',
+        contribuinte: '',
+        endereco: {} as EnderecoEntity,
+        arquivo_contrato: '',
+        id_vendedor_padrao: null,
+        ativo: true,
+        pais: ''
+    });
 
 const NotaServico: React.FC = () => {
     const router = useRouter();
@@ -44,28 +77,38 @@ const NotaServico: React.FC = () => {
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
+    const formRef = useRef<PessoaFormRef>(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
     const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
+    const [reloadKeyEmpresa, setReloadKeyEmpresa] = useState(0);
+    const [reloadKeyServico, setReloadKeyServico] = useState(0);
+    const [showModalPessoa, setShowModalPessoa] = useState(false);
+    const [showModalEmpresa, setShowModalEmpresa] = useState(false);
+    const [showModalServico, setShowModalServico] = useState(false);
+    const [loadingExportPdf, setLoadingExportPdf] = useState(false);
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [dateRange, setDateRange] = useState<DateRangeValue>([null, null]);
-    const [draftDateRange, setDraftDateRange] = useState<DateRangeValue>([null, null]);
+    const [pessoa, setPessoa] = useState<PessoaEntity>(createEmptyPessoa());
     const [showDialogPreparaNfs, setShowDialogPreparaNfs] = useState(false);
+    const [dateRange, setDateRange] = useState<DateRangeValue>([null, null]);
+    const [empresa, setEmpresa] = useState<CompanyEntity>(createEmptyEmpresa());
+     const [servico, setServico] = useState<ServiceEntity>(createEmptyServico());
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
-    const [draftSelectedPessoa, setDraftSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity | null>(null);
-    const [draftSelectedEmpresa, setDraftSelectedEmpresa] = useState<CompanyEntity | null>(null);
+    const [selectedServico, setSelectedServico] = useState<ServiceEntity | null>(null);
+    const [draftDateRange, setDraftDateRange] = useState<DateRangeValue>([null, null]);
     const [stateDisableBtnPrepararNfse, setStateDisableBtnPrepararNfse] = useState(false);
     const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
-    const [draftSelectedVendedor, setDraftSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [selectedStatusNotaServico, setSelectedStatusNotaServico] = useState<string>('');
-    const [draftSelectedStatusNotaServico, setDraftSelectedStatusNotaServico] = useState<string>('');
+    const [draftSelectedPessoa, setDraftSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedPessoaDialog, setSelectedPessoaDialog] = useState<PessoaEntity | null>(null);
-    const [selectedServicoDialog, setSelectedServicoDialog] = useState<ServiceEntity | null>(null);
+    const [draftSelectedEmpresa, setDraftSelectedEmpresa] = useState<CompanyEntity | null>(null);
     const [selectedEmpresaDialog, setSelectedEmpresaDialog] = useState<CompanyEntity | null>(null);
-    const [loadingExportPdf, setLoadingExportPdf] = useState(false);
+    const [selectedServicoDialog, setSelectedServicoDialog] = useState<ServiceEntity | null>(null);
+    const [draftSelectedVendedor, setDraftSelectedVendedor] = useState<VendedorEntity | null>(null);
+    const [draftSelectedStatusNotaServico, setDraftSelectedStatusNotaServico] = useState<string>('');
     const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>({
         pageable: {
             pageNumber: 0,
@@ -369,6 +412,15 @@ const NotaServico: React.FC = () => {
         setSelectedPessoaDialog(pessoa);
         handlePrepararNfsChange('id_cliente', pessoa?.id ?? 0);
     };
+    const handlePessoaContrato = (updatedPessoa: PessoaEntity) => {
+        setPessoa(updatedPessoa);
+    };
+    const handlePessoaSaved = (created: PessoaEntity) => {
+        setShowModalPessoa(false);
+        setSelectedPessoaDialog(created);
+        handlePrepararNfsChange('id_cliente', created.id);
+        setReloadKeyPessoa((current) => current + 1);
+    };
     const search = async (filters?: {
         dateRange: DateRangeValue;
         selectedEmpresa: CompanyEntity | null;
@@ -439,6 +491,27 @@ const NotaServico: React.FC = () => {
             setLoadingPrepararNfs(false);
         }
     };
+    const handleServico = (updatedServico: ServiceEntity) => {
+            setServico(updatedServico);
+    };
+    const handleEmpresa = (updatedEmpresa: CompanyEntity) => {
+            setEmpresa(updatedEmpresa);
+    };
+    const handleEmpresaSaved = (created: CompanyEntity) => {
+            setShowModalEmpresa(false);
+            setSelectedEmpresa(created);
+            handlePrepararNfsChange('id_empresa', created.id);
+            setReloadKeyEmpresa((current) => current + 1);
+    };
+    const handleErrorsChange = (updatedErrors: Record<string, string>) => {
+            setErrors(updatedErrors);
+    };
+    const handleServiceSaved = (created: ServiceEntity) => {
+            setShowModalServico(false);
+            setSelectedServico(created);
+            handlePrepararNfsChange('id_servico', created.id);
+            setReloadKeyServico((current) => current + 1);
+        };
     useEffect(() => {
         if (!showDialogPreparaNfs) return;
 
@@ -515,14 +588,20 @@ const NotaServico: React.FC = () => {
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
-                                                        selectedCompany={draftSelectedEmpresa}
-                                                        onCompanyChange={handleEmpresaChange}
+                                                        selectedEmpresa={draftSelectedEmpresa}
+                                                        onEmpresaChange={handleEmpresaChange}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <PessoaDropdownField selectedPessoa={draftSelectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
+                                                    <PessoaDropdownField 
+                                                    selectedPessoa={draftSelectedPessoa} 
+                                                    onPessoaChange={handlePessoaChange} 
+                                                    reloadKey={reloadKeyPessoa} 
+                                                    hasError={!!errors.selectedPessoa} 
+                                                    errorMessage={errors.selectedPessoa} 
+                                                    />
                                                 </div>
                                                 <div className="col-12 lg:col-12">
                                                     <DropdownSearch<VendedorEntity>
@@ -635,14 +714,19 @@ const NotaServico: React.FC = () => {
                                             <div className="grid formgrid">
                                             <div className="col-12 lg:col-12 ">
                                                 <EmpresaDropdownField
-                                                    selectedCompany={draftSelectedEmpresa}
-                                                    onCompanyChange={handleEmpresaChange}
+                                                    selectedEmpresa={draftSelectedEmpresa}
+                                                    onEmpresaChange={handleEmpresaChange}
                                                     hasError={!!errors.selectedCompany}
                                                     errorMessage={errors.selectedCompany}
                                                 />
                                             </div>
                                             <div className="col-12 lg:col-12 ">
-                                                <PessoaDropdownField selectedPessoa={draftSelectedPessoa} onPessoaChange={handlePessoaChange} reloadKey={reloadKeyPessoa} hasError={!!errors.selectedPessoa} errorMessage={errors.selectedPessoa} />
+                                                <PessoaDropdownField 
+                                                selectedPessoa={draftSelectedPessoa}
+                                                onPessoaChange={handlePessoaChange}
+                                                reloadKey={reloadKeyPessoa} 
+                                                hasError={!!errors.selectedPessoa}
+                                                errorMessage={errors.selectedPessoa} />
                                             </div>
                                             <div className="col-12 lg:col-12">
                                                 <DropdownSearch<VendedorEntity>
@@ -746,18 +830,24 @@ const NotaServico: React.FC = () => {
                         >
                             <div className="col-12 lg:col-12 ">
                                 <EmpresaDropdownField
-                                    selectedCompany={selectedEmpresaDialog}
-                                    onCompanyChange={handleEmpresaChangeDialog}
+                                    id="selectedEmpresa" 
+                                    reloadKey={reloadKeyEmpresa}
+                                    selectedEmpresa={selectedEmpresaDialog}
+                                    onEmpresaChange={handleEmpresaChangeDialog}
+                                    showAddButton
+                                    onAddClick={() => setShowModalEmpresa(true)}
                                     hasError={!!errors.selectedEmpresa}
                                     errorMessage={errors.selectedEmpresa}
-                                    autoSelectSingle={true}
                                 />
                             </div>
                             <div className="col-12 lg:col-12 ">
                                 <PessoaDropdownField 
                                 id="selectedCliente" 
+                                reloadKey={reloadKeyPessoa}
                                 selectedPessoa={selectedPessoaDialog} 
                                 onPessoaChange={handlePessoaChangeDialog} 
+                                showAddButton
+                                onAddClick={() => setShowModalPessoa(true)}
                                 hasError={!!errors.selectedCliente} 
                                 errorMessage={errors.selectedCliente} 
                                 />
@@ -765,17 +855,64 @@ const NotaServico: React.FC = () => {
                             <div className="col-12 lg:col-12">
                                 <ServicoDropdownField
                                     id="selectedServico"
+                                    reloadKey={reloadKeyServico}
                                     selectedService={selectedServicoDialog}
                                     onServiceChange={handleServicoChangeDialog}
-                                    placeholder="Selecione o serviço"
-                                    topLabel="Serviço:"
-                                    showTopLabel
-                                    autoSelectSingle={true}
+                                    showAddButton
+                                    onAddClick={() => setShowModalServico(true)}
                                     hasError={!!errors.selectedServico}
                                     errorMessage={errors.selectedServico}
                                 />
                             </div>
                         </Dialog>
+                        <DialogFilter header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
+                        <FormEmpresaCreated
+                            msgs={msgs}
+                            ref={formRef}
+                            empresa={empresa}
+                            initialId={null}
+                            setEmpresa={setEmpresa}
+                            onEmpresaChange={handleEmpresa}
+                            onErrorsChange={handleErrorsChange}
+                            redirectAfterSave={false}
+                            onSaved={handleEmpresaSaved}
+                            onClose={() => setShowModalEmpresa(false)}
+                            showBTNPGCreatedDialog
+                            onBackClick={() => setShowModalEmpresa(false)}
+                        />
+                    </DialogFilter>
+                        <DialogFilter header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
+                            <FormCreatedPessoa
+                                msgs={msgs}
+                                ref={formRef}
+                                pessoa={pessoa}
+                                initialId={null}
+                                setPessoa={setPessoa}
+                                onPessoaChange={handlePessoaContrato}
+                                onErrorsChange={() => {}}
+                                redirectAfterSave={false}
+                                onSaved={handlePessoaSaved}
+                                onClose={() => setShowModalPessoa(false)}
+                                showBTNPGCreatedDialog
+                                onBackClick={() => setShowModalPessoa(false)}
+                            />
+                        </DialogFilter>
+                          <DialogFilter header="Adicionar Serviço" visible={showModalServico} onHide={() => setShowModalServico(false)}>
+                        <FormCreatedServico
+                            msgs={msgs}
+                            ref={formRef}
+                            servico={servico}
+                            initialId={null}
+                            setServico={setServico}
+                            onServicoChange={handleServico}
+                            onErrorsChange={handleErrorsChange}
+                            redirectAfterSave={false}
+                            onSaved={handleServiceSaved}
+                            onClose={() => setShowModalServico(false)}
+                            showBTNPGCreatedDialog
+                            onBackClick={() => setShowModalServico(false)}
+                        />
+                    </DialogFilter>
                     </>
                 )}
             </div>

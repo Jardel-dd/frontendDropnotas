@@ -9,16 +9,22 @@ import { MultiSelectChangeEvent } from "primereact/multiselect";
 import { Toast } from "primereact/toast";
 import { ChangeEvent, RefObject } from "react";
 
+
 export interface EmpresaDropdownFieldProps {
-    selectedCompany: CompanyEntity | null;
-    selectedCompanyId?: number | null;
-    onCompanyChange: (empresa: CompanyEntity | null) => void;
+    selectedEmpresa: CompanyEntity | null;
+    selectedEmpresaId?: number | null;
+    onEmpresaChange: (pessoa: CompanyEntity | null) => void;
     reloadKey?: number;
+    id?: string;
     hasError?: boolean;
     errorMessage?: string;
-    showAddButton?: boolean;
+    placeholder?: string;
+    topLabel?: string;
+    showTopLabel?: boolean;
+    required?: boolean;
     onAddClick?: () => void;
     autoSelectSingle?: boolean;
+    showAddButton?: boolean;
 }
 
 export interface EmpresaFormProps {

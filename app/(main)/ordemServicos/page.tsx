@@ -305,8 +305,8 @@ const OrdemServicos: React.FC = () => {
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
-                                                        selectedCompany={draftSelectedEmpresa}
-                                                        onCompanyChange={handleCompanyChange}
+                                                        selectedEmpresa={draftSelectedEmpresa}
+                                                        onEmpresaChange={handleCompanyChange}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
                                                         showAddButton
@@ -417,8 +417,8 @@ const OrdemServicos: React.FC = () => {
                                                 <div className="grid formgrid">
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
-                                                        selectedCompany={draftSelectedEmpresa}
-                                                        onCompanyChange={handleCompanyChange}
+                                                        selectedEmpresa={draftSelectedEmpresa}
+                                                        onEmpresaChange={handleCompanyChange}
                                                         hasError={!!errors.selectedCompany}
                                                         errorMessage={errors.selectedCompany}
                                                     />

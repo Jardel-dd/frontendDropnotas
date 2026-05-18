@@ -187,7 +187,7 @@ export const visualiarButton = (
                 fontSize: "1rem",
                 width: "2rem",
                 height: "2rem",
-                color: "#FFFFFF",
+                color: "#64748B",
                 boxShadow: "none"
 
             }}

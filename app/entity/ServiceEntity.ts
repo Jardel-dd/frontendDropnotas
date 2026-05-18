@@ -290,7 +290,7 @@ export class DetalPrestadorValoresEntity {
 export class ServiceEntity {
     id_servico?: string;
     ativo?: boolean;
-    id?: number;
+    id!: number;
     descricao!: string;
     descricao_completa?: string;
     codigo!: string;

@@ -95,7 +95,7 @@ export const createdPerfilUser = async (
         });
         console.log('Dados do perfil:', perfilUser);
         if (redirectAfterSave) {
-            router.push('/cadastro/perfilUsuario');
+            router.push('/cadastro/permissoes');
         }
         setPerfilUser(created);
         return created;
@@ -131,7 +131,7 @@ export const updatePerfilUser = async (
             detail: 'Perfil de usuário atualizado com sucesso!'
         });
 
-        router.push('/cadastro/perfilUsuario');
+        router.push('/cadastro/permissoes');
     } catch (error) {
         if (axios.isAxiosError(error)) {
             console.error('Erro na atualização do perfil de usuário:', error.response?.data);
