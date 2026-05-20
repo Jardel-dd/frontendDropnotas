@@ -1,5 +1,7 @@
 import axios from 'axios';
 import api from '@/app/services/api';
+import { Messages } from 'primereact/messages';
+import { RefObject } from 'react';
 import {  PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
@@ -13,7 +15,8 @@ export const listContrato = async (
     listPaginationContratos: Record<string, any>,
     listarInativos: boolean,
     setLoading: (state: boolean) => void,
-    searchTerm: string
+    searchTerm: string,
+    msgs?: RefObject<Messages | null>
 ) => {
     setLoading(true);
     try {
@@ -23,8 +26,29 @@ export const listContrato = async (
         console.log('status', listarInativos);
         console.log('Dados retornados da API list:', response.data);
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Erro ao buscar Contratos:', error);
+        if (error.response?.status === 403) {
+            msgs?.current?.clear();
+            msgs?.current?.show({
+                severity: 'warn',
+                summary: 'Acesso negado',
+                detail: 'Você não possui permissão para visualizar Contratos.',
+                life: 6000
+            });
+            return {
+                content: [],
+                pageable: {
+                    pageNumber: listPaginationContratos.pageable.pageNumber ?? 0,
+                    pageSize: listPaginationContratos.pageable.pageSize ?? 10
+                },
+                totalElements: 0,
+                totalPages: 0,
+                last: true,
+                first: true,
+                empty: true
+            };
+        }
         throw error;
     } finally {
         setLoading(false);
@@ -49,7 +73,7 @@ export const ativarContrato = async (
                 detail: `Contrato ativado com sucesso.`,
             },
         ]);
-        await listContrato(listPaginationContratos, listarInativos, setLoading, searchTerm);
+        await listContrato(listPaginationContratos, listarInativos, setLoading, searchTerm, msgs);
         console.log(`Contrato com ID ${ContratoId} ativada com sucesso.`);
     } catch (error) {
         msgs.current?.clear();
@@ -88,7 +112,7 @@ export const deletarContrato = async (
             msgs.current?.clear();
         }, 20000);
         console.log(`Contrato com ID ${ContratoId} excluída com sucesso.`);
-        await listContrato(listPaginationContratos, listarInativos, setLoading, searchTerm);
+        await listContrato(listPaginationContratos, listarInativos, setLoading, searchTerm, msgs);
     } catch (error) {
         msgs.current?.clear();
         msgs.current?.show([
@@ -210,7 +234,7 @@ export const handleActiveOrInativeContrato = async (
         } else {
             await ativarContrato(rowData.id!, msgs, listPaginationContrato, listarInativos, setLoading, searchTerm);
         }
-        const refreshList = await listContrato(listPaginationContrato, listarInativos, setLoading, searchTerm);
+        const refreshList = await listContrato(listPaginationContrato, listarInativos, setLoading, searchTerm, msgs);
         setListPaginationContrato(refreshList);
     } catch (error) {
         console.error("Erro ao ativar/desativar Contrato:", error);

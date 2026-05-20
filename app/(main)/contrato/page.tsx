@@ -92,7 +92,8 @@ const Contratos: React.FC = () => {
                 },
                 listarInativos,
                 setLoading,
-                _searchTerm ?? searchTerm
+                _searchTerm ?? searchTerm,
+                msgs
             );
             setListPaginationContratos(contratos);
         } catch (error) {

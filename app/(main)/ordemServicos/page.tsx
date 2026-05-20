@@ -158,7 +158,8 @@ const OrdemServicos: React.FC = () => {
                 setLoading,
                 _searchTerm ?? searchTerm,
                 statusToSend,
-                periodoToSend
+                periodoToSend,
+                msgs
             );
             if (ordemServicos) {
                 setListPaginationOrdemServico(ordemServicos);
@@ -233,7 +234,7 @@ const OrdemServicos: React.FC = () => {
                 data_hora_inicio,
                 data_hora_fim
             };
-            const resultado = await fetchOrdemServico(params);
+            const resultado = await fetchOrdemServico(params, msgs);
             setRelatorio(resultado);
         } finally {
             setLoading(false);

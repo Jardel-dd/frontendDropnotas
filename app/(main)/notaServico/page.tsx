@@ -251,7 +251,7 @@ const NotaServico: React.FC = () => {
                 id_empresa: appliedFilters.selectedEmpresa?.id,
                 id_cliente: appliedFilters.selectedPessoa?.id,
                 id_vendedor: appliedFilters.selectedVendedor?.id
-            });
+            }, msgs);
 
             setListPaginationNotaServico(data);
         } finally {
@@ -346,7 +346,7 @@ const NotaServico: React.FC = () => {
                 id_empresa: activeFilters.selectedEmpresa?.id,
                 id_cliente: activeFilters.selectedPessoa?.id,
                 id_vendedor: activeFilters.selectedVendedor?.id
-            });
+            }, msgs);
 
             const referencias = (response?.content ?? [])
                 .map((nota: NfsEntity) => nota.referencia?.trim())

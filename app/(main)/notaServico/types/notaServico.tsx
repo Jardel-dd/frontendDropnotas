@@ -10,6 +10,10 @@ import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 export interface NotaServicoFormRef {
     handleSave: () => Promise<void>;
 }
+export type ExportarPdfNfsePayload = {
+    data_hora_inicio: string;
+    data_hora_fim: string;
+};
 export interface NotaServicoFormProps {
     notaServico: NfsEntity;
     initialId?: string | null;

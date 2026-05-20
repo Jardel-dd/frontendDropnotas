@@ -1,5 +1,7 @@
 import axios from 'axios';
 import api from '@/app/services/api';
+import { Messages } from 'primereact/messages';
+import { RefObject } from 'react';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
@@ -12,47 +14,104 @@ import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 
-export const fetchOrdemServico = async (params: OrdemServicoParams) => {
-    const searchParams = new URLSearchParams();
-    if (params.termo != null) {
-        searchParams.append('termo', String(params.termo));
-    }
-    if (params.idEmpresa != null) {
-        searchParams.append('id_empresa', String(params.idEmpresa));
-    }
-    if (params.idCliente != null) {
-        searchParams.append('id_cliente', String(params.idCliente));
-    }
-    if (params.status) {
-        searchParams.append('status', params.status);
-    }
-    if (params.data_hora_inicio) {
-        searchParams.append('data_hora_inicio', params.data_hora_inicio);
-    }
-    if (params.data_hora_fim) {
-        searchParams.append('data_hora_final', params.data_hora_fim);
-    }
-    if (params.tipo_data) {
-        searchParams.append('tipo_data', params.tipo_data);
-    }
-    const queryString = searchParams.toString();
-    const url = `/ordem-servico${queryString ? `?${queryString}` : ''}`;
+const getEmptyOrdemServicoList = (pageNumber = 0, pageSize = 10) => ({
+    content: [],
+    pageable: {
+        pageNumber,
+        pageSize
+    },
+    totalElements: 0,
+    totalPages: 0,
+    last: true,
+    first: true,
+    empty: true
+});
 
-    const response = await api.get(url);
-    return response.data;
-};
-export const list = async (pagination: any, listarInativos: boolean, setLoading: (v: boolean) => void, termo?: string, status?: string, periodo?: DateRangeValue) => {
-    const params: any = {
-        page: pagination.pageable.pageNumber,
-        size: pagination.pageable.pageSize,
-        ...mapDateRangeToParams(periodo)
-    };
-    if (termo) params.termo = termo;
-    if (status !== undefined && status !== null && status !== '') {
-        params.status = status;
+export const fetchOrdemServico = async (
+    params: OrdemServicoParams,
+    msgs?: RefObject<Messages | null>
+) => {
+    try {
+        const searchParams = new URLSearchParams();
+        if (params.termo != null) {
+            searchParams.append('termo', String(params.termo));
+        }
+        if (params.idEmpresa != null) {
+            searchParams.append('id_empresa', String(params.idEmpresa));
+        }
+        if (params.idCliente != null) {
+            searchParams.append('id_cliente', String(params.idCliente));
+        }
+        if (params.status) {
+            searchParams.append('status', params.status);
+        }
+        if (params.data_hora_inicio) {
+            searchParams.append('data_hora_inicio', params.data_hora_inicio);
+        }
+        if (params.data_hora_fim) {
+            searchParams.append('data_hora_final', params.data_hora_fim);
+        }
+        if (params.tipo_data) {
+            searchParams.append('tipo_data', params.tipo_data);
+        }
+        const queryString = searchParams.toString();
+        const url = `/ordem-servico${queryString ? `?${queryString}` : ''}`;
+
+        const response = await api.get(url);
+        return response.data;
+    } catch (error: any) {
+        console.error('Erro ao buscar Ordens de Serviço:', error);
+        if (error.response?.status === 403) {
+            msgs?.current?.clear();
+            msgs?.current?.show({
+                severity: 'warn',
+                summary: 'Acesso negado',
+                detail: 'Você não possui permissão para visualizar Ordem Serviços.',
+                life: 6000
+            });
+            return getEmptyOrdemServicoList();
+        }
+        throw error;
     }
-    const response = await api.get('/ordem-servico', { params });
-    return response.data;
+};
+export const list = async (
+    pagination: any,
+    listarInativos: boolean,
+    setLoading: (v: boolean) => void,
+    termo?: string,
+    status?: string,
+    periodo?: DateRangeValue,
+    msgs?: RefObject<Messages | null>
+) => {
+    try {
+        const params: any = {
+            page: pagination.pageable.pageNumber,
+            size: pagination.pageable.pageSize,
+            ...mapDateRangeToParams(periodo)
+        };
+        if (termo) params.termo = termo;
+        if (status !== undefined && status !== null && status !== '') {
+            params.status = status;
+        }
+        const response = await api.get('/ordem-servico', { params });
+        return response.data;
+    } catch (error: any) {
+        console.error('Erro ao buscar Ordens de Serviço:', error);
+        if (error.response?.status === 403) {
+            msgs?.current?.clear();
+            msgs?.current?.show({
+                severity: 'warn',
+                summary: 'Acesso negado',
+                detail: 'Você não possui permissão para visualizar Ordem Serviços.',
+                life: 6000
+            });
+            return getEmptyOrdemServicoList(
+                pagination?.pageable?.pageNumber ?? 0,
+                pagination?.pageable?.pageSize ?? 10
+            );
+        }
+        throw error;
+    }
 };
 export const deletar = async (id: number, msgs: any, setLoading: (state: boolean) => void, searchTerm: string) => {
     try {
