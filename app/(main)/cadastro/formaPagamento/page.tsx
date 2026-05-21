@@ -4,6 +4,7 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import { CheckboxChangeEvent } from 'primereact/checkbox';
 import { DropdownChangeEvent } from 'primereact/dropdown';
@@ -11,7 +12,6 @@ import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import ListarFormaPagamento from './tabela/formaPagamentoListagem';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
@@ -31,6 +31,7 @@ const CategoriaContrato: React.FC = () => {
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const {permissaoFormaPagamento} = usePermissions();
     const [visible, setVisible] = useState<boolean>(false);
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoEntity>(
@@ -204,8 +205,10 @@ const CategoriaContrato: React.FC = () => {
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
+                                     {permissaoFormaPagamento.create && (
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                </div>
+                                     )}
+                                     </div>
                             </div>
                         </div>
                         <div>
@@ -279,9 +282,11 @@ const CategoriaContrato: React.FC = () => {
                                             />
                                         </FilterOverlay>
                                     </div>
+                                    {permissaoFormaPagamento.create && (
                                     <div className="container-button-primary-novo">
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
+                                     )}
                                 </div>
                                 <div >
                                     <ListarFormaPagamento

@@ -1,18 +1,24 @@
 'use client';
 import './TreeStyles.css';
 import '@/app/styles/styledGlobal.css';
+import LoadingScreen from '@/app/loading';
 import { Messages } from 'primereact/messages';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
+import { useUser } from '@/app/routes/protected/UserContext';
 import { PermissoesFormRef } from '../types/perfilUsuario';
 import FormPermissoesCreated from '../form/controller';
 
 export default function PerfilUserPage() {
+    const router = useRouter();
     const msgs = useRef<Messages>(null);
     const searchParams = useSearchParams();
+    const { userConta } = useUser();
     const perfilUserId = searchParams.get('id');
     const formRef = useRef<PermissoesFormRef>(null);
+    const hasRedirectedRef = useRef(false);
     const [perfilUser, setPerfilUser] = useState<PerfilUser>(
         new PerfilUser({
             ativo: true,
@@ -80,10 +86,33 @@ export default function PerfilUserPage() {
     const handleErrorsChange = (updatedErrors: Record<string, string>) => {
         setErrors(updatedErrors);
     };
+    const isEditRoute = !!perfilUserId;
+    const canAccessPerfilUsuarioPage = isEditRoute ? !!userConta?.perfilUsuario?.perfilUsuarioAlterar : !!userConta?.perfilUsuario?.perfilUsuarioCadastrar;
+
+    useEffect(() => {
+        if (canAccessPerfilUsuarioPage || hasRedirectedRef.current) {
+            return;
+        }
+
+        hasRedirectedRef.current = true;
+
+        const hasInternalReferrer = typeof document !== 'undefined' && !!document.referrer && document.referrer.startsWith(window.location.origin);
+
+        if (hasInternalReferrer && window.history.length > 1) {
+            router.back();
+            return;
+        }
+
+        router.replace('/cadastro/permissoes');
+    }, [canAccessPerfilUsuarioPage, router]);
+
+    if (!canAccessPerfilUsuarioPage) {
+        return <LoadingScreen loadingText="Redirecionando..." />;
+    }
+
     return (
         <div className="card styled-container-main-all-routes">
             <FormPermissoesCreated msgs={msgs} ref={formRef} perfilUser={perfilUser} initialId={perfilUserId} setPerfilUser={setPerfilUser} onPerfilUserChange={handlePerfilUserChange} onErrorsChange={handleErrorsChange} showBTNPGCreatedAll={true} />
         </div>
     );
 }
-

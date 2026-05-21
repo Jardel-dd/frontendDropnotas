@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getToken, renewToken } from './token';
+import { requestUserRefresh } from '@/app/routes/protected/userRefreshEvents';
 const api = axios.create({
     baseURL: 'https://backend.dropnotas.com',
     headers: {
@@ -24,6 +25,7 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+        const requestUrl = originalRequest?.url;
         if (originalRequest.url === '/refresh-token') {
             return Promise.reject(error);
         }
@@ -35,6 +37,9 @@ api.interceptors.response.use(
             }
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
             return api(originalRequest);
+        }
+        if (error.response?.status === 403 && requestUrl !== '/login') {
+            requestUserRefresh();
         }
         return Promise.reject(error);
     }

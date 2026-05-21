@@ -4,6 +4,7 @@ import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
+import { usePermissions } from '@/app/routes/permissoes';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
@@ -36,6 +37,7 @@ export function ListarEmpresas({
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
     const msgs = useRef<Messages>(null);
+    const { permissaoEmpresa } = usePermissions();
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<CompanyEntity[]>([]);
@@ -80,14 +82,18 @@ export function ListarEmpresas({
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => editButton(rowData, '/configuracoes/empresas/created', router)}
-                                toggleStatusOrDeleteButtonTemplate={(rowData) =>
-                                    toggleStatusOrDeleteButton({
-                                        entity: rowData,
-                                        onToggle: changeStatusActivateandDelete,
-                                        entityType: ''
-                                    })
-                                }
+                                editButtonTemplate={
+                                    permissaoEmpresa.update ?
+                                        (rowData) => editButton(rowData, '/configuracoes/empresas/created', router)
+                                        : undefined}
+                                toggleStatusOrDeleteButtonTemplate={
+                                    permissaoEmpresa.delete ? (rowData) =>
+                                        toggleStatusOrDeleteButton({
+                                            entity: rowData,
+                                            onToggle: changeStatusActivateandDelete,
+                                            entityType: ''
+                                        })
+                                        : undefined}
                                 showExpandButton={true}
                                 columns={[
                                     {
@@ -115,14 +121,18 @@ export function ListarEmpresas({
                                 searchTerm={searchTerm}
                                 rowExpansionTemplate={rowExpansionTemplate}
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
-                                editButtonTemplate={(rowData) => editButton(rowData, '/configuracoes/empresas/created', router)}
-                                toggleStatusOrDeleteButtonTemplate={(rowData) =>
-                                    toggleStatusOrDeleteButton({
-                                        entity: rowData,
-                                        onToggle: changeStatusActivateandDelete,
-                                        entityType: ''
-                                    })
-                                }
+                                editButtonTemplate={
+                                    permissaoEmpresa.update ?
+                                        (rowData) => editButton(rowData, '/configuracoes/empresas/created', router)
+                                        : undefined}
+                                toggleStatusOrDeleteButtonTemplate={
+                                    permissaoEmpresa.delete ? (rowData) =>
+                                        toggleStatusOrDeleteButton({
+                                            entity: rowData,
+                                            onToggle: changeStatusActivateandDelete,
+                                            entityType: ''
+                                        })
+                                        : undefined}
                                 columns={[
                                     {
                                         field: 'razaoSocial',

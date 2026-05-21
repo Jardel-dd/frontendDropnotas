@@ -4,14 +4,15 @@ import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
+import { usePermissions } from '@/app/routes/permissoes';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { handleActiveOrInativeServicos } from '../controller/controller';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
-import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 
 export function ListarServicos(
     {
@@ -37,6 +38,7 @@ export function ListarServicos(
     const router = useRouter();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages>(null);
+    const { permissaoServico } = usePermissions();
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === "dark";
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
@@ -69,12 +71,12 @@ export function ListarServicos(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/servicos/created", router)}
-                                    toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
+                                    editButtonTemplate={permissaoServico.update ? (rowData) => editButton(rowData, "/cadastro/servicos/created", router) : undefined}
+                                    toggleStatusOrDeleteButtonTemplate={permissaoServico.delete ? (rowData) => toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
                                         entityType: "",
-                                    })}
+                                    }) : undefined}
                                     showExpandButton={false}
                                     columns={[
                                         {
@@ -108,12 +110,12 @@ export function ListarServicos(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/servicos/created", router)}
-                                    toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
+                                    editButtonTemplate={permissaoServico.update ? (rowData) => editButton(rowData, "/cadastro/servicos/created", router) : undefined}
+                                    toggleStatusOrDeleteButtonTemplate={permissaoServico.delete ? (rowData) => toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
                                         entityType: "",
-                                    })}
+                                    }) : undefined}
                                     showExpandButton={false}
                                     columns={[
                                         {

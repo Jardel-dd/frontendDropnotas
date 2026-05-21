@@ -1,19 +1,19 @@
 'use client';
-import '@/app/styles/styledGlobal.css'
+import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
+import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import { Skeleton } from 'primereact/skeleton';
-import LoadingScreen from '@/app/loading';
+import { usePermissions } from '@/app/routes/permissoes';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { handleActiveOrInativeClientesFornecedores } from '../controller/controller';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
-import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
-
 
 export function ListarClientesFornecedores(
     {
@@ -43,6 +43,7 @@ export function ListarClientesFornecedores(
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages>(null);
+    const { permissaoPessoa } = usePermissions();
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === "dark";
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
@@ -78,12 +79,15 @@ export function ListarClientesFornecedores(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/pessoas/created", router)}
-                                    toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
-                                        entity: rowData,
-                                        onToggle: changeStatusActivateandDelete,
-                                        entityType: "",
-                                    })}
+                                    editButtonTemplate={permissaoPessoa.update ?
+                                        (rowData) => editButton(rowData, "/cadastro/pessoas/created", router) : undefined}
+                                    toggleStatusOrDeleteButtonTemplate={
+                                        permissaoPessoa.delete ?
+                                            (rowData) => toggleStatusOrDeleteButton({
+                                                entity: rowData,
+                                                onToggle: changeStatusActivateandDelete,
+                                                entityType: "",
+                                            }) : undefined}
                                     showExpandButton={false}
                                     columns={[
                                         {
@@ -120,12 +124,15 @@ export function ListarClientesFornecedores(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/pessoas/created", router)}
-                                    toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
-                                        entity: rowData,
-                                        onToggle: changeStatusActivateandDelete,
-                                        entityType: "",
-                                    })}
+                                    editButtonTemplate={permissaoPessoa.update ?
+                                        (rowData) => editButton(rowData, "/cadastro/pessoas/created", router) : undefined}
+                                    toggleStatusOrDeleteButtonTemplate={
+                                        permissaoPessoa.delete ?
+                                            (rowData) => toggleStatusOrDeleteButton({
+                                                entity: rowData,
+                                                onToggle: changeStatusActivateandDelete,
+                                                entityType: "",
+                                            }) : undefined}
                                     showExpandButton={false}
                                     columns={[
                                         {
@@ -161,8 +168,6 @@ export function ListarClientesFornecedores(
                                                 );
                                             },
                                         }
-
-
                                     ]}
                                     listarInativos={listarInativos}
                                     cliente={cliente}

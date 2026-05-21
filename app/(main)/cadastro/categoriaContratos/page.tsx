@@ -21,6 +21,7 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
+import { usePermissions } from '@/app/routes/permissoes';
 
 const CategoriaContrato: React.FC = () => {
     const pageSize = usePageSize();
@@ -30,6 +31,7 @@ const CategoriaContrato: React.FC = () => {
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const { permissaoCategoriaContrato } = usePermissions();
     const formRef = useRef<CategoriaContratoFormRef>(null);
     const [visible, setVisible] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -212,7 +214,9 @@ const CategoriaContrato: React.FC = () => {
                                         />
 
                                     </FilterOverlay>
-                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    {permissaoCategoriaContrato.create && (
+                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -278,7 +282,9 @@ const CategoriaContrato: React.FC = () => {
                                         </FilterOverlay>
                                     </div>
                                     <div className="container-button-primary-novo">
-                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                        {permissaoCategoriaContrato.create && (
+                                            <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                        )}
                                     </div>
                                 </div>
                             </div>

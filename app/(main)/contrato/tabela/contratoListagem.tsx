@@ -1,18 +1,19 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
+import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
-import LoadingScreen from '@/app/loading';
+import { usePermissions } from '@/app/routes/permissoes';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { handleActiveOrInativeContrato } from '../controller/controller';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
-import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 export function ListarContratos({
     listPaginationContratos,
     setListPaginationContratos,
@@ -35,6 +36,7 @@ export function ListarContratos({
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages>(null);
+    const { permissaoContrato } = usePermissions();
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
@@ -55,18 +57,18 @@ export function ListarContratos({
                                 loading={loading}
                                 totalRecords={listPaginationContratos?.size ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => editButton(rowData, '/contrato/created', router)}
-                                toggleStatusOrDeleteButtonTemplate={(rowData) =>
+                                editButtonTemplate={permissaoContrato.update ? (rowData) => editButton(rowData, '/contrato/created', router) : undefined}
+                                toggleStatusOrDeleteButtonTemplate={permissaoContrato.delete ? (rowData) =>
                                     toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
                                         entityType: ''
-                                    })
+                                    }) : undefined
                                 }
                                 showExpandButton={false}
                                 columns={[
@@ -90,18 +92,18 @@ export function ListarContratos({
                                 loading={loading}
                                 totalRecords={listPaginationContratos?.size ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => editButton(rowData, '/contrato/created', router)}
-                                toggleStatusOrDeleteButtonTemplate={(rowData) =>
+                                editButtonTemplate={permissaoContrato.update ? (rowData) => editButton(rowData, '/contrato/created', router) : undefined}
+                                toggleStatusOrDeleteButtonTemplate={permissaoContrato.delete ? (rowData) =>
                                     toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
                                         entityType: ''
-                                    })
+                                    }) : undefined
                                 }
                                 showExpandButton={false}
                                 columns={[

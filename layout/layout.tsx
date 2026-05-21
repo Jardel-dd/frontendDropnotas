@@ -6,7 +6,7 @@ import { classNames, DomHandler } from 'primereact/utils';
 import { usePathname, useSearchParams } from 'next/navigation';
 import type { AppTopbarRef, ChildContainerProps } from '@/types';
 import PrivateRoute from '@/app/routes/protected/protectedRoute';
-import { UserProvider } from '@/app/routes/protected/UserContext';
+import PermissionRouteGuard from '@/app/routes/protected/PermissionRouteGuard';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import { setupLocale } from '@/app/components/calendarComponent/calendarTranslation/addLocale';
 import { useEventListener, useResizeListener, useUnmountEffect } from 'primereact/hooks';
@@ -146,21 +146,19 @@ const Layout = (props: ChildContainerProps) => {
     return (
         <React.Fragment>
             <PrivateRoute>
-                <UserProvider >
-                    <div className={classNames('layout-container', containerClassName)}>
-                        <AppTopbar ref={topbarRef} />
-                        <div ref={sidebarRef} className="layout-sidebar" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                            <AppSidebar />
-                        </div>
-                        <div className="layout-content-wrapper">
-                            <div className="layout-content">
-                                <div className="layout-content-inner">
-                                    {props.children}
-                                </div>
+                <div className={classNames('layout-container', containerClassName)}>
+                    <AppTopbar ref={topbarRef} />
+                    <div ref={sidebarRef} className="layout-sidebar" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                        <AppSidebar />
+                    </div>
+                    <div className="layout-content-wrapper">
+                        <div className="layout-content">
+                            <div className="layout-content-inner">
+                                <PermissionRouteGuard>{props.children}</PermissionRouteGuard>
                             </div>
                         </div>
                     </div>
-                </UserProvider>
+                </div>
             </PrivateRoute>
         </React.Fragment>
     );

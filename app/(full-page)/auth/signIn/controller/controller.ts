@@ -33,8 +33,10 @@ export const authLogin = async (userConta: UsuarioContaEntity, msgs: React.RefOb
         }
         return false;
     } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-            msgs.current?.show([{ severity: 'error', summary: 'Erro', detail: 'Email ou Senha incorreto, por favor verifique.' }]);
+        const statusCode = error.response?.status;
+
+        if (statusCode === 401 || statusCode === 403) {
+            msgs.current?.show([{ severity: 'error', summary: 'Erro', detail: 'Email ou senha incorretos. Por favor, verifique e tente novamente.' }]);
         } else {
             msgs.current?.show([{ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro. Tente novamente.' }]);
         }

@@ -1,6 +1,7 @@
 import api from './api';
 import { JwtPayload, jwtDecode } from 'jwt-decode';
 import { logoutUser } from '../(full-page)/auth/logout/logoutRefreshToken';
+import { requestUserRefresh } from '@/app/routes/protected/userRefreshEvents';
 
 export const getToken = async (): Promise<string | null> => {
     const token = localStorage.getItem('token');
@@ -48,6 +49,7 @@ export const renewToken = async (): Promise<string | null> => {
         if (token && newRefreshToken) {
             saveToken(token);
             saveRefreshToken(newRefreshToken);
+            requestUserRefresh();
             return token;
         }
         console.error('Tokens invalido retornado');

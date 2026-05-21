@@ -5,13 +5,14 @@ import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
 import { Messages } from 'primereact/messages';
 import { Skeleton } from 'primereact/skeleton';
+import { usePermissions } from '@/app/routes/permissoes';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { handleActiveOrInativeCategoriaContrato } from '../controller/controller';
-import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
 
 export function ListarCategoriaContrato({
@@ -38,9 +39,9 @@ export function ListarCategoriaContrato({
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages>(null);
     const { layoutConfig } = useContext(LayoutContext);
+    const { permissaoCategoriaContrato } = usePermissions();
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
-
     const changeStatusActivateandDelete = async (rowData: CategoryContratosEntity) => {
         await handleActiveOrInativeCategoriaContrato(rowData, msgs, listPaginationCategoriaContrato, listarInativos, setLoading, searchTerm, setListPaginationCategoriaContrato);
     };
@@ -58,30 +59,33 @@ export function ListarCategoriaContrato({
                                 loading={loading}
                                 totalRecords={listPaginationCategoriaContrato?.size ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => (
-                                    <Button
-                                        icon="pi pi-pencil"
-                                        tooltip="Alterar"
-                                        className="p-button-text p-button-warning bottom-All-plus-datatableDetails"
-                                        onClick={() => {
-                                            console.log('[EDITAR] Clique no botão editar');
-                                            console.log('[EDITAR] RowData:', rowData);
-                                            console.log('[EDITAR] ID da categoria:', rowData.id);
-                                            onCategoriaClick?.(rowData);
-                                        }}
-                                    />
-                                )}
-                                toggleStatusOrDeleteButtonTemplate={(rowData) =>
-                                    toggleStatusOrDeleteButton({
-                                        entity: rowData,
-                                        onToggle: changeStatusActivateandDelete,
-                                        entityType: ''
-                                    })
+                                editButtonTemplate={
+                                    permissaoCategoriaContrato.update ?
+                                        (rowData) => (
+                                            <Button
+                                                icon="pi pi-pencil"
+                                                tooltip="Alterar"
+                                                className="p-button-text p-button-warning bottom-All-plus-datatableDetails"
+                                                onClick={() => {
+                                                    console.log('[EDITAR] Clique no botão editar');
+                                                    console.log('[EDITAR] RowData:', rowData);
+                                                    console.log('[EDITAR] ID da categoria:', rowData.id);
+                                                    onCategoriaClick?.(rowData);
+                                                }}
+                                            />
+                                        ) : undefined}
+                                toggleStatusOrDeleteButtonTemplate={
+                                    permissaoCategoriaContrato.delete ? (rowData) =>
+                                        toggleStatusOrDeleteButton({
+                                            entity: rowData,
+                                            onToggle: changeStatusActivateandDelete,
+                                            entityType: ''
+                                        }) : undefined
                                 }
                                 showExpandButton={false}
                                 columns={[
@@ -105,27 +109,28 @@ export function ListarCategoriaContrato({
                                 loading={loading}
                                 totalRecords={listPaginationCategoriaContrato?.size ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => (
-                                    <Button
-                                        icon="pi pi-pencil"
-                                        tooltip="Alterar"
-                                        className="p-button-text p-button-warning bottom-All-plus-datatableDetails"
-                                        onClick={() => {
-                                            onCategoriaClick?.(rowData);
-                                        }}
-                                    />
-                                )}
-                                toggleStatusOrDeleteButtonTemplate={(rowData) =>
+                                editButtonTemplate={
+                                    permissaoCategoriaContrato.update ? (rowData) => (
+                                        <Button
+                                            icon="pi pi-pencil"
+                                            tooltip="Alterar"
+                                            className="p-button-text p-button-warning bottom-All-plus-datatableDetails"
+                                            onClick={() => {
+                                                onCategoriaClick?.(rowData);
+                                            }}
+                                        />
+                                    ) : undefined}
+                                toggleStatusOrDeleteButtonTemplate={permissaoCategoriaContrato.delete ? (rowData) =>
                                     toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
                                         entityType: ''
-                                    })
+                                    }) : undefined
                                 }
                                 showExpandButton={false}
                                 columns={[

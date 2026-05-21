@@ -5,6 +5,7 @@ import '@/app/styles/styledGlobal.css';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { OrdemServicoParams } from './types/ordemServico';
@@ -15,13 +16,13 @@ import ListarOrdemServico from './tabela/ordemServicoListagem';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { Formas_recebimento } from '@/app/entity/FormaPagamento';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { DetalServiceOSEntity } from '@/app/entity/ServiceEntity';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { deletar, fetchOrdemServico, list, preparar } from './controller/controller';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
@@ -37,6 +38,7 @@ const OrdemServicos: React.FC = () => {
     const msgs = useRef<Messages | null>(null);
     const hasLoadedInitialList = useRef(false);
     const [loading, setLoading] = useState(true);
+    const {permissaoOrdemServico} = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
     const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
@@ -340,6 +342,7 @@ const OrdemServicos: React.FC = () => {
                                                     />
                                                 </div>
                                             </FilterOverlay>
+                                            {permissaoOrdemServico.create && (
                                             <Button
                                                 label=""
                                                 className="ml-1rem"
@@ -356,6 +359,7 @@ const OrdemServicos: React.FC = () => {
                                                     } catch (error) { }
                                                 }}
                                             />
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -451,6 +455,7 @@ const OrdemServicos: React.FC = () => {
                                                 </div>
                                             </FilterOverlay>
                                         </div>
+                                        {permissaoOrdemServico.create && (
                                         <div className="container-button-primary-novo">
                                             <Button
                                                 label="Novo"
@@ -469,6 +474,7 @@ const OrdemServicos: React.FC = () => {
                                                 }}
                                             />
                                         </div>
+                                        )}
                                     </div>
                                     <div className="mt-3">
                                         <ListarOrdemServico

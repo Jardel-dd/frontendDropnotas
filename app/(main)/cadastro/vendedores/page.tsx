@@ -12,13 +12,14 @@ import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
-import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
+import {  CheckboxChangeEvent } from 'primereact/checkbox';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarVendedor, deletarVendedor, listVendedor } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
+import { usePermissions } from '@/app/routes/permissoes';
 
 const Vendedores: React.FC = () => {
     const router = useRouter();
@@ -26,9 +27,9 @@ const Vendedores: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
-    const { isDarkMode } = useTheme();
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const {permissaoVendedor} = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
     const [vendedor, setVendedor] = useState<VendedorEntity>(
@@ -191,8 +192,10 @@ const Vendedores: React.FC = () => {
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
+                                    {permissaoVendedor.create && (
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                </div>
+                                    )}
+                                    </div>
                             </div>
                         </div>
                         <div>
@@ -256,9 +259,11 @@ const Vendedores: React.FC = () => {
 
                                         </FilterOverlay>
                                     </div>
+                                     {permissaoVendedor.create && (
                                     <div className="container-button-primary-novo">
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
+                                     )}
                                 </div>
                             </div>
                             <div>

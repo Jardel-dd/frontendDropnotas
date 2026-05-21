@@ -5,14 +5,15 @@ import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import { Skeleton } from 'primereact/skeleton';
+import { usePermissions } from '@/app/routes/permissoes';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { handleActiveOrInativeFormaPagamento, } from '../controller/controller';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
-import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 export function ListarFormaPagamento(
     {
         listPaginationFormaPagamento,
@@ -39,6 +40,7 @@ export function ListarFormaPagamento(
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages>(null);
+    const { permissaoFormaPagamento } = usePermissions();
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === "dark";
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
@@ -73,12 +75,16 @@ export function ListarFormaPagamento(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/formaPagamento/created", router)}
-                                    toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
-                                        entity: rowData,
-                                        onToggle: changeStatusActivateandDelete,
-                                        entityType: "",
-                                    })}
+                                    editButtonTemplate={
+                                        permissaoFormaPagamento.update ?
+                                            (rowData) => editButton(rowData, "/cadastro/formaPagamento/created",
+                                                router) : undefined}
+                                    toggleStatusOrDeleteButtonTemplate={
+                                        permissaoFormaPagamento.delete ? (rowData) => toggleStatusOrDeleteButton({
+                                            entity: rowData,
+                                            onToggle: changeStatusActivateandDelete,
+                                            entityType: "",
+                                        }) : undefined}
                                     showExpandButton={false}
                                     columns={[
                                         {
@@ -112,12 +118,16 @@ export function ListarFormaPagamento(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/formaPagamento/created", router)}
-                                    toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
-                                        entity: rowData,
-                                        onToggle: changeStatusActivateandDelete,
-                                        entityType: "",
-                                    })}
+                                    editButtonTemplate={
+                                        permissaoFormaPagamento.update ?
+                                            (rowData) => editButton(rowData, "/cadastro/formaPagamento/created",
+                                                router) : undefined}
+                                    toggleStatusOrDeleteButtonTemplate={
+                                        permissaoFormaPagamento.delete ? (rowData) => toggleStatusOrDeleteButton({
+                                            entity: rowData,
+                                            onToggle: changeStatusActivateandDelete,
+                                            entityType: "",
+                                        }) : undefined}
                                     showExpandButton={false}
                                     columns={[
                                         {

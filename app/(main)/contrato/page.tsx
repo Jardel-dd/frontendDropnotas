@@ -17,6 +17,7 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
+import { usePermissions } from '@/app/routes/permissoes';
 
 const Contratos: React.FC = () => {
     const router = useRouter();
@@ -26,6 +27,7 @@ const Contratos: React.FC = () => {
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const {permissaoContrato} = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
     const [contrato, setContrato] = useState<ContratoEntity>(
@@ -192,7 +194,6 @@ const Contratos: React.FC = () => {
                                 <div className="col-4 mb-0 lg:col-2 p-0 ">
                                     <div className="container-BTN-Filter-Created">
                                         <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
-
                                             <CheckBoxField
                                                 inputId="listarInativos"
                                                 label="Listar Desativadas"
@@ -200,8 +201,10 @@ const Contratos: React.FC = () => {
                                                 onChange={handleCheckboxChange}
                                             />
                                         </FilterOverlay>
+                                        {permissaoContrato.create && (
                                         <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                    </div>
+                                        )}
+                                        </div>
                                 </div>
                             </div>
                         </div>
@@ -265,9 +268,11 @@ const Contratos: React.FC = () => {
                                             />
                                         </FilterOverlay>
                                     </div>
+                                    {permissaoContrato.create && (
                                     <div className="container-button-primary-novo">
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
+                                   )}
                                 </div>
                             </div>
                             <div >

@@ -6,28 +6,28 @@ import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import ListarEmpresas from './tabela/empresaListagem';
 import Input from '@/app/shared/include/input/input-all';
+import { usePermissions } from '@/app/routes/permissoes';
+import {  CheckboxChangeEvent } from 'primereact/checkbox';
 import { CompanyEntity, } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
-import {  CheckboxChangeEvent } from 'primereact/checkbox';
 import {  PaginatorPageChangeEvent } from 'primereact/paginator';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarEmpresa, deletarEmpresa, listEmpresa } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import CustomPaginator from '@/app/components/paginator/customPaginator';
-import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const Empresas: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
-    const { isDarkMode } = useTheme();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
+    const {permissaoEmpresa} = usePermissions();
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [empresa, setEmpresa] = useState<CompanyEntity>(
@@ -72,7 +72,7 @@ const Empresas: React.FC = () => {
             telefone: '',
             ativo: true,
             tipo_rps: '',
-        }));
+    }));
     const [visible, setVisible] = useState<boolean>(false);
     const [isCompanyCreated, setIsCompanyCreated] = useState(false);
     const [listarInativos, setListarInativos] = useState<boolean>(false);
@@ -206,8 +206,10 @@ const Empresas: React.FC = () => {
                                                 onChange={handleCheckboxChange}
                                             />
                                         </FilterOverlay>
+                                        {permissaoEmpresa.create && (
                                         <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                    </div>
+                                        )}
+                                        </div>
                                 </div>
                             </div>
                         </div>
@@ -271,12 +273,13 @@ const Empresas: React.FC = () => {
                                                 checked={listarInativos}
                                                 onChange={handleCheckboxChange}
                                             />
-
                                         </FilterOverlay>
                                     </div>
+                                     {permissaoEmpresa.create && (
                                     <div className='container-button-primary-novo'>
                                         <Button icon="pi pi-plus" label='Novo' onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
+                                    )}
                                 </div>
                                 <div>
                                     <ListarEmpresas

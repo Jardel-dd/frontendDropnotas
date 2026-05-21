@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { UserProvider } from '@/app/routes/protected/UserContext';
 import type { ChildContainerProps, LayoutContextProps, LayoutConfig, LayoutState, Breadcrumb } from '@/types';
 import { applyThemeLink, DEFAULT_COLOR_SCHEME, DEFAULT_COMPONENT_THEME, getStoredUserThemePreferences, updateStoredUserThemePreferences } from '@/app/utils/themePreferences';
 
@@ -130,8 +129,6 @@ export const LayoutProvider = (props: ChildContainerProps) => {
         setTabs
     };
     return (
-        <UserProvider>
-            <LayoutContext.Provider value={value}>{props.children}</LayoutContext.Provider>
-        </UserProvider>
+        <LayoutContext.Provider value={value}>{props.children}</LayoutContext.Provider>
     );
 };

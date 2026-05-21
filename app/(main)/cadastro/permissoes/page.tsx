@@ -5,19 +5,19 @@ import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import ListarPerfilUsers from './tabela/perfilUsuario';
+import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
+import {  CheckboxChangeEvent } from 'primereact/checkbox';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
+import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
-import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { ativarPerfilUser, deletarPerfilUser, listPerfilUser } from './controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import CustomPaginator from '@/app/components/paginator/customPaginator';
-import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const PerfilUsuarios: React.FC = () => {
     const pageSize = usePageSize();
@@ -25,10 +25,10 @@ const PerfilUsuarios: React.FC = () => {
     const isDesktop = useIsDesktop();
     const router = useRouter();
     const toast = useRef<Toast>(null);
-    const { isDarkMode } = useTheme();
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const {permissaoPerfilUsuario} = usePermissions();
     const [visible, setVisible] = useState<boolean>(false);
     const [perfilUser, setPerfilUser] = useState<PerfilUser>(
         new PerfilUser({
@@ -88,8 +88,7 @@ const PerfilUsuarios: React.FC = () => {
             formaPagamentoDesativar: false,
             formaPagamentoPesquisar: false,
             nfseTipoVisualizacao: ''
-        }));
-
+    }));
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [isPerfilUsuarioCreated, setIsPerfilUsuarioCreated] = useState(false);
     const [selectedPerfilUser, setSelectedPerfilUser] = useState<PerfilUser | null>(null);
@@ -184,8 +183,32 @@ const PerfilUsuarios: React.FC = () => {
         setVisible(false);
     };
     useEffect(() => {
-        handleListPerfilUser();
-    }, []);
+        const loadInitialPerfilUsers = async () => {
+            try {
+                const perfilUsers = await listPerfilUser(
+                    {
+                        pageable: {
+                            pageNumber: 0,
+                            pageSize
+                        }
+                    },
+                    false,
+                    setLoading,
+                    ''
+                );
+                setListPaginationPerfilUser(perfilUsers);
+            } catch (error) {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Falha ao buscar Perfil de Usuário',
+                    life: 3000
+                });
+            }
+        };
+
+        void loadInitialPerfilUsers();
+    }, [pageSize]);
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
@@ -221,7 +244,7 @@ const PerfilUsuarios: React.FC = () => {
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
-                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    {permissaoPerfilUsuario.create && <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />}
                                 </div>
                             </div>
                         </div>
@@ -286,9 +309,11 @@ const PerfilUsuarios: React.FC = () => {
                                         />
                                     </FilterOverlay>
                                 </div>
-                                <div className="container-button-primary-novo">
-                                    <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
-                                </div>
+                                {permissaoPerfilUsuario.create  && (
+                                    <div className="container-button-primary-novo">
+                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div>

@@ -1,18 +1,19 @@
 'use client';
-import './perfilStyles.css'
+import './perfilStyles.css';
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
+import { usePermissions } from '@/app/routes/permissoes';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { handleActiveOrInativeVendedor } from '../controller/controller';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
-import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 export function ListarVendedores(
     {
         listPaginationVendedores,
@@ -20,8 +21,8 @@ export function ListarVendedores(
         loading,
         setLoading,
         searchTerm,
-        listarInativos, 
-     
+        listarInativos,
+
     }: {
         listPaginationVendedores: Record<string, any>
         loading: boolean
@@ -33,15 +34,16 @@ export function ListarVendedores(
         listarInativos: boolean;
     }
 ) {
+    const router = useRouter();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
-    const router = useRouter();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages>(null);
+    const { permissaoVendedor } = usePermissions();
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === "dark";
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
-     
+
     const changeStatusActivateandDelete = async (rowData: VendedorEntity) => {
         await handleActiveOrInativeVendedor(
             rowData,
@@ -55,7 +57,7 @@ export function ListarVendedores(
     };
     return (
         <div style={{ marginTop: '0' }}>
-      <Messages ref={msgs} className="custom-messages" />
+            <Messages ref={msgs} className="custom-messages" />
             {loading ? (<LoadingScreen loadingText={'Carregando...'} />) :
                 (
                     <>
@@ -66,18 +68,18 @@ export function ListarVendedores(
                                     loading={loading}
                                     totalRecords={listPaginationVendedores?.size ?? 0}
                                     expandedRows={false}
-                                    setExpandedRows={() => {}}
+                                    setExpandedRows={() => { }}
                                     rowExpansionTemplate={() => null}
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/vendedores/created", router)}
-                                    toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
+                                    editButtonTemplate={permissaoVendedor.update ? (rowData) => editButton(rowData, "/cadastro/vendedores/created", router) : undefined}
+                                    toggleStatusOrDeleteButtonTemplate={permissaoVendedor.delete ? (rowData) => toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
                                         entityType: "",
-                                    })}
-                                    showExpandButton={false} 
+                                    }) : undefined}
+                                    showExpandButton={false}
                                     columns={[
                                         {
                                             field: "razaoSocial",
@@ -93,52 +95,50 @@ export function ListarVendedores(
                                                 );
                                             },
                                         },
-                                    ]} 
-                                    listarInativos={listarInativos}      
-                             />
+                                    ]}
+                                    listarInativos={listarInativos}
+                                />
                             </div>
                         }
                         {isDesktop &&
                             <div>
-                            <DataTableComponent
-                                value={listPaginationVendedores?.content as VendedorEntity[]}
-                                loading={loading}
-                                totalRecords={listPaginationVendedores?.size ?? 0}
-                                expandedRows={false}
-                                setExpandedRows={() => {}}
-                                rowExpansionTemplate={() => null}
-                                expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
-                                isDarkMode={isDarkMode}
-                                searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/vendedores/created", router)}
-                                toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
-                                    entity: rowData,
-                                    onToggle: changeStatusActivateandDelete,
-                                    entityType: "",
-                                })}
-                                showExpandButton={false} 
-                                columns={[
-                                    {
-                                        field: "razaoSocial",
-                                        header: "Nome",
-                                        body: (data) => {
-                                            const isStatusInactive = data.ativo === false;
-                                            return loading ? (
-                                                <Skeleton />
-                                            ) : (
-                                                <span className={isStatusInactive ? 'text-red-custom' : ''}>
-                                                    {highlightSearchTerm(limitarText(data.razao_social, 25), searchTerm)}
-                                                </span>
-                                            );
+                                <DataTableComponent
+                                    value={listPaginationVendedores?.content as VendedorEntity[]}
+                                    loading={loading}
+                                    totalRecords={listPaginationVendedores?.size ?? 0}
+                                    expandedRows={false}
+                                    setExpandedRows={() => { }}
+                                    rowExpansionTemplate={() => null}
+                                    expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
+                                    isDarkMode={isDarkMode}
+                                    searchTerm={searchTerm}
+                                    editButtonTemplate={permissaoVendedor.update ? (rowData) => editButton(rowData, "/cadastro/vendedores/created", router) : undefined}
+                                    toggleStatusOrDeleteButtonTemplate={permissaoVendedor.delete ? (rowData) => toggleStatusOrDeleteButton({
+                                        entity: rowData,
+                                        onToggle: changeStatusActivateandDelete,
+                                        entityType: "",
+                                    }) : undefined}
+                                    showExpandButton={false}
+                                    columns={[
+                                        {
+                                            field: "razaoSocial",
+                                            header: "Nome",
+                                            body: (data) => {
+                                                const isStatusInactive = data.ativo === false;
+                                                return loading ? (
+                                                    <Skeleton />
+                                                ) : (
+                                                    <span className={isStatusInactive ? 'text-red-custom' : ''}>
+                                                        {highlightSearchTerm(limitarText(data.razao_social, 25), searchTerm)}
+                                                    </span>
+                                                );
+                                            },
                                         },
-                                    },
-                                    
-                                ]} 
-                                
-                                listarInativos={listarInativos}     
-                                   
-                         />
-                        </div>
+
+                                    ]}
+                                    listarInativos={listarInativos}
+                                />
+                            </div>
                         }
                     </>
                 )

@@ -9,8 +9,6 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
-import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
-import { exportarPdfNotasServico, listNotaServico } from './controller/controller';
 import Input from '@/app/shared/include/input/input-all';
 import ListarNotaServico from './tabela/notaServicoListagem';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
@@ -20,11 +18,14 @@ import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
+import { PessoaFormRef } from '../cadastro/pessoas/types/pessoa';
 import { validateFieldsPrepararNfs } from './controller/validation';
-import { FormCreatedPessoa } from '../cadastro/pessoas/form/controller';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
+import { FormCreatedPessoa } from '../cadastro/pessoas/form/controller';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
+import { FormCreatedServico } from '../cadastro/servicos/form/controller';
+import FormEmpresaCreated from '../configuracoes/empresas/form/controller';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
@@ -32,16 +33,17 @@ import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { DropDownFilterNotaServico } from '@/app/shared/optionsDropDown/options';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import { exportarPdfNotasServico, listNotaServico } from './controller/controller';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
+import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { createEmptyEmpresa, createEmptyServico } from '../ordemServicos/types/ordemServico';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import { PessoaFormRef } from '../cadastro/pessoas/types/pessoa';
-import FormEmpresaCreated from '../configuracoes/empresas/form/controller';
-import { FormCreatedServico } from '../cadastro/servicos/form/controller';
-import { createEmptyEmpresa, createEmptyServico } from '../ordemServicos/types/ordemServico';
+import { usePermissions } from '@/app/routes/permissoes';
 
 const createEmptyPessoa = () =>
     new PessoaEntity({
@@ -76,6 +78,7 @@ const NotaServico: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
+    const {permissaoNfse} = usePermissions();
     const msgs = useRef<Messages | null>(null);
     const formRef = useRef<PessoaFormRef>(null);
     const [loading, setLoading] = useState(true);
@@ -646,8 +649,10 @@ const NotaServico: React.FC = () => {
                                                     className="ml-1rem"
                                                     onClick={handleExportPdf}
                                                 />
+                                                 {permissaoNfse.create && (
                                                 <Button label="" icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                            </div>
+                                                 )}
+                                                </div>
                                         </div>
 
                                     </div>
@@ -776,9 +781,11 @@ const NotaServico: React.FC = () => {
                                                 onClick={handleExportPdf}
                                             />
                                         </div>
+                                        {permissaoNfse.create && (
                                         <div>
                                             <Button label="Novo" icon="pi pi-plus" onClick={handleNavigate} className="p-button-primary-novo" />
                                         </div>
+                                         )}
                                     </div>
                                 </div>
                             </div>

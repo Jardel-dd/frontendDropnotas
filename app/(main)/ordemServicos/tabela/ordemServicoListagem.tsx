@@ -13,6 +13,7 @@ import { useIsDesktop } from '@/app/components/responsiveCelular/responsive';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton } from '@/app/components/dataTableComponent/DataTableComponent';
+import { usePermissions } from '@/app/routes/permissoes';
 
 export function ListarOrdemServico(
     {
@@ -34,13 +35,10 @@ export function ListarOrdemServico(
     }
 ) {
     const isDesktop = useIsDesktop();
-    const router = useRouter();
     const msgs = useRef<Messages>(null);
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === "dark";
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
-
-
     return (
         <div style={{ marginTop: '0' }}>
             <Messages ref={msgs} className="custom-messages" />

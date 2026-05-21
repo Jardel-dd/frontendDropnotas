@@ -5,18 +5,19 @@ import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import ListarServicos from './tabela/servicoListagem';
+import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarServico, deletarServico, listServico } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 function Servicos() {
     const router = useRouter();
@@ -26,6 +27,7 @@ function Servicos() {
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const { permissaoServico } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [service, setService] = useState<ServiceEntity>(
         new ServiceEntity({
@@ -195,7 +197,9 @@ function Servicos() {
                                         />
 
                                     </FilterOverlay>
-                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    {permissaoServico.create && (
+                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -259,9 +263,12 @@ function Servicos() {
                                             />
                                         </FilterOverlay>
                                     </div>
-                                    <div className="container-button-primary-novo">
-                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
-                                    </div>
+                                    {permissaoServico.create && (
+                                        <div className="container-button-primary-novo">
+                                            <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                        </div>
+                                    )}
+
                                 </div>
                                 <div className="mt-3">
                                     <ListarServicos

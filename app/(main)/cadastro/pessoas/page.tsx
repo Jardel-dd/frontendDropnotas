@@ -5,6 +5,7 @@ import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import ListarPessoa from './tabela/pessoaListagem';
+import { usePermissions } from '@/app/routes/permissoes';
 import { ClienteFornecedorFilter } from './types/pessoa';
 import Input from '@/app/shared/include/input/input-all';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
@@ -30,6 +31,7 @@ const ClientesFornecedores: React.FC = () => {
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
+    const { permissaoPessoa } = usePermissions();
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [pessoa, setPessoa] = useState<PessoaEntity>(
@@ -220,7 +222,9 @@ const ClientesFornecedores: React.FC = () => {
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
-                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    {permissaoPessoa.create && (
+                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -301,9 +305,11 @@ const ClientesFornecedores: React.FC = () => {
                                             </div>
                                         </FilterOverlay>
                                     </div>
-                                    <div className="container-button-primary-novo">
-                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
-                                    </div>
+                                    {permissaoPessoa.create && (
+                                        <div className="container-button-primary-novo">
+                                            <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <ListarPessoa
