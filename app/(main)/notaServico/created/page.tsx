@@ -4,7 +4,7 @@ import { Messages } from 'primereact/messages';
 import { useSearchParams } from 'next/navigation';
 import { NfsEntity } from '@/app/entity/NfsEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
-import { DetalTomadorEntity } from '@/app/entity/PessoaEntity';
+import { ContatoEntity, DetalTomadorEntity } from '@/app/entity/PessoaEntity';
 import { DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DetalPrestadorValoresEntity, DetalServiceEntity } from '@/app/entity/ServiceEntity';
 import NotaServicoForm, { NotaServicoFormRef } from '@/app/(main)/notaServico/form/notaServico';
@@ -76,7 +76,9 @@ export default function CriarNotaServico() {
             tomador: new DetalTomadorEntity({
                 cpf_cnpj: 0,
                 razao_social: '',
-                email: '',
+                contato: new ContatoEntity({
+                                    email: '',
+                                }),
                 endereco: new EnderecoEntity({
                     cep: '',
                     logradouro: '',

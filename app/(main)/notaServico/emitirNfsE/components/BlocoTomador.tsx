@@ -21,7 +21,6 @@ type Props = {
 export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropdownChange, handleSearchCep, setLoadingCep, setNfs, setError, msgs, errors, handleDropdownChangeEnderecoTomador, loadingCep }: Props) {
     const tomadorErrors = getScopedErrors(errors, 'tomador');
     const tomadorEnderecoErrors = getScopedErrors(errors, 'tomador.endereco');
-    const tomadorEmail = nfseGerada.tomador?.email || nfseGerada.tomador?.contato?.email || '';
 
     return (
         <div>
@@ -70,7 +69,7 @@ export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropd
                 </div>
                 <div className="col-12 mb-1 lg:col-12 lg:mb-0">
                     <Input
-                        value={tomadorEmail}
+                        value={nfseGerada.tomador?.email ?? nfseGerada.tomador?.contato?.email ?? ''}
                         onChange={(e) => handleAllChanges(e, 'tomador')}
                         label="E-mail"
                         id="email"

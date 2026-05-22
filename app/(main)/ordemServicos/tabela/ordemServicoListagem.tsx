@@ -1,10 +1,7 @@
 'use client';
 import LoadingScreen from '@/app/loading';
-import { Button } from 'primereact/button';
-import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
-import { confirmDialog } from 'primereact/confirmdialog';
 import { getStatusClassOs } from '../types/statusClassNfs';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
@@ -12,8 +9,7 @@ import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import { useIsDesktop } from '@/app/components/responsiveCelular/responsive';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
-import { DataTableComponent, defaultExpandButtonTemplate, editButton } from '@/app/components/dataTableComponent/DataTableComponent';
-import { usePermissions } from '@/app/routes/permissoes';
+import { DataTableComponent, defaultExpandButtonTemplate} from '@/app/components/dataTableComponent/DataTableComponent';
 
 export function ListarOrdemServico(
     {
@@ -184,15 +180,10 @@ export function ListarOrdemServico(
                                                 return loading ? (
                                                     <Skeleton />
                                                 ) : (
-                                                    <span
-                                                        style={{ borderRadius: "1REM" }}
-                                                        className={`px-3 py-1 rounded-2xl text-sm font-medium inline-block ${getStatusClassOs(
-                                                            data.status
-                                                        )}`}
-                                                    >
-                                                        {highlightSearchTerm(limitarText(data.status, 25), searchTerm)}
-                                                    </span>
 
+                                                    <span style={{ borderRadius: '1REM', width: '90%', display: 'flex', alignItems: 'center' }} className={`px-3 py-1 rounded-2xl text-sm font-medium inline-block ${getStatusClassOs(data.status ?? '')}`}>
+                                                        <div style={{ display: 'flex', justifyContent: 'center' }}>{data.status}</div>
+                                                    </span>
                                                 );
                                             },
                                         },
@@ -200,7 +191,6 @@ export function ListarOrdemServico(
                                     listarInativos={listarInativos}
                                 />
                             </div>
-
                         }
                     </>
                 )

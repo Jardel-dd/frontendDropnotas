@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 import { Messages } from 'primereact/messages';
 import { NfsEntity } from '@/app/entity/NfsEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
-import { DetalTomadorEntity } from '@/app/entity/PessoaEntity';
+import { ContatoEntity, DetalTomadorEntity } from '@/app/entity/PessoaEntity';
 import { DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DetalPrestadorValoresEntity, DetalServiceEntity } from '@/app/entity/ServiceEntity';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
@@ -136,7 +136,9 @@ export const createEmptyNfse = () =>
         tomador: new DetalTomadorEntity({
             cpf_cnpj: 0,
             razao_social: '',
-            email: '',
+            contato:  new ContatoEntity({
+                email:'',
+            }),
             endereco: new EnderecoEntity({
                 cep: '',
                 logradouro: '',

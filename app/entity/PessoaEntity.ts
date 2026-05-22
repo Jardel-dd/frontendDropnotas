@@ -3,27 +3,50 @@ import { EnderecoEntity } from "./enderecoEntity";
 export class DetalTomadorEntity {
     cpf_cnpj!: number;
     razao_social!: string;
-    email!: string;
+    contato!: ContatoEntity;
     endereco!: EnderecoEntity;
+
     constructor({
         cpf_cnpj,
         razao_social,
-        email,
+        contato,
         endereco,
     }: {
         cpf_cnpj: number;
         razao_social: string;
-        email: string;
+        contato: ContatoEntity;
         endereco: EnderecoEntity;
     }) {
         Object.assign(this, {
             cpf_cnpj,
             razao_social,
-            email,
+            contato,
             endereco,
         });
     }
 }
+export class ContatoEntity {
+    email!: string;
+    constructor({
+        email,
+    }: {
+        email: string;
+    }) {
+        Object.assign(this, {
+            email,
+        });
+    }
+    copyWith({
+        email,
+    }: {
+        email?: string;
+    }): ContatoEntity {
+        return new ContatoEntity({
+            email: email ?? this.email,
+            
+    })
+}
+};
 export class PessoaEntity {
     id!: number;
     razao_social!: string;
@@ -49,7 +72,6 @@ export class PessoaEntity {
     id_vendedor_padrao?: number | null;
     ativo?: boolean;
     pais?: string;
-
     constructor({
         id,
         razao_social,
@@ -128,7 +150,6 @@ export class PessoaEntity {
             pais
         });
     }
-
     copyWith({
         id,
         razao_social,

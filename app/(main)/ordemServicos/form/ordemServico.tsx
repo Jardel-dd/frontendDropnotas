@@ -16,7 +16,6 @@ import { fetchAllVendedores, fetchFilteredVendedor } from '@/app/(main)/cadastro
 export type { FormCreatedOrdemServicoProps, OrdemServicoFieldsProps, OrdemServicoFormProps, OrdemServicoFormRef } from '../types/ordemServico';
 
 export function OrdemServicoFields({
-
     emitirOS,
     errors,
     reloadKeyPessoa,
@@ -94,6 +93,25 @@ export function OrdemServicoFields({
                     />
                 </div>
                 <div className="col-12 lg:col-4 ">
+                    <ServicoDropdownField
+                        id="selectedService"
+                        selectedService={selectedServico}
+                        onServiceChange={onServicoChange}
+                        reloadKey={reloadKeyServico}
+                        fetchAllItems={listTheService}
+                        fetchFilteredItems={fetchFilteredService}
+                        placeholder="Selecione o Serviço"
+                        hasError={!!errors.selectedService}
+                        errorMessage={errors.selectedService}
+                        autoSelectSingle
+                        showAddButton
+                        onAddClick={onAddServico}
+                        showTopLabel
+                        required
+                        topLabel="Serviço:"
+                    />
+                </div>
+                 <div className="col-12 lg:col-4 ">
                     <DropdownSearch<VendedorEntity>
                         id="selectedVendedor"
                         selectedItem={selectedVendedor}
@@ -121,25 +139,6 @@ export function OrdemServicoFields({
                         errorMessage={errors.selectedFormaPagamento}
                         showAddButton
                         onAddClick={onAddFormaPagamento}
-                    />
-                </div>
-                <div className="col-12 lg:col-4 ">
-                    <ServicoDropdownField
-                        id="selectedService"
-                        selectedService={selectedServico}
-                        onServiceChange={onServicoChange}
-                        reloadKey={reloadKeyServico}
-                        fetchAllItems={listTheService}
-                        fetchFilteredItems={fetchFilteredService}
-                        placeholder="Selecione o Serviço"
-                        hasError={!!errors.selectedService}
-                        errorMessage={errors.selectedService}
-                        autoSelectSingle
-                        showAddButton
-                        onAddClick={onAddServico}
-                        showTopLabel
-                        required
-                        topLabel="Serviço:"
                     />
                 </div>
                 <div className="col-12 lg:col-2">

@@ -2,9 +2,11 @@
 import './style.css';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
+import { Button } from 'primereact/button';
 import { Skeleton } from 'primereact/skeleton';
 import { Messages } from 'primereact/messages';
 import { NfsEntity } from '@/app/entity/NfsEntity';
+import { useRouter } from 'next/navigation';
 import { StatusNota } from '../types/statusClassNfs';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
@@ -36,9 +38,61 @@ export function ListarNotaServico({
 }) {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const router = useRouter();
     const msgs = useRef<Messages>(null);
     const { layoutConfig } = useContext(LayoutContext);
+    const { permissaoNfse } = usePermissions();
     const isDarkMode = layoutConfig.colorScheme === 'dark';
+
+    const canCorrectRejectedNota = permissaoNfse.create || permissaoNfse.update;
+
+    const handleCorrecao = (nota: NfsEntity) => {
+        const query = new URLSearchParams();
+
+        if (nota.referencia) {
+            query.set('referencia', nota.referencia);
+        }
+
+        if (nota.id) {
+            query.set('id', String(nota.id));
+        }
+
+        if (!query.toString()) return;
+
+        router.push(`/notaServico/created?${query.toString()}`);
+    };
+
+    const renderExtraActions = (rowData: NfsEntity) => {
+        if (rowData.status_nota === 'REJEITADA') {
+            if (!canCorrectRejectedNota) {
+                return null;
+            }
+
+            return (
+                <Button
+                    label="CORREÇÃO"
+                    icon="pi pi-pencil"
+                    outlined
+                    severity="warning"
+                    className="nota-servico-btn-correcao"
+                    style={{
+                        boxShadow: 'none'
+                    }}
+                    onClick={() => handleCorrecao(rowData)}
+                />
+            );
+        }
+
+        return (
+            <>
+                {visualiarButton(rowData, msgs)}
+                {downloadXmlButton(rowData, msgs)}
+                {downloadPdfButton(rowData, msgs)}
+                <CancelarNfs nota={rowData} msgs={msgs} />
+            </>
+        );
+    };
+
     return (
         <div style={{ marginTop: '0' }}>
             <Messages ref={msgs} className="custom-messages" />
@@ -163,18 +217,7 @@ export function ListarNotaServico({
                                     )
                                 }
                             ]}
-                            extraActionsTemplate={(rowData) => (
-                                <>
-                                    {rowData.status_nota !== 'REJEITADA' && (
-                                        <>
-                                            {visualiarButton(rowData, msgs)}
-                                            {downloadXmlButton(rowData, msgs)}
-                                            {downloadPdfButton(rowData, msgs)}
-                                            <CancelarNfs nota={rowData} msgs={msgs} />
-                                        </>
-                                    )}
-                                </>
-                            )}
+                            extraActionsTemplate={renderExtraActions}
                         />
                     )}
                     {isMobile && (
@@ -208,18 +251,7 @@ export function ListarNotaServico({
                                     )
                                 }
                             ]}
-                            extraActionsTemplate={(rowData) => (
-                                <>
-                                    {rowData.status_nota !== 'REJEITADA' && (
-                                        <>
-                                            {visualiarButton(rowData, msgs)}
-                                            {downloadXmlButton(rowData, msgs)}
-                                            {downloadPdfButton(rowData, msgs)}
-                                            <CancelarNfs nota={rowData} msgs={msgs} />
-                                        </>
-                                    )}
-                                </>
-                            )}
+                            extraActionsTemplate={renderExtraActions}
                         />
                     )}
                 </div>

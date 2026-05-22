@@ -27,7 +27,7 @@ import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
 import { FormCreatedServico } from '../cadastro/servicos/form/controller';
 import FormEmpresaCreated from '../configuracoes/empresas/form/controller';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
-import { DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
+import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { DropDownFilterNotaServico } from '@/app/shared/optionsDropDown/options';
@@ -203,7 +203,9 @@ const NotaServico: React.FC = () => {
             tomador: new DetalTomadorEntity({
                 cpf_cnpj: 0,
                 razao_social: '',
-                email: '',
+                contato: new ContatoEntity({
+                    email: '',
+                }),
                 endereco: new EnderecoEntity({
                     cep: '',
                     logradouro: '',

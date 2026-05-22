@@ -128,6 +128,44 @@ export const listNotaServico = async (
 
     return await fetchNotaServico(query, msgs);
 };
+export const fetchNotaServicoByID = async (id: string | number) => {
+    try {
+        const response = await api.get(`/nfse/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao buscar NFS-e por ID:', error);
+        throw error;
+    }
+};
+export const prepararCorrecaoNotaServico = async (
+    params: { referencia?: string | null; id?: string | number | null },
+    msgs?: any
+) => {
+    try {
+        const response = await api.get('/nfse/preparar-emissao', {
+            params: {
+                referencia: params.referencia ?? undefined,
+                id: params.referencia ? undefined : params.id ?? undefined
+            }
+        });
+
+        return response.data;
+    } catch (error: any) {
+        console.error('Erro ao preparar correcao da NFS-e:', error);
+
+        msgs?.current?.show({
+            severity: 'error',
+            summary: 'Erro',
+            detail:
+                error.response?.data?.message ||
+                error.response?.data?.mensagem ||
+                'Nao foi possivel carregar os dados da NFS-e para correcao.',
+            life: 5000
+        });
+
+        throw error;
+    }
+};
 export const deletarNotaServico = async (nfsId: number, msgs: any, listPaginationNotaServico: Record<string, any>, listarInativos: boolean, setLoading: (state: boolean) => void, searchTerm: string) => {
     try {
         await api.delete(`/nfse/cancelar${String(nfsId)}`);

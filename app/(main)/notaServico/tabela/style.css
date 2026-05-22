@@ -26,3 +26,9 @@
     line-height: 1.2rem;
     max-height: 2.4rem;
 }
+
+.nota-servico-btn-correcao {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}

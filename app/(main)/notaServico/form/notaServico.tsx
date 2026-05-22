@@ -17,12 +17,69 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
 import { validateFieldsNotaServico } from '@/app/(main)/notaServico/controller/validation';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { createdNotaServico, normalizeNfseServiceValores, prepararNotaServico } from '@/app/(main)/notaServico/controller/controller';
 import { incentivoFiscal, prestacaoSus, regimeEspecialTributarioOptionsCompany, tipo_rps } from '@/app/shared/optionsDropDown/options';
-import { createEmptyNfse, type FormCreatedNotaServicoProps, type NotaServicoFieldsProps, type NotaServicoFormProps, type NotaServicoFormRef } from '../types/notaServico';
 export type { FormCreatedNotaServicoProps, NotaServicoFieldsProps, NotaServicoFormProps, NotaServicoFormRef } from '../types/notaServico';
+import { createEmptyNfse, type FormCreatedNotaServicoProps, type NotaServicoFieldsProps, type NotaServicoFormProps, type NotaServicoFormRef } from '../types/notaServico';
+import { createdNotaServico, fetchNotaServicoByID, normalizeNfseServiceValores, prepararCorrecaoNotaServico, prepararNotaServico } from '@/app/(main)/notaServico/controller/controller';
 
+const buildEnderecoEntity = (endereco?: Partial<EnderecoEntity> | null) =>
+    new EnderecoEntity({
+        cep: endereco?.cep ?? '',
+        logradouro: endereco?.logradouro ?? '',
+        complemento: endereco?.complemento ?? '',
+        numero: endereco?.numero ?? '',
+        bairro: endereco?.bairro ?? '',
+        municipio: endereco?.municipio ?? '',
+        codigo_municipio: endereco?.codigo_municipio ?? '',
+        codigo_pais: endereco?.codigo_pais ?? '',
+        nome_pais: endereco?.nome_pais ?? '',
+        uf: endereco?.uf ?? '',
+        telefone: endereco?.telefone ?? ''
+});
+const parseCompetenciaDate = (competencia?: string | null) => {
+    if (!competencia) {
+        return null;
+    }
 
+    const [year, month, day] = competencia.split('T')[0].split('-').map(Number);
+
+    if (!year || !month || !day) {
+        return null;
+    }
+
+    const parsedDate = new Date(year, month - 1, day);
+
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+const buildNotaServicoFromResponse = (nfseData?: Partial<NfsEntity>) => {
+    const notaData = nfseData ?? {};
+    const emptyNfse = createEmptyNfse();
+    const tomadorEmail =
+        (notaData.tomador as any)?.email ??
+        (notaData.tomador as any)?.contato?.email ??
+        '';
+
+    return new NfsEntity({
+        ...emptyNfse,
+        ...notaData,
+        prestador: new DetalPrestadorEntity({
+            ...emptyNfse.prestador,
+            ...(notaData.prestador ?? {}),
+            endereco: buildEnderecoEntity(notaData.prestador?.endereco)
+        }),
+        tomador: new DetalTomadorEntity({
+            ...emptyNfse.tomador,
+            ...(notaData.tomador ?? {}),
+            contato: tomadorEmail,
+            endereco: buildEnderecoEntity(notaData.tomador?.endereco)
+        }),
+        servico: new DetalServiceEntity({
+            ...emptyNfse.servico,
+            ...(notaData.servico ?? {}),
+            valores: normalizeNfseServiceValores(notaData.servico?.valores)
+        })
+    });
+};
 export function NotaServicoFields({
     gerarNfse,
     errors,
@@ -97,16 +154,25 @@ export function NotaServicoFields({
         </>
     );
 }
-const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(({ notaServico, msgs, onNotaServicoChange, onErrorsChange, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
+const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(({ notaServico, initialId, msgs, onNotaServicoChange, onErrorsChange, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
     const router = useRouter();
     const toast = useRef<Toast>(null);
     const searchParams = useSearchParams();
+    const correctionReference = searchParams.get('referencia');
+    const hasInitialId = Boolean(initialId);
+    const hasCorrectionReference = Boolean(correctionReference);
     const hasPrepararParams = Boolean(searchParams.get('id_empresa') && searchParams.get('id_cliente') && searchParams.get('id_servico'));
     const onNotaServicoChangeRef = useRef(onNotaServicoChange);
     const onErrorsChangeRef = useRef(onErrorsChange);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [loading, setLoading] = useState(hasPrepararParams);
-    const [loadingText, setLoadingText] = useState(hasPrepararParams ? 'Preparando NFS-e...' : 'Emitindo NFS-e...');
+    const [loading, setLoading] = useState(hasPrepararParams || hasCorrectionReference || hasInitialId);
+    const [loadingText, setLoadingText] = useState(
+        hasPrepararParams
+            ? 'Preparando NFS-e...'
+            : hasCorrectionReference || hasInitialId
+              ? 'Carregando NFS-e para correcao...'
+              : 'Emitindo NFS-e...'
+    );
     const [loadingCep, setLoadingCep] = useState(false);
     const [gerarNfse, setGerarNfse] = useState<NfsEntity>(notaServico instanceof NfsEntity ? notaServico : createEmptyNfse());
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
@@ -280,7 +346,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         const id_cliente = Number(searchParams.get('id_cliente'));
         const id_servico = Number(searchParams.get('id_servico'));
 
-        if (!id_empresa || !id_cliente || !id_servico) {
+        if (hasCorrectionReference || initialId || !id_empresa || !id_cliente || !id_servico) {
             return;
         }
         const prepararEmissao = async () => {
@@ -295,19 +361,11 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                 const response = await prepararNotaServico(payload, selectedEmpresa, selectedCliente, selectedServico, setErrors, msgs, router);
 
                 if (response?.nfse) {
-                    const nfse = response.nfse;
-                    const valoresNormalizados = normalizeNfseServiceValores(nfse.servico?.valores);
-                    setGerarNfse(
-                        new NfsEntity({
-                            ...nfse,
-                            prestador: nfse.prestador,
-                            tomador: nfse.tomador,
-                            servico: new DetalServiceEntity({
-                                ...nfse.servico,
-                                valores: valoresNormalizados
-                            })
-                        })
-                    );
+                    const notaServicoPreparada = buildNotaServicoFromResponse(response.nfse);
+                    const competenciaDate = parseCompetenciaDate(notaServicoPreparada.competencia);
+
+                    setGerarNfse(notaServicoPreparada);
+                    setDateRange(competenciaDate ? [competenciaDate] : [new Date()]);
                     setIsValidationActive(true);
                 }
             } catch (error) {
@@ -322,7 +380,68 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         };
 
         prepararEmissao();
-    }, [msgs, router, searchParams, selectedCliente, selectedEmpresa, selectedServico]);
+    }, [hasCorrectionReference, initialId, msgs, router, searchParams, selectedCliente, selectedEmpresa, selectedServico]);
+    useEffect(() => {
+        if (!correctionReference || hasPrepararParams) {
+            return;
+        }
+
+        const carregarNotaParaCorrecao = async () => {
+            setLoadingText('Carregando NFS-e para correcao...');
+            setLoading(true);
+
+            try {
+                const response = await prepararCorrecaoNotaServico(
+                    {
+                        referencia: correctionReference,
+                        id: initialId
+                    },
+                    msgs
+                );
+                const notaServicoCarregada = buildNotaServicoFromResponse(response?.nfse ?? response);
+                const competenciaDate = parseCompetenciaDate(notaServicoCarregada.competencia);
+
+                setGerarNfse(notaServicoCarregada);
+                setDateRange(competenciaDate ? [competenciaDate] : [new Date()]);
+                setIsValidationActive(true);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        carregarNotaParaCorrecao().catch(() => undefined);
+    }, [correctionReference, hasPrepararParams, initialId, msgs]);
+    useEffect(() => {
+        if (!initialId || hasPrepararParams || hasCorrectionReference) {
+            return;
+        }
+
+        const carregarNotaPorId = async () => {
+            setLoadingText('Carregando NFS-e para correcao...');
+            setLoading(true);
+
+            try {
+                const response = await fetchNotaServicoByID(initialId);
+                const notaServicoCarregada = buildNotaServicoFromResponse(response?.nfse ?? response);
+                const competenciaDate = parseCompetenciaDate(notaServicoCarregada.competencia);
+
+                setGerarNfse(notaServicoCarregada);
+                setDateRange(competenciaDate ? [competenciaDate] : [new Date()]);
+                setIsValidationActive(true);
+            } catch (error) {
+                msgs.current?.show({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Nao foi possivel carregar a NFS-e para correcao.',
+                    life: 5000
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        carregarNotaPorId();
+    }, [hasCorrectionReference, hasPrepararParams, initialId, msgs]);
     if (loading) {
         return <LoadingScreen loadingText={loadingText} />;
     }
