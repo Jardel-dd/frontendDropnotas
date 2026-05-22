@@ -7,7 +7,7 @@ import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation'
 
 type Props = {
     nfseGerada: any;
-    handleAllChanges: (e: any, bloco?: 'prestador' | 'tomador' | 'servico') => void;
+    handleAllChanges: (e: any, bloco?: 'prestador' | 'tomador' | 'servico', subBloco?: 'contato') => void;
     handleDropdownChange: (e: any) => void;
     handleSubmit: (e: any) => void;
     handleSearchCep: Function;

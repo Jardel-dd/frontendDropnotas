@@ -6,7 +6,7 @@ import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation'
 
 type Props = {
     nfseGerada: any;
-    handleAllChanges: (e: any, bloco?: 'prestador' | 'tomador' | 'servico', index?: number) => void;
+    handleAllChanges: (e: any, bloco?: 'prestador' | 'tomador' | 'servico', subBloco?: 'contato') => void;
     handleDropdownChange: (e: any) => void;
     handleSearchCep: Function;
     setLoadingCep: Function;
@@ -38,8 +38,7 @@ export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropd
                                         type: 'text'
                                     }
                                 },
-                                'tomador',
-                                0
+                                'tomador'
                             )
                         }
                         placeholder="99.999.999/9999-99"
@@ -69,8 +68,8 @@ export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropd
                 </div>
                 <div className="col-12 mb-1 lg:col-12 lg:mb-0">
                     <Input
-                        value={nfseGerada.tomador?.email ?? nfseGerada.tomador?.contato?.email ?? ''}
-                        onChange={(e) => handleAllChanges(e, 'tomador')}
+                        value={ nfseGerada.tomador?.contato?.email ?? ''}
+                        onChange={(e) => handleAllChanges(e, 'tomador', 'contato')}
                         label="E-mail"
                         id="email"
                         type="email"

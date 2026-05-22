@@ -15,7 +15,7 @@ import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 type Props = {
     nfseGerada: any;
     errors: Record<string, string>;
-    handleAllChanges: (e: any, bloco?: 'prestador' | 'tomador' | 'servico') => void;
+    handleAllChanges: (e: any, bloco?: 'prestador' | 'tomador' | 'servico', subBloco?: 'contato') => void;
     handleNumberChange: (e: any, bloco?: 'prestador' | 'tomador' | 'servico', index?: number) => void;
     handleDropdownChange: (e: any, bloco?: 'prestador' | 'tomador' | 'servico', index?: number) => void;
 };

@@ -35,7 +35,7 @@ export interface NotaServicoFieldsProps {
     loadingCep: boolean;
     dateRange: Date[] | null;
     onDateChange: (date: Date | null) => void;
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any, bloco?: 'prestador' | 'tomador' | 'servico') => void;
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any, bloco?: 'prestador' | 'tomador' | 'servico', subBloco?: 'contato') => void;
     onNumberChange: (e: any, bloco?: 'prestador' | 'tomador' | 'servico') => void;
     onDropdownChange: (e: any, bloco?: 'prestador' | 'tomador' | 'servico') => void;
     onDropdownChangeRegime: (e: any) => void;
