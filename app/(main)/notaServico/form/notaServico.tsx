@@ -10,7 +10,7 @@ import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import NotaServico from '@/app/(main)/notaServico/emitirNfsE/nfse';
 import { DatePicker } from '@/app/components/calendarComponent/datePicker';
-import { DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
+import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import {  DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
@@ -36,6 +36,10 @@ const buildEnderecoEntity = (endereco?: Partial<EnderecoEntity> | null) =>
         uf: endereco?.uf ?? '',
         telefone: endereco?.telefone ?? ''
 });
+const buildContatoEntity = (contato?: Partial<ContatoEntity> | string | null) =>
+    new ContatoEntity({
+        email: typeof contato === 'string' ? contato : contato?.email ?? ''
+    });
 const parseCompetenciaDate = (competencia?: string | null) => {
     if (!competencia) {
         return null;
@@ -54,10 +58,6 @@ const parseCompetenciaDate = (competencia?: string | null) => {
 const buildNotaServicoFromResponse = (nfseData?: Partial<NfsEntity>) => {
     const notaData = nfseData ?? {};
     const emptyNfse = createEmptyNfse();
-    const tomadorEmail =
-        (notaData.tomador as any)?.email ??
-        (notaData.tomador as any)?.contato?.email ??
-        '';
 
     return new NfsEntity({
         ...emptyNfse,
@@ -70,7 +70,7 @@ const buildNotaServicoFromResponse = (nfseData?: Partial<NfsEntity>) => {
         tomador: new DetalTomadorEntity({
             ...emptyNfse.tomador,
             ...(notaData.tomador ?? {}),
-            contato: tomadorEmail,
+            contato: buildContatoEntity((notaData.tomador as any)?.contato ?? (notaData.tomador as any)?.email),
             endereco: buildEnderecoEntity(notaData.tomador?.endereco)
         }),
         servico: new DetalServiceEntity({
@@ -182,19 +182,35 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
     const [selectedCliente] = useState<PessoaEntity | null>(null);
     const [selectedServico] = useState<ServiceEntity | null>(null);
 
-    const handleAllChanges = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any, bloco: 'prestador' | 'tomador' | 'servico' = 'prestador') => {
+    const handleAllChanges = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any, bloco: 'prestador' | 'tomador' | 'servico' = 'prestador', subBloco?: "contato") => {
         const id = e?.target?.id ?? e?.id;
         const value = e?.target?.value ?? e?.value ?? '';
         if (!id) return;
+
         setGerarNfse((prev) => {
             const nfse = prev instanceof NfsEntity ? prev : new NfsEntity(prev);
-
-            return nfse.copyWith({
-                [bloco]: (nfse[bloco] as any)?.copyWith
-                    ? (nfse[bloco] as any).copyWith({
+            const blocoAtual = nfse[bloco] as any;
+            const updateField = (target: any) =>
+                target?.copyWith
+                    ? target.copyWith({
                           [id]: value
                       })
-                    : { ...nfse[bloco], [id]: value }
+                    : {
+                          ...(target ?? {}),
+                          [id]: value
+                      };
+
+            return nfse.copyWith({
+                [bloco]: subBloco
+                    ? blocoAtual?.copyWith
+                        ? blocoAtual.copyWith({
+                              [subBloco]: updateField(blocoAtual?.[subBloco])
+                          })
+                        : {
+                              ...(blocoAtual ?? {}),
+                              [subBloco]: updateField(blocoAtual?.[subBloco])
+                          }
+                    : updateField(blocoAtual)
             });
         });
     };
