@@ -179,7 +179,7 @@ const PerfilUsuarios: React.FC = () => {
     };
     const handleClearFilters = () => {
         setListarInativos(false);
-        handleListPerfilUser(0, searchTerm, listarInativos);
+        handleListPerfilUser(0, '', false);
         setVisible(false);
     };
     useEffect(() => {

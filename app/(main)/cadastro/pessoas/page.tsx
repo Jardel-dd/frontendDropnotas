@@ -164,7 +164,7 @@ const ClientesFornecedores: React.FC = () => {
         setSelectedClienteFornecedor(defaultClienteFornecedorFilter);
         setDraftClienteFornecedor(defaultClienteFornecedorFilter);
         setListarInativos(false);
-        handleListClientesFornecedores(0, searchTerm, defaultClienteFornecedorFilter, false);
+        handleListClientesFornecedores(0, '', defaultClienteFornecedorFilter, false);
         setVisible(false);
     };
     const handleApplyFilters = () => {

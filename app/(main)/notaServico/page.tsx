@@ -383,7 +383,7 @@ const NotaServico: React.FC = () => {
         setDraftSelectedStatusNotaServico('');
         setDateRange(clearedDateRange);
         setDraftDateRange(clearedDateRange);
-        handleListNotaServico(0, searchTerm, {
+        handleListNotaServico(0, '', {
             dateRange: clearedDateRange,
             selectedEmpresa: null,
             selectedPessoa: null,

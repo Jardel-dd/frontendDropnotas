@@ -212,7 +212,7 @@ const OrdemServicos: React.FC = () => {
         setDraftSelectedPessoa(null);
         setSelectedStatusOrdemServico('');
         setDraftSelectedStatusOrdemServico('');
-        handleListOrdemServico(0, searchTerm, listarInativos, '', dateRange);
+        handleListOrdemServico(0, '', false, '', dateRange);
         search(null, null, '');
         setVisible(false);
     };

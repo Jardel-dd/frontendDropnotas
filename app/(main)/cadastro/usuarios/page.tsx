@@ -129,7 +129,7 @@ const Usuarios: React.FC = () => {
     };
     const handleClearFilters = () => {
         setListarInativos(false);
-        handleListUsersConta(0, searchTerm, listarInativos);
+        handleListUsersConta(0, '', false);
         setVisible(false);
     };
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {

@@ -2,6 +2,7 @@
 import './styles.css';
 import 'primeicons/primeicons.css';
 import '@/app/styles/styledGlobal.css';
+import LoadingScreen from '@/app/loading';
 import { Divider } from 'primereact/divider';
 import { Messages } from 'primereact/messages';
 import { useEffect, useRef, useState } from 'react';
@@ -14,7 +15,6 @@ import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { VendedorFormRef } from '../../vendedores/types/vendedor';
-import LoadingScreenComponent from '@/app/loading/loadingComponent';
 import { FormCreatedVendedor } from '../../vendedores/form/controller';
 import VendedorDropdownField from '../../vendedores/dropDown/DropdownVendedor';
 import { handleSearchCep } from '../../../../components/seachs/searchCep/controller';
@@ -258,7 +258,7 @@ export default function PessoaPage() {
         }
     }, [pessoa, selectedVendedor]);
     if (isLoading && pessoaId) {
-        return <LoadingScreenComponent fullScreen={false} loadingText="Carregando informacoes do Cliente ou Fornecedor selecionado..." />;
+        return <LoadingScreen loadingText="Carregando informações do Cliente ou Fornecedor selecionado..." />;
     }
     const isSubmitDisabled =
         stateDisableBtnCreatedClienteFornecedor ||
@@ -278,7 +278,7 @@ export default function PessoaPage() {
     return (
         <div className="card styled-container-main-all-routes">
             <Messages ref={msgs} className="custom-messages" />
-            <div className="scrollable-container">
+            <div className="scrollable-container ">
                 <div className="custom-flex-col">
                     <FormCreatedPessoa
                         pessoa={pessoa}

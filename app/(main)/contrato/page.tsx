@@ -160,9 +160,7 @@ const Contratos: React.FC = () => {
                 id_clientes_contrato: [0]
             })
         );
-
         handleListContratos(0, '', false);
-
         setVisible(false);
     };
     useEffect(() => {

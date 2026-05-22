@@ -192,7 +192,7 @@ const Comissoes: React.FC = () => {
         setFiltrarComissaoFechada(false);
         setDateRange([null, null]);
         setDateRangePickerKey((prev) => prev + 1);
-        handleListComissoes(0, searchTerm, false, {
+        handleListComissoes(0, '', false, {
             id_vendedor: null,
             tipo_origem: null,
             comissao_fechada: null,

@@ -142,7 +142,7 @@ const Vendedores: React.FC = () => {
             fornecedor: true
         };
         setListarInativos(false);
-        handleListVendedores(0, searchTerm, listarInativos);
+        handleListVendedores(0, '', false);
         setVisible(false);
     };
     const handleApplyFilters = () => {

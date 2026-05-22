@@ -145,7 +145,7 @@ export const PermissoesFormContainer = forwardRef<PermissoesFormRef, PermissoesF
     }, [errors]);
 
     if (isLoading && initialId) {
-        return <LoadingScreen loadingText="Carregando informacoes da Permissao selecionada..." />;
+        return <LoadingScreen loadingText="Carregando informações da Permissão selecionada..." />;
     }
 
     const isDialogMode = Boolean(showBTNPGCreatedDialog);

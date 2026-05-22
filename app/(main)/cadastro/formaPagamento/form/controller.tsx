@@ -146,7 +146,7 @@ export const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, For
         }, [errors]);
 
         if (isLoading && initialId) {
-            return <LoadingScreen loadingText="Carregando informacoes da Forma de Pagamento selecionada..." />;
+            return <LoadingScreen loadingText="Carregando informações da Forma de Pagamento selecionada..." />;
         }
 
         const isDialogMode = Boolean(showBTNPGCreatedDialog);

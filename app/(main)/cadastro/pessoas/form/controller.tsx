@@ -1,17 +1,17 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
 import { PessoaFields } from './pessoa';
+import LoadingScreen from '@/app/loading';
+import { useRouter } from 'next/navigation';
 import { Divider } from 'primereact/divider';
 import { Messages } from 'primereact/messages';
 import { getCitiesFromState } from '@/app/entity/maps';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { DropdownChangeEvent } from 'primereact/dropdown';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { VendedorFormRef } from '../../vendedores/types/vendedor';
-import LoadingScreenComponent from '@/app/loading/loadingComponent';
 import { FormCreatedVendedor } from '../../vendedores/form/controller';
 import { handleSearchCep } from '@/app/components/seachs/searchCep/controller';
 import { handleSearchCNPJ } from '@/app/components/seachs/searchCnpj/controller';
@@ -307,7 +307,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
         if (isLoading && pessoaId) {
-            return <LoadingScreenComponent fullScreen={false} loadingText="Carregando informacoes do Cliente ou Fornecedor selecionado..." />;
+            return <LoadingScreen  loadingText="Carregando informacoes do Cliente ou Fornecedor selecionado..." />;
         }
         const isSubmitDisabled =
             stateDisableBtnCreatedClienteFornecedor ||

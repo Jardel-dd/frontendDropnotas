@@ -152,7 +152,7 @@ function Servicos() {
     };
     const handleClearFilters = () => {
         setListarInativos(false);
-        handleListServicos(0, searchTerm, listarInativos);
+        handleListServicos(0,' ', false);
         setVisible(false);
     };
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {

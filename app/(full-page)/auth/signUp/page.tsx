@@ -279,7 +279,7 @@ function SignUp() {
                             </div>
                         </div>
                     </div>
-                    {/* <div className='ml-2 mr-2'>
+                     <div className='ml-2 mr-2'>
                         <Button
                             type="submit"
                             label={isLoadingBtnCreated ? 'Criando conta...' : 'Criar conta'}
@@ -302,7 +302,7 @@ function SignUp() {
                                 <span className="text-primary cursor-pointer">Acessar conta</span>
                             </Link>
                         </div>
-                    </div> */}
+                    </div> 
                 </div>
             </div>
             </form>

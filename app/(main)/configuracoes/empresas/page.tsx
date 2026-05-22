@@ -164,7 +164,7 @@ const Empresas: React.FC = () => {
     };
     const handleClearFilters = () => {
         setListarInativos(false);
-        handleListCompany(0, searchTerm, listarInativos);
+        handleListCompany(0, '', false);
         setVisible(false);
     };
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {

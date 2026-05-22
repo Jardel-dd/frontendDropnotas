@@ -6,7 +6,6 @@ import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import CNAEDropdownField from '@/app/components/fetchAll/listAllCnae/cnaeFiscal';
 import {contribuinteOptions, DropDownTipoPessoa, OptionsTipoContrato,regimeTributarioPessoaOptions} from '@/app/shared/optionsDropDown/options';
 export function PessoaFields({
     pessoa,
