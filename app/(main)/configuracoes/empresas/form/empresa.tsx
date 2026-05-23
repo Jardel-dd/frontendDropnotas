@@ -242,7 +242,22 @@ export function EmpresaFields({
                         <Input id="percentual_desconto_condicionado" type="number" value={empresa.percentual_desconto_condicionado ?? 0} onChange={onChange} label="Desconto Incondicionado" hasError={!!errors.percentual_desconto_condicionado} errorMessage={errors.percentual_desconto_condicionado} topLabel="Desconto Condicionado:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
                     </div>
                     <div className="col-12  lg:col-3 ">
-                        <DropdownSearch<TableCNAEEntity> id="cnae_fiscal" selectedItem={selectedCNAE} onItemChange={onCNAEChange} fetchAllItems={fetchAllCnae} fetchFilteredItems={fetchFilteredCnae} optionLabel="descricao" optionValue="codigo" initialOptionValue={empresa.cnae_fiscal || null} placeholder="Selecione CNAE" hasError={!!errors.cnae_fiscal} errorMessage={errors.cnae_fiscal} topLabel="CNAE Fiscal:" showTopLabel required />
+                        <DropdownSearch<TableCNAEEntity>
+                         id="cnae_fiscal" 
+                         selectedItem={selectedCNAE} 
+                         onItemChange={onCNAEChange}
+                          fetchAllItems={fetchAllCnae} 
+                          fetchFilteredItems={fetchFilteredCnae} 
+                          optionLabel="descricao" 
+                          optionValue="codigo" 
+                          initialOptionValue={empresa.cnae_fiscal || null} 
+                          placeholder="Selecione CNAE" 
+                          hasError={!!errors.cnae_fiscal} 
+                          errorMessage={errors.cnae_fiscal} 
+                        topLabel="CNAE Fiscal:" 
+                        showTopLabel 
+                        required 
+                        />
                     </div>
                     <div className="col-12  lg:col-3 ">
                         <Dropdown id="prestacao_sus" value={empresa.prestacao_sus ?? null} options={prestacaoSus} onChange={onDropdownChange} label="Selecione a Prestação SUS" hasError={!!errors.prestacao_sus} errorMessage={errors.prestacao_sus} topLabel="Prestação SUS:" showTopLabel required />

@@ -1,13 +1,13 @@
-import { ContratoEntity } from "@/app/entity/ContratoEntity";
+import { RefObject } from "react";
+import { Messages } from "primereact/messages";
 import { PessoaEntity } from "@/app/entity/PessoaEntity";
+import { DropdownChangeEvent } from "primereact/dropdown";
 import { ServiceEntity } from "@/app/entity/ServiceEntity";
 import { CompanyEntity } from "@/app/entity/CompanyEntity";
-import { DropdownChangeEvent } from "primereact/dropdown";
-import { Messages } from "primereact/messages";
+import { ContratoEntity } from "@/app/entity/ContratoEntity";
 import { FormaPagamentoEntity } from "@/app/entity/FormaPagamento";
-import { CategoryContratosEntity } from "@/app/entity/CategoryContratEntity";
-import { RefObject } from "react";
 import { InputNumberValueChangeEvent } from "primereact/inputnumber";
+import { CategoryContratosEntity } from "@/app/entity/CategoryContratEntity";
 
 export type ApiListItem = { id: string;[key: string]: any };
 export interface ContratoFormRef {
@@ -28,11 +28,11 @@ export interface ContratoFormProps {
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
 }
-
 export interface ContratoFieldsProps {
     contrato: ContratoEntity;
     errors: Record<string, string>;
-    selectedPessoa: PessoaEntity | null;
+    selectedPessoa: PessoaEntity[];
+    pessoaOptions: PessoaEntity[];
     selectedCompany: CompanyEntity | null;
     selectedService: ServiceEntity | null;
     selectedCategoriaContrato: CategoryContratosEntity | null;
@@ -62,7 +62,7 @@ export interface ContratoFieldsProps {
     onFormaPagamentoChange: (
         formaPagamento: FormaPagamentoEntity | null
     ) => void;
-    onPessoaChange: (pessoa: PessoaEntity | null) => void;
+    onPessoaChange: (pessoas: PessoaEntity[]) => void;
     onAddEmpresa: () => void;
     onAddServico: () => void;
     onAddCategoriaContrato: () => void;
@@ -70,7 +70,6 @@ export interface ContratoFieldsProps {
     onAddPessoa: () => void;
     onValidateDescricao: () => void;
 }
-
 export type FormContratoCreatedProps =
     | ContratoFieldsProps
     | ContratoFormProps;

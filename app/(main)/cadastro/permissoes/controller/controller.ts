@@ -38,7 +38,7 @@ export const deletarPerfilUser = async (perfilUserId: number, msgs: any, listPag
             {
                 severity: 'error',
                 summary: 'Erro',
-                detail: 'Houve um erro ao tentar excluir o Perfil Usuário, tente novamente.'
+                detail: 'Houve um erro ao excluir o Perfil Usuário, tente novamente.'
             }
         ]);
     }
@@ -67,7 +67,7 @@ export const ativarPerfilUser = async (perfilUserId: number, msgs: any, listPagi
                 className: 'messages-center',
                 severity: 'error',
                 summary: 'Erro',
-                detail: `Houve um erro ao tentar ativar este Perfil usuario , tente novamente.`
+                detail: `Houve um erro ao tentar ativar este Perfil usuário, tente novamente.`
             }
         ]);
         console.error(`Erro ao tentar ativar este Perfil usuario  com ID ${perfilUserId}:`, error);
@@ -85,25 +85,43 @@ export const createdPerfilUser = async (
     redirectAfterSave: boolean
 ) => {
     const formattedPermissions = getFormattedPermissions(selectedKeys);
+    const payload = { ...perfilUser, ...formattedPermissions };
+    console.log('Payload final para criacao de permissao:', payload);
     try {
-        const resp = await api.post('/perfil-usuario', { ...perfilUser, ...formattedPermissions });
+        const resp = await api.post('/perfil-usuario', payload);
         const created = new PerfilUser(resp.data?.perfilUser ?? resp.data);
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso',
             detail: 'Perfil criado com sucesso!'
         });
-        console.log('Dados do perfil:', perfilUser);
         if (redirectAfterSave) {
             router.push('/cadastro/permissoes');
         }
         setPerfilUser(created);
         return created;
-    } catch (error: any) {
-        console.error('Erro ao criar perfil:', error.response?.data || error);
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            console.error('Erro ao criar permissao:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                payload
+            });
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Erro',
+                detail:
+                    error.response?.status === 500
+                        ? 'Não foi possivel cadastrar esta permissão, tente novamente.'
+                        : error.response?.data?.message || error.message
+            });
+            return;
+        }
+        console.error('Erro inesperado ao criar permissao:', error, 'Payload enviado:', payload);
         msgs.current?.show({
             severity: 'error',
-            detail: `Erro ao criar perfil: ${error.response?.data?.message || error.message}`
+            summary: 'Erro',
+            detail: 'Não foi possivel cadastrar esta permissão, tente novamente.'
         });
     }
 };

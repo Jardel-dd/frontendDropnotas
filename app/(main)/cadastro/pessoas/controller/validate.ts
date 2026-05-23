@@ -1,5 +1,6 @@
 import { PessoaEntity } from "@/app/entity/PessoaEntity";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
+import { ContratoEntity } from "@/app/entity/ContratoEntity";
 
 type ErrorsMap = Record<string, string>;
 
@@ -41,6 +42,7 @@ const validateEnderecoPessoa = (pessoa: PessoaEntity): ErrorsMap => {
 const validateCamposComunsPessoa = (
     pessoa: PessoaEntity,
     selectedVendedor: VendedorEntity | null,
+    selectedContrato: ContratoEntity | null,
 ): ErrorsMap => {
     if (!pessoa.codigo_regime_tributario) {
         return { selectedRegime: 'Este Campo deve ser selecionado.' };
@@ -57,6 +59,9 @@ const validateCamposComunsPessoa = (
     if (!pessoa.pessoa_cliente && !pessoa.pessoa_fornecedor) {
         return { selectedContato: 'Este Campo deve ser selecionado.' };
     }
+    if (!selectedContrato && !pessoa.id_contrato) {
+        return { selectedContrato: 'Este Campo deve ser selecionado.' };
+    }
     if (!hasValidEmail(pessoa.email)) {
         return { email: 'Email invalido. Por favor, digite um email valido.' };
     }
@@ -71,6 +76,7 @@ export const validateFieldsPessoa = (
     setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
     msgs: React.RefObject<any>,
     selectedVendedor: VendedorEntity | null,
+    selectedContrato: ContratoEntity | null,
 ) => {
     let newErrors: ErrorsMap = {};
     msgs.current?.clear();
@@ -83,7 +89,7 @@ export const validateFieldsPessoa = (
         } else if (!pessoa.nome_fantasia || pessoa.nome_fantasia.trim().length < 2) {
             newErrors = { nome_fantasia: 'Campo deve ter no minimo 2 caracteres.' };
         } else {
-            newErrors = validateCamposComunsPessoa(pessoa, selectedVendedor);
+            newErrors = validateCamposComunsPessoa(pessoa, selectedVendedor, selectedContrato);
         }
     } else if (pessoa.tipo_pessoa === 'PESSOA_FISICA') {
         if (!pessoa.cpf || pessoa.cpf.replace(/\D/g, '').length < 11) {
@@ -95,7 +101,7 @@ export const validateFieldsPessoa = (
         } else if (!pessoa.cnae_fiscal) {
             newErrors = { cnae_fiscal: 'Este Campo deve ser selecionado.' };
         } else {
-            newErrors = validateCamposComunsPessoa(pessoa, selectedVendedor);
+            newErrors = validateCamposComunsPessoa(pessoa, selectedVendedor, selectedContrato);
         }
     } else if (pessoa.tipo_pessoa === 'ESTRANGEIRO_NO_BRASIL') {
         if (!pessoa.documento_estrangeiro || pessoa.documento_estrangeiro.trim().length < 9) {

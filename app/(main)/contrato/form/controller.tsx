@@ -160,7 +160,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         const [showModalEmpresa, setShowModalEmpresa] = useState(false);
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
-        const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
+        const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity[]>([]);
         const [reloadKeyFormaPagamento, setReloadKeyFormaPagamento] = useState(0);
         const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoEntity>(
             new FormaPagamentoEntity({
@@ -320,17 +320,25 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         };
         const handlePessoaSaved = (created: PessoaEntity) => {
             setShowModalPessoa(false);
-            setSelectedPessoa(created);
-            updateContratoField('id_clientes_contrato', [created.id]);
+            setSelectedPessoa((prev) => {
+                const nextSelectedPessoa = prev.some((pessoaSelecionada) => pessoaSelecionada.id === created.id)
+                    ? prev
+                    : [...prev, created];
+                updateContratoField('id_clientes_contrato', nextSelectedPessoa.map((pessoaSelecionada) => pessoaSelecionada.id));
+                return nextSelectedPessoa;
+            });
             clearErrors('selectedPessoa');
             setReloadKeyPessoa((current) => current + 1);
         };
         const handlePessoaContrato = (updatedPessoa: PessoaEntity) => {
-            setPessoa([updatedPessoa]);
+            setPessoa((prev) => {
+                const exists = prev.some((pessoaExistente) => pessoaExistente.id === updatedPessoa.id);
+                return exists ? prev : [...prev, updatedPessoa];
+            });
         };
-        const handlePessoaChange = (pessoaSelecionada: PessoaEntity | null) => {
-            setSelectedPessoa(pessoaSelecionada);
-            updateContratoField('id_clientes_contrato', pessoaSelecionada ? [pessoaSelecionada.id] : []);
+        const handlePessoaChange = (pessoasSelecionadas: PessoaEntity[]) => {
+            setSelectedPessoa(pessoasSelecionadas);
+            updateContratoField('id_clientes_contrato', pessoasSelecionadas.map((pessoaSelecionada) => pessoaSelecionada.id));
             clearErrors('selectedPessoa');
         };
         const handleSubmit = async (event?: React.FormEvent) => {
@@ -452,7 +460,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                 return;
             }
 
-            setSelectedPessoa(null);
+            setSelectedPessoa([]);
             setIsLoading(false);
         }, [contratoId]);
         useEffect(() => {
@@ -487,7 +495,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
             (!selectedService && !contrato.id_servico) ||
             (!selectedCategoriaContrato && !contrato.id_categoria_contrato) ||
             (!selectedFormadePagamento && !contrato.id_forma_pagamento) ||
-            (!selectedPessoa && !(contrato.id_clientes_contrato?.length ?? 0)) ||
+            (selectedPessoa.length === 0 && !(contrato.id_clientes_contrato?.length ?? 0)) ||
             !contrato.periodicidade;
         return (
             <div className="p-fluid">
@@ -497,6 +505,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                         contrato={contrato}
                         errors={errors}
                         selectedPessoa={selectedPessoa}
+                        pessoaOptions={pessoa}
                         selectedCompany={selectedCompany}
                         selectedService={selectedService}
                         selectedCategoriaContrato={selectedCategoriaContrato}

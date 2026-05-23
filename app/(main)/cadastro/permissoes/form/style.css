@@ -11,6 +11,47 @@ bottom: 0;
 z-index: 99;
 }
 
+.permissoes-tree-wrapper {
+    position: relative;
+}
+
+.permissoes-actions {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.permissoes-tree {
+    padding-top: 2.75rem;
+}
+
+.permissoes-toggle-button {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    box-shadow: none;
+}
+
+.permissoes-toggle-button .p-button {
+    padding: 0.35rem 0.75rem;
+        box-shadow: none;
+
+}
+
+.permissoes-toggle-button .p-button-label {
+    font-weight: 500;
+        box-shadow: none;
+
+}
+
+.permissoes-toggle-button .p-button-icon {
+    font-size: 0.85rem;
+        box-shadow: none;
+
+}
+
 
 .p-checkbox.p-highlight .p-checkbox-box {
 
@@ -45,8 +86,7 @@ z-index: 99;
     background-color: var(--hover-background-color);
     color: var(--text-color);
 }
-.p-invalid .p-inputtext { border: 1px solid #FCA5A5;
-}
+
 .p-fileupload-choose .p-button-icon {
     display: none;
 }

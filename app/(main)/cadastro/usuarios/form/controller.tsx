@@ -164,24 +164,6 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
         };
 
         const handleSubmit = async (event?: React.FormEvent) => {
-            if (event) {
-                event.preventDefault();
-            }
-
-            msgs.current?.clear();
-
-            if (isLoadingBtnCreated) {
-                return;
-            }
-
-            const isValid = validateUsuarioForm();
-            if (!isValid) {
-                setTouchedFields((prev) => ({ ...prev, submit: true }));
-                return;
-            }
-
-            setIsLoadingBtnCreated(true);
-
             try {
                 if (isEditMode && userContaID) {
                     await updateUsuario(userContaID, userConta, confirmPassword, selectedEmpresa, selectedPerfilUser, setErrors, msgs, router, setUserConta, setSelectedEmpresa, setSelectedPerfilUser);
@@ -258,15 +240,12 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
 
         const hasSelectedEmpresa = selectedEmpresa.length > 0 || (userConta.id_empresas_acesso?.length ?? 0) > 0;
         const isDialogMode = Boolean(showBTNPGCreatedDialog || onClose || onBackClick);
-        const isSubmitDisabled =
-            stateDisableBtnCreatedUserConta ||
-            isLoadingBtnCreated ||
-            Object.keys(errors).length > 0 ||
-            !userConta.nome?.trim() ||
-            !userConta.email?.trim() ||
-            (!userContaID && !userConta.senha) ||
-            !selectedPerfilUser ||
-            !hasSelectedEmpresa;
+        // const isSubmitDisabled =
+        //     stateDisableBtnCreatedUserConta ||
+        //     isLoadingBtnCreated ||
+        //     Object.keys(errors).length > 0 ||
+        //     !userConta.nome?.trim() ||
+        //     !hasSelectedEmpresa;
 
         return (
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
@@ -303,8 +282,8 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
                     </div>
                 </div>
                 <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
-                    {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Salvar" disabled={isSubmitDisabled} icon="pi pi-save"/>}
-                    {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Salvar" onBackClick={onBackClick} onClose={onClose} disabled={isSubmitDisabled} icon="pi pi-save"/>}
+                    {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Salvar" icon="pi pi-save" disabled={false}/>}
+                    {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Salvar" onBackClick={onBackClick} onClose={onClose} icon="pi pi-save" disabled={false}/>}
                 </div>
 
                 <DialogFilter header="Adicionar Perfil deste Usuário" visible={showModalPerfilUser} onHide={() => setShowModalPerfilUser(false)}>

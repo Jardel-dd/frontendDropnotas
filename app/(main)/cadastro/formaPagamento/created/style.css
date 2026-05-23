@@ -47,11 +47,6 @@
   background-color: var(--hover-background-color);
   color: var(--text-color);
 }
-
-.p-invalid .p-inputtext {
-  border: 1px solid #FCA5A5;
-}
-
 .container-PerfilUser {
   width: 100%;
   display: flex;

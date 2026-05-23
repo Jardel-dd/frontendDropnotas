@@ -27,10 +27,12 @@ export interface PermissoesFieldsProps {
     perfilUser: PerfilUser;
     errors: Record<string, string>;
     selectedKeys: TreeCheckboxSelectionKeys;
+    allPermissionsSelected: boolean;
     isLoading: boolean;
     onChange: (event: { target: { id: string; value: any; checked?: any; type: string } }) => void;
     onDropdownChange: (event: any) => void;
     onSelectionChange: (selectedKeys: TreeCheckboxSelectionKeys) => void;
+    onToggleAllPermissions: () => void;
     onValidateNome: () => void;
 }
 

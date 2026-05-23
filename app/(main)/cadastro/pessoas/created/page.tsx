@@ -14,6 +14,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
+import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { VendedorFormRef } from '../../vendedores/types/vendedor';
 import { FormCreatedVendedor } from '../../vendedores/form/controller';
 import VendedorDropdownField from '../../vendedores/dropDown/DropdownVendedor';
@@ -74,11 +75,13 @@ export default function PessoaPage() {
     const [loadingCnpj, setLoadingCnpj] = useState<boolean>(false);
     const [showModalVendedor, setShowModalVendedor] = useState(false);
     const [selectedContato, setSelectedContato] = useState<string | null>(null);
+    const [selectedContrato, setSelectedContrato] = useState<ContratoEntity | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
     const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
     const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
+    const [reloadKeyContrato] = useState(0);
     const [stateDisableBtnCreatedClienteFornecedor, setStateDisableBtnCreatedClienteFornecedor] = useState(false);
     const [pessoa, setPessoa] = useState<PessoaEntity>(
         new PessoaEntity({
@@ -107,7 +110,7 @@ export default function PessoaPage() {
             pais: ''
         })
     );
-    const validatePessoaForm = () => validateFieldsPessoa(pessoa, setErrors, msgs, selectedVendedor);
+    const validatePessoaForm = () => validateFieldsPessoa(pessoa, setErrors, msgs, selectedVendedor, selectedContrato);
     const handleAllChanges = (event: any) => {
         const id = event?.target?.id;
         const type = event?.target?.type;
@@ -194,7 +197,7 @@ export default function PessoaPage() {
         const updatedPessoa = pessoa.copyWith(mapContatoSelectionToFlags(selected));
 
         setPessoa(updatedPessoa);
-        validateFieldsPessoa(updatedPessoa, setErrors, msgs, selectedVendedor);
+        validateFieldsPessoa(updatedPessoa, setErrors, msgs, selectedVendedor, selectedContrato);
     };
     const handleCNAEChange = (cnae: TableCNAEEntity | null) => {
         setSelectedCNAE(cnae);
@@ -205,6 +208,19 @@ export default function PessoaPage() {
         setErrors((prevErrors) => {
             const newErrors = { ...prevErrors };
             delete newErrors.cnae_fiscal;
+            return newErrors;
+        });
+    };
+    const handleContratoChange = (contrato: ContratoEntity | null) => {
+        setSelectedContrato(contrato);
+        setPessoa((prev) =>
+            prev.copyWith({
+                id_contrato: contrato?.id ?? null
+            })
+        );
+        setErrors((prevErrors) => {
+            const newErrors = { ...prevErrors };
+            delete newErrors.selectedContrato;
             return newErrors;
         });
     };
@@ -228,6 +244,7 @@ export default function PessoaPage() {
             const pessoaEntity = new PessoaEntity(dataPessoa);
             setPessoa(pessoaEntity);
             setSelectedContato(mapPessoaContatoToSelection(dataPessoa));
+            setSelectedContrato(null);
             setSelectedCNAE(
                 dataPessoa.cnae_fiscal
                     ? new TableCNAEEntity({
@@ -272,6 +289,7 @@ export default function PessoaPage() {
         !pessoa.codigo_regime_tributario ||
         !pessoa.contribuinte ||
         (!selectedVendedor && !pessoa.id_vendedor_padrao) ||
+        (!selectedContrato && !pessoa.id_contrato) ||
         !pessoa.endereco ||
         !pessoa.email;
 
@@ -284,13 +302,18 @@ export default function PessoaPage() {
                         pessoa={pessoa}
                         errors={errors}
                         selectedContato={selectedContato}
+                        selectedContrato={selectedContrato}
                         selectedCNAE={selectedCNAE}
                         loadingCnpj={loadingCnpj}
                         hasFocused={hasFocused}
+                        reloadKeyContrato={reloadKeyContrato}
+                        onAddContato={() => {}}
                         onFocusFirstField={() => setHasFocused(true)}
                         onChange={handleAllChanges}
                         onDropdownChange={handleDropdownChange}
                         onContatoChange={handleContatoChange}
+                        onAddContrato={() => {}}
+                        onContratoChange={handleContratoChange}
                         onCNAEChange={handleCNAEChange}
                         onSearchCnpj={handleSearchPessoaCnpj}
                         onValidateCnpj={handleValidateCnpj}

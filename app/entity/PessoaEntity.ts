@@ -54,6 +54,7 @@ export class PessoaEntity {
     cpf!: string | null;
     rg!: string | null;
     email?: string;
+    id_contrato?: number | null;
     documento_estrangeiro: string | null = null;
     cnpj!: null | string;
     inscricao_estadual?: string | null;
@@ -91,6 +92,7 @@ export class PessoaEntity {
         codigo_regime_tributario,
         tipo_pessoa,
         contribuinte,
+        id_contrato,
         // telefone,
         endereco,
         arquivo_contrato,
@@ -119,6 +121,7 @@ export class PessoaEntity {
         // telefone?: string;
         endereco: EnderecoEntity;
         arquivo_contrato?: string;
+        id_contrato?: number | null;
         id_vendedor_padrao?: number | null;
         ativo?: boolean;
         pais?: string;
@@ -136,6 +139,7 @@ export class PessoaEntity {
             inscricao_municipal,
             atividade_principal,
             cnae_fiscal,
+            id_contrato,
             data_fundacao,
             pessoa_cliente,
             pessoa_fornecedor,
@@ -157,6 +161,7 @@ export class PessoaEntity {
         cpf,
         rg,
         email,
+        id_contrato,
         documento_estrangeiro,
         cnpj,
         inscricao_estadual,
@@ -197,6 +202,7 @@ export class PessoaEntity {
         // telefone?: string;
         endereco?: EnderecoEntity;
         arquivo_contrato?: string;
+        id_contrato?: number | null;
         id_vendedor_padrao?: number | null;
         ativo?: boolean;
         pais?: string;
@@ -208,6 +214,7 @@ export class PessoaEntity {
             cpf: cpf ?? this.cpf,
             rg: rg ?? this.rg,
             email: email ?? this.email,
+            id_contrato: id_contrato ?? this.id_contrato,
             documento_estrangeiro: documento_estrangeiro ?? this.documento_estrangeiro,
             cnpj: cnpj ?? this.cnpj,
             inscricao_estadual: inscricao_estadual ?? this.inscricao_estadual,

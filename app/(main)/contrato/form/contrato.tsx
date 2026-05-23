@@ -8,17 +8,19 @@ import type {ContratoFieldsProps,} from '../types/contratos';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { OptionsPeriodicidade } from '@/app/shared/optionsDropDown/options';
-import PessoaDropdownField from '@/app/(main)/cadastro/pessoas/dropDown/pessoa';
+import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import EmpresaDropdownField from '@/app/(main)/configuracoes/empresas/dropDown/empresa';
 import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dropDown/formaPagamento';
 import CategoriaContratoDropdownField from '@/app/(main)/cadastro/categoriaContratos/dropDown/categoriaContratos';
+import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 export type {ContratoFieldsProps, ContratoFormProps, ContratoFormRef,FormContratoCreatedProps} from '../types/contratos';
 
 export function ContratoFields({
     contrato,
     errors,
     selectedPessoa,
+    pessoaOptions,
     selectedCompany,
     selectedService,
     selectedCategoriaContrato,
@@ -150,18 +152,25 @@ export function ContratoFields({
                             />
                         </div>
                         <div className="col-12 lg:col-4">
-                            <PessoaDropdownField
+                            <CustomMultiSelect
                                 hasError={!!errors.selectedPessoa}
                                 errorMessage={errors.selectedPessoa}
-                                selectedPessoa={selectedPessoa}
-                                selectedPessoaId={contrato.id_clientes_contrato?.[0] ?? null}
-                                onPessoaChange={onPessoaChange}
-                                reloadKey={reloadKeyPessoa}
-                                autoSelectSingle
+                                selectedItems={selectedPessoa}
+                                onChange={(event) => onPessoaChange(event.value ?? [])}
+                                id="selectedPessoa"
+                                options={pessoaOptions}
+                                optionLabel="razao_social"
+                                dataKey="id"
+                                fetchAllItems={listThePessoas}
+                                fetchFilteredItems={fetchFilteredPessoas}
+                                initialSelectedValues={contrato.id_clientes_contrato ?? []}
                                 showAddButton
                                 onAddClick={onAddPessoa}
-                                required
-                            />
+                                placeholder="Selecione Cliente ou Fornecedor"
+                                topLabel="Cliente ou Fornecedor:"
+                                showTopLabel
+                                required 
+                                showChips={false}                            />
                         </div>
                     </div>
                     <div className="grid formgrid contrato-switch-group">

@@ -91,7 +91,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const latestUserData = response.data ?? {};
         const perfilId = latestUserData?.id_perfil_usuario ?? latestUserData?.perfilUsuario?.id;
         let perfilUsuario = latestUserData?.perfilUsuario ?? currentUser.perfilUsuario;
-
         if (!latestUserData?.perfilUsuario && perfilId) {
           try {
             const perfilResponse = await api.get(`/perfil-usuario/${perfilId}`);

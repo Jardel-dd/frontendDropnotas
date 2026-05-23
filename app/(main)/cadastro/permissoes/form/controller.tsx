@@ -16,6 +16,22 @@ import { validateFieldsPerfilUser } from '@/app/(main)/cadastro/permissoes/contr
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdPerfilUser, fetchPerfilUserByID, updatePerfilUser } from '@/app/(main)/cadastro/permissoes/controller/controller';
 import { createEmptyPerfilUser, type FormCreatedPermissoesProps, type PermissoesFormProps, type PermissoesFormRef } from '../types/perfilUsuario';
+
+const permissionNodeKeys = permissoes.flatMap((permission) => permission.children?.map((child) => child.key).filter((key): key is string => Boolean(key)) ?? []);
+const parentNodeKeys = permissoes.map((permission) => permission.key).filter((key): key is string => Boolean(key));
+const buildAllSelectedKeys = (): TreeCheckboxSelectionKeys => {
+    const allSelected = permissionNodeKeys.reduce<TreeCheckboxSelectionKeys>((acc, key) => {
+        acc[key] = { checked: true };
+        return acc;
+    }, {});
+
+    parentNodeKeys.forEach((key) => {
+        allSelected[key] = { checked: true };
+    });
+
+    return allSelected;
+};
+
 export const PermissoesFormContainer = forwardRef<PermissoesFormRef, PermissoesFormProps>(({ initialId, msgs, onPerfilUserChange, onErrorsChange, redirectAfterSave, onSaved, onClose, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
     const router = useRouter();
     const onPerfilUserChangeRef = useRef(onPerfilUserChange);
@@ -54,6 +70,14 @@ export const PermissoesFormContainer = forwardRef<PermissoesFormRef, PermissoesF
     };
 
     const handleSelectionChange = (nextSelectedKeys: TreeCheckboxSelectionKeys) => {
+        setSelectedKeys(nextSelectedKeys);
+        validateFieldsPerfilUser(perfilUser, null, nextSelectedKeys, setErrors, msgs);
+    };
+
+    const allPermissionsSelected = permissionNodeKeys.length > 0 && permissionNodeKeys.every((key) => selectedKeys[key]?.checked);
+
+    const handleToggleAllPermissions = () => {
+        const nextSelectedKeys = allPermissionsSelected ? {} : buildAllSelectedKeys();
         setSelectedKeys(nextSelectedKeys);
         validateFieldsPerfilUser(perfilUser, null, nextSelectedKeys, setErrors, msgs);
     };
@@ -160,10 +184,12 @@ export const PermissoesFormContainer = forwardRef<PermissoesFormRef, PermissoesF
                     perfilUser={perfilUser}
                     errors={errors}
                     selectedKeys={selectedKeys}
+                    allPermissionsSelected={allPermissionsSelected}
                     isLoading={isLoading}
                     onChange={handleAllChanges}
                     onDropdownChange={handleDropdownChange}
                     onSelectionChange={handleSelectionChange}
+                    onToggleAllPermissions={handleToggleAllPermissions}
                     onValidateNome={handleValidateNome}
                 />
             </div>

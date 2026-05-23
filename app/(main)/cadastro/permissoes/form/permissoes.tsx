@@ -6,9 +6,10 @@ import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { PermissoesFieldsProps } from '../types/perfilUsuario';
 import '@/app/(main)/cadastro/permissoes/created/TreeStyles.css';
 import { Tree, TreeCheckboxSelectionKeys } from 'primereact/tree';
+import { Button } from 'primereact/button';
 import { permissoes, tiposVisualizacaoPermissoes } from '@/app/shared/optionsDropDown/options';
 export type { FormCreatedPermissoesProps, PermissoesFieldsProps, PermissoesFormProps, PermissoesFormRef } from '../types/perfilUsuario';
-export function PermissoesFields({ perfilUser, errors, selectedKeys, isLoading, onChange, onDropdownChange, onSelectionChange, onValidateNome }: PermissoesFieldsProps) {
+export function PermissoesFields({ perfilUser, errors, selectedKeys, allPermissionsSelected, isLoading, onChange, onDropdownChange, onSelectionChange, onToggleAllPermissions, onValidateNome }: PermissoesFieldsProps) {
     return (
         <div className="grid formgrid">
             <div className="col-12 lg:col-12 ">
@@ -69,19 +70,31 @@ export function PermissoesFields({ perfilUser, errors, selectedKeys, isLoading, 
                 />
             </div>
             <div className="col-12 lg:col-12 mt-3">
-                <Tree
-                    id="selectedPerfilUser"
-                    value={permissoes}
-                    selectionMode="checkbox"
-                    selectionKeys={selectedKeys}
-                    onSelectionChange={(event) => onSelectionChange(event.value as TreeCheckboxSelectionKeys)}
-                    className={`w-full custom-multiselect permissoes-tree ${errors.selectedPerfilUser ? 'tree-error' : ''}`}
-                    disabled={isLoading}
-                />
+                <div className="permissoes-tree-wrapper">
+                    <div className="permissoes-actions">
+                        <Button
+                            type="button"
+                            label={allPermissionsSelected ? 'Desselecionar' : 'Selecionar todas'}
+                            icon={allPermissionsSelected }
+                            outlined
+                            className="permissoes-toggle-button"
+                            style={{boxShadow:"none"}}
+                            onClick={onToggleAllPermissions}
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <Tree
+                        id="selectedPerfilUser"
+                        value={permissoes}
+                        selectionMode="checkbox"
+                        selectionKeys={selectedKeys}
+                        onSelectionChange={(event) => onSelectionChange(event.value as TreeCheckboxSelectionKeys)}
+                        className={`w-full custom-multiselect permissoes-tree ${errors.selectedPerfilUser ? 'tree-error' : ''}`}
+                        disabled={isLoading}
+                    />
+                </div>
                 {errors.selectedPerfilUser && <small className="p-error">{errors.selectedPerfilUser}</small>}
             </div>
         </div>
     );
 }
-
-

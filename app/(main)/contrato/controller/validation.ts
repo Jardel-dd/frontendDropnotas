@@ -11,7 +11,7 @@ export const validateFieldsContrato = (
     selectedService: ServiceEntity | null,
     selectedCategoriaContrato: CategoryContratosEntity | null,
     selectedFormadePagamento: FormaPagamentoEntity | null,
-    selectedPessoa: PessoaEntity | null,
+    selectedPessoa: PessoaEntity[],
 
     setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
     msgs: React.RefObject<any>
@@ -27,7 +27,7 @@ export const validateFieldsContrato = (
     const hasSavedCategoriaContratoId = contrato.id_categoria_contrato !== null && contrato.id_categoria_contrato !== undefined;
     const hasSelectedFormaPagamento = !!selectedFormadePagamento;
     const hasSavedFormaPagamentoId = contrato.id_forma_pagamento !== null && contrato.id_forma_pagamento !== undefined;
-    const hasSelectedPessoa = !!selectedPessoa;
+    const hasSelectedPessoa = Array.isArray(selectedPessoa) && selectedPessoa.length > 0;
     const hasSavedPessoaIds =
         Array.isArray(contrato.id_clientes_contrato) &&
         contrato.id_clientes_contrato.some((id) => Number(id) > 0);

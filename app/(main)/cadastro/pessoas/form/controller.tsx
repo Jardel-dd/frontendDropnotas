@@ -25,6 +25,7 @@ import VendedorDropdownField from '@/app/(main)/cadastro/vendedores/dropDown/Dro
 import { fetchAllCnae, fetchFilteredCnae } from '@/app/components/fetchAll/listAllCnae/controller';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdPessoa, fetchPessoasById, updatePessoa } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { ContratoEntity } from '@/app/entity/ContratoEntity';
 export const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string | null => {
     if (pessoa.pessoa_cliente && pessoa.pessoa_fornecedor) return 'AMBOS';
     if (pessoa.pessoa_cliente) return 'pessoa_cliente';
@@ -89,11 +90,13 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const [loadingCnpj, setLoadingCnpj] = useState(false);
         const [showModalVendedor, setShowModalVendedor] = useState(false);
         const [selectedContato, setSelectedContato] = useState<string | null>(null);
+        const [selectedContrato, setSelectedContrato] = useState<ContratoEntity | null>(null);
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
         const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
+        const [reloadKeyContrato] = useState(0);
         const [stateDisableBtnCreatedClienteFornecedor, setStateDisableBtnCreatedClienteFornecedor] = useState(false);
         const [pessoa, setPessoa] = useState<PessoaEntity>(
             new PessoaEntity({
@@ -122,7 +125,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 pais: ''
             })
         );
-        const validatePessoaForm = () => validateFieldsPessoa(pessoa, setErrors, msgs, selectedVendedor);
+        const validatePessoaForm = () => validateFieldsPessoa(pessoa, setErrors, msgs, selectedVendedor, selectedContrato);
         const handleAllChanges = (event: any) => {
             const id = event?.target?.id;
             const type = event?.target?.type;
@@ -229,7 +232,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setSelectedContato(selected);
             const updatedPessoa = pessoa.copyWith(mapContatoSelectionToFlags(selected));
             setPessoa(updatedPessoa);
-            validateFieldsPessoa(updatedPessoa, setErrors, msgs, selectedVendedor);
+            validateFieldsPessoa(updatedPessoa, setErrors, msgs, selectedVendedor, selectedContrato);
         };
         const handleCNAEChange = (cnae: TableCNAEEntity | null) => {
             setSelectedCNAE(cnae);
@@ -242,6 +245,18 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 delete newErrors.cnae_fiscal;
                 return newErrors;
             });
+        };
+        const handleContratoChange = (contrato: ContratoEntity | null) => {
+            setSelectedContrato(contrato);
+            const updatedPessoa = pessoa.copyWith({
+                id_contrato: contrato?.id ?? null
+            });
+            setPessoa(updatedPessoa);
+            setErrors((prevErrors) => {
+                const newErrors = { ...prevErrors };
+            delete newErrors.selectedContrato;
+            return newErrors;
+        });
         };
         const handleErrorsChange = (updatedErrors: Record<string, string>) => {
             setErrors(updatedErrors);
@@ -263,6 +278,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 const pessoaEntity = new PessoaEntity(dataPessoa);
                 setPessoa(pessoaEntity);
                 setSelectedContato(mapPessoaContatoToSelection(dataPessoa));
+                setSelectedContrato(null);
                 setSelectedCNAE(
                     dataPessoa.cnae_fiscal
                         ? new TableCNAEEntity({
@@ -321,6 +337,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             !pessoa.codigo_regime_tributario ||
             !pessoa.contribuinte ||
             (!selectedVendedor && !pessoa.id_vendedor_padrao) ||
+            (!selectedContrato && !pessoa.id_contrato) ||
             !pessoa.endereco ||
             !pessoa.email;
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
@@ -334,13 +351,18 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                 pessoa={pessoa}
                                 errors={errors}
                                 selectedContato={selectedContato}
+                                selectedContrato={selectedContrato}
                                 selectedCNAE={selectedCNAE}
                                 loadingCnpj={loadingCnpj}
                                 hasFocused={hasFocused}
+                                reloadKeyContrato={reloadKeyContrato}
+                                onAddContato={() => {}}
                                 onFocusFirstField={() => setHasFocused(true)}
                                 onChange={handleAllChanges}
                                 onDropdownChange={handleDropdownChange}
                                 onContatoChange={handleContatoChange}
+                                onAddContrato={() => {}}
+                                onContratoChange={handleContratoChange}
                                 onCNAEChange={handleCNAEChange}
                                 onSearchCnpj={handleSearchPessoaCnpj}
                                 onValidateCnpj={handleValidateCnpj}

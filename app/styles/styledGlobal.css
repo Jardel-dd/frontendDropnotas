@@ -20,7 +20,9 @@ textarea.p-inputtextarea {
     min-height: unset !important;
     box-sizing: border-box;
 }
-
+/* .p-invalid .p-inputtext {
+    border: 1px solid #fca5a5;
+} */
 .switchRow {
     display: flex;
     align-items: center;

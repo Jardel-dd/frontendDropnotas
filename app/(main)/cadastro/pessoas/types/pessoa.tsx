@@ -1,3 +1,4 @@
+import { ContratoEntity } from "@/app/entity/ContratoEntity";
 import { PessoaEntity } from "@/app/entity/PessoaEntity";
 import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
 import { DropdownChangeEvent } from "primereact/dropdown";
@@ -31,13 +32,18 @@ export interface PessoaFieldsProps {
     pessoa: PessoaEntity;
     errors: Record<string, string>;
     selectedContato: string | null;
+    selectedContrato: ContratoEntity | null;
     selectedCNAE: TableCNAEEntity | null;
     loadingCnpj: boolean;
     hasFocused: boolean;
+    reloadKeyContrato: number;
+    onAddContato: () => void;
     onFocusFirstField: () => void;
     onChange: (event: any) => void;
     onDropdownChange: (event: DropdownChangeEvent) => void;
     onContatoChange: (event: DropdownChangeEvent) => void;
+    onAddContrato: () => void;
+    onContratoChange: (contrato: ContratoEntity | null) => void;
     onCNAEChange: (cnae: TableCNAEEntity | null) => void;
     onSearchCnpj: () => Promise<void>;
     onValidateCnpj: () => void;
@@ -60,4 +66,3 @@ export interface PessoaDropdownFieldProps {
     autoSelectSingle?: boolean;
     showAddButton?: boolean;
 }
-

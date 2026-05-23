@@ -1,4 +1,5 @@
 'use client'
+import './styles.css';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { useDebouncedCallback } from 'use-debounce';
@@ -27,6 +28,7 @@ interface SearchDropdownProps<T> {
     onAddClick?: () => void;
     minSearchChars?: number;
     maxResults?: number;
+    className?:string;
     autoSelectSingle?: boolean;
     showTopLabel?: boolean;
     topLabel?: string | ReactNode;
@@ -69,7 +71,8 @@ export const DropdownSearch = <T extends Record<string, any>>({
     autoSelectSingle = false,
     showTopLabel,
     topLabel,
-    required
+    required,
+    className,
 }: SearchDropdownProps<T>) => {
     const [items, setItems] = useState<T[]>([]);
     const [loading, setLoading] = useState(false);
@@ -297,7 +300,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
                 </div>
             )}
             <div className={`p-inputgroup flex-1 custom-input-number styled-on-focus styled-on-hover ${hasError ? 'input-error' : ''}`}
-                  style={{ border: isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da' , borderRadius: '6px' }}>
+                  style={{ border: hasError ? '1px solid #fca5a5' : (isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da'), borderRadius: '6px' }}>
                 <Dropdown
                     ref={dropdownRef}
                     id={id}
@@ -330,7 +333,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
                     filter
                     autoFocus={autoFocus}
                     panelStyle={{ maxWidth: '350px', width: '100%' }}
-                    className={`${hasError ? 'p-invalid' : ''}`}
+                    className={hasError ? 'p-invalid' : ''}
                     style={{
                         boxShadow: 'none',
                         background: isDarkMode ? '#293B51' : '#FFFFFF',

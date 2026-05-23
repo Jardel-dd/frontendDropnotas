@@ -25,6 +25,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type Disp
 import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyByID, resolveLogoEmpresaSource, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { FormCreatedUsuario, UsuarioFormRef } from '@/app/(main)/cadastro/usuarios/form/controller';
 import { createEmptyUserConta } from '@/app/(main)/cadastro/usuarios/types/usuario';
+import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 
 export type { EmpresaFieldsProps, EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
 
@@ -337,6 +338,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                 setIsLoading(true);
                 const { empresa, userConta, selectedUserConta } = await fetchCompanyByID(currentEmpresaId);
                 const logoEmpresaSource = await resolveLogoEmpresaSource(empresa.logo_empresa);
+                const cnaeOptions = empresa.cnae_fiscal ? await fetchFilteredCnae(empresa.cnae_fiscal) : [];
                 const empresaNormalizada = new CompanyEntity({
                     ...empresa,
                     logo_empresa: logoEmpresaSource,
@@ -350,7 +352,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                 setLogoAlterada(false);
                 setUserConta(userConta);
                 setSelectedUserConta(selectedUserConta);
-                setSelectedCNAE(null);
+                setSelectedCNAE(findCNAEByCodigo(empresa.cnae_fiscal, cnaeOptions));
             } finally {
                 setIsLoading(false);
             }

@@ -7,17 +7,23 @@ import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import {contribuinteOptions, DropDownTipoPessoa, OptionsTipoContrato,regimeTributarioPessoaOptions} from '@/app/shared/optionsDropDown/options';
+import ContratoDropdownField from '../dropDown/contrato';
 export function PessoaFields({
     pessoa,
     errors,
     selectedContato,
+    selectedContrato,
     selectedCNAE,
     loadingCnpj,
     hasFocused,
+    reloadKeyContrato,
+    onAddContato,
     onFocusFirstField,
     onChange,
     onDropdownChange,
     onContatoChange,
+    onAddContrato,
+    onContratoChange,
     onCNAEChange,
     onSearchCnpj,
     onValidateCnpj,
@@ -356,6 +362,20 @@ export function PessoaFields({
                     topLabel="Tipo de contato:"
                 />
             </div>
+             <div className="col-12 lg:col-3">
+                                     <ContratoDropdownField
+                                            selectedContrato={selectedContrato}
+                                            selectedContratoId={pessoa.id_contrato ?? null}
+                                            onContratoChange={onContratoChange}
+                                            reloadKey={reloadKeyContrato}
+                                            hasError={!!errors.selectedContrato}
+                                            errorMessage={errors.selectedContrato}
+                                            showAddButton
+                                            onAddClick={onAddContrato}
+                                            autoSelectSingle={false}
+                                            required
+                                        />
+                                    </div>
             <div className="col-12 lg:col-6">
                 <Input
                     value={pessoa?.email || ''}
