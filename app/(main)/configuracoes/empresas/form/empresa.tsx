@@ -78,7 +78,8 @@ export function EmpresaFields({
         'uf',
         'municipio',
         'codigo_municipio',
-        'codigo_pais'
+        'codigo_pais',
+        'telefone'
     ]);
     const hasNotaFiscalErrors = hasAnyTabError([
         'serie_emissao_nfse',
@@ -220,6 +221,7 @@ export function EmpresaFields({
                     <EnderecoForm
                         endereco={empresa.endereco}
                         telefone={empresa.telefone}
+                        telefoneObrigatorio
                         errors={errors}
                         onChange={onChange}
                         onCepSearch={onCepSearch}
@@ -229,7 +231,7 @@ export function EmpresaFields({
                         loadingCep={loadingCep} />
 
                 </TabPanel>
-                  <TabPanel
+                <TabPanel
                     header={
                         <span className="shared-form-tab-label">
                             Acesso a Empresa
@@ -238,7 +240,7 @@ export function EmpresaFields({
                     }
                 >
                     <div className="grid formgrid">
-                        <div className="col-12 mb-1 lg:col-6 lg:mb-0">
+                        <div className="col-12 mb-1 lg:col-3 lg:mb-0">
                             <div className="p-field">
                                 <CustomMultiSelect
                                     id=""
@@ -353,32 +355,75 @@ export function EmpresaFields({
                     }
                 >
                     <div className="grid formgrid">
-                        <div className="col-12  lg:col-3 ">
-                            <label className="filter-label flex my-1 items-center">
+                        <div className="col-12 lg:col-4  mt-2">
+                            <label className="filter-label">
                                 Certificado Digital:
                                 <Mandatory />
                             </label>
                             <Toast ref={toastRef}></Toast>
-                            <div className="file-upload-container mt-2" style={{ display: 'flex', alignItems: 'center' }}>
+                            <div className="file-upload-container mt-1"
+                                style={{ display: 'flex', alignItems: 'center' }}>
                                 <FileUpload ref={fileUploadRef} name="file" url="./upload" id="certificado_digital" customUpload chooseLabel={empresa.nome_certificado_digital || 'Upload Certificado A1'} mode="basic" disabled={loadingFileUpload} accept=".pfx,.p12,.cer,.crt,.cert" onSelect={onFileChangeCertificado} onClear={onClearCertificado} className={`p-fileupload-basic w-full ${isDarkMode ? 'dark-mode' : 'light-mode'} ${errors.certificado_digital ? 'p-invalid' : ''}`} withCredentials={false} />
                                 {empresa.certificado_digital && <Button icon="pi pi-trash" outlined severity="danger" aria-label="Cancel" onClick={onRemoveFile} style={{ width: '10%', marginLeft: '1rem' }} />}
                             </div>
                             {errors.certificado_digital && <small className="p-error">{errors.certificado_digital}</small>}
                         </div>
-                        <div className="col-12  lg:col-3 ">
-                            <Input value={empresa.senha_certificado_digital || ''} onChange={onChange} label="Senha" id="senha_certificado_digital" type={isPasswordVisible ? 'text' : 'password'} useRightButton outlined iconLeft="pi pi-key" iconRight={<IconVisible isPasswordVisible={isPasswordVisible} />} onClick={onTogglePasswordVisibility} hasError={!!errors.senha_certificado_digital} errorMessage={errors.senha_certificado_digital} topLabel="Senha:" showTopLabel required />
+                        <div className="col-12 lg:col-4 " style={{ marginTop: "2px" }}>
+                            <Input value={empresa.senha_certificado_digital || ''}
+                                onChange={onChange} label="Senha" id="senha_certificado_digital"
+                                type={isPasswordVisible ? 'text' : 'password'} useRightButton
+                                outlined iconLeft="pi pi-key" iconRight={<IconVisible isPasswordVisible={isPasswordVisible} />}
+                                onClick={onTogglePasswordVisibility} hasError={!!errors.senha_certificado_digital}
+                                errorMessage={errors.senha_certificado_digital}
+                                topLabel="Senha:"
+                                showTopLabel required
+                            />
                         </div>
                         {empresaId && (
                             <>
-                                <div className="col-12  lg:col-6 lg:mb-0">
+                                <div className="col-12  lg:col-2 lg:mb-0">
                                     <Input value={empresa.data_vencimento_certificado_digital || ''} onChange={onChange} label="" id="data_vencimento_certificado_digital" useRightButton outlined readOnly topLabel="Data vencimento Certificado:" showTopLabel />
                                 </div>
-                                <div className="col-12 mb-1 lg:col-6 lg:mb-0" style={{ display: 'flex', alignItems: 'center' }}>
-                                    <div className="flex justify-center items-center col-12 mb-1 lg:col-12 lg:mb-0">
-                                        <label className="mr-2" htmlFor="status">
-                                            Status do Certificado Digital:
-                                        </label>
-                                        <Tag severity={empresa.status_certificado_digital?.toUpperCase() === 'EXPIRADO' ? 'danger' : 'success'} value={empresa.status_certificado_digital || ''} />
+                                <div className="col-12 lg:col-2"style={{marginTop:25.5}}>
+                                    <div className="flex align-items-center justify-content-between p-2 border-round-lg"
+                                        style={{
+                                            background: empresa.status_certificado_digital?.toUpperCase() === 'EXPIRADO'
+                                                ? '#fff5f5'
+                                                : '#f4fff6',
+                                            border: `1px solid ${empresa.status_certificado_digital?.toUpperCase() === 'EXPIRADO'
+                                                    ? '#f5c2c7'
+                                                    : '#b7ebc6'
+                                                }`,
+                                            minHeight: '40px',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                                        }}
+                                    >
+                                        
+                                        <div className="flex flex-column">
+                                            <span
+                                                style={{
+                                                    fontSize: '0.85rem',
+                                                    color: '#6b7280',
+                                                    marginBottom: '0.25rem'
+                                                }}
+                                            >
+                                                STATUS CERTIFICADO DIGITAL
+                                            </span>
+                                        </div>
+
+                                        <Tag
+                                            severity={
+                                                empresa.status_certificado_digital?.toUpperCase() === 'EXPIRADO'
+                                                    ? 'danger'
+                                                    : 'success'
+                                            }
+                                            value={
+                                                empresa.status_certificado_digital?.toUpperCase() === 'EXPIRADO'
+                                                    ? 'Expirado'
+                                                    : 'Ativo'
+                                            }
+                                            rounded
+                                        />
                                     </div>
                                 </div>
                             </>

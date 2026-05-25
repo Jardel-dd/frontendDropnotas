@@ -337,7 +337,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             !pessoa.codigo_regime_tributario ||
             !pessoa.contribuinte ||
             (!selectedVendedor && !pessoa.id_vendedor_padrao) ||
-            (!selectedContrato && !pessoa.id_contrato) ||
             !pessoa.endereco ||
             !pessoa.email;
         const isDialogMode = Boolean(showBTNPGCreatedDialog);

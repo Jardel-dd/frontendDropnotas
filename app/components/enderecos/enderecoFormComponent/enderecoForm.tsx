@@ -16,6 +16,7 @@ type Props = {
     loadingCep?: boolean;
     readOnly?: boolean;
     exibirTelefone?: boolean;
+    telefoneObrigatorio?: boolean;
     nomePaisObrigatorio?: boolean;
 };
 export default function EnderecoForm({
@@ -30,6 +31,7 @@ export default function EnderecoForm({
     loadingCep = false,
     readOnly,
     exibirTelefone = true,
+    telefoneObrigatorio = false,
     nomePaisObrigatorio = false
 }: Props) {
     const enderecoSafe = endereco || {};
@@ -159,11 +161,12 @@ export default function EnderecoForm({
                             iconRight=""
                             onClickSearch={() => {}}
                             readOnly={readOnly}
-                            hasError={!!errors.telefone}
-                            errorMessage={errors.telefone}
+                            hasError={!!errors.telefone && telefoneObrigatorio}
+                            errorMessage={telefoneObrigatorio ? errors.telefone : undefined}
                             disabledRightButton={!endereco?.telefone || endereco.cep.replace(/\D/g, '').length !== 8}
                             topLabel="Telefone:"
                             showTopLabel
+                            required={telefoneObrigatorio}
                         />
                     </div>
                 )}

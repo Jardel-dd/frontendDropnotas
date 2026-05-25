@@ -59,9 +59,6 @@ const validateCamposComunsPessoa = (
     if (!pessoa.pessoa_cliente && !pessoa.pessoa_fornecedor) {
         return { selectedContato: 'Este Campo deve ser selecionado.' };
     }
-    if (!selectedContrato && !pessoa.id_contrato) {
-        return { selectedContrato: 'Este Campo deve ser selecionado.' };
-    }
     if (!hasValidEmail(pessoa.email)) {
         return { email: 'Email invalido. Por favor, digite um email valido.' };
     }
