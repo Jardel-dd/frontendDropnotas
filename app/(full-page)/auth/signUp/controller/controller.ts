@@ -39,7 +39,12 @@ export const create = async (conta: CreatedAccountEntity, router: AppRouterInsta
             router
         );
         if (loginSuccess) {
-            window.location.href = '/dashboard';
+            const onboardingParams = new URLSearchParams({
+                onboarding: 'company-setup',
+                cnpj: conta.cnpj?.replace(/\D/g, '') ?? ''
+            });
+
+            window.location.href = `/configuracoes/empresas?${onboardingParams.toString()}`;
             return {
                 token: localStorage.getItem('token') || '',
                 refreshToken: localStorage.getItem('refreshToken') || ''

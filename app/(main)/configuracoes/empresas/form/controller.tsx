@@ -63,7 +63,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         const [empresa, setEmpresa] = useState<CompanyEntity>(
             new CompanyEntity({
                 id: 0,
-                id_usuarios_acesso: [0],
+                id_usuarios_acesso: [],
                 cnpj: '',
                 razao_social: '',
                 nome_fantasia: '',
@@ -390,6 +390,9 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
             return <LoadingScreen loadingText="Carregando informações da Empresa selecionada..." />;
         }
         const isDialogMode = Boolean(showBTNPGCreatedDialog || onClose || onBackClick);
+        const hasValidUserContaSelection =
+            selectedUserConta.length > 0 ||
+            (Array.isArray(empresa.id_usuarios_acesso) && empresa.id_usuarios_acesso.some((id) => Number(id) > 0));
         const isSubmitDisabled =
             stateDisableBtnCreatedCompany ||
             Object.keys(errors).length > 0 ||
@@ -412,7 +415,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
             !empresa.tipo_rps ||
             (!empresa.certificado_digital && !empresa.nome_certificado_digital) ||
             !empresa.senha_certificado_digital ||
-            !selectedUserConta;
+            !hasValidUserContaSelection;
 
         return (
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>

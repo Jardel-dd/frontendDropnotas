@@ -76,8 +76,8 @@ const SignIn: React.FC = () => {
             <div className="styled-containerSignUp-SignIn ">
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="card styled-container-login-register">
-                    <img style={{ height: '15rem' }} alt="dropdown icon" src="/layout/images/logoDropNOTAS.png" />
-                    <p className="text-color-secondary mb-4">Informe email e senha nos campos</p>
+                    <img style={{ height: '10rem' }} alt="dropdown icon" src="/layout/images/logoDropNotasMain.png" />
+                    <p className="text-color-secondary mb-2 mt-3">Informe email e senha nos campos</p>
                     <div className="col-12 lg:col-12 ">
                         <Input
                             id="email"

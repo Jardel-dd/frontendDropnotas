@@ -53,10 +53,6 @@ export function ListarNotaServico({
             query.set('referencia', nota.referencia);
         }
 
-        if (nota.id) {
-            query.set('id', String(nota.id));
-        }
-
         if (!query.toString()) return;
 
         router.push(`/notaServico/created?${query.toString()}`);

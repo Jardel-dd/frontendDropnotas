@@ -147,7 +147,7 @@ function SignUp() {
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="card styled-container-login-register sign-up-card">
                     <div className="sign-up-card__header">
-                        <img className="sign-up-card__logo" alt="dropdown icon" src="/layout/images/logoDropNOTAS.png" />
+                        <img className="sign-up-card__logo" alt="dropdown icon" src="/layout/images/logoDropNotasMain.png" />
                         <p className="sign-up-card__description">
                             Para fazer o cadastro você precisa preencher os campos abaixo:
                         </p>

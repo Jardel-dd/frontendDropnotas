@@ -100,7 +100,7 @@ export function NotaServicoFields({
     setGerarNfse
 }: NotaServicoFieldsProps) {
     return (
-        <>
+        <div className="shared-form-tabbed-layout">
             <div className="grid formgrid">
               <div className="col-12 lg:col-3">
                     <DatePicker
@@ -127,7 +127,7 @@ export function NotaServicoFields({
                     />
                 </div>
             </div>
-            <div>
+            <div className="shared-form-tabbed-body">
                 <NotaServico
                     nfseGerada={gerarNfse}
                     handleAllChanges={onChange}
@@ -151,7 +151,7 @@ export function NotaServicoFields({
                     loadingCep={loadingCep}
                 />
             </div>
-        </>
+        </div>
     );
 }
 const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(({ notaServico, initialId, msgs, onNotaServicoChange, onErrorsChange, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
@@ -409,8 +409,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             try {
                 const response = await prepararCorrecaoNotaServico(
                     {
-                        referencia: correctionReference,
-                        id: initialId
+                        referencia: correctionReference
                     },
                     msgs
                 );
@@ -466,7 +465,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
 
     return (
         <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
-            <div className="scrollable-container shared-form-content">
+            <div className="shared-form-tabbed-content">
                 <Messages ref={msgs} className="custom-messages" />
                 <NotaServicoFields
                     gerarNfse={gerarNfse}

@@ -12,7 +12,7 @@ export const validateFieldsEmpresas = (
     let errorMessages: string[] = [];
     let newErrors: { [key: string]: string } = {};
     const hasSelectedUserConta = !!selectedUserConta;
-    const hasSavedUserContaIds = Array.isArray(empresa.id_usuarios_acesso) && empresa.id_usuarios_acesso.length > 0;
+    const hasSavedUserContaIds = Array.isArray(empresa.id_usuarios_acesso) && empresa.id_usuarios_acesso.some((id) => Number(id) > 0);
     msgs.current?.clear();
 
     if (!empresa.cnpj || empresa.cnpj.replace(/\D/g, '').length < 14) {

@@ -100,8 +100,17 @@ export const handleEdit = <T extends { id?: number | string }>(entity: T, basePa
     }).toString();
     router.push(`${basePath}?${queryParams}`);
 };
-export const editButton = <T extends { id?: number | string }>(entity: T, basePath: string, router: ReturnType<typeof useRouter>) => {
-    return <Button icon="pi pi-pencil" tooltip="Alterar" className="p-button-text p-button-warning bottom-All-plus-datatableDetails" onClick={() => handleEdit(entity, basePath, router)} />;
+export const editButton = <T extends { id?: number | string }>(
+    entity: T,
+    basePath: string,
+    router: ReturnType<typeof useRouter>,
+    buttonWrapperRef?: React.Ref<HTMLSpanElement>
+) => {
+    return (
+        <span ref={buttonWrapperRef}>
+            <Button icon="pi pi-pencil" tooltip="Alterar" className="p-button-text p-button-warning bottom-All-plus-datatableDetails" onClick={() => handleEdit(entity, basePath, router)} />
+        </span>
+    );
 };
 export const defaultExpandButtonTemplate = <T extends Identifiable>(rowData: T, expandedRows: any[], setExpandedRows: React.Dispatch<React.SetStateAction<any[]>>) => {
     const isExpanded = expandedRows.some((row) => row.id === rowData.id);

@@ -14,7 +14,7 @@ export default function CriarEmpresas() {
     const [empresa, setEmpresa] = useState<CompanyEntity>(
         new CompanyEntity({
             id: 0,
-            id_usuarios_acesso: [0],
+            id_usuarios_acesso: [],
             cnpj: '',
             razao_social: '',
             nome_fantasia: '',

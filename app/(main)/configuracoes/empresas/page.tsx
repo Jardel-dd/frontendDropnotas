@@ -2,7 +2,7 @@
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Messages } from 'primereact/messages';
 import ListarEmpresas from './tabela/empresaListagem';
 import Input from '@/app/shared/include/input/input-all';
@@ -22,6 +22,7 @@ import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterCompo
 
 const Empresas: React.FC = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -102,6 +103,8 @@ const Empresas: React.FC = () => {
         first: true,
         empty: false
     });
+    const showOnboardingHint = searchParams.get('onboarding') === 'company-setup';
+    const onboardingCnpj = searchParams.get('cnpj')?.replace(/\D/g, '') ?? '';
     const handleNavigate = () => {
         router.push('/configuracoes/empresas/created');
         setIsCompanyCreated(true);
@@ -225,6 +228,8 @@ const Empresas: React.FC = () => {
                                 searchTerm={searchTerm}
                                 setListPaginationEmpresa={setListPaginationEmpresa}
                                 listarInativos={listarInativos}
+                                showOnboardingHint={showOnboardingHint}
+                                onboardingCnpj={onboardingCnpj}
                             />
                         </div>
                         <div style={{ marginTop: 'auto' }}>
@@ -293,6 +298,8 @@ const Empresas: React.FC = () => {
                                         searchTerm={searchTerm}
                                         setListPaginationEmpresa={setListPaginationEmpresa}
                                         listarInativos={listarInativos}
+                                        showOnboardingHint={showOnboardingHint}
+                                        onboardingCnpj={onboardingCnpj}
                                     />
                                 </div>
                             </div>

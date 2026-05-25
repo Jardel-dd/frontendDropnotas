@@ -18,7 +18,7 @@ const COLOR_SCHEME_ALIASES: Record<string, ColorScheme> = {
 
 export const THEME_PREFERENCES_STORAGE_KEY = 'themePreferences';
 
-export const DEFAULT_COLOR_SCHEME: ColorScheme = 'dark';
+export const DEFAULT_COLOR_SCHEME: ColorScheme = 'light';
 export const DEFAULT_COMPONENT_THEME = 'green';
 
 const getDefaultThemePreferences = (): ThemePreferences => ({

@@ -9,10 +9,11 @@ import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { handleActiveOrInativeEmpresa } from '../controller/controller';
-import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
+import { useOnboardingStyles } from './style';
 
 export function ListarEmpresas({
     listPaginationEmpresa,
@@ -20,7 +21,9 @@ export function ListarEmpresas({
     loading,
     setLoading,
     searchTerm,
-    listarInativos
+    listarInativos,
+    showOnboardingHint = false,
+    onboardingCnpj = ''
 }: {
     listPaginationEmpresa: Record<string, any>;
     loading: boolean;
@@ -32,7 +35,13 @@ export function ListarEmpresas({
     selectedEmpresa: CompanyEntity | null;
     setLoading: (state: boolean) => void;
     listarInativos: boolean;
+    showOnboardingHint?: boolean;
+    onboardingCnpj?: string;
 }) {
+    const {
+   onboardingWrapperStyle,
+   onboardingMessageStyle
+} = useOnboardingStyles();
     const router = useRouter();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -41,6 +50,91 @@ export function ListarEmpresas({
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<CompanyEntity[]>([]);
+    const onboardingFocusDoneRef = useRef(false);
+    const onboardingButtonRef = useRef<HTMLButtonElement | null>(null);
+    const normalizedOnboardingCnpj = onboardingCnpj.replace(/\D/g, '');
+    const [onboardingHintPosition, setOnboardingHintPosition] = useState<{ top: number; left: number } | null>(null);
+  
+
+    const updateOnboardingHintPosition = () => {
+        const targetButton = onboardingButtonRef.current;
+
+        if (!showOnboardingHint || !targetButton) {
+            setOnboardingHintPosition(null);
+            return;
+        }
+
+        const buttonRect = targetButton.getBoundingClientRect();
+        const hintWidth = isMobile ? 192 : 256;
+        const hintHeight = 72;
+        const gap = 12;
+        const preferredLeft = buttonRect.left - hintWidth - gap;
+        const fallbackLeft = buttonRect.right + gap;
+        const left = preferredLeft >= 12 ? preferredLeft : Math.min(fallbackLeft, window.innerWidth - hintWidth - 12);
+        const top = Math.min(
+            Math.max(buttonRect.top + (buttonRect.height / 2) - (hintHeight / 2), 12),
+            window.innerHeight - hintHeight - 12
+        );
+
+        setOnboardingHintPosition({ top, left });
+    };
+
+    useEffect(() => {
+        if (!showOnboardingHint || loading || onboardingFocusDoneRef.current || !onboardingButtonRef.current) {
+            return;
+        }
+
+        onboardingButtonRef.current.focus();
+        onboardingButtonRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+        });
+        updateOnboardingHintPosition();
+        onboardingFocusDoneRef.current = true;
+    }, [showOnboardingHint, loading, listPaginationEmpresa]);
+
+    useEffect(() => {
+        if (!showOnboardingHint || loading) {
+            setOnboardingHintPosition(null);
+            return;
+        }
+
+        const handleWindowUpdate = () => updateOnboardingHintPosition();
+
+        handleWindowUpdate();
+        window.addEventListener('resize', handleWindowUpdate);
+        window.addEventListener('scroll', handleWindowUpdate, true);
+
+        return () => {
+            window.removeEventListener('resize', handleWindowUpdate);
+            window.removeEventListener('scroll', handleWindowUpdate, true);
+        };
+    }, [showOnboardingHint, loading, isMobile, listPaginationEmpresa]);
+
+    const renderOnboardingEditButton = (rowData: CompanyEntity) => {
+        const rowCnpj = rowData.cnpj?.replace(/\D/g, '') ?? '';
+        const isOnboardingTarget =
+            showOnboardingHint &&
+            normalizedOnboardingCnpj.length > 0 &&
+            rowCnpj === normalizedOnboardingCnpj;
+
+        if (!isOnboardingTarget) {
+            return editButton(rowData, '/configuracoes/empresas/created', router);
+        }
+
+        return (
+            <div style={onboardingWrapperStyle}>
+                {editButton(
+                    rowData,
+                    '/configuracoes/empresas/created',
+                    router,
+                    onboardingButtonRef
+                )}
+            </div>
+        );
+    };
+
     const rowExpansionTemplate = (data: CompanyEntity) => {
         return (
             <div className="company-details p-3 shadow-sm rounded">
@@ -65,7 +159,19 @@ export function ListarEmpresas({
     };
     return (
         <div className="mt-0">
+            
             <Messages ref={msgs} className="custom-messages" />
+            {showOnboardingHint && onboardingHintPosition && (
+                <div
+                    style={{
+                        ...onboardingMessageStyle,
+                        top: onboardingHintPosition.top,
+                        left: onboardingHintPosition.left
+                    }}
+                >
+                   Finalize o cadastrado de informações da empresa para emissão das Notas Fiscais.
+                </div>
+            )}
             {loading ? (
                 <LoadingScreen loadingText={'Carregando...'} />
             ) : (
@@ -84,7 +190,7 @@ export function ListarEmpresas({
                                 searchTerm={searchTerm}
                                 editButtonTemplate={
                                     permissaoEmpresa.update ?
-                                        (rowData) => editButton(rowData, '/configuracoes/empresas/created', router)
+                                        (rowData) => renderOnboardingEditButton(rowData)
                                         : undefined}
                                 toggleStatusOrDeleteButtonTemplate={
                                     permissaoEmpresa.delete ? (rowData) =>
@@ -123,7 +229,7 @@ export function ListarEmpresas({
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                 editButtonTemplate={
                                     permissaoEmpresa.update ?
-                                        (rowData) => editButton(rowData, '/configuracoes/empresas/created', router)
+                                        (rowData) => renderOnboardingEditButton(rowData)
                                         : undefined}
                                 toggleStatusOrDeleteButtonTemplate={
                                     permissaoEmpresa.delete ? (rowData) =>

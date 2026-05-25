@@ -6,10 +6,12 @@ import BlocoTomador from './components/BlocoTomador';
 import { TabView, TabPanel } from 'primereact/tabview';
 import BlocoPrestador from './components/BlocoPrestador';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
+import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation';
 
 export function NotaServico(props: any) {
     const { isDarkMode } = useTheme();
-    
+    const invalidTabMessage = 'Verifique este menu, possui campos obrigatorios nao preenchidos';
+
     const {
         nfseGerada,
         handleAllChanges,
@@ -32,10 +34,23 @@ export function NotaServico(props: any) {
         getCitiesFromState,
         loadingCep
     } = props;
+
+    const scopedErrors = errors ?? {};
+    const hasPrestadorErrors = Object.keys(getScopedErrors(scopedErrors, 'prestador')).length > 0;
+    const hasTomadorErrors = Object.keys(getScopedErrors(scopedErrors, 'tomador')).length > 0;
+    const hasServicoErrors = Object.keys(getScopedErrors(scopedErrors, 'servico')).length > 0;
+
     return (
-        <div>
-            <TabView className={`nota-servico-tabs ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-                <TabPanel header="Empresa  (Prestador)">
+        <div className="shared-form-tabbed-body">
+            <TabView className={`shared-form-tabs shared-form-tabbed-view ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                <TabPanel
+                    header={
+                        <span className="shared-form-tab-label">
+                            Empresa (Prestador)
+                            {hasPrestadorErrors && <i className="pi pi-exclamation-circle shared-form-tab-alert" title={invalidTabMessage} aria-label={invalidTabMessage} />}
+                        </span>
+                    }
+                >
                     <BlocoPrestador
                         nfseGerada={nfseGerada}
                         handleAllChanges={handleAllChanges}
@@ -53,7 +68,14 @@ export function NotaServico(props: any) {
                         loadingCep={loadingCep}
                     />
                 </TabPanel>
-                <TabPanel header="Cliente (Tomador)">
+                <TabPanel
+                    header={
+                        <span className="shared-form-tab-label">
+                            Cliente (Tomador)
+                            {hasTomadorErrors && <i className="pi pi-exclamation-circle shared-form-tab-alert" title={invalidTabMessage} aria-label={invalidTabMessage} />}
+                        </span>
+                    }
+                >
                     <BlocoTomador
                         nfseGerada={nfseGerada}
                         handleAllChanges={handleAllChanges}
@@ -68,7 +90,14 @@ export function NotaServico(props: any) {
                         loadingCep={loadingCep}
                     />
                 </TabPanel>
-                <TabPanel header="Serviço">
+                <TabPanel
+                    header={
+                        <span className="shared-form-tab-label">
+                            Serviço
+                            {hasServicoErrors && <i className="pi pi-exclamation-circle shared-form-tab-alert" title={invalidTabMessage} aria-label={invalidTabMessage} />}
+                        </span>
+                    }
+                >
                     <BlocoServico nfseGerada={nfseGerada} handleNumberChange={handleNumberChange} handleAllChanges={handleAllChanges} handleDropdownChange={handleDropdownChange} errors={errors} />
                 </TabPanel>
             </TabView>
