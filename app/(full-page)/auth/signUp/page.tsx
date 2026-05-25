@@ -110,7 +110,6 @@ function SignUp() {
             console.log('Requisição enviada com sucesso.');
         } catch (error) {
             console.error('Erro ao criar conta:', error);
-        } finally {
             setIsLoadingBtnCreated(false);
         }
     };

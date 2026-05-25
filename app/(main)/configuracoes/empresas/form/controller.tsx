@@ -29,6 +29,8 @@ import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/l
 
 export type { EmpresaFieldsProps, EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
 
+const TELEFONE_OBRIGATORIO = true;
+
 const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
     (
         {
@@ -115,7 +117,8 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [selectedUserConta, setSelectedUserConta] = useState<UsuarioContaEntity[]>([]);
         const [stateDisableBtnCreatedCompany, setStateDisableBtnCreatedCompany] = useState(false);
-        const validateEmpresaForm = (empresaAtual = empresa, selectedUser = selectedUserConta[0]) => validateFieldsEmpresas(empresaAtual, selectedUser, setErrors, msgs);
+        const validateEmpresaForm = (empresaAtual = empresa, selectedUser = selectedUserConta[0]) =>
+            validateFieldsEmpresas(empresaAtual, selectedUser, setErrors, msgs, TELEFONE_OBRIGATORIO);
         const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
             const { id, value, checked, type } = event.target;
             let newValue = type === 'checkbox' || type === 'switch' ? checked : value;
@@ -377,7 +380,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         }, [empresaId]);
         useEffect(() => {
             if (Object.values(touchedFields).some((touched) => touched)) {
-                validateFieldsEmpresas(empresa, selectedUserConta[0], setErrors, msgs);
+                validateFieldsEmpresas(empresa, selectedUserConta[0], setErrors, msgs, TELEFONE_OBRIGATORIO);
             }
         }, [empresa, selectedUserConta, touchedFields, msgs]);
         useEffect(() => {
@@ -402,6 +405,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
             !empresa.atividade_principal ||
             !empresa.inscricao_municipal ||
             !empresa.codigo_regime_tributario ||
+            (TELEFONE_OBRIGATORIO && !empresa.telefone) ||
             !empresa.endereco ||
             !empresa.serie_emissao_nfse ||
             !empresa.proximo_numero_rps ||

@@ -373,7 +373,6 @@ export function PessoaFields({
                                             showAddButton
                                             onAddClick={onAddContrato}
                                             autoSelectSingle={false}
-                                            required
                                         />
                                     </div>
             <div className="col-12 lg:col-6">
