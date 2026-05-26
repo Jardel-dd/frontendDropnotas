@@ -516,7 +516,7 @@ const NotaServico: React.FC = () => {
             return;
         }
 
-        toast.current?.show({
+        msgs.current?.show({
             ...feedback,
             life: 7000
         });

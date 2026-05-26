@@ -30,13 +30,13 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 <Input
                     id="descricao"
                     value={nfseGerada.servico?.descricao || ''}
-                    label="DescriÃ§Ã£o"
+                    label="Descrição"
                     onChange={(e) => handleAllChanges(e, 'servico')}
                     hasError={!!servicoErrors.descricao}
                     errorMessage={servicoErrors.descricao}
                     showTopLabel
                     required
-                    topLabel="DescriÃ§Ã£o:"
+                    topLabel="Descrição:"
                 />
             </div>
             <div className="col-12 lg:col-3">
