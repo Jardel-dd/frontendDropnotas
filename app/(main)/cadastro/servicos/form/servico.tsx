@@ -43,7 +43,7 @@ export function ServicoFields({
                 <Input
                     value={servico.descricao || ''}
                     onChange={onChange}
-                    label="Descrição completa do serviço"
+                    label="Descrição completa Serviço"
                     id="descricao"
                     hasError={!!errors.descricao}
                     errorMessage={errors.descricao}
@@ -59,7 +59,7 @@ export function ServicoFields({
                     id="valor_servico"
                     value={servico.valor_servico || 0}
                     onChange={onNumberChange}
-                    label="Valor Serviços"
+                    label="Valor Serviço"
                     useRightButton
                     outlined
                     hasError={!!errors.valor_servico}
@@ -277,7 +277,7 @@ export function ServicoFields({
                     id="codigo_credito_presumido"
                     hasError={!!errors.codigo_credito_presumido}
                     errorMessage={errors.codigo_credito_presumido}
-                    topLabel="Crédito presumido:"
+                    topLabel="Codigo Crédito Presumido:"
                     maxLength={20}
                     showTopLabel
                 />
@@ -318,19 +318,6 @@ export function ServicoFields({
                     hasError={!!errors.codigo_municipio}
                     errorMessage={errors.codigo_municipio}
                     topLabel="Código do Município:"
-                    showTopLabel
-                    required
-                />
-            </div>
-             <div className="col-12  lg:col-4">
-                <Input
-                    value={servico.municipio_incidencia || ''}
-                    onChange={onChange}
-                    label="Código do Município Incidência"
-                    id="municipio_incidencia"
-                    hasError={!!errors.municipio_incidencia}
-                    errorMessage={errors.municipio_incidencia}
-                    topLabel="Código do Município Incidência:"
                     showTopLabel
                     required
                 />

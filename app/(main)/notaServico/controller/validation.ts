@@ -48,7 +48,6 @@ const buildNotaServicoErrors = (notaServico: NfsEntity) => {
     addRequiredError(newErrors, 'servico.codigo_municipio', isBlank(notaServico.servico?.codigo_municipio));
     addRequiredError(newErrors, 'servico.exigibilidade_iss', isBlank(notaServico.servico?.exigibilidade_iss));
     addRequiredError(newErrors, 'servico.responsavel_retencao', isBlank(notaServico.servico?.responsavel_retencao));
-    addRequiredError(newErrors, 'servico.municipio_incidencia', isBlank(notaServico.servico?.municipio_incidencia));
     addRequiredError(newErrors, 'tomador.razao_social', isBlank(notaServico.tomador?.razao_social));
     addRequiredError(newErrors, 'tomador.cpf_cnpj', !hasDigits(notaServico.tomador?.cpf_cnpj));
     addRequiredError(newErrors, 'tomador.email', isBlank(tomadorEmail));

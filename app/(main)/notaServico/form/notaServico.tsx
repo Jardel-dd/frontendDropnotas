@@ -154,7 +154,7 @@ export function NotaServicoFields({
         </div>
     );
 }
-const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(({ notaServico, initialId, msgs, onNotaServicoChange, onErrorsChange, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
+const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormProps>(({ notaServico, initialId, msgs, onNotaServicoChange, onErrorsChange, redirectAfterSave = true, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
     const router = useRouter();
     const toast = useRef<Toast>(null);
     const searchParams = useSearchParams();
@@ -321,9 +321,13 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         try {
             setLoadingText('Emitindo NFS-e...');
             setLoading(true);
-            await createdNotaServico(gerarNfse, setErrors, msgs, router);
-            onSaved?.(gerarNfse);
-            onClose?.();
+            const wasCreated = await createdNotaServico(gerarNfse, setErrors, msgs, router, redirectAfterSave);
+            if (wasCreated) {
+                onSaved?.(gerarNfse);
+                if (!redirectAfterSave) {
+                    onClose?.();
+                }
+            }
         } catch (error) {
             toast.current?.show({
                 severity: 'error',

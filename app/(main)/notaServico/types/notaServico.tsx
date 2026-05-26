@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 import { Messages } from 'primereact/messages';
 import { NfsEntity } from '@/app/entity/NfsEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
-import { ContatoEntity, DetalTomadorEntity } from '@/app/entity/PessoaEntity';
+import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import { DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DetalPrestadorValoresEntity, DetalServiceEntity } from '@/app/entity/ServiceEntity';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
@@ -73,7 +73,32 @@ export type NotaFiscalParams = {
     data_hora_fim?: string | null;
     sort?: string;
 };
-
+export const createEmptyPessoa = () =>
+    new PessoaEntity({
+        id: 0,
+        razao_social: '',
+        nome_fantasia: '',
+        cpf: null,
+        rg: null,
+        email: '',
+        documento_estrangeiro: null,
+        cnpj: null,
+        inscricao_estadual: '',
+        inscricao_municipal: '',
+        atividade_principal: '',
+        cnae_fiscal: null,
+        data_fundacao: '',
+        pessoa_cliente: false,
+        pessoa_fornecedor: false,
+        codigo_regime_tributario: '',
+        tipo_pessoa: 'PESSOA_JURIDICA',
+        contribuinte: '',
+        endereco: {} as EnderecoEntity,
+        arquivo_contrato: '',
+        id_vendedor_padrao: null,
+        ativo: true,
+        pais: ''
+    });
 export const createEmptyNfse = () =>
     new NfsEntity({
         referencia: '',
