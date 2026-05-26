@@ -9,6 +9,14 @@ import { mapDateRangeToParams } from '@/app/components/calendarComponent/control
 import { DetalPrestadorValoresEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams } from '../types/notaServico';
 
+const NOTA_SERVICO_FEEDBACK_KEY = 'notaServicoFeedback';
+
+type NotaServicoFeedback = {
+    severity: 'success' | 'warn' | 'error';
+    summary: string;
+    detail: string;
+};
+
 
 const normalizeOptionalNumberToZero = (value: unknown): number => {
     if (value === null || value === undefined || value === '') {
@@ -20,6 +28,34 @@ const normalizeOptionalNumberToZero = (value: unknown): number => {
     }
     const normalized = Number(value);
     return Number.isFinite(normalized) ? normalized : 0;
+};
+
+const persistNotaServicoFeedback = (feedback: NotaServicoFeedback) => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    window.sessionStorage.setItem(NOTA_SERVICO_FEEDBACK_KEY, JSON.stringify(feedback));
+};
+
+export const consumeNotaServicoFeedback = (): NotaServicoFeedback | null => {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const rawFeedback = window.sessionStorage.getItem(NOTA_SERVICO_FEEDBACK_KEY);
+    if (!rawFeedback) {
+        return null;
+    }
+
+    window.sessionStorage.removeItem(NOTA_SERVICO_FEEDBACK_KEY);
+
+    try {
+        return JSON.parse(rawFeedback) as NotaServicoFeedback;
+    } catch (error) {
+        console.error('Erro ao ler feedback da nota de servico:', error);
+        return null;
+    }
 };
 export const normalizeNfseServiceValores = (valores?: Partial<DetalPrestadorValoresEntity> | null): DetalPrestadorValoresEntity =>
     new DetalPrestadorValoresEntity({
@@ -35,7 +71,7 @@ export const normalizeNfseServiceValores = (valores?: Partial<DetalPrestadorValo
         aliquota_outras_retencoes: normalizeOptionalNumberToZero(valores?.aliquota_outras_retencoes),
         percentual_desconto_incondicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_incondicionado),
         percentual_desconto_condicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_condicionado)
-});
+    });
 export const fetchNotaServico = async (
     params: NotaFiscalParams,
     msgs?: any
@@ -67,7 +103,7 @@ export const fetchNotaServico = async (
                 content: [],
                 pageable: {
                     pageNumber: 0,
-        pageSize: 10
+                    pageSize: 10
                 },
                 totalElements: 0,
                 totalPages: 0,
@@ -142,12 +178,10 @@ export const prepararCorrecaoNotaServico = async (
     msgs?: any
 ) => {
     try {
-        const response = await api.get('/nfse/preparar-emissao', {
-            params: {
-                referencia: params.referencia ?? undefined,
-                id: params.referencia ? undefined : params.id ?? undefined
-            }
-        });
+        const payload = params.referencia
+            ? { referencia: params.referencia }
+            : { id: params.id };
+        const response = await api.post('/nfse/preparar-emissao', payload);
 
         return response.data;
     } catch (error: any) {
@@ -227,7 +261,8 @@ export const createdNotaServico = async (
     nfs: NfsEntity,
     setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
     msgs: any,
-    router: AppRouterInstance
+    router: AppRouterInstance,
+    redirectAfterSave = true
 ) => {
     try {
         const valoresNormalizados = normalizeNfseServiceValores(nfs.servico?.valores);
@@ -250,13 +285,44 @@ export const createdNotaServico = async (
         };
         console.log('Envio:', { nfse: dataNfse });
         const response = await api.post('/nfse', { nfse: dataNfse });
+        console.log('Response NFS:', response);
+
+        if (response.data?.status_nota?.trim().toUpperCase() === 'REJEITADA' && redirectAfterSave) {
+            persistNotaServicoFeedback({
+                severity: 'warn',
+                summary: 'Emissao nao concluida',
+                detail: 'Nao foi possivel emitir esta Nota fiscal no momento, efetue a correcao ou a emissao de uma nova Nota.'
+            });
+            router.push('/notaServico');
+            return false;
+        }
+
+        if (redirectAfterSave) {
+            persistNotaServicoFeedback({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: 'NFS-e cadastrada com sucesso!'
+            });
+            router.push('/notaServico');
+            return true;
+        }
+
+        if (response.data?.status_nota?.trim().toUpperCase() === 'REJEITADA') {
+            msgs.current?.show({
+                severity: 'warn',
+                summary: 'Emissao nao concluida',
+                detail: 'Não foi possivel emitir a Nota fiscal no momento, efetue a correcão ou a emissao de uma nova Nota Fiscal.',
+                life: 7000
+            });
+            return false;
+        }
+
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso',
             detail: 'NFS-e cadastrada com sucesso!'
         });
-        console.log('Response NFS:', response);
-        router.push('/notaServico');
+        return true;
     } catch (error: any) {
         let summaryMessage = 'Erro';
         let detailMessage = 'Ocorreu um erro ao cadastrar a NFS-e.';
@@ -288,6 +354,7 @@ export const createdNotaServico = async (
             detail: detailMessage,
             life: 6000
         });
+        return false;
     }
 };
 // export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>, msgs: any, router: AppRouterInstance) => {
@@ -417,6 +484,7 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
         });
     }
 };
+
 export const exportarPdfNotasServico = async (
     payload: ExportarPdfNfsePayload,
     msgs: React.RefObject<Messages | null>
@@ -425,10 +493,11 @@ export const exportarPdfNotasServico = async (
         const response = await api.post('/nfse/exportar-pdf', payload, {
             responseType: 'blob'
         });
-        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const blob = new Blob([response.data], {
+            type: 'application/pdf'
+        });
         const fileURL = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
-
         link.href = fileURL;
         link.setAttribute('download', 'notas-servico.pdf');
         document.body.appendChild(link);
@@ -437,11 +506,34 @@ export const exportarPdfNotasServico = async (
         window.URL.revokeObjectURL(fileURL);
     } catch (error) {
         console.error('Erro ao exportar PDF das notas:', error);
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+            msgs.current?.show({
+                severity: 'warn',
+                detail:
+                    'Nenhuma nota fiscal autorizada foi encontrada para o período e filtros selecionados.',
+                life: 5000
+            });
+            return;
+        }
+        if (axios.isAxiosError(error) && error.response?.status === 400) {
+            msgs.current?.show({
+                severity: 'warn',
+                summary: 'Período não informado',
+                detail:
+                    'Selecione uma data inicial e uma data final para realizar a exportação do PDF.',
+                life: 5000
+            });
+
+            return;
+        }
+
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
-            detail: 'Não foi possível exportar o PDF das notas.',
+            summary: 'Erro ao exportar PDF',
+            detail:
+                'Ocorreu um erro inesperado ao gerar o PDF. Tente novamente em alguns instantes.',
             life: 5000
         });
     }
+
 };

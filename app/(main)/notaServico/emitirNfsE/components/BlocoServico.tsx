@@ -11,7 +11,6 @@ import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation'
 import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 
-
 type Props = {
     nfseGerada: any;
     errors: Record<string, string>;
@@ -31,13 +30,13 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 <Input
                     id="descricao"
                     value={nfseGerada.servico?.descricao || ''}
-                    label="Descrição"
+                    label="DescriÃ§Ã£o"
                     onChange={(e) => handleAllChanges(e, 'servico')}
                     hasError={!!servicoErrors.descricao}
                     errorMessage={servicoErrors.descricao}
                     showTopLabel
                     required
-                    topLabel="Descrição:"
+                    topLabel="DescriÃ§Ã£o:"
                 />
             </div>
             <div className="col-12 lg:col-3">
@@ -90,12 +89,12 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     value={nfseGerada.servico.tributacao_issqn ?? 0}
                     options={tributacaoISSQN}
                     onChange={(e) => handleDropdownChange(e, 'servico')}
-                    label="Selecione a Tributação ISSQN "
+                    label="Selecione a Tributária ISSQN "
                     hasError={!!servicoErrors.tributacao_issqn}
                     errorMessage={servicoErrors.tributacao_issqn}
                     showTopLabel
                     required
-                    topLabel="Tributação ISSQN:"
+                    topLabel="Tributária ISSQN:"
                 />
             </div>
             <div className="col-12 lg:col-3">
@@ -153,7 +152,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                             'servico'
                         );
                     }}
-                    placeholder="Selecione um serviço"
+                    placeholder="Selecione um Serviço"
                     topLabel="Descrição da Atividade do Serviço:"
                     showTopLabel
                     required
@@ -178,27 +177,14 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
             <div className="col-12 lg:col-3">
                 <Input
                     id="codigo_municipio"
-                    label="Código do Municí­pio"
+                    label="Código do Município"
                     value={nfseGerada.servico.codigo_municipio || ''}
                     onChange={(e) => handleAllChanges(e, 'servico')}
                     hasError={!!servicoErrors.codigo_municipio}
                     errorMessage={servicoErrors.codigo_municipio}
-                    topLabel="Código do Municí­pio:"
+                    topLabel="Código do Município:"
                     showTopLabel
                     required
-                />
-            </div>
-            <div className="col-12 lg:col-3">
-                <Input
-                    id="municipio_incidencia"
-                    value={nfseGerada.servico?.municipio_incidencia || ''}
-                    label="Municí­pio Incidência"
-                    onChange={(e) => handleAllChanges(e, 'servico')}
-                    showTopLabel
-                    required
-                    topLabel="Código Municí­pio Incidência:"
-                    hasError={!!servicoErrors.municipio_incidencia}
-                    errorMessage={servicoErrors.municipio_incidencia}
                 />
             </div>
             <div className="col-12 lg:col-3">
@@ -357,7 +343,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
-             <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-full">
+            <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-full">
                 <InputTextarea
                     value={nfseGerada.servico?.descricao_completa || ''}
                     onChange={(e) => handleAllChanges(e, 'servico')}

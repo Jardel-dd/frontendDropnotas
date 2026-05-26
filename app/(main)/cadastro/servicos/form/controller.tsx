@@ -18,7 +18,7 @@ import { createServico, updateServico } from '@/app/(main)/cadastro/servicos/con
 import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
 import { createEmptyServico, FormCreatedServicoProps, ServiceFormProps, ServiceFormRef } from '../types/servico';
 import { fetchAllCodigoNBS, fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
-import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
+import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria, findClassificacaoTributariaByCodigo } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
 import { TableService } from '@/app/entity/TableServiceEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
@@ -176,10 +176,11 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                 setIsLoading(true);
                 const { servico } = await fetchServicesByID(id);
                 const entidade = new ServiceEntity(servico);
-                const [allServices, codigoNBSOptions, codigoCNAEOptions] = await Promise.all([
+                const [allServices, codigoNBSOptions, codigoCNAEOptions, classificacaoTributariaOptions] = await Promise.all([
                     fetchAllTabelaServico(),
                     entidade.codigo_nbs ? fetchFilteredCodigoNBS(entidade.codigo_nbs) : Promise.resolve([] as TableCodigoNBSEntity[]),
-                    entidade.codigo_cnae ? fetchFilteredCnae(entidade.codigo_cnae) : Promise.resolve([] as TableCNAEEntity[])
+                    entidade.codigo_cnae ? fetchFilteredCnae(entidade.codigo_cnae) : Promise.resolve([] as TableCNAEEntity[]),
+                    entidade.codigo_classificacao_tributaria ? fetchFilteredClassificacaoTributaria(entidade.codigo_classificacao_tributaria) : Promise.resolve([] as TableClassificacaoTributariaEntity[])
                 ]);
                 setServico(
                     new ServiceEntity({
@@ -213,7 +214,12 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                     setSelectedCodigoCNAE(null);
                 }
                 if (entidade.codigo_classificacao_tributaria) {
+                    const matchedClassificacaoTributaria = findClassificacaoTributariaByCodigo(
+                        entidade.codigo_classificacao_tributaria,
+                        classificacaoTributariaOptions
+                    );
                     setSelectedClassificacaoTributaria(
+                        matchedClassificacaoTributaria ??
                         new TableClassificacaoTributariaEntity({
                             id: 0,
                             codigo: entidade.codigo_classificacao_tributaria,
@@ -221,6 +227,8 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                             codigoCst: entidade.codigo_classificacao_tributaria
                         })
                     );
+                } else {
+                    setSelectedClassificacaoTributaria(null);
                 }
                 if (entidade.item_lista_servico) {
                     setSelectedCodigoServico(
