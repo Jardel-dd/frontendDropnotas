@@ -15,9 +15,6 @@ const AppSubMenu = (props: MenuProps) => {
         }
     }, [layoutState.overlaySubmenuActive]);
     useEffect(() => {
-        generateBreadcrumbs(props.model);
-    }, []);
-    const generateBreadcrumbs = (model: MenuModel[]) => {
         let breadcrumbs: Breadcrumb[] = [];
 
         const getBreadcrumb = (item: BreadcrumbItem, labels: string[] = []) => {
@@ -31,11 +28,12 @@ const AppSubMenu = (props: MenuProps) => {
             to && breadcrumbs.push({ labels, to });
         };
 
-        model.forEach((item) => {
+        props.model.forEach((item) => {
             getBreadcrumb(item);
         });
+
         setBreadcrumbs(breadcrumbs);
-    };
+    }, [props.model, setBreadcrumbs]);
     return (
         <MenuProvider >
             <ul className="layout-menu">

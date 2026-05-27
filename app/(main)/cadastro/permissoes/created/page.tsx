@@ -87,7 +87,7 @@ export default function PerfilUserPage() {
         setErrors(updatedErrors);
     };
     const isEditRoute = !!perfilUserId;
-    const canAccessPerfilUsuarioPage = isEditRoute ? !!userConta?.perfilUsuario?.perfilUsuarioAlterar : !!userConta?.perfilUsuario?.perfilUsuarioCadastrar;
+    const canAccessPerfilUsuarioPage = isEditRoute ? !!userConta?.perfil_usuario?.perfilUsuarioAlterar : !!userConta?.perfil_usuario?.perfilUsuarioCadastrar;
 
     useEffect(() => {
         if (canAccessPerfilUsuarioPage || hasRedirectedRef.current) {

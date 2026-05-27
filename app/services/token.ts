@@ -1,10 +1,10 @@
 import api from './api';
 import { JwtPayload, jwtDecode } from 'jwt-decode';
 import { logoutUser } from '../(full-page)/auth/logout/logoutRefreshToken';
-import { requestUserRefresh } from '@/app/routes/protected/userRefreshEvents';
+import { readStoredAuthValue, writeStoredAuthValue } from './authStorage';
 
 export const getToken = async (): Promise<string | null> => {
-    const token = localStorage.getItem('token');
+    const token = readStoredAuthValue('token');
     if (!token) {
         return null;
     }
@@ -20,7 +20,7 @@ export const getToken = async (): Promise<string | null> => {
 };
 export const getTokenDecoded = (): JwtPayload | null => {
     try {
-        const token = localStorage.getItem('token');
+        const token = readStoredAuthValue('token');
         if (!token) return null;
         const tokenDecoded = jwtDecode(token);
         return tokenDecoded;
@@ -49,7 +49,6 @@ export const renewToken = async (): Promise<string | null> => {
         if (token && newRefreshToken) {
             saveToken(token);
             saveRefreshToken(newRefreshToken);
-            requestUserRefresh();
             return token;
         }
         console.error('Tokens invalido retornado');
@@ -66,7 +65,7 @@ export const renewToken = async (): Promise<string | null> => {
 };
 export const saveToken = (token: string) => {
     if (token && token !== 'token') {
-        localStorage.setItem('token', token);
+        writeStoredAuthValue('token', token);
         console.log('Token armazenado com sucesso:', token);
     } else {
         console.error('Tentativa de salvar um token falhou:', token);
@@ -74,14 +73,14 @@ export const saveToken = (token: string) => {
 };
 export const saveRefreshToken = (refreshToken: string) => {
     if (refreshToken && refreshToken !== 'refreshToken') {
-        localStorage.setItem('refreshToken', refreshToken);
+        writeStoredAuthValue('refreshToken', refreshToken);
         console.log('Refresh token armazenado com sucesso:', refreshToken);
     } else {
         console.error('Tentativa de salvar um refresh token falhou', refreshToken);
     }
 };
 export const getRefreshToken = (): string | null => {
-    return localStorage.getItem('refreshToken');
+    return readStoredAuthValue('refreshToken');
 };
 // export const getToken = async (forceRefresh = false): Promise<string | null> => {
 //     const token = localStorage.getItem('token');

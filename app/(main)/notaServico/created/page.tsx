@@ -1,19 +1,26 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import LoadingScreen from '@/app/loading';
 import { Messages } from 'primereact/messages';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { NfsEntity } from '@/app/entity/NfsEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { ContatoEntity, DetalTomadorEntity } from '@/app/entity/PessoaEntity';
 import { DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { DetalPrestadorValoresEntity, DetalServiceEntity } from '@/app/entity/ServiceEntity';
 import NotaServicoForm, { NotaServicoFormRef } from '@/app/(main)/notaServico/form/notaServico';
+import { usePermissions } from '@/app/routes/permissoes';
 
 export default function CriarNotaServico() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const notaServicoID = searchParams.get('id');
+    const correctionReference = searchParams.get('referencia');
     const msgs = useRef<Messages | null>(null);
     const formRef = useRef<NotaServicoFormRef>(null);
+    const { permissaoNfse } = usePermissions();
+    const isEditRoute = Boolean(notaServicoID || correctionReference);
+    const canAccessNotaServicoPage = isEditRoute ? permissaoNfse.update : permissaoNfse.create;
     const [gerarNfse, setGerarNfse] = useState<NfsEntity>(
         new NfsEntity({
             referencia: '',
@@ -102,6 +109,24 @@ export default function CriarNotaServico() {
     const handleErrorsChange = (updatedErrors: Record<string, string>) => {
         setErrors(updatedErrors);
     };
+
+    useEffect(() => {
+        if (canAccessNotaServicoPage) {
+            return;
+        }
+
+        if (window.history.length > 1) {
+            router.back();
+            return;
+        }
+
+        router.replace('/notaServico');
+    }, [canAccessNotaServicoPage, router]);
+
+    if (!canAccessNotaServicoPage) {
+        return <LoadingScreen loadingText="Redirecionando..." />;
+    }
+
     return (
         <div className="card styled-container-main-all-routes">
             <NotaServicoForm

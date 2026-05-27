@@ -286,7 +286,6 @@ export const createdNotaServico = async (
         console.log('Envio:', { nfse: dataNfse });
         const response = await api.post('/nfse', { nfse: dataNfse });
         console.log('Response NFS:', response);
-
         if (response.data?.status_nota?.trim().toUpperCase() === 'REJEITADA' && redirectAfterSave) {
             persistNotaServicoFeedback({
                 severity: 'warn',

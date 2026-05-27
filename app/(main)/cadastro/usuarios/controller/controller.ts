@@ -129,7 +129,7 @@ export const updateUsuario = async (
             ...userConta,
             id_perfil_usuario: selectedPerfilUser.id,
             id_empresas_acesso: empresaIds,
-            perfilUsuario: selectedPerfilUser,
+            perfil_usuario: selectedPerfilUser,
         };
         await api.put(`/usuario-conta/alterar-email`, userContaData);
         msgs.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'O Usuario Conta atualizado com sucesso!' });
@@ -248,7 +248,7 @@ export const fetchUserContaCreated = async (userContaID: string) => {
       id: p.id,
       nome: p.nome || "Nome não disponível",
     }));
-    const perfilIdDoUsuario = userConta?.id_perfil_usuario; 
+    const perfilIdDoUsuario = userConta?.id_perfil_usuario ?? userConta?.perfil_usuario?.id; 
     const perfilSelecionadoRaw =
       perfisRaw.find((p: any) => p?.id === perfilIdDoUsuario) ?? null;
     const perfilDefault =  new PerfilUser({

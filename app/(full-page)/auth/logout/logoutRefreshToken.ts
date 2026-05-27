@@ -1,6 +1,7 @@
 import { applyThemeLink, DEFAULT_COLOR_SCHEME, DEFAULT_COMPONENT_THEME, THEME_PREFERENCES_STORAGE_KEY } from '@/app/utils/themePreferences';
+import { AUTH_STORAGE_KEYS } from '@/app/services/authStorage';
 
-const AUTH_STORAGE_KEYS = ['token', 'refreshToken', 'userConta', 'colorScheme', THEME_PREFERENCES_STORAGE_KEY] as const;
+const AUTH_STORAGE_KEYS_TO_CLEAR = [AUTH_STORAGE_KEYS.token, AUTH_STORAGE_KEYS.refreshToken, AUTH_STORAGE_KEYS.user, 'colorScheme', THEME_PREFERENCES_STORAGE_KEY] as const;
 const DEFAULT_LOGOUT_REDIRECT_PATH = '/';
 
 const clearThemeCookie = () => {
@@ -24,7 +25,7 @@ export const clearAuthStorage = () => {
         return;
     }
 
-    AUTH_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+    AUTH_STORAGE_KEYS_TO_CLEAR.forEach((key) => localStorage.removeItem(key));
     clearThemeCookie();
     resetPublicThemeToDefault();
 };

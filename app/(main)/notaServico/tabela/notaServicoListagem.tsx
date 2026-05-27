@@ -44,7 +44,9 @@ export function ListarNotaServico({
     const { permissaoNfse } = usePermissions();
     const isDarkMode = layoutConfig.colorScheme === 'dark';
 
-    const canCorrectRejectedNota = permissaoNfse.create || permissaoNfse.update;
+    const canCorrectRejectedNota = permissaoNfse.update;
+    const canCancelNota = permissaoNfse.delete;
+    const canSelectPendingNota = permissaoNfse.update;
 
     const handleCorrecao = (nota: NfsEntity) => {
         const query = new URLSearchParams();
@@ -84,7 +86,7 @@ export function ListarNotaServico({
                 {visualiarButton(rowData, msgs)}
                 {downloadXmlButton(rowData, msgs)}
                 {downloadPdfButton(rowData, msgs)}
-                <CancelarNfs nota={rowData} msgs={msgs} />
+                {canCancelNota && <CancelarNfs nota={rowData} msgs={msgs} />}
             </>
         );
     };
@@ -101,7 +103,7 @@ export function ListarNotaServico({
                             data={listPaginationNotaServico?.content || []}
                             selected={selectedNotas}
                             onSelectionChange={setSelectedNotas}
-                            isRowSelectable={(nota) => nota.status_nota === 'PENDENTE'}
+                            isRowSelectable={(nota) => canSelectPendingNota && nota.status_nota === 'PENDENTE'}
                             dataKey="id"
                             loading={loading}
                             isDarkMode={isDarkMode}
@@ -221,7 +223,7 @@ export function ListarNotaServico({
                             data={listPaginationNotaServico?.content || []}
                             selected={selectedNotas}
                             onSelectionChange={setSelectedNotas}
-                            isRowSelectable={(nota) => nota.status_nota === 'PENDENTE'}
+                            isRowSelectable={(nota) => canSelectPendingNota && nota.status_nota === 'PENDENTE'}
                             dataKey="id"
                             loading={loading}
                             isDarkMode={isDarkMode}

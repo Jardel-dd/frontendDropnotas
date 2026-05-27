@@ -8,7 +8,7 @@ export class UsuarioContaEntity {
     senha!: string;
     id_empresas_acesso?: number[];
     esquema_cor?:string;
-    perfilUsuario?: PerfilUsuario;
+    perfil_usuario?: PerfilUsuario;
     tema_componente?:string;
     constructor({
         ativo,
@@ -18,7 +18,7 @@ export class UsuarioContaEntity {
         email,
         senha,
         id_empresas_acesso,
-        perfilUsuario,
+        perfil_usuario,
         tema_componente,
         esquema_cor
     }: {
@@ -31,7 +31,7 @@ export class UsuarioContaEntity {
         id_empresas_acesso?: number[];
         esquema_cor?:string;
         tema_componente?:string;
-        perfilUsuario?: PerfilUsuario;
+        perfil_usuario?: PerfilUsuario;
     }) {
         Object.assign(this, {
             ativo,
@@ -41,7 +41,7 @@ export class UsuarioContaEntity {
             email,
             senha,
             id_empresas_acesso,
-            perfilUsuario,
+            perfil_usuario,
             tema_componente,
             esquema_cor
         });
@@ -54,7 +54,7 @@ export class UsuarioContaEntity {
         email,
         senha,
         id_empresas_acesso,
-        perfilUsuario,
+        perfil_usuario,
         tema_componente,
         esquema_cor
     }: {
@@ -67,7 +67,7 @@ export class UsuarioContaEntity {
         id_empresas_acesso?: number[];
         tema_componente?:string;
         esquema_cor?:string;
-        perfilUsuario?: PerfilUsuario;
+        perfil_usuario?: PerfilUsuario;
     }): UsuarioContaEntity {
         return new UsuarioContaEntity({
             ativo: ativo ?? this.ativo,
@@ -79,7 +79,7 @@ export class UsuarioContaEntity {
             id_empresas_acesso: id_empresas_acesso ?? this.id_empresas_acesso,
             tema_componente: tema_componente ?? this.tema_componente,
             esquema_cor: esquema_cor ?? this.esquema_cor,
-            perfilUsuario: perfilUsuario ?? this.perfilUsuario,
+            perfil_usuario: perfil_usuario ?? this.perfil_usuario,
         });
     }
 }

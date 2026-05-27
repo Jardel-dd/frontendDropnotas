@@ -46,6 +46,35 @@ import { consumeNotaServicoFeedback, exportarPdfNotasServico, listNotaServico } 
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 
 
+const buildEmptyNotaServicoPagination = (pageSize: number, pageNumber = 0) => ({
+    content: [],
+    pageable: {
+        pageNumber,
+        pageSize,
+        sort: {
+            empty: true,
+            sorted: false,
+            unsorted: true
+        },
+        offset: pageNumber * pageSize,
+        paged: true,
+        unpaged: false
+    },
+    totalPages: 0,
+    totalElements: 0,
+    last: true,
+    size: pageSize,
+    number: pageNumber,
+    sort: {
+        empty: true,
+        sorted: false,
+        unsorted: true
+    },
+    numberOfElements: 0,
+    first: pageNumber === 0,
+    empty: true
+});
+
 const NotaServico: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
@@ -53,6 +82,9 @@ const NotaServico: React.FC = () => {
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
     const { permissaoNfse } = usePermissions();
+    const canSearchNotaServico = permissaoNfse.search;
+    const canCreateNotaServico = permissaoNfse.create;
+    const canUpdateNotaServico = permissaoNfse.update;
     const msgs = useRef<Messages | null>(null);
     const formRef = useRef<PessoaFormRef>(null);
     const [loading, setLoading] = useState(true);
@@ -87,33 +119,7 @@ const NotaServico: React.FC = () => {
     const [selectedServicoDialog, setSelectedServicoDialog] = useState<ServiceEntity | null>(null);
     const [draftSelectedVendedor, setDraftSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [draftSelectedStatusNotaServico, setDraftSelectedStatusNotaServico] = useState<string>('');
-    const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>({
-        pageable: {
-            pageNumber: 0,
-            pageSize: 10,
-            sort: {
-                empty: true,
-                sorted: false,
-                unsorted: true
-            },
-            offset: 0,
-            paged: true,
-            unpaged: false
-        },
-        totalPages: 1,
-        totalElements: 2,
-        last: true,
-        size: 10,
-        number: 0,
-        sort: {
-            empty: true,
-            sorted: false,
-            unsorted: true
-        },
-        numberOfElements: 0,
-        first: true,
-        empty: false
-    });
+    const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>(buildEmptyNotaServicoPagination(10));
     const [loadingPrepararNfs, setLoadingPrepararNfs] = useState(false);
     const [prepararNfs, setPrepararNfs] = useState<PrepararNfs>(
         new PrepararNfs({
@@ -197,10 +203,20 @@ const NotaServico: React.FC = () => {
             })
         })
     );
+    const clearNotaServicoResults = (pageNumber = 0) => {
+        setSelectedNotas([]);
+        setListPaginationNotaServico(buildEmptyNotaServicoPagination(pageSize, pageNumber));
+    };
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setGerarNfse,
         field: ['razao_social_cliente'],
-        onSearch: (value) => handleListNotaServico(0, value)
+        onSearch: (value) => {
+            if (!canSearchNotaServico) {
+                return;
+            }
+
+            handleListNotaServico(0, value);
+        }
     });
     const handleListNotaServico = async (
         pageNumber = 0,
@@ -213,6 +229,12 @@ const NotaServico: React.FC = () => {
             selectedStatusNotaServico: string;
         }
     ) => {
+        if (!canSearchNotaServico) {
+            clearNotaServicoResults(pageNumber);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             const appliedFilters = filters ?? {
@@ -239,11 +261,19 @@ const NotaServico: React.FC = () => {
         }
     };
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
         const value = event.target.value;
         setSearchTerm(value);
         debouncedSearch(value);
     };
     const onPageChange = (event: PaginatorPageChangeEvent) => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
         handleListNotaServico(event.page);
     };
     const handleVendedorChange = (vendedor: VendedorEntity | null) => {
@@ -272,11 +302,15 @@ const NotaServico: React.FC = () => {
         setErrors({});
     };
     const handleNavigate = () => {
+        if (!canCreateNotaServico) {
+            return;
+        }
+
         clearPreparaNfsDialog();
         setShowDialogPreparaNfs(true);
     };
     const handleEmitirNotas = async () => {
-        if (selectedNotas.length === 0) return;
+        if (!canUpdateNotaServico || selectedNotas.length === 0) return;
         const notaIds = selectedNotas
             .filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE')
             .map((nota) => nota.id);
@@ -300,6 +334,11 @@ const NotaServico: React.FC = () => {
         }
     };
     const handleSelectedNotasChange = (notas: NfsEntity[]) => {
+        if (!canUpdateNotaServico) {
+            setSelectedNotas([]);
+            return;
+        }
+
         setSelectedNotas(
             notas.filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE')
         );
@@ -319,7 +358,7 @@ const NotaServico: React.FC = () => {
         return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY') : '-';
     };
     const handleOpenExportPdfDialog = () => {
-        if (loadingExportPdf) return;
+        if (!canSearchNotaServico || loadingExportPdf) return;
         setShowExportPdfDialog(true);
     };
     const handleCloseExportPdfDialog = () => {
@@ -327,7 +366,7 @@ const NotaServico: React.FC = () => {
         setShowExportPdfDialog(false);
     };
     const handleConfirmExportPdf = async () => {
-        if (loadingExportPdf) return;
+        if (!canSearchNotaServico || loadingExportPdf) return;
         const activeFilters = getActiveFilters();
         setLoadingExportPdf(true);
         try {
@@ -359,6 +398,10 @@ const NotaServico: React.FC = () => {
         }
     };
     const handleClearFilters = () => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
         const clearedDateRange: DateRangeValue = [null, null];
         setSelectedEmpresa(null);
         setDraftSelectedEmpresa(null);
@@ -420,9 +463,18 @@ const NotaServico: React.FC = () => {
         selectedVendedor: VendedorEntity | null;
         selectedStatusNotaServico: string;
     }) => {
+        if (!canSearchNotaServico) {
+            clearNotaServicoResults();
+            return;
+        }
+
         await handleListNotaServico(0, searchTerm, filters);
     };
     const handleApplyFilters = () => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
         const nextFilters = {
             dateRange: draftDateRange,
             selectedEmpresa: draftSelectedEmpresa,
@@ -439,6 +491,10 @@ const NotaServico: React.FC = () => {
         setVisible(false);
     };
     const handleDesktopDateRangeSearch = (inicio: Date, fim: Date) => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
         const nextDateRange: DateRangeValue = [dayjs(inicio), dayjs(fim)];
         const nextFilters = {
             dateRange: nextDateRange,
@@ -452,6 +508,10 @@ const NotaServico: React.FC = () => {
         search(nextFilters);
     };
     const handleDesktopDateRangeClear = () => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
         const clearedDateRange: DateRangeValue = [null, null];
         const nextFilters = {
             dateRange: clearedDateRange,
@@ -465,6 +525,10 @@ const NotaServico: React.FC = () => {
         search(nextFilters);
     };
     const handleConfirmPreparaNfs = async () => {
+        if (!canCreateNotaServico) {
+            return;
+        }
+
         const isValid = validatePrepararNfsDialog();
         if (!isValid) return;
         setLoadingPrepararNfs(true);
@@ -505,18 +569,43 @@ const NotaServico: React.FC = () => {
     useEffect(() => {
         if (!showDialogPreparaNfs) return;
 
-        validatePrepararNfsDialog();
-    }, [showDialogPreparaNfs, selectedEmpresaDialog, selectedPessoaDialog, selectedServicoDialog]);
+        validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs);
+    }, [prepararNfs, selectedEmpresaDialog, selectedPessoaDialog, selectedServicoDialog, showDialogPreparaNfs]);
     useEffect(() => {
-        handleListNotaServico();
-    }, []);
+        if (!canSearchNotaServico) {
+            setSelectedNotas([]);
+            setListPaginationNotaServico(buildEmptyNotaServicoPagination(pageSize));
+            setLoading(false);
+            return;
+        }
+
+        const loadInitialNotaServico = async () => {
+            setLoading(true);
+
+            try {
+                const data = await listNotaServico({
+                    page: 0,
+                    size: pageSize,
+                    termo: '',
+                    status: '',
+                    dateRange: [null, null]
+                }, msgs);
+
+                setListPaginationNotaServico(data);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadInitialNotaServico();
+    }, [canSearchNotaServico, pageSize]);
     useEffect(() => {
         const feedback = consumeNotaServicoFeedback();
         if (!feedback) {
             return;
         }
 
-        toast.current?.show({
+        msgs.current?.show({
             ...feedback,
             life: 7000
         });
@@ -535,24 +624,26 @@ const NotaServico: React.FC = () => {
                         <div className="card styled-container-main-all-routes">
                             <div style={{ marginTop: "8px", marginLeft: "8px", width: "100%" }}>
                                 <div className="grid formgrid w-full" style={{ maxHeight: '74px' }}>
-                                    <div className="col-7 mb-0 lg:col-3  ">
-                                        <Input
-                                            label="Digite o nome Cliente"
-                                            outlined={true}
-                                            id="razao_social_cliente"
-                                            useRightButton={true}
-                                            iconRight="pi pi-search"
-                                            onChange={handleSearchChange}
-                                            value={searchTerm}
-                                            loading={loading}
-                                            onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Pesquise:"
-                                            showTopLabel
-                                        />
-                                    </div>
-                                    <div className="col-5 mb-0 lg:col-3 ">
+                                    {canSearchNotaServico && (
+                                        <div className="col-7 mb-0 lg:col-3  ">
+                                            <Input
+                                                label="Digite o nome Cliente"
+                                                outlined={true}
+                                                id="razao_social_cliente"
+                                                useRightButton={true}
+                                                iconRight="pi pi-search"
+                                                onChange={handleSearchChange}
+                                                value={searchTerm}
+                                                loading={loading}
+                                                onClickSearch={() => searchNow(searchTerm)}
+                                                topLabel="Pesquise:"
+                                                showTopLabel
+                                            />
+                                        </div>
+                                    )}
+                                    <div className={`${canSearchNotaServico ? 'col-5' : 'col-12'} mb-0 lg:col-3 `}>
                                         <div className="nota-servico-mobile-buttons" style={{ position: "relative" }}>
-                                            {selectedNotas.length > 0 && (
+                                            {canUpdateNotaServico && selectedNotas.length > 0 && (
                                                 <Button
                                                     icon="pi pi-send"
                                                     label={`Emitir selecionadas (${selectedNotas.length})`}
@@ -571,12 +662,13 @@ const NotaServico: React.FC = () => {
                                             )}
                                         </div>
                                         <div className="container-BTN-Filter-Created nota-servico-mobile-actions">
-                                            <FilterOverlay
-                                                onOpen={syncDraftFilters}
-                                                onApply={handleApplyFilters}
-                                                onClear={handleClearFilters}
-                                                buttonClassName="height-2-8rem-ml-1rem-mobile"
-                                            >
+                                            {canSearchNotaServico && (
+                                                <FilterOverlay
+                                                    onOpen={syncDraftFilters}
+                                                    onApply={handleApplyFilters}
+                                                    onClear={handleClearFilters}
+                                                    buttonClassName="height-2-8rem-ml-1rem-mobile"
+                                                >
                                                 <div className="col-12 lg:col-12 ">
                                                     <DateRangePicker
                                                         showTopLabel
@@ -634,20 +726,23 @@ const NotaServico: React.FC = () => {
                                                         showTopLabel
                                                     />
                                                 </div>
-                                            </FilterOverlay>
+                                                </FilterOverlay>
+                                            )}
                                             <div className="nota-servico-mobile-buttons">
-                                                <Button
-                                                    label=""
-                                                    icon="pi pi-file-pdf"
-                                                    severity="secondary"
-                                                    outlined
-                                                    tooltip="Exportar PDF"
-                                                    loading={loadingExportPdf}
-                                                    disabled={loadingExportPdf}
-                                                    className="ml-1rem"
-                                                    onClick={handleOpenExportPdfDialog}
-                                                />
-                                                {permissaoNfse.create && (
+                                                {canSearchNotaServico && (
+                                                    <Button
+                                                        label=""
+                                                        icon="pi pi-file-pdf"
+                                                        severity="secondary"
+                                                        outlined
+                                                        tooltip="Exportar PDF"
+                                                        loading={loadingExportPdf}
+                                                        disabled={loadingExportPdf}
+                                                        className="ml-1rem"
+                                                        onClick={handleOpenExportPdfDialog}
+                                                    />
+                                                )}
+                                                {canCreateNotaServico && (
                                                     <Button label="" icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                                 )}
                                             </div>
@@ -657,28 +752,34 @@ const NotaServico: React.FC = () => {
                                 </div>
                             </div>
                             <div className="mt-3">
-                                <ListarNotaServico
-                                    loading={loading}
-                                    setLoading={setLoading}
-                                    listPaginationNotaServico={listPaginationNotaServico}
-                                    setListPaginationNotaServico={setListPaginationNotaServico}
-                                    searchTerm={searchTerm}
-                                    selectedNotas={selectedNotas}
-                                    setSelectedNotas={handleSelectedNotasChange}
-                                    listarInativos={false}
-                                />
-                            </div>
-                            <div style={{ marginTop: 'auto' }}>
-                                <div className="custom-paginator">
-                                    <CustomPaginator
-                                        first={listPaginationNotaServico.pageable.pageNumber * listPaginationNotaServico.pageable.pageSize}
-                                        rows={listPaginationNotaServico.pageable.pageSize}
-                                        totalRecords={listPaginationNotaServico.totalElements}
-                                        onPageChange={onPageChange}
-                                        isMobile
+                                {canSearchNotaServico ? (
+                                    <ListarNotaServico
+                                        loading={loading}
+                                        setLoading={setLoading}
+                                        listPaginationNotaServico={listPaginationNotaServico}
+                                        setListPaginationNotaServico={setListPaginationNotaServico}
+                                        searchTerm={searchTerm}
+                                        selectedNotas={selectedNotas}
+                                        setSelectedNotas={handleSelectedNotasChange}
+                                        listarInativos={false}
                                     />
-                                </div>
+                                ) : (
+                                    <div className="p-3">Sem permissao para pesquisar notas fiscais.</div>
+                                )}
                             </div>
+                            {canSearchNotaServico && (
+                                <div style={{ marginTop: 'auto' }}>
+                                    <div className="custom-paginator">
+                                        <CustomPaginator
+                                            first={listPaginationNotaServico.pageable.pageNumber * listPaginationNotaServico.pageable.pageSize}
+                                            rows={listPaginationNotaServico.pageable.pageSize}
+                                            totalRecords={listPaginationNotaServico.totalElements}
+                                            onPageChange={onPageChange}
+                                            isMobile
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
@@ -687,33 +788,38 @@ const NotaServico: React.FC = () => {
                         <div className="card styled-container-main-all-routes">
                             <div style={{ padding: '0.5rem' }}>
                                 <div className="grid formgrid">
-                                    <div className="col-12 lg:col-3 container-input-search-all">
-                                        <Input
-                                            label="Digite nome do Cliente"
-                                            outlined={true}
-                                            id="razao_social_cliente"
-                                            useRightButton={true}
-                                            iconRight="pi pi-search"
-                                            onChange={handleSearchChange}
-                                            value={searchTerm}
-                                            loading={loading}
-                                            onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Pesquise:"
-                                            showTopLabel
-                                        />
-                                    </div>
-                                    <div>
-                                        <DateRangePicker
-                                            showTopLabel
-                                            topLabel="Filtar por Data:"
-                                            onClear={handleDesktopDateRangeClear}
-                                            onBuscar={(inicio: Date, fim: Date) => {
-                                                handleDesktopDateRangeSearch(inicio, fim);
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="Container-Btn-Filter-Desktop">
-                                        <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
+                                    {canSearchNotaServico && (
+                                        <div className="col-12 lg:col-3 container-input-search-all">
+                                            <Input
+                                                label="Digite nome do Cliente"
+                                                outlined={true}
+                                                id="razao_social_cliente"
+                                                useRightButton={true}
+                                                iconRight="pi pi-search"
+                                                onChange={handleSearchChange}
+                                                value={searchTerm}
+                                                loading={loading}
+                                                onClickSearch={() => searchNow(searchTerm)}
+                                                topLabel="Pesquise:"
+                                                showTopLabel
+                                            />
+                                        </div>
+                                    )}
+                                    {canSearchNotaServico && (
+                                        <div>
+                                            <DateRangePicker
+                                                showTopLabel
+                                                topLabel="Filtar por Data:"
+                                                onClear={handleDesktopDateRangeClear}
+                                                onBuscar={(inicio: Date, fim: Date) => {
+                                                    handleDesktopDateRangeSearch(inicio, fim);
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                    {canSearchNotaServico && (
+                                        <div className="Container-Btn-Filter-Desktop">
+                                            <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
                                             <div className="grid formgrid">
                                                 <div className="col-12 lg:col-12 ">
                                                     <EmpresaDropdownField
@@ -762,24 +868,27 @@ const NotaServico: React.FC = () => {
                                                     />
                                                 </div>
                                             </div>
-                                        </FilterOverlay>
-                                    </div>
-                                    <div className="container-button-primary-novo">
-                                        <div className="p-2">{selectedNotas.length > 0 && <Button label={`Emitir ${selectedNotas.length} Nota${selectedNotas.length > 1 ? 's' : ''}`} icon="pi pi-send" onClick={handleEmitirNotas} outlined />}</div>
-                                        <div className="p-2">
-                                            <Button
-                                                icon="pi pi-file-pdf"
-                                                severity="secondary"
-                                                outlined
-                                                tooltip="Exportar PDF"
-                                                aria-label="Exportar PDF"
-                                                loading={loadingExportPdf}
-                                                disabled={loadingExportPdf}
-                                                style={{ width: '2.8rem', height: '38px', boxShadow: 'none' }}
-                                                onClick={handleOpenExportPdfDialog}
-                                            />
+                                            </FilterOverlay>
                                         </div>
-                                        {permissaoNfse.create && (
+                                    )}
+                                    <div className="container-button-primary-novo">
+                                        <div className="p-2">{canUpdateNotaServico && selectedNotas.length > 0 && <Button label={`Emitir ${selectedNotas.length} Nota${selectedNotas.length > 1 ? 's' : ''}`} icon="pi pi-send" onClick={handleEmitirNotas} outlined />}</div>
+                                        {canSearchNotaServico && (
+                                            <div className="p-2">
+                                                <Button
+                                                    icon="pi pi-file-pdf"
+                                                    severity="secondary"
+                                                    outlined
+                                                    tooltip="Exportar PDF"
+                                                    aria-label="Exportar PDF"
+                                                    loading={loadingExportPdf}
+                                                    disabled={loadingExportPdf}
+                                                    style={{ width: '2.8rem', height: '38px', boxShadow: 'none' }}
+                                                    onClick={handleOpenExportPdfDialog}
+                                                />
+                                            </div>
+                                        )}
+                                        {canCreateNotaServico && (
                                             <div>
                                                 <Button label="Novo" icon="pi pi-plus" onClick={handleNavigate} className="p-button-primary-novo" />
                                             </div>
@@ -788,25 +897,31 @@ const NotaServico: React.FC = () => {
                                 </div>
                             </div>
                             <div>
-                                <ListarNotaServico
-                                    loading={loading}
-                                    setLoading={setLoading}
-                                    listPaginationNotaServico={listPaginationNotaServico}
-                                    setListPaginationNotaServico={setListPaginationNotaServico}
-                                    searchTerm={searchTerm}
-                                    selectedNotas={selectedNotas}
-                                    setSelectedNotas={handleSelectedNotasChange}
-                                    listarInativos={false}
-                                />
+                                {canSearchNotaServico ? (
+                                    <ListarNotaServico
+                                        loading={loading}
+                                        setLoading={setLoading}
+                                        listPaginationNotaServico={listPaginationNotaServico}
+                                        setListPaginationNotaServico={setListPaginationNotaServico}
+                                        searchTerm={searchTerm}
+                                        selectedNotas={selectedNotas}
+                                        setSelectedNotas={handleSelectedNotasChange}
+                                        listarInativos={false}
+                                    />
+                                ) : (
+                                    <div className="p-3">Sem permissao para pesquisar notas fiscais.</div>
+                                )}
                             </div>
-                            <div style={{ marginTop: 'auto' }}>
-                                <CustomPaginator
-                                    first={listPaginationNotaServico.pageable.pageNumber * listPaginationNotaServico.pageable.pageSize}
-                                    rows={listPaginationNotaServico.pageable.pageSize}
-                                    totalRecords={listPaginationNotaServico.totalElements}
-                                    onPageChange={onPageChange}
-                                />
-                            </div>
+                            {canSearchNotaServico && (
+                                <div style={{ marginTop: 'auto' }}>
+                                    <CustomPaginator
+                                        first={listPaginationNotaServico.pageable.pageNumber * listPaginationNotaServico.pageable.pageSize}
+                                        rows={listPaginationNotaServico.pageable.pageSize}
+                                        totalRecords={listPaginationNotaServico.totalElements}
+                                        onPageChange={onPageChange}
+                                    />
+                                </div>
+                            )}
                         </div>
                         <Dialog
                             header="Preparar NFS-e"

@@ -4,6 +4,7 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import { usePermissions } from '@/app/routes/permissoes';
 import ListarUserConta from './tabela/usuarioListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
@@ -25,6 +26,7 @@ const Usuarios: React.FC = () => {
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
+    const { permissaoUsuarioConta } = usePermissions();
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
@@ -174,7 +176,9 @@ const Usuarios: React.FC = () => {
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
-                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    {permissaoUsuarioConta.create && (
+                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -237,9 +241,11 @@ const Usuarios: React.FC = () => {
                                             />
                                         </FilterOverlay>
                                     </div>
-                                    <div className="container-button-primary-novo">
-                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
-                                    </div>
+                                    {permissaoUsuarioConta.create && (
+                                        <div className="container-button-primary-novo">
+                                            <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className='mt-3'>
                                     <ListarUserConta
