@@ -3,6 +3,7 @@ import { Messages } from 'primereact/messages';
 import { saveRefreshToken, saveToken } from '@/app/services/token';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { applyThemeLink, getThemePreferencesFromUser, updateStoredUserThemePreferences } from '@/app/utils/themePreferences';
+import { writeStoredUser } from '@/app/services/authStorage';
 
 export const authLogin = async (userConta: UsuarioContaEntity, msgs: React.RefObject<Messages | null>, router: any): Promise<boolean> => {
     try {
@@ -11,19 +12,22 @@ export const authLogin = async (userConta: UsuarioContaEntity, msgs: React.RefOb
             senha: userConta.senha.trim()
         });
         console.log('Login sucesso dados', response);
-        const { token, refreshToken, dadosUsuario } = response.data;
+        const { token, refreshToken, dadosUsuario, perfil_usuario } = response.data ?? {};
         saveToken(token);
         saveRefreshToken(refreshToken);
         if (dadosUsuario) {
-            const themePreferences = getThemePreferencesFromUser(dadosUsuario);
-            const userData: UsuarioContaEntity = {
+            const perfilUsuario = perfil_usuario ?? dadosUsuario.perfil_usuario;
+            const mergedUserData = new UsuarioContaEntity({
                 ...dadosUsuario,
+                perfil_usuario: perfilUsuario
+            });
+            const themePreferences = getThemePreferencesFromUser(mergedUserData);
+            const userData = new UsuarioContaEntity({
+                ...mergedUserData,
                 tema_componente: themePreferences.colorScheme,
-                esquema_cor: themePreferences.componentTheme,
-                token,
-                refreshToken
-            };
-            localStorage.setItem('userConta', JSON.stringify(userData));
+                esquema_cor: themePreferences.componentTheme
+            });
+            writeStoredUser(userData);
             updateStoredUserThemePreferences({
                 colorScheme: themePreferences.colorScheme,
                 componentTheme: themePreferences.componentTheme

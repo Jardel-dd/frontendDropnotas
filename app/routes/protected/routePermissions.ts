@@ -1,64 +1,73 @@
 import type { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
+import { hasPermissionAccess, type PermissionResourceKey } from '@/app/routes/permissionRules';
 
 export const ACCESS_DENIED_PATH = '/acesso-negado';
 
 type RoutePermissionRule = {
     pathPrefix: string;
-    isAllowed: (userConta: UsuarioContaEntity | null) => boolean;
+    resource: PermissionResourceKey;
 };
 
 const routePermissionRules: RoutePermissionRule[] = [
     {
         pathPrefix: '/dashboard',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.empresa
+        resource: 'dashboard'
     },
     {
         pathPrefix: '/cadastro/pessoas',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.pessoa
+        resource: 'pessoa'
     },
     {
         pathPrefix: '/cadastro/servicos',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.servico
+        resource: 'servico'
     },
     {
         pathPrefix: '/cadastro/vendedores',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.vendedor
+        resource: 'vendedor'
     },
     {
         pathPrefix: '/cadastro/usuarios',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.usuarioConta
+        resource: 'usuarioConta'
     },
     {
         pathPrefix: '/cadastro/permissoes',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.perfilUsuario
+        resource: 'perfilUsuario'
     },
     {
         pathPrefix: '/cadastro/formaPagamento',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.formaPagamento
+        resource: 'formaPagamento'
     },
     {
         pathPrefix: '/cadastro/categoriaContratos',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.categoriaContrato
+        resource: 'categoriaContrato'
     },
     {
         pathPrefix: '/contrato',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.contrato
+        resource: 'contrato'
     },
     {
         pathPrefix: '/ordemServicos',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.ordemServico
+        resource: 'ordemServico'
+    },
+    {
+        pathPrefix: '/notaServico',
+        resource: 'nfse'
     },
     {
         pathPrefix: '/financas',
-        isAllowed: (userConta) => userConta?.perfilUsuario?.financeiro ?? true
+        resource: 'financeiro'
     },
     {
         pathPrefix: '/cobrancas',
-        isAllowed: (userConta) => userConta?.perfilUsuario?.financeiro ?? true
+        resource: 'financeiro'
     },
     {
-        pathPrefix: '/configuracoes',
-        isAllowed: (userConta) => !!userConta?.perfilUsuario?.empresa
+        pathPrefix: '/configuracoes/empresas',
+        resource: 'empresa'
+    },
+    {
+        pathPrefix: '/configuracoes/geral',
+        resource: 'configuracoes'
     }
 ];
 
@@ -73,5 +82,5 @@ export const isPathAuthorized = (pathname: string, userConta: UsuarioContaEntity
         return true;
     }
 
-    return matchedRule.isAllowed(userConta);
+    return hasPermissionAccess(userConta, matchedRule.resource);
 };

@@ -1,5 +1,6 @@
 import type { ColorScheme } from '@/types';
 import type { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
+import { AUTH_STORAGE_KEYS } from '@/app/services/authStorage';
 
 type ThemePreferences = {
     colorScheme: ColorScheme;
@@ -114,7 +115,7 @@ export const getStoredUserThemePreferences = (): ThemePreferences => {
     }
 
     try {
-        const storedUser = localStorage.getItem('userConta');
+        const storedUser = localStorage.getItem(AUTH_STORAGE_KEYS.user);
 
         if (!storedUser) {
             return getDefaultThemePreferences();
@@ -141,7 +142,7 @@ export const updateStoredUserThemePreferences = ({ colorScheme, componentTheme }
         localStorage.setItem(THEME_PREFERENCES_STORAGE_KEY, JSON.stringify(nextThemePreferences));
         document.cookie = `${THEME_PREFERENCES_STORAGE_KEY}=${encodeURIComponent(JSON.stringify(nextThemePreferences))}; path=/; max-age=31536000; SameSite=Lax`;
 
-        const storedUser = localStorage.getItem('userConta');
+        const storedUser = localStorage.getItem(AUTH_STORAGE_KEYS.user);
 
         if (!storedUser) {
             return;
@@ -154,7 +155,7 @@ export const updateStoredUserThemePreferences = ({ colorScheme, componentTheme }
             esquema_cor: nextThemePreferences.componentTheme
         };
 
-        localStorage.setItem('userConta', JSON.stringify(nextUser));
+        localStorage.setItem(AUTH_STORAGE_KEYS.user, JSON.stringify(nextUser));
     } catch {
         return;
     }
@@ -165,7 +166,7 @@ export const getThemeInitializationScript = (themeLinkId = 'theme-link') => `
     try {
         const storageKey = ${JSON.stringify(THEME_PREFERENCES_STORAGE_KEY)};
         const rawThemePreferences = window.localStorage.getItem(storageKey);
-        const rawUser = window.localStorage.getItem('userConta');
+        const rawUser = window.localStorage.getItem(${JSON.stringify(AUTH_STORAGE_KEYS.user)});
         const colorSchemeAliases = ${JSON.stringify(COLOR_SCHEME_ALIASES)};
         const availableComponentThemes = ${JSON.stringify([...AVAILABLE_COMPONENT_THEMES])};
         const defaultColorScheme = ${JSON.stringify(DEFAULT_COLOR_SCHEME)};

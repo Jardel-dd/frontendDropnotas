@@ -4,6 +4,7 @@ import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Messages } from 'primereact/messages';
+import { usePermissions } from '@/app/routes/permissoes';
 import { Skeleton } from 'primereact/skeleton';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
@@ -38,6 +39,7 @@ export function ListarUserConta(
     const isDesktop = useIsDesktop();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages>(null);
+    const { permissaoUsuarioConta } = usePermissions();
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === "dark";
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
@@ -70,12 +72,12 @@ export function ListarUserConta(
                                     expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                     isDarkMode={isDarkMode}
                                     searchTerm={searchTerm}
-                                    editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/usuarios/created", router)}
-                                    toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
+                                    editButtonTemplate={permissaoUsuarioConta.update ? (rowData) => editButton(rowData, "/cadastro/usuarios/created", router) : undefined}
+                                    toggleStatusOrDeleteButtonTemplate={permissaoUsuarioConta.delete ? (rowData) => toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
                                         entityType: "",
-                                    })}
+                                    }) : undefined}
                                     showExpandButton={false} 
                                     columns={[
                                         {
@@ -109,12 +111,12 @@ export function ListarUserConta(
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                 isDarkMode={isDarkMode}
                                 searchTerm={searchTerm}
-                                editButtonTemplate={(rowData) => editButton(rowData, "/cadastro/usuarios/created", router)}
-                                toggleStatusOrDeleteButtonTemplate={(rowData) => toggleStatusOrDeleteButton({
+                                editButtonTemplate={permissaoUsuarioConta.update ? (rowData) => editButton(rowData, "/cadastro/usuarios/created", router) : undefined}
+                                toggleStatusOrDeleteButtonTemplate={permissaoUsuarioConta.delete ? (rowData) => toggleStatusOrDeleteButton({
                                     entity: rowData,
                                     onToggle: changeStatusActivateandDelete,
                                     entityType: "",
-                                })}
+                                }) : undefined}
                                 showExpandButton={false} 
                                 columns={[
                                     {

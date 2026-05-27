@@ -1,130 +1,148 @@
 import AppSubMenu from './AppSubMenu';
-import type { MenuModel } from '@/types';
 import { useUserContext } from '@/app/routes/protected/userUserContext';
+import { filterVisibleMenuItems, hasPermissionAccess } from '@/app/routes/permissionRules';
+import { useMemo } from 'react';
 
 const AppMenu = () => {
     const { userConta } = useUserContext();
-    const model: MenuModel[] = [
-        userConta?.perfilUsuario?.empresa ? {
-            label: 'Dashboard',
-            icon: 'pi pi-fw pi-home',
-            to: '/dashboard',
-        } : null,
-        {
-            label: 'Cadastros',
-            icon: 'pi pi-fw pi-plus',
-            items: [
-                userConta?.perfilUsuario?.pessoa ? {
-                    label: 'Clientes e Fornecedores',
-                    icon: 'pi pi-users',
-                    to: '/cadastro/pessoas',
-                } : null,
-                userConta?.perfilUsuario?.servico ? {
-                    label: 'Serviços',
-                    icon: 'pi pi-ticket',
-                    to: '/cadastro/servicos',
-                } : null,
-                userConta?.perfilUsuario?.vendedor ? {
-                    label: 'Vendedores',
-                    icon: 'pi pi-user',
-                    to: '/cadastro/vendedores',
-                } : null,
-                userConta?.perfilUsuario?.usuarioConta ? {
-                    label: 'Usuários',
-                    icon: 'pi pi-users',
-                    to: '/cadastro/usuarios',
-                } : null,
-                userConta?.perfilUsuario?.perfilUsuario ? {
-                    label: 'Permissões',
-                    icon: 'pi pi-unlock',
-                    to: '/cadastro/permissoes',
-                } : null,
-                userConta?.perfilUsuario?.formaPagamento ? {
-                    label: 'Forma de Pagamento',
-                    icon: 'pi pi-money-bill',
-                    to: '/cadastro/formaPagamento',
-                } : null,
-                  userConta?.perfilUsuario?.categoriaContrato ? {
-                    label: 'Categoria Contratos',
-                    icon: 'pi pi pi-folder	',
-                    to: '/cadastro/categoriaContratos',
-                } : null,
-            ].filter(Boolean) as MenuModel[], 
-        },
-        userConta?.perfilUsuario?.contrato ? {
-            label: 'Contratos',
-            icon: 'pi pi-briefcase',
-              to: '/contrato',
-                } : null,
-              
-        userConta?.perfilUsuario?.ordemServico ? {
-            label: 'Ordem de Serviços',
-            icon: 'pi pi-wrench',
-            to: '/ordemServicos',
-        } : null,
-        {
-            label: 'Nota de Serviços',
-            icon: 'pi pi-book',
-            to: '/notaServico',
-        },
-         userConta?.perfilUsuario?.financeiro ?? true ? {
-            label: 'Finanças',
-            icon: 'pi pi-money-bill',
-            to: '/financas',
-            items: [
-                {
-                    label: 'Contas a Pagar',
-                    icon: 'pi pi-building',
-                    to: '/financas/pagar',
-                },
-                {
-                    label: 'Contas a Receber',
-                    icon: 'pi pi-palette',
-                    to: '/financas/receber',
-                },
-                 {
-                    label: 'Comissões',
-                    icon: 'pi pi-dollar',
-                    to: '/financas/comissoes',
-                }
-            ],
-        } : null,
-        {
-            label: 'Relatórios',
-            icon: 'pi pi-chart-bar',
-             items: [
-                {
-                    label: 'Serviços',
-                    icon: 'pi pi-wrench',
-                    to: '/relatorios/servicos',
-                },
-                {
-                    label: 'Recebimentos',
-                    icon: 'pi pi-wallet',
-                    to: '/relatorios/recebimentos',
-                }
-            ],
-        },
-        userConta?.perfilUsuario?.empresa ? {
-            label: 'Configurações',
-            icon: 'pi pi-cog',
-            to: '/configuracoes',
-            items: [
-                {
-                    label: 'Minhas Empresas',
-                    icon: 'pi pi-building',
-                    to: '/configuracoes/empresas',
-                },
-                {
-                    label: 'Temas',
-                    icon: 'pi pi-palette',
-                    to: '/configuracoes/geral',
-                }
-            ],
-        } : null,
-    ].filter(Boolean) as MenuModel[]; 
 
-    return <AppSubMenu model={model} />;
+    const model = useMemo(() => {
+        return filterVisibleMenuItems([
+            {
+                label: 'Dashboard',
+                icon: 'pi pi-fw pi-home',
+                to: '/dashboard',
+                visible: hasPermissionAccess(userConta, 'dashboard')
+            },
+            {
+                label: 'Cadastros',
+                icon: 'pi pi-fw pi-plus',
+                items: [
+                    {
+                        label: 'Clientes e Fornecedores',
+                        icon: 'pi pi-users',
+                        to: '/cadastro/pessoas',
+                        visible: hasPermissionAccess(userConta, 'pessoa')
+                    },
+                    {
+                        label: 'Servicos',
+                        icon: 'pi pi-ticket',
+                        to: '/cadastro/servicos',
+                        visible: hasPermissionAccess(userConta, 'servico')
+                    },
+                    {
+                        label: 'Vendedores',
+                        icon: 'pi pi-user',
+                        to: '/cadastro/vendedores',
+                        visible: hasPermissionAccess(userConta, 'vendedor')
+                    },
+                    {
+                        label: 'Usuarios',
+                        icon: 'pi pi-users',
+                        to: '/cadastro/usuarios',
+                        visible: hasPermissionAccess(userConta, 'usuarioConta')
+                    },
+                    {
+                        label: 'Permissoes',
+                        icon: 'pi pi-unlock',
+                        to: '/cadastro/permissoes',
+                        visible: hasPermissionAccess(userConta, 'perfilUsuario')
+                    },
+                    {
+                        label: 'Forma de Pagamento',
+                        icon: 'pi pi-money-bill',
+                        to: '/cadastro/formaPagamento',
+                        visible: hasPermissionAccess(userConta, 'formaPagamento')
+                    },
+                    {
+                        label: 'Categoria Contratos',
+                        icon: 'pi pi-folder',
+                        to: '/cadastro/categoriaContratos',
+                        visible: hasPermissionAccess(userConta, 'categoriaContrato')
+                    }
+                ]
+            },
+            {
+                label: 'Contratos',
+                icon: 'pi pi-briefcase',
+                to: '/contrato',
+                visible: hasPermissionAccess(userConta, 'contrato')
+            },
+            {
+                label: 'Ordem de Servicos',
+                icon: 'pi pi-wrench',
+                to: '/ordemServicos',
+                visible: hasPermissionAccess(userConta, 'ordemServico')
+            },
+            {
+                label: 'Nota de Servicos',
+                icon: 'pi pi-book',
+                to: '/notaServico',
+                visible: hasPermissionAccess(userConta, 'nfse')
+            },
+            {
+                label: 'Financas',
+                icon: 'pi pi-money-bill',
+                to: '/financas',
+                visible: hasPermissionAccess(userConta, 'financeiro'),
+                items: [
+                    {
+                        label: 'Contas a Pagar',
+                        icon: 'pi pi-building',
+                        to: '/financas/pagar',
+                    },
+                    {
+                        label: 'Contas a Receber',
+                        icon: 'pi pi-palette',
+                        to: '/financas/receber',
+                    },
+                    {
+                        label: 'Comissoes',
+                        icon: 'pi pi-dollar',
+                        to: '/financas/comissoes',
+                    }
+                ],
+            },
+            {
+                label: 'Relatorios',
+                icon: 'pi pi-chart-bar',
+                items: [
+                    {
+                        label: 'Servicos',
+                        icon: 'pi pi-wrench',
+                        to: '/relatorios/servicos',
+                    },
+                    {
+                        label: 'Recebimentos',
+                        icon: 'pi pi-wallet',
+                        to: '/relatorios/recebimentos',
+                    }
+                ],
+            },
+            {
+                label: 'Configuracoes',
+                icon: 'pi pi-cog',
+                to: '/configuracoes',
+                visible: hasPermissionAccess(userConta, 'empresa'),
+                items: [
+                    {
+                        label: 'Minhas Empresas',
+                        icon: 'pi pi-building',
+                        to: '/configuracoes/empresas',
+                        visible: hasPermissionAccess(userConta, 'empresa'),
+                    },
+                    {
+                        label: 'Temas',
+                        icon: 'pi pi-palette',
+                        to: '/configuracoes/geral',
+                        visible: hasPermissionAccess(userConta, 'configuracoes'),
+                    }
+                ],
+            },
+        ]);
+    }, [userConta]);
+
+    return <AppSubMenu key={JSON.stringify(model)} model={model} />;
 };
 
 export default AppMenu;

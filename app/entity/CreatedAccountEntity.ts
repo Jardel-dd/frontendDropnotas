@@ -1,6 +1,13 @@
 import { UsuarioContaEntity } from "./UsuarioContaEntity";
 
 export interface PerfilUsuario {
+    id?: number;
+    nome?: string;
+    ativo?: boolean;
+    contaClienteId?: number;
+    contratoTipoVisualizacao?: string;
+    nfseTipoVisualizacao?: string;
+    ordemServicoTipoVisualizacao?: string;
     empresa?: boolean;
     financeiro?: boolean;
     pessoa?: boolean;

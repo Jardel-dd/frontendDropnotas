@@ -14,21 +14,18 @@ const PermissionRouteGuard: React.FC<PermissionRouteGuardProps> = ({ children })
     const router = useRouter();
     const pathname = usePathname() ?? '';
     const searchParams = useSearchParams();
-    const { userConta } = useUser();
+    const { userConta, isInitializing } = useUser();
     const [isRedirecting, setIsRedirecting] = useState(false);
-    const hasStoredUser = typeof window !== 'undefined' && !!window.localStorage.getItem('userConta');
 
     const currentPathWithQuery = useMemo(() => {
         const queryString = searchParams?.toString();
         return queryString ? `${pathname}?${queryString}` : pathname;
     }, [pathname, searchParams]);
 
-    const hasStoredToken = typeof window !== 'undefined' && !!window.localStorage.getItem('token');
-    const isUserContextLoading = hasStoredToken && hasStoredUser && !userConta;
     const isAuthorized = isPathAuthorized(pathname, userConta);
 
     useEffect(() => {
-        if (isUserContextLoading) {
+        if (isInitializing) {
             return;
         }
 
@@ -44,14 +41,14 @@ const PermissionRouteGuard: React.FC<PermissionRouteGuardProps> = ({ children })
         }
 
         setIsRedirecting(false);
-    }, [currentPathWithQuery, isAuthorized, isUserContextLoading, pathname, router]);
+    }, [currentPathWithQuery, isAuthorized, isInitializing, pathname, router]);
 
-    if (isUserContextLoading || isRedirecting) {
-        return <LoadingScreen loadingText="Atualizando permissoes de acesso..." />;
+    if (isInitializing || isRedirecting) {
+        return <LoadingScreen loadingText="Verificando permissões de acesso..." overlayOpacity={1} />;
     }
 
     if (!isAuthorized && pathname !== ACCESS_DENIED_PATH) {
-        return <LoadingScreen loadingText="Atualizando permissoes de acesso..." />;
+        return <LoadingScreen loadingText="Verificando permissões acesso..." overlayOpacity={1} />;
     }
 
     return <>{children}</>;
