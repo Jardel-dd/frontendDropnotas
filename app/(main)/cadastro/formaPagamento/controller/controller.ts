@@ -37,7 +37,7 @@ export const ativarFormaPagamento = async (
             {
                 className: 'messages-center',
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Forma de Pagamento ativada com sucesso.`,
             },
         ]);
@@ -47,7 +47,7 @@ export const ativarFormaPagamento = async (
             {
                 className: 'messages-center',
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: `Houve um erro ao tentar ativar a Forma Pagamento, tente novamente.`,
             },
         ]);
@@ -68,7 +68,7 @@ export const deletarFormaPagamento = async (
         msgs.current?.show([
             {
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Forma de Pagamento  excluído com sucesso.'
             },
         ]);
@@ -77,7 +77,7 @@ export const deletarFormaPagamento = async (
         msgs.current?.show([
             {
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar excluir a Forma de Pagamento , tente novamente.'
             },
         ]);
@@ -100,7 +100,7 @@ export const createdFormaPagamento = async (
 
     msgs.current?.show({
       severity: 'success',
-      summary: 'Sucesso',
+      summary: 'Sucesso:',
       detail: 'Forma de Pagamento criada com sucesso!',
     });
 
@@ -125,7 +125,7 @@ export const updateFormaPagamento = async (
 ) => {
     try {
         await api.put(`/forma-pagamento`, formaPagamento);
-        msgs.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Forma de Pagamento atualizado com sucesso!' });
+        msgs.current?.show({ severity: 'success', summary: 'Sucesso:', detail: 'Forma de Pagamento atualizado com sucesso!' });
         router.push('/cadastro/formaPagamento');
     } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -134,7 +134,7 @@ export const updateFormaPagamento = async (
             console.error('Cabeçalhos da resposta de erro:', error.response?.headers);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: error.response?.data?.message
                     || 'Ocorreu um erro ao atualizar a Forma de Pagamento.'
             });

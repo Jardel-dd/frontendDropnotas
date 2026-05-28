@@ -42,7 +42,7 @@ export const ativarVendedor = async (
                 className: 'messages-center',
                 sticky: true,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Vendedor ativado com sucesso.`,
             },
         ]);
@@ -56,7 +56,7 @@ export const ativarVendedor = async (
                 className: 'messages-center',
                 sticky: true,
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: `Houve um erro ao tentar ativar este Vendedor , tente novamente.`,
             },
         ]);
@@ -78,7 +78,7 @@ export const deletarVendedor = async (
         msgs.current?.show([
             {
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Vendedor excluído com sucesso.'
             },
         ]);
@@ -87,7 +87,7 @@ export const deletarVendedor = async (
         msgs.current?.show([
             {
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar excluir o Vendedor, tente novamente.'
             },
         ]);
@@ -107,29 +107,33 @@ export const createdVendedor = async (
       ...vendedor,
       cnpj: vendedor.cnpj && vendedor.cnpj.replace(/\D/g, '').length > 0 ? vendedor.cnpj : null,
       cpf: vendedor.cpf && vendedor.cpf.replace(/\D/g, '').length > 0 ? vendedor.cpf : null,
-      documento_estrangeiro: vendedor.documento_estrangeiro && vendedor.documento_estrangeiro.replace(/\D/g, '').length > 0 ? vendedor.documento_estrangeiro : null,
+      documento_estrangeiro:
+        vendedor.documento_estrangeiro &&
+        vendedor.documento_estrangeiro.replace(/\D/g, '').length > 0
+          ? vendedor.documento_estrangeiro
+          : null,
     };
     const resp = await api.post('/vendedor', vendedorDataToSend);
     const created = new VendedorEntity(resp.data?.vendedor ?? resp.data);
-    msgs.current?.show({ severity: 'success', detail: 'Vendedor criado com sucesso!' });
+    msgs.current?.show({
+      severity: 'success',
+      detail: 'Vendedor criado com sucesso!',
+    });
     if (redirectAfterSave) {
       router.push('/cadastro/vendedores');
     }
     setVendedor(created);
     return created;
   } catch (error: any) {
-    console.error('Erro ao criar Vendedor:', error);
-    if (error.response) {
-      console.log('Status do erro:', error.response.status, vendedor);
-      console.error('Dados do erro:', error.response.data);
-    } else {
-      console.error('Erro inesperado:', error.message);
+    if (error.response?.status === 409) {
+      msgs.current?.show({
+        severity: 'error',
+        summary: 'Atenção:',
+        detail:
+          'Já existe cadastrado com este CPF ou CNPJ. Verifique os dados informados.',
+      });
     }
-    msgs.current?.show({
-      severity: 'error',
-      detail: `Erro ao criar Vendedor: ${error.response?.data?.message || error.message}`,
-    });
-    throw error;
+    throw null;
   }
 };
 export const updateVendedor = async (
@@ -145,28 +149,41 @@ export const updateVendedor = async (
         await api.put(`/vendedor`, vendedor);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Vendedor atualizado com sucesso!',
         });
         if (redirectAfterSave) {
             router.push('/cadastro/vendedores');
         }
     } catch (error: any) {
+        if (axios.isAxiosError(error) && error.response?.status === 409) {
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Atenção:',
+                detail:
+                    'Já existe um vendedor cadastrado com este CPF ou CNPJ.',
+            });
+            return;
+        }
         if (axios.isAxiosError(error) && error.response) {
             const { status, data } = error.response;
-            const errorMessage = data.message || 'Erro ao atualizar Vendedor.';
-            console.error("Erro de API:", status, data);
+
+            console.error('Erro de API:', status, data);
+
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
-                detail: String(errorMessage),
+                summary: 'Atenção:',
+                detail:
+                    data.message ||
+                    'Não foi possível atualizar o vendedor.',
             });
+
         } else {
-            console.error("Erro inesperado:", error);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
-                detail: 'Erro inesperado ao atualizar Vendedor.',
+                summary: 'Atenção:',
+                detail:
+                    'Ocorreu um erro inesperado ao atualizar o vendedor.',
             });
         }
     }

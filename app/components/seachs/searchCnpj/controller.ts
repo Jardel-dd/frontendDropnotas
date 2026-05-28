@@ -90,6 +90,7 @@ export const handleSearchCNPJ = async <
     if (msgs?.current?.show) {
       msgs.current.show({
         severity: 'error',
+        summary: 'Atenção:',
         detail: 'CNPJ não encontrado. Verifique ou inclua manualmente os dados da empresa.',
       });
     }

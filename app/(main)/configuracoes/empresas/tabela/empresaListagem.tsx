@@ -173,7 +173,7 @@ export function ListarEmpresas({
                 </div>
             )}
             {loading ? (
-                <LoadingScreen loadingText={'Carregando...'} />
+                <LoadingScreen loadingText={'Carregando Empresas...'} />
             ) : (
                 <>
                     {isMobile && (

@@ -133,7 +133,7 @@ const Empresas: React.FC = () => {
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao buscar empresas',
             });
         } finally {

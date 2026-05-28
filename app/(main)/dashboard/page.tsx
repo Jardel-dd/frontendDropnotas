@@ -137,7 +137,7 @@ const ComponentDashboard: React.FC = () => {
             setRelatorio(null);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: error instanceof Error ? error.message : 'Não foi possível carregar os dados do dashboard.'
             });
         } finally {

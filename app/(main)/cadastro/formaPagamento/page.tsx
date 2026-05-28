@@ -99,7 +99,7 @@ const CategoriaContrato: React.FC = () => {
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao buscar Forma de Pagamento ',
                 life: 3000
             });

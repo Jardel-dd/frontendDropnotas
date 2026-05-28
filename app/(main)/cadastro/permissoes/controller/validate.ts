@@ -34,7 +34,7 @@ export const validateFieldsPerfilUser = (
     }
     setErrors(newErrors);
     if (errorMessages.length > 0) {
-        msgs?.current?.show({ severity: 'error', summary: 'Erro', detail: errorMessages[0] });
+        msgs?.current?.show({ severity: 'error', summary: 'Atenção:', detail: errorMessages[0] });
     }
     return valid;
 };

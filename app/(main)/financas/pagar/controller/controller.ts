@@ -65,7 +65,7 @@ export const createdContasPagar = async (
         console.log('resposta de sucesso:', payload);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Contas a Pagar criada com sucesso!'
         });
         if (redirectAfterSave) {
@@ -95,7 +95,7 @@ export const handleActiveOrInativeContasPagar = async (
         console.error('Erro ao recarregar Contas a Pagar:', error);
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Atenção:',
             detail: `Nao foi possivel atualizar a listagem da conta ${rowData.id}.`
         });
     }

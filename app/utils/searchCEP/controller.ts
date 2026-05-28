@@ -9,6 +9,6 @@ export const searchByCep = async (_cep: string, msgs: React.RefObject<Messages>)
             { headers: { Authorization: `Bearer ${token}` } });
         console.log(response); return response.data;
     } catch (error) {
-        if (msgs.current) { msgs.current.show({ severity: 'error', summary: 'Erro', detail: 'Cep não encontrado, verifique ou inclua o endereço manualmente!' }); }
+        if (msgs.current) { msgs.current.show({ severity: 'error', summary: 'Atenção:', detail: 'Cep não encontrado, verifique ou inclua o endereço manualmente!' }); }
     }
 }

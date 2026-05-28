@@ -49,7 +49,7 @@ export function ListarCategoriaContrato({
         <div style={{ marginTop: '0' }}>
             <Messages ref={msgs} className="custom-messages" />
             {loading ? (
-                <LoadingScreen loadingText={'Carregando...'} />
+                <LoadingScreen loadingText={'Carregando Categoria de Contratos...'} />
             ) : (
                 <>
                     {isMobile && (

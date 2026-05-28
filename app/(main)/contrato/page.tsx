@@ -102,7 +102,7 @@ const Contratos: React.FC = () => {
             console.error('Erro ao buscar Contratos:', error);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao buscar Contratos'
             });
         } finally {

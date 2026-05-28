@@ -108,7 +108,7 @@ const Vendedores: React.FC = () => {
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha Vendedor '
             });
         } finally {

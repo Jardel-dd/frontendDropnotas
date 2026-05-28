@@ -22,7 +22,7 @@ export const ativarCategoriaContrato = async (categoriaContratoId: number, msgs:
             {
                 className: 'messages-center',
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Categoria Contrato ativada com sucesso.`
             }
         ]);
@@ -32,7 +32,7 @@ export const ativarCategoriaContrato = async (categoriaContratoId: number, msgs:
             {
                 className: 'messages-center',
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: `Houve um erro ao tentar ativar a Categoria Contrato , tente novamente.`
             }
         ]);
@@ -46,7 +46,7 @@ export const deletarCategoriaContrato = async (categoriaContratoId: number, msgs
         msgs.current?.show([
             {
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Categoria Contrato excluído com sucesso.'
             }
         ]);
@@ -55,7 +55,7 @@ export const deletarCategoriaContrato = async (categoriaContratoId: number, msgs
         msgs.current?.show([
             {
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar excluir a Categoria Contrato, tente novamente.'
             }
         ]);
@@ -75,7 +75,7 @@ export const createdCategoriaContrato = async (
         const created = new CategoryContratosEntity(resp.data?.categoriaContrato ?? resp.data);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Categoria Contrato criado com sucesso!'
         });
         if (redirectAfterSave) {
@@ -92,7 +92,7 @@ export const createdCategoriaContrato = async (
         }
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro:',
+            summary: 'Atenção:',
             detail: message,
             life: 4000
         });
@@ -111,7 +111,7 @@ export const updateCategoriaContrato = async (
         await api.put(`/categoria-contrato`, categoriaContrato);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Categoria Contrato atualizado com sucesso!'
         });
     } catch (error) {
@@ -123,7 +123,7 @@ export const updateCategoriaContrato = async (
             }
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Conflito',
+                summary: 'Atenção:',
                 detail: message,
                 life: 4000
             });

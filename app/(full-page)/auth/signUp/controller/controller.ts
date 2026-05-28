@@ -23,7 +23,7 @@ export const create = async (conta: CreatedAccountEntity, router: AppRouterInsta
         console.log('requestData:', requestData);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Conta criada com sucesso',
+            summary: 'Sucesso:',
             detail: 'Sua conta foi criada com sucesso.'
         });
         const loginSuccess = await authLogin(
@@ -52,7 +52,7 @@ export const create = async (conta: CreatedAccountEntity, router: AppRouterInsta
         } else {
             console.log('Erro ao realizar o login após a criação da conta.');
             msgs.current?.show({
-                severity: 'error',
+                severity: 'Atenção',
                 detail: 'Não foi possível fazer o login automático após a criação da conta. Tente logar manualmente.',
                 life: 5000
             });
@@ -84,7 +84,7 @@ export const create = async (conta: CreatedAccountEntity, router: AppRouterInsta
             detailMessage = error.message || 'Ocorreu um erro inesperado.';
         }
         msgs.current?.show({
-            severity: 'error',
+            severity: 'Atenção',
             summary: summaryMessage,
             detail: detailMessage,
             life: 5000
@@ -117,7 +117,7 @@ export const handleSearchCNPJCreated = async <T extends CreatedAccountEntity>(cn
     } catch (error) {
         if (msgs.current) {
             msgs.current.show({
-                severity: 'error',
+                severity: 'Atenção:',
                 detail: 'CNPJ não encontrado. Verifique ou inclua manualmente os dados da empresa.'
             });
         }

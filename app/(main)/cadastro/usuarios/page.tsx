@@ -97,7 +97,7 @@ const Usuarios: React.FC = () => {
             console.error('Erro ao buscar Usuário:', error);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao buscar Usuário',
             });
         } finally {

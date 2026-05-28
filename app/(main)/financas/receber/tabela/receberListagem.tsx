@@ -77,7 +77,7 @@ export function ListarContasReceber({
         <div style={{ marginTop: '0' }}>
             <Messages className="custom-messages" />
             {loading ? (
-                <LoadingScreen loadingText={'Carregando...'} />
+                <LoadingScreen loadingText={'Carregando Contas a Receber...'} />
             ) : (
                 <>
                     {isMobile && (

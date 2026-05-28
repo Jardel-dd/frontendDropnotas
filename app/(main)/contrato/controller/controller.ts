@@ -66,7 +66,7 @@ export const ativarContrato = async (
             {
                 life: 3000,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Contrato ativado com sucesso.`,
             },
         ]);
@@ -78,7 +78,7 @@ export const ativarContrato = async (
             {
                 life: 3000,
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: `Houve um erro ao tentar ativar este Contrato, tente novamente.`,
             },
         ]);
@@ -100,7 +100,7 @@ export const deletarContrato = async (
             {
                 life: 3000,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Contrato excluido com sucesso.'
             },
         ]);
@@ -115,7 +115,7 @@ export const deletarContrato = async (
             {
                 life: 3000,
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar excluir este Contrato, tente novamente.'
             },
         ]);
@@ -150,7 +150,7 @@ export const createContrato = async (
         console.log('Enviando dados do contrato:', contratoDataToSend);
         const response = await api.post('/contrato', contratoDataToSend);
         console.log('Resposta da API apos criacao:', response.data);
-        msgs.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Contrato cadastrado com sucesso!' });
+        msgs.current?.show({ severity: 'success', summary: 'Sucesso:', detail: 'Contrato cadastrado com sucesso!' });
         setSelectedFormadePagamento(null);
         setSelectedCompany(null);
         setSelectedCategoriaContrato(null);
@@ -164,13 +164,13 @@ export const createContrato = async (
             const errorMessage = data.message || 'Erro ao cadastrar Contrato.';
             msgs.current?.show({
                 severity: 'error',
-                summary: `Erro ${status}`,
+                summary: `Atenção: ${status}`,
                 detail: String(errorMessage),
             });
         } else {
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Erro inesperado ao cadastrar Contrato.',
             });
         }
@@ -191,7 +191,7 @@ export const updateContrato = async (
         await api.put(`/contrato`, contratoDataToUpdate);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Contrato atualizado com sucesso!',
         });
         router.push('/contrato');
@@ -202,14 +202,14 @@ export const updateContrato = async (
             console.error('Erro de API:', status, data);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: String(errorMessage),
             });
         } else {
             console.error('Erro inesperado:', error);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Erro inesperado ao atualizar Contrato.',
             });
         }

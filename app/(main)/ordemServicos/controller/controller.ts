@@ -121,7 +121,7 @@ export const deletar = async (id: number, msgs: any, setLoading: (state: boolean
             {
                 life: 3000,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Ordem de Serviço Cancelada com sucesso.'
             }
         ]);
@@ -131,7 +131,7 @@ export const deletar = async (id: number, msgs: any, setLoading: (state: boolean
             {
                 life: 3000,
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar Cancelar Ordem de Serviço, tente novamente.'
             }
         ]);
@@ -148,13 +148,13 @@ export const preparar = async (msgs: any) => {
             const msg = error.response?.data?.message || 'Erro ao preparar Ordem de Serviço.';
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: msg,
             });
         } else {
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Erro inesperado ao preparar Ordem de Serviço.',
             });
         }
@@ -251,7 +251,7 @@ export const createdOrdemServico = async (
         const created = new ServiceOrderEntity(resp.data?.ordemServico ?? resp.data);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Ordem de Serviço cadastrada com sucesso!'
         });
         console.log('Payload enviado:', OrdemServicoData);
@@ -273,7 +273,7 @@ export const createdOrdemServico = async (
             console.groupEnd();
             msgs.current?.show({
                 severity: 'error',
-                summary: `Erro ${status}`,
+                summary: `Atenção: ${status}`,
                 detail: data?.mensagem || 'Erro ao cadastrar a Ordem de Serviço.',
                 life: 6000
             });
@@ -281,7 +281,7 @@ export const createdOrdemServico = async (
             console.groupEnd();
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro Interno',
+                summary: 'Atenção:',
                 detail: error?.message || 'Falha na comunicação com o servidor.',
                 life: 6000
             });

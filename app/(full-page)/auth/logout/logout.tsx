@@ -19,7 +19,7 @@ const Logout = () => {
     const showLogoutError = () => {
         toast.current?.show({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Atenção:',
             detail: LOGOUT_ERROR_MESSAGE,
             life: 3000
         });

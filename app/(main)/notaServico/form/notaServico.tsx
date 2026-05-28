@@ -317,12 +317,15 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             return;
         }
         setIsLoadingBtnCreated(true);
+        let shouldKeepLoadingDuringRedirect = false;
 
         try {
             setLoadingText('Emitindo NFS-e...');
             setLoading(true);
-            const wasCreated = await createdNotaServico(gerarNfse, setErrors, msgs, router, redirectAfterSave);
-            if (wasCreated) {
+            const submitResult = await createdNotaServico(gerarNfse, setErrors, msgs, router, redirectAfterSave);
+            shouldKeepLoadingDuringRedirect = submitResult.redirected;
+
+            if (submitResult.wasCreated) {
                 onSaved?.(gerarNfse);
                 if (!redirectAfterSave) {
                     onClose?.();
@@ -331,12 +334,14 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao emitir NFS-e'
             });
         } finally {
-            setLoading(false);
-            setIsLoadingBtnCreated(false);
+            if (!shouldKeepLoadingDuringRedirect) {
+                setLoading(false);
+                setIsLoadingBtnCreated(false);
+            }
         }
     };
     useImperativeHandle(ref, () => ({
@@ -391,7 +396,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             } catch (error) {
                 toast.current?.show({
                     severity: 'error',
-                    summary: 'Erro',
+                    summary: 'Atenção:',
                     detail: 'Falha ao preparar a emissao da NFS-e'
                 });
             } finally {
@@ -450,7 +455,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             } catch (error) {
                 msgs.current?.show({
                     severity: 'error',
-                    summary: 'Erro',
+                    summary: 'Atenção:',
                     detail: 'Nao foi possivel carregar a NFS-e para correcao.',
                     life: 5000
                 });

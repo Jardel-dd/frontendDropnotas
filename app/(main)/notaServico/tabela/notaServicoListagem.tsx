@@ -95,7 +95,7 @@ export function ListarNotaServico({
         <div style={{ marginTop: '0' }}>
             <Messages ref={msgs} className="custom-messages" />
             {loading ? (
-                <LoadingScreen loadingText={'Carregando...'} />
+                <LoadingScreen loadingText={'Carregando Notas Fiscais...'} />
             ) : (
                 <div>
                     {isDesktop && (

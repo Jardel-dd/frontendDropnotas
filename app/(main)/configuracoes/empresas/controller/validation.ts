@@ -61,7 +61,7 @@ export const validateFieldsEmpresas = (
         newErrors.codigo_pais = 'Campo deve ter no minimo 2 numeros.';
         valid = false;
     } else if (telefoneObrigatorio && (!empresa.telefone || empresa.telefone.replace(/\D/g, '').length < 10)) {
-        newErrors.telefone = 'Campo deve ter no minimo 10 numeros.';
+        newErrors.telefone = 'Inclua um número de telefone válido.';
         valid = false;
     } else if (!hasSelectedUserConta && !hasSavedUserContaIds) {
         newErrors.selectedUserConta = 'Este campo deve ser selecionado.';
@@ -161,7 +161,7 @@ export const validateFieldsEmpresas = (
     setErrors(newErrors);
 
     if (msgs.current && errorMessages.length > 0) {
-        msgs.current.show({ severity: 'error', summary: 'Erro', detail: errorMessages[0] });
+        msgs.current.show({ severity: 'error', summary: 'Atenção:', detail: errorMessages[0] });
     }
 
     return valid;

@@ -17,6 +17,11 @@ type NotaServicoFeedback = {
     detail: string;
 };
 
+type CreatedNotaServicoResult = {
+    wasCreated: boolean;
+    redirected: boolean;
+};
+
 
 const normalizeOptionalNumberToZero = (value: unknown): number => {
     if (value === null || value === undefined || value === '') {
@@ -115,7 +120,7 @@ export const fetchNotaServico = async (
         if (error.response) {
             msgs?.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail:
                     error.response?.data?.mensagem ||
                     'Não foi possível carregar as notas fiscais.',
@@ -124,7 +129,7 @@ export const fetchNotaServico = async (
         } else {
             msgs?.current?.show({
                 severity: 'error',
-                summary: 'Erro interno',
+                summary: 'Atenção:',
                 detail:
                     error.message ||
                     'Ocorreu um erro inesperado ao carregar as notas fiscais.',
@@ -189,7 +194,7 @@ export const prepararCorrecaoNotaServico = async (
 
         msgs?.current?.show({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Atenção:',
             detail:
                 error.response?.data?.message ||
                 error.response?.data?.mensagem ||
@@ -208,7 +213,7 @@ export const deletarNotaServico = async (nfsId: number, msgs: any, listPaginatio
             {
                 life: 3000,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Nfse Cancelada com sucesso.'
             }
         ]);
@@ -218,7 +223,7 @@ export const deletarNotaServico = async (nfsId: number, msgs: any, listPaginatio
             {
                 life: 3000,
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar Cancelar Nfse, tente novamente.'
             }
         ]);
@@ -243,14 +248,14 @@ export const prepararNotaServico = async (
             const msg = error.response?.data?.message || 'Erro ao preparar NFS-e.';
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: msg,
                 life: 5000
             });
         } else {
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Erro inesperado ao preparar NFS-e.',
                 life: 5000
             });
@@ -263,7 +268,7 @@ export const createdNotaServico = async (
     msgs: any,
     router: AppRouterInstance,
     redirectAfterSave = true
-) => {
+): Promise<CreatedNotaServicoResult> => {
     try {
         const valoresNormalizados = normalizeNfseServiceValores(nfs.servico?.valores);
         const valorServicoNormalizado = (() => {
@@ -293,17 +298,23 @@ export const createdNotaServico = async (
                 detail: 'Nao foi possivel emitir esta Nota fiscal no momento, efetue a correcao ou a emissao de uma nova Nota.'
             });
             router.push('/notaServico');
-            return false;
+            return {
+                wasCreated: false,
+                redirected: true
+            };
         }
 
         if (redirectAfterSave) {
             persistNotaServicoFeedback({
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'NFS-e cadastrada com sucesso!'
             });
             router.push('/notaServico');
-            return true;
+            return {
+                wasCreated: true,
+                redirected: true
+            };
         }
 
         if (response.data?.status_nota?.trim().toUpperCase() === 'REJEITADA') {
@@ -313,15 +324,21 @@ export const createdNotaServico = async (
                 detail: 'Não foi possivel emitir a Nota fiscal no momento, efetue a correcão ou a emissao de uma nova Nota Fiscal.',
                 life: 7000
             });
-            return false;
+            return {
+                wasCreated: false,
+                redirected: false
+            };
         }
 
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'NFS-e cadastrada com sucesso!'
         });
-        return true;
+        return {
+            wasCreated: true,
+            redirected: false
+        };
     } catch (error: any) {
         let summaryMessage = 'Erro';
         let detailMessage = 'Ocorreu um erro ao cadastrar a NFS-e.';
@@ -338,78 +355,28 @@ export const createdNotaServico = async (
                     detail: 'Já existe uma emissão recente de Nota Fiscal para esta empresa, cliente e serviço.',
                     life: 7000
                 });
-                return;
+                return {
+                    wasCreated: false,
+                    redirected: false
+                };
             }
         } else {
-            summaryMessage = 'Erro interno';
             detailMessage =
                 error.message || 'Ocorreu um erro inesperado.';
-
             console.error('Erro interno:', error);
         }
         msgs.current?.show({
             severity: 'error',
-            summary: summaryMessage,
+            summary: "Atenção:",
             detail: detailMessage,
             life: 6000
         });
-        return false;
+        return {
+            wasCreated: false,
+            redirected: false
+        };
     }
 };
-// export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>, msgs: any, router: AppRouterInstance) => {
-//     try {
-//         const valoresNormalizados = normalizeNfseServiceValores(nfs.servico?.valores);
-//         const valorServicoNormalizado = (() => {
-//             const raw = nfs.servico.valores?.valor_servico as string | number | undefined;
-//             if (typeof raw === 'string') {
-//                 const normalized = raw.replace(',', '.');
-//                 return parseFloat(normalized) || 0;
-//             }
-
-//             return parseFloat(Number(raw ?? 0).toFixed(2));
-//         })();
-//         const dataNfse = {
-//             ...nfs,
-//             servico: {
-//                 ...nfs.servico,
-//                 valores: valoresNormalizados.copyWith({
-//                     valor_servico: valorServicoNormalizado
-//                 })
-//             }
-//         };
-//         console.log('Envio:', { nfse: dataNfse });
-//         const response = await api.post('/nfse', { nfse: dataNfse });
-//         msgs.current?.show({
-//             severity: 'success',
-//             summary: 'Sucesso',
-//             detail: 'NFS-E cadastrada com sucesso!'
-//         });
-//         console.log('Response NFS:', response);
-//         router.push('/notaServico');
-//     } catch (error: any) {
-//         let summaryMessage = 'Erro';
-//         let detailMessage = 'Ocorreu um erro ao cadastrar a NFS.';
-//         if (error.response) {
-//             console.group('retorno:');
-//             console.log('Status:', error.response.status);
-//             console.log('Headers:', error.response.headers);
-//             console.log('resp:', error.response.data);
-//             console.groupEnd();
-//             detailMessage = error.response.data?.mensagem || detailMessage;
-//         } else {
-//             summaryMessage = 'Erro Interno';
-//             detailMessage = error.message || 'Ocorreu um erro inesperado.';
-//             console.error('Erro interno:', error);
-//         }
-
-//         msgs.current?.show({
-//             severity: 'error',
-//             summary: summaryMessage,
-//             detail: detailMessage,
-//             life: 5000
-//         });
-//     }
-// };
 export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
     try {
         const response = await api.get(`/nfse/${nota.id}/pdf`, {
@@ -428,6 +395,7 @@ export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
         console.log('Erro ao baixar PDF:', error);
         msgs.current?.show({
             severity: 'error',
+            summary:"Atenção:",
             detail: 'Erro ao baixar PDF da Nota Fiscal. Tente novamente em instantes. Caso o problema persista, entre em contato com o suporte.',
             life: 5000
         });
@@ -452,6 +420,7 @@ export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
         console.error(' Erro ao baixar XML:', error);
         msgs.current?.show({
             severity: 'error',
+            summary:'Atenção:',
             detail: 'Erro ao baixar XML da Nota Fiscal. Tente novamente em instantes. Caso o problema persista, entre em contato com o suporte.',
             life: 5000
 
@@ -477,7 +446,7 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
     } catch (error) {
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Atenção:',
             detail: 'Não foi possível abrir o PDF da nota.',
             life: 5000
         });
@@ -525,12 +494,11 @@ export const exportarPdfNotasServico = async (
 
             return;
         }
-
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro ao exportar PDF',
+            summary: 'Atenção:',
             detail:
-                'Ocorreu um erro inesperado ao gerar o PDF. Tente novamente em alguns instantes.',
+                'Ocorreu um erro inesperado ao gerar o PDF. Tente novamente.',
             life: 5000
         });
     }
