@@ -56,7 +56,7 @@ export const updatePessoa = async (
         await api.put(`/pessoa`, pessoaDataToUpdate);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Pessoa atualizado com sucesso!',
         });
         router.push('/cadastro/pessoas');
@@ -67,14 +67,14 @@ export const updatePessoa = async (
             console.error("Erro de API:", status, data);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: String(errorMessage),
             });
         } else {
             console.error("Erro inesperado:", error);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Erro inesperado ao atualizar Pessoa.',
             });
         }
@@ -97,7 +97,7 @@ export const ativarPessoa = async (
             {
                 className: 'messages-center',
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Cliente ou Fornecedor ativado com sucesso.`,
             },
         ]);
@@ -110,7 +110,7 @@ export const ativarPessoa = async (
             {
                 className: 'messages-center',
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: `Houve um erro ao tentar ativar este Cliente ou Fornecedor , tente novamente.`,
             },
         ]);
@@ -135,7 +135,7 @@ export const deletarPessoa = async (
             {
                 life: 3000,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Cliente ou Fornecedor excluído com sucesso.'
             },
         ]);
@@ -144,7 +144,7 @@ export const deletarPessoa = async (
         msgs.current?.show([
             {
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar excluir o Cliente ou Fornecedor, tente novamente.'
             },
         ]);
@@ -180,14 +180,14 @@ export const createdPessoa = async (
             const errorMessage = data.message || 'Erro ao cadastrar Pessoa.';
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: String(errorMessage),
             });
         } else {
             console.error("Erro inesperado:", error);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Erro inesperado ao cadastrar Pessoa.',
             });
         }
@@ -228,7 +228,7 @@ export const handleSearchCepPessoa = async (
         if (msgs.current) {
             msgs.current.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'CEP não encontrado, verifique ou inclua o endereço manualmente!',
             });
         }

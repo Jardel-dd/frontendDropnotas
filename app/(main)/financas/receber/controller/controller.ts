@@ -61,7 +61,7 @@ export const createdContasReceber = async (
 
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Contas a Receber criada com sucesso!'
         });
 
@@ -92,7 +92,7 @@ export const handleActiveOrInativeContasReceber = async (
         console.error('Erro ao recarregar Contas a Receber:', error);
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Atenção:',
             detail: `Nao foi possivel atualizar a listagem da conta ${rowData.id}.`
         });
     }

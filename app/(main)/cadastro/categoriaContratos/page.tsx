@@ -104,7 +104,7 @@ const CategoriaContrato: React.FC = () => {
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao buscar Categoria Contrato ',
                 life: 3000
             });

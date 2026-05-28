@@ -90,7 +90,7 @@ const ContasReceber: React.FC = () => {
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao buscar contas a Receber ',
                 life: 3000
             });

@@ -28,7 +28,7 @@ export const deletarPerfilUser = async (perfilUserId: number, msgs: any, listPag
         msgs.current?.show([
             {
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Perfil Usuário excluído com sucesso.'
             }
         ]);
@@ -37,7 +37,7 @@ export const deletarPerfilUser = async (perfilUserId: number, msgs: any, listPag
         msgs.current?.show([
             {
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao excluir o Perfil Usuário, tente novamente.'
             }
         ]);
@@ -51,7 +51,7 @@ export const ativarPerfilUser = async (perfilUserId: number, msgs: any, listPagi
             {
                 className: 'messages-center',
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Perfil usuario ativado com sucesso.`
             }
         ]);
@@ -65,7 +65,7 @@ export const ativarPerfilUser = async (perfilUserId: number, msgs: any, listPagi
         msgs.current?.show([
             {
                 className: 'messages-center',
-                severity: 'error',
+                severity: 'Atenção:',
                 summary: 'Erro',
                 detail: `Houve um erro ao tentar ativar este Perfil usuário, tente novamente.`
             }
@@ -92,7 +92,7 @@ export const createdPerfilUser = async (
         const created = new PerfilUser(resp.data?.perfilUser ?? resp.data);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Perfil criado com sucesso!'
         });
         if (redirectAfterSave) {
@@ -120,7 +120,7 @@ export const createdPerfilUser = async (
         console.error('Erro inesperado ao criar permissao:', error, 'Payload enviado:', payload);
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Atenção:',
             detail: 'Não foi possivel cadastrar esta permissão, tente novamente.'
         });
     }
@@ -145,7 +145,7 @@ export const updatePerfilUser = async (
         await api.put(`/perfil-usuario`, dataPerfilUser);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Perfil de usuário atualizado com sucesso!'
         });
 
@@ -155,7 +155,7 @@ export const updatePerfilUser = async (
             console.error('Erro na atualização do perfil de usuário:', error.response?.data);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: error.response?.data?.message || 'Ocorreu um erro ao atualizar o perfil de usuário.'
             });
         }

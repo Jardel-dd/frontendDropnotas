@@ -91,8 +91,8 @@ export const validateFieldsNotaServico = (
     if (!valid && showMessage) {
         msgs?.current?.show({
             severity: 'error',
-            summary: 'Erro de validacao',
-            detail: 'Por favor, preencha todos os campos obrigatorios.',
+            summary: 'Atenção:',
+            detail: 'Por favor, preencha todos os campos obrigatórios.',
             life: 5000
         });
     }

@@ -3,7 +3,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import api from '@/app/services/api';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { applyThemeLink, getThemePreferencesFromUser, updateStoredUserThemePreferences } from '@/app/utils/themePreferences';
-import { AUTH_STORAGE_KEYS, readStoredUser, shouldSyncStoredUserOnReload, writeStoredUser } from '@/app/services/authStorage';
+import { AUTH_STORAGE_KEYS, hasStoredAuthSession, readStoredUser, shouldSyncStoredUserOnReload, writeStoredUser } from '@/app/services/authStorage';
 
 interface UserContextType {
   userConta: UsuarioContaEntity | null;
@@ -364,9 +364,17 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const currentUser = options?.sourceUser ?? userContaRef.current ?? readStoredUser();
+    const hasPersistedAuthSession = hasStoredAuthSession();
 
     if (!currentUser?.id) {
       return currentUser ?? null;
+    }
+
+    if (!hasPersistedAuthSession) {
+      console.warn('[UserContext] Refresh ignorado porque nao existe sessao autenticada valida no storage.', {
+        userId: currentUser.id
+      });
+      return null;
     }
 
     const refreshPromise = (async () => {
@@ -438,8 +446,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserData(syncedUser);
         return syncedUser;
       } catch (error: any) {
-        if (error?.response?.status !== 401 && error?.response?.status !== 403) {
+        const responseStatus = error?.response?.status;
+        const isAuthError = responseStatus === 401 || responseStatus === 403;
+
+        if (!isAuthError) {
           console.error('[UserContext] Falha ao atualizar usuario logado:', error);
+        }
+
+        if (isAuthError) {
+          console.warn('[UserContext] Refresh rejeitado por autenticacao invalida. Limpando usuario em memoria/storage para evitar loop de bootstrap.', {
+            userId: currentUser.id,
+            status: responseStatus ?? null
+          });
+          setUserData(null);
+          return null;
         }
 
         if (options?.commitCurrentIfRequestFails) {
@@ -470,6 +490,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const bootstrapUser = async () => {
       try {
         const storedUser = readStoredUser();
+        const hasPersistedAuthSession = hasStoredAuthSession();
         const shouldRefreshStoredUser = shouldSyncStoredUserOnReload(storedUser?.id);
         const syncedStoredUser = storedUser
           ? buildSyncedUser(normalizeUserPayload(storedUser, storedUser), storedUser)
@@ -477,10 +498,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         console.info('[UserContext] Bootstrap da sessao iniciado.', {
           hasStoredUser: !!storedUser,
+          hasPersistedAuthSession,
           storedUserId: storedUser?.id ?? null,
           shouldSyncOnReload: shouldRefreshStoredUser,
           perfil_usuario: getPerfilUsuarioDebugSnapshot(storedUser?.perfil_usuario as Record<string, any> | undefined)
         });
+
+        if (storedUser && !hasPersistedAuthSession) {
+          console.warn('[UserContext] userConta encontrado sem token/sessao valida. Limpando storage antes de iniciar a tela publica.', {
+            storedUserId: storedUser.id
+          });
+          setUserData(null);
+          return;
+        }
 
         if (syncedStoredUser) {
           userContaRef.current = syncedStoredUser;
@@ -522,7 +552,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isMounted = false;
       window.removeEventListener('storage', handleStorage);
     };
-  }, [refreshUserData]);
+  }, [refreshUserData, setUserData]);
 
   return (
     <UserContext.Provider value={{ userConta, isInitializing, isRefreshingUser, setUserData, refreshUserData }}>

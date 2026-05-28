@@ -135,7 +135,7 @@ const Comissoes: React.FC = () => {
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao buscar Comissões ',
                 life: 3000
             });
@@ -212,7 +212,7 @@ const Comissoes: React.FC = () => {
             await aprovarComissoes(selectedComissoesPendentes);
             toast.current?.show({
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `${selectedComissoesPendentes.length} comiss${selectedComissoesPendentes.length > 1 ? 'ões aprovadas' : 'ão aprovada'} com sucesso.`,
                 life: 3000
             });
@@ -226,7 +226,7 @@ const Comissoes: React.FC = () => {
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Não foi possível aprovar as comissões selecionadas.',
                 life: 3000
             });

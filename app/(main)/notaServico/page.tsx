@@ -321,14 +321,14 @@ const NotaServico: React.FC = () => {
             console.log('Notas enviadas com sucesso:', response);
             toast.current?.show({
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Foram enviadas ${notaIds.length} nota${notaIds.length > 1 ? 's' : ''} para emissão.`
             });
         } catch (error) {
             console.error('Erro ao emitir notas pendentes:', error);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao emitir notas pendentes.'
             });
         }
@@ -553,7 +553,7 @@ const NotaServico: React.FC = () => {
     };
     const handleEmpresaSaved = (created: CompanyEntity) => {
         setShowModalEmpresa(false);
-        setSelectedEmpresa(created);
+        setSelectedEmpresaDialog(created);
         handlePrepararNfsChange('id_empresa', created.id);
         setReloadKeyEmpresa((current) => current + 1);
     };
@@ -562,7 +562,7 @@ const NotaServico: React.FC = () => {
     };
     const handleServiceSaved = (created: ServiceEntity) => {
         setShowModalServico(false);
-        setSelectedServico(created);
+        setSelectedServicoDialog(created);
         handlePrepararNfsChange('id_servico', created.id);
         setReloadKeyServico((current) => current + 1);
     };
@@ -934,7 +934,7 @@ const NotaServico: React.FC = () => {
                             }}
                             footer={
                                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0.5rem' }}>
-                                    <Button label="Confirmar" style={{ boxShadow: 'none' }} disabled={disableConfirmarPrepararNfs} onClick={handleConfirmPreparaNfs} outlined />
+                                    <Button label="Confirmar"  style={{ boxShadow: 'none' }} disabled={disableConfirmarPrepararNfs} onClick={handleConfirmPreparaNfs}  />
                                     <Button
                                         label="Cancelar"
                                         onClick={() => {

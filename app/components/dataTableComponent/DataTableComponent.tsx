@@ -165,7 +165,7 @@ export function CancelarNfs({ nota, msgs }: CancelarNfsActionProps) {
             await api.post(`/nfse/cancelar`, { id: nota.id, motivo });
             msgs.current?.show({
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'NFS-e cancelada com sucesso.'
             });
             setVisible(false);
@@ -173,7 +173,7 @@ export function CancelarNfs({ nota, msgs }: CancelarNfsActionProps) {
         } catch {
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Não foi possível cancelar a NFS-e.'
             });
         }

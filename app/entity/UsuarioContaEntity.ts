@@ -3,6 +3,7 @@ export class UsuarioContaEntity {
     ativo?: boolean;
     id!: number;
     foto_perfil?: string;
+    is_usuario_principal?:boolean
     nome!: string;
     email!: string;
     senha!: string;
@@ -16,6 +17,7 @@ export class UsuarioContaEntity {
         foto_perfil,
         nome,
         email,
+        is_usuario_principal,
         senha,
         id_empresas_acesso,
         perfil_usuario,
@@ -30,6 +32,7 @@ export class UsuarioContaEntity {
         senha: string;
         id_empresas_acesso?: number[];
         esquema_cor?:string;
+        is_usuario_principal?:boolean;
         tema_componente?:string;
         perfil_usuario?: PerfilUsuario;
     }) {
@@ -43,7 +46,8 @@ export class UsuarioContaEntity {
             id_empresas_acesso,
             perfil_usuario,
             tema_componente,
-            esquema_cor
+            esquema_cor,
+            is_usuario_principal
         });
     }
     copyWith({
@@ -56,7 +60,8 @@ export class UsuarioContaEntity {
         id_empresas_acesso,
         perfil_usuario,
         tema_componente,
-        esquema_cor
+        esquema_cor,
+        is_usuario_principal
     }: {
         ativo?: boolean;
         id?: number;
@@ -68,6 +73,7 @@ export class UsuarioContaEntity {
         tema_componente?:string;
         esquema_cor?:string;
         perfil_usuario?: PerfilUsuario;
+        is_usuario_principal?:boolean;
     }): UsuarioContaEntity {
         return new UsuarioContaEntity({
             ativo: ativo ?? this.ativo,
@@ -76,6 +82,7 @@ export class UsuarioContaEntity {
             nome: nome ?? this.nome,
             email: email ?? this.email,
             senha: senha ?? this.senha,
+            is_usuario_principal: is_usuario_principal ?? this.is_usuario_principal,
             id_empresas_acesso: id_empresas_acesso ?? this.id_empresas_acesso,
             tema_componente: tema_componente ?? this.tema_componente,
             esquema_cor: esquema_cor ?? this.esquema_cor,

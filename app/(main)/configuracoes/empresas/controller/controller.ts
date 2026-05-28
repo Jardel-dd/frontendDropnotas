@@ -13,15 +13,13 @@ const NO_CACHE_REQUEST_HEADERS = {
     Pragma: 'no-cache',
     Expires: '0',
 };
-
 const blobToDataUrl = (blob: Blob): Promise<string> =>
     new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
         reader.onerror = () => reject(new Error('Nao foi possivel ler o blob da imagem.'));
         reader.readAsDataURL(blob);
-    });
-
+});
 const getLogoUrlCandidates = (imageUrl: string): string[] => {
     const trimmedUrl = imageUrl.trim();
 
@@ -44,7 +42,6 @@ const getLogoUrlCandidates = (imageUrl: string): string[] => {
 
     return Array.from(new Set(candidates));
 };
-
 const resolveRequestUrl = (requestUrl: string): string => {
     const trimmedUrl = requestUrl.trim();
 
@@ -64,7 +61,6 @@ const resolveRequestUrl = (requestUrl: string): string => {
         return new URL(trimmedUrl, apiBaseUrl).toString();
     }
 };
-
 const fetchImageBlobWithoutCache = async (imageUrl: string): Promise<Blob | null> => {
     const token = await getToken();
     const response = await fetch(resolveRequestUrl(imageUrl), {
@@ -83,7 +79,6 @@ const fetchImageBlobWithoutCache = async (imageUrl: string): Promise<Blob | null
 
     return response.blob();
 };
-
 const inferImageMimeTypeFromBase64 = (base64Value: string): string | null => {
     const normalizedValue = base64Value.replace(/\s/g, '');
 
@@ -111,7 +106,6 @@ const inferImageMimeTypeFromBase64 = (base64Value: string): string | null => {
 
     return null;
 };
-
 const normalizeLogoEmpresaForBackend = async (logoEmpresa?: string | null): Promise<string> => {
     const logoNormalizado = logoEmpresa?.trim() ?? '';
 
@@ -141,7 +135,6 @@ const normalizeLogoEmpresaForBackend = async (logoEmpresa?: string | null): Prom
 
     return logoNormalizado;
 };
-
 export const listEmpresa = async (
     listPaginationEmpresa: Record<string, any>,
     listarInativos: boolean,
@@ -204,8 +197,10 @@ export const updateEmpresa = async (
         console.log(' Resp do backend:', response?.data);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Empresa atualizada com sucesso!',
+            life: 5000,
+
         });
         if (redirectAfterSave) {
             router.push('/configuracoes/empresas');
@@ -220,7 +215,8 @@ export const updateEmpresa = async (
         }
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Atenção:',
+            life: 5000,
             detail: 'Não foi possível atualizar esta empresa. Verifique os dados e tente novamente.',
         });
         if (error.response?.data?.errors) {
@@ -242,7 +238,7 @@ export const ativarEmpresa = async (
         msgs.current.show([
             {
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Empresa ativada com sucesso.`,
             },
         ]);
@@ -253,7 +249,7 @@ export const ativarEmpresa = async (
                 {
 
                     severity: 'error',
-                    summary: 'Erro',
+                    summary: 'Atenção:',
                     detail: `Houve um erro ao tentar ativar esta empresa, tente novamente.`,
                 },
             ]);
@@ -276,7 +272,7 @@ export const deletarEmpresa = async (
             {
                 life: 3000,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Empresa excluída com sucesso.'
             },
         ]);
@@ -286,7 +282,7 @@ export const deletarEmpresa = async (
             {
                 life: 3000,
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar excluir esta empresa, tente novamente.'
             },
         ]);
@@ -319,54 +315,63 @@ export const createdEmpresa = async (
         console.log("responde data created", response)
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Empresa cadastrada com sucesso!'
         });
         setEmpresa({});
         setSelectedUserConta([]);
-
         if (redirectAfterSave) {
             router.push('/configuracoes/empresas');
         }
         return created;
-    } catch (error: any) {
-        console.error("Erro inesperado:", error);
-
-        let summaryMessage = 'Erro';
-        let detailMessage = 'Ocorreu um erro ao cadastrar a empresa.';
-
-        if (error.response) {
-            const statusCode = error.response.status;
-
-            if (statusCode === 400) {
-                detailMessage = 'Senha do Certificado Digital inválida, por favor verifique.';
-            } else {
-                const backendMessage =
-                    error.response.data?.message ||
-                    error.response.data?.error ||
-                    error.response.data?.mensagem ||
-                    error.response.data?.detail;
-
-                if (backendMessage) {
-                    detailMessage = backendMessage;
-                }
+   } catch (error: any) {
+    let detailMessage = 'Não foi possível concluir o cadastro da empresa.';
+    if (error.response) {
+        const statusCode = error.response.status;
+        const backendMessage =
+            error.response.data?.message ||
+            error.response.data?.error ||
+            error.response.data?.mensagem ||
+            error.response.data?.detail;
+        if (statusCode === 400) {
+            if (
+                backendMessage?.toLowerCase().includes('cnpj')
+            ) {
+                detailMessage =
+                    'Já existe uma empresa cadastrada com este CNPJ, por favor verifique.';
+            }
+            else if (
+                backendMessage?.toLowerCase().includes('cpf')
+            ) {
+                detailMessage =
+                    'Já existe um cadastro utilizando este CPF. Confira os dados informados.';
+            }
+            else if (
+                backendMessage?.toLowerCase().includes('senha do certificado')
+            ) {
+                detailMessage =
+                    'A senha do certificado digital está incorreta. Verifique e tente novamente.';
+            }
+            else if (backendMessage) {
+                detailMessage = backendMessage;
             }
         }
-        else if (error.request) {
-            summaryMessage = 'Erro de Rede';
-            detailMessage = 'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.';
-        }
-        else {
-            summaryMessage = 'Erro Interno';
-            detailMessage = error.message || 'Ocorreu um erro inesperado.';
-        }
-        msgs.current?.show({
-            severity: 'error',
-            summary: summaryMessage,
-            detail: detailMessage,
-            life: 6000,
-        });
+    } else if (error.request) {
+
+        detailMessage =
+            'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
+    } else {
+
+        detailMessage =
+            error.message || 'Ocorreu um erro inesperado.';
     }
+    msgs.current?.show({
+        severity: 'error',
+       summary: 'Atenção:',
+        detail: detailMessage,
+        life: 5000,
+    });
+}
 };
 export const convertLogoToBase64 = (
     files: File[],
@@ -385,14 +390,14 @@ export const convertLogoToBase64 = (
         setEmpresa((prevEmpresa) => prevEmpresa.copyWith({ logo_empresa: base64String }));
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Logo carregado com sucesso!',
         });
     };
     reader.onerror = () => {
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Atenção:',
             detail: 'Erro ao processar o logo. Tente novamente!',
         });
         console.error('Erro ao ler o logo');
@@ -420,14 +425,14 @@ export const convertCertificadoToBase64 = (
         });
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Certificado digital carregado com sucesso!',
         });
     };
     reader.onerror = () => {
         msgs.current?.show({
             severity: 'error',
-            summary: 'Erro',
+            summary: 'Atenção:',
             detail: 'Erro ao processar o certificado. Tente novamente!',
         });
         console.error(`Erro ao ler o certificado`);
@@ -457,7 +462,6 @@ export const convertImageUrlToBase64 = async (
 
     return null;
 };
-
 export const resolveLogoEmpresaSource = async (imageUrl?: string | null): Promise<string> => {
     const logoSource = imageUrl?.trim() ?? '';
 

@@ -60,7 +60,7 @@ export function ListarPerfilUsers(
     return (
         <div style={{ marginTop: '0' }}>
             <Messages ref={msgs} className="custom-messages" />
-            {loading ? (<LoadingScreen loadingText={'Carregando...'} />) :
+            {loading ? (<LoadingScreen loadingText={'Carregando Permissões...'} />) :
                 (
                     <>
                         {isMobile &&

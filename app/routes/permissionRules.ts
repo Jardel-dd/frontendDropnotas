@@ -19,7 +19,8 @@ export type PermissionResourceKey =
     | 'integracao'
     | 'nfse'
     | 'financeiro'
-    | 'configuracoes';
+    | 'configuracoes'
+    | 'is_usuario_principal';
 
 export type PermissionFlags = {
     view: boolean;
@@ -133,8 +134,10 @@ const permissionDefinitions: Record<PermissionResourceKey, PermissionDefinition>
     },
     configuracoes: {
         viewKey: 'configuracoes',
-        fallbackViewKeys: ['permiteAlterarConfiguracoes'],
         updateKey: 'permiteAlterarConfiguracoes'
+    },
+    is_usuario_principal: {
+        defaultView: false
     }
 };
 
@@ -196,7 +199,21 @@ const readViewPermission = (perfilUsuario: PerfilUsuario | undefined, definition
     return definition.defaultView ?? false;
 };
 
+const readPrimaryUserPermission = (userConta: UsuarioContaEntity | null) => {
+    return normalizePermissionValue(userConta?.is_usuario_principal);
+};
+
 export const getPermissionFlags = (userConta: UsuarioContaEntity | null, resource: PermissionResourceKey): PermissionFlags => {
+    if (resource === 'is_usuario_principal') {
+        return {
+            view: readPrimaryUserPermission(userConta),
+            create: false,
+            update: false,
+            delete: false,
+            search: false
+        };
+    }
+
     const perfilUsuario = userConta?.perfil_usuario;
     const definition = permissionDefinitions[resource];
 

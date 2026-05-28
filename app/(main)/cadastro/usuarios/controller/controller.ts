@@ -42,7 +42,7 @@ export const ativarUsuario = async (
             {
                 life: 3000,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Usuário Conta ativado com sucesso.`,
             },
         ]);
@@ -54,7 +54,7 @@ export const ativarUsuario = async (
             {
                 life: 3000,
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: `Houve um erro ao tentar ativar este Usuário Conta, tente novamente.`,
             },
         ]);
@@ -84,7 +84,7 @@ export const createUsuario = async (
         console.log('Dados enviados para criação:', userDataToSend);
         const response = await api.post('/usuario-conta', userDataToSend);
         console.log('Resposta da API após criação:', response.data);
-        msgs.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Usuário cadastrado com sucesso!' });
+        msgs.current?.show({ severity: 'success', summary: 'Sucesso:', detail: 'Usuário cadastrado com sucesso!' });
         router.push('/cadastro/usuarios');
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
@@ -92,13 +92,13 @@ export const createUsuario = async (
             const errorMessage = data.message || 'Erro ao cadastrar usuário.';
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: String(errorMessage),
             });
         } else {
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Erro ao cadastrar usuário.',
             });
         }
@@ -118,7 +118,7 @@ export const updateUsuario = async (
     setSelectedPerfilUser: React.Dispatch<React.SetStateAction<PerfilUser | null>>,
 ) => {
     if (selectedPerfilUser === null) {
-        msgs.current?.show({ severity: 'error', summary: 'Erro', detail: 'Perfil de usuário não selecionado.' });
+        msgs.current?.show({ severity: 'error', summary: 'Atenção:', detail: 'Perfil de usuário não selecionado.' });
         return;
     }
     try {
@@ -131,11 +131,11 @@ export const updateUsuario = async (
             id_empresas_acesso: empresaIds,
             perfil_usuario: selectedPerfilUser,
         };
-        await api.put(`/usuario-conta/alterar-email`, userContaData);
-        msgs.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'O Usuario Conta atualizado com sucesso!' });
+        await api.put(`/usuario-conta`, userContaData);
+        msgs.current?.show({ severity: 'success', summary: 'Sucesso:', detail: 'O Usuario Conta atualizado com sucesso!' });
         router.push('/cadastro/usuarios');
     } catch (error) {
-        msgs.current?.show({ severity: 'error', summary: 'Erro', detail: 'Não foi possível atualizar o Usuario Conta. Tente novamente.' });
+        msgs.current?.show({ severity: 'error', summary: 'Atenção:', detail: 'Não foi possível atualizar o Usuario Conta. Tente novamente.' });
     }
 };
 export const deletarUsuario = async (
@@ -152,7 +152,7 @@ export const deletarUsuario = async (
         msgs.current?.show([
             {
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Usuário excluído com sucesso.'
             },
         ]);
@@ -161,7 +161,7 @@ export const deletarUsuario = async (
         msgs.current?.show([
             {
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar excluir o Usuário, tente novamente.'
             },
         ]);
@@ -183,10 +183,10 @@ export const convertProfileUserToBase64 = (
             ...prev,
             foto_perfil: base64String,
         }));
-        msgs.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Foto de perfil carregada com sucesso!' });
+        msgs.current?.show({ severity: 'success', summary: 'Sucesso:', detail: 'Foto de perfil carregada com sucesso!' });
     };
     reader.onerror = () => {
-        msgs.current?.show({ severity: 'error', summary: 'Error', detail: 'Erro ao processar a Foto de Perfil. Tente novamente!' });
+        msgs.current?.show({ severity: 'error', summary: 'Atenção:', detail: 'Erro ao processar a Foto de Perfil. Tente novamente!' });
         console.error(`Erro ao ler o logo`);
     };
 

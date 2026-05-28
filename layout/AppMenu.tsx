@@ -123,7 +123,7 @@ const AppMenu = () => {
                 label: 'Configuracoes',
                 icon: 'pi pi-cog',
                 to: '/configuracoes',
-                visible: hasPermissionAccess(userConta, 'empresa'),
+                visible: hasPermissionAccess(userConta, 'empresa') || hasPermissionAccess(userConta, 'is_usuario_principal'),
                 items: [
                     {
                         label: 'Minhas Empresas',
@@ -135,7 +135,6 @@ const AppMenu = () => {
                         label: 'Temas',
                         icon: 'pi pi-palette',
                         to: '/configuracoes/geral',
-                        visible: hasPermissionAccess(userConta, 'configuracoes'),
                     }
                 ],
             },

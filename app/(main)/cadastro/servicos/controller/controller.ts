@@ -54,7 +54,7 @@ export const ativarServico = async (
             {
                 life: 3000,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: `Serviço ativado com sucesso.`,
             },
         ]);
@@ -67,7 +67,7 @@ export const ativarServico = async (
             {
                 life: 3000,
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: `Houve um erro ao tentar ativar este Serviço, tente novamente.`,
             },
         ]);
@@ -92,7 +92,7 @@ export const deletarServico = async (
             {
                 life: 3000,
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso:',
                 detail: 'Serviço excluído com sucesso.'
             },
         ]);
@@ -109,7 +109,7 @@ export const deletarServico = async (
             {
                 life: 3000,
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar excluir este Serviço, tente novamente.'
             },
         ]);
@@ -138,7 +138,7 @@ export const createServico = async (
         const created = new ServiceEntity(resp.data?.servico ?? resp.data);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Serviço cadastrado com sucesso!',
         });
         if (redirectAfterSave) {
@@ -169,7 +169,7 @@ export const updateServico = async (
         await api.put(`/servico`, dataServiceUpdate);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso',
+            summary: 'Sucesso:',
             detail: 'Serviço atualizado com sucesso!',
         });
         router.push('/cadastro/servicos');
@@ -180,14 +180,14 @@ export const updateServico = async (
             console.error("Erro de API:", status, data);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: String(errorMessage),
             });
         } else {
             console.error("Erro inesperado:", error);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Erro inesperado ao atualizar Serviço.',
             });
         }

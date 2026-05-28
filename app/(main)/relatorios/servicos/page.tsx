@@ -155,7 +155,7 @@ const RelatoriosServicos: React.FC = () => {
         <div className="p-fluid">
             <div className="card styled-container-main-all-routes w-full">
                 <div className="scrollable-container">
-                    {loading && <LoadingScreen loadingText={'Carregando...'} />}
+                    {loading && <LoadingScreen loadingText={'Carregando Serviços...'} />}
                     <div className="row flex w-full">
                         <div className=" mt-2 p-2">
                             <div className="col-12 mb-0 lg:col-12 lg:mb-0 p-0 w-full ">

@@ -47,7 +47,7 @@ export function ListarContratos({
         <div style={{ marginTop: '0' }}>
             <Messages ref={msgs} className="custom-messages" />
             {loading ? (
-                <LoadingScreen loadingText={'Carregando...'} />
+                <LoadingScreen loadingText={'Carregando Contratos...'} />
             ) : (
                 <>
                     {isMobile && (

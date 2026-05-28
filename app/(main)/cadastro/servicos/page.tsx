@@ -117,7 +117,7 @@ function Servicos() {
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Erro',
+                summary: 'Atenção:',
                 detail: 'Falha ao buscar Servicos',
                 life: 3000
             });
