@@ -31,6 +31,7 @@ function CustomMultiSelect({
     initialSelectedValues = [],
     showAddButton = false,
     onAddClick,
+    onEditClick,
     minSearchChars = 2,
     maxResults = 50,
     showTopLabel,
@@ -205,8 +206,22 @@ function CustomMultiSelect({
             }
         });
     };
+    const handleEditButtonMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+    const handleEditButtonClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        multiSelectRef.current?.hide();
+
+        if (Array.isArray(selectedItemsRef.current) && selectedItemsRef.current.length === 1) {
+            onEditClick?.(selectedItemsRef.current[0]);
+        }
+    };
     const hasSelectedValues = Array.isArray(selectedItems) && selectedItems.length > 0;
-    const showHeaderButtons = showAddButton || hasSelectedValues;
+    const canEditSelected = Boolean(onEditClick && Array.isArray(selectedItems) && selectedItems.length === 1);
+    const showHeaderButtons = showAddButton || canEditSelected || hasSelectedValues;
     return (
         <div className="p-field" style={{ width: '100%', height: '85px', maxHeight: "85px" }}>
             {showTopLabel && topLabel && (
@@ -290,6 +305,24 @@ function CustomMultiSelect({
                                             onMouseDown={handleAddButtonMouseDown}
                                             onClick={handleAddButtonClick}
                                         />
+                                        )}
+                                        {canEditSelected && (
+                                            <Button
+                                                type="button"
+                                                style={{
+                                                    height: '30px',
+                                                    width: '40px',
+                                                    boxShadow: 'none'
+                                                }}
+                                                tooltip="Editar"
+                                                icon="pi pi-pencil"
+                                                aria-label="Editar"
+                                                severity="info"
+                                                outlined
+                                                raised
+                                                onMouseDown={handleEditButtonMouseDown}
+                                                onClick={handleEditButtonClick}
+                                            />
                                         )}
                                         {hasSelectedValues && (
                                             <Button

@@ -4,7 +4,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Checkbox } from 'primereact/checkbox';
 import ListarComissoes from './tabela/comissoes';
 import Input from '@/app/shared/include/input/input-all';
@@ -455,3 +455,4 @@ const Comissoes: React.FC = () => {
 };
 
 export default Comissoes;
+

@@ -7,6 +7,7 @@ export default function CategoriaContratoDropdownField({
     selectedCategoriaContrato,
     selectedCategoriaContratoId,
     onCategoriaContratoChange,
+    onEditClick,
     reloadKey = 0,
     hasError,
     errorMessage,
@@ -36,6 +37,7 @@ export default function CategoriaContratoDropdownField({
             autoSelectSingle={autoSelectSingle}
             showAddButton={showAddButton}
             onAddClick={onAddClick}
+            onEditClick={onEditClick}
             topLabel="Categoria de Contratos:"
             showTopLabel
             required={required}

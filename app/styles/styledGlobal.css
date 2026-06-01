@@ -368,15 +368,17 @@ height: 66px;
 .text-red-clear-custom {
     color: #FCA5A5;
 }
-
 .custom-messages {
-    position: fixed;
+    position: fixed !important;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 9999;
     width: 70%;
     max-width: 800px;
+    z-index: 2147483647 !important;
+}
+.custom-messages .p-message-wrapper {
+    z-index: 2147483647 !important;
 }
 
 @media (max-width: 768px) {

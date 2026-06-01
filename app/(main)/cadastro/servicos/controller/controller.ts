@@ -2,6 +2,15 @@ import axios from 'axios';
 import api from '@/app/services/api';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
+import { TableService } from '@/app/entity/TableServiceEntity';
+import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
+import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
+import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
+import { fetchAllTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
+import { fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
+import { fetchFilteredClassificacaoTributaria, findClassificacaoTributariaByCodigo } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
+import type { PreloadedServicoData } from '../types/servico';
 
 const normalizeEmptyValuesToNull = <T,>(value: T): T => {
     if (Array.isArray(value)) {
@@ -166,13 +175,30 @@ export const updateServico = async (
             aliquota_deducoes: service.aliquota_deducoes ?? 0,
         });
         console.log('[Cadastro/Servicos] Payload enviado ao atualizar servico:', dataServiceUpdate);
-        await api.put(`/servico`, dataServiceUpdate);
+        const response = await api.put(`/servico`, dataServiceUpdate);
+        const responseData = response?.data;
+        const responseServico =
+            responseData &&
+            typeof responseData === 'object' &&
+            'servico' in responseData
+                ? (responseData as { servico?: ServiceEntity | Record<string, unknown> }).servico
+                : null;
+        const updated =
+            (responseServico && typeof responseServico === 'object' ? responseServico : null) ??
+            (responseData && typeof responseData === 'object' ? responseData : null) ?? {
+                ...dataServiceUpdate,
+                id: Number(servicosID)
+            };
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso:',
             detail: 'Serviço atualizado com sucesso!',
         });
-        router.push('/cadastro/servicos');
+        setServicos(new ServiceEntity(updated));
+        if (redirectAfterSave) {
+            router.push('/cadastro/servicos');
+        }
+        return updated;
     } catch (error: any) {
         if (axios.isAxiosError(error) && error.response) {
             const { status, data } = error.response;
@@ -231,6 +257,64 @@ export const fetchServicesByID = async (id: string): Promise<{ servico: ServiceE
         console.error("Erro ao buscar serviço:", error);
         throw error;
     }
+};
+export const fetchServiceFormDataByID = async (id: string): Promise<PreloadedServicoData> => {
+    const { servico } = await fetchServicesByID(id);
+    const entidade = new ServiceEntity(servico);
+    const [allServices, codigoNBSOptions, codigoCNAEOptions, classificacaoTributariaOptions] = await Promise.all([
+        fetchAllTabelaServico(),
+        entidade.codigo_nbs ? fetchFilteredCodigoNBS(entidade.codigo_nbs) : Promise.resolve([] as TableCodigoNBSEntity[]),
+        entidade.codigo_cnae ? fetchFilteredCnae(entidade.codigo_cnae) : Promise.resolve([] as TableCNAEEntity[]),
+        entidade.codigo_classificacao_tributaria ? fetchFilteredClassificacaoTributaria(entidade.codigo_classificacao_tributaria) : Promise.resolve([] as TableClassificacaoTributariaEntity[])
+    ]);
+    const matchedServico = entidade.item_lista_servico
+        ? allServices.find((option) => option.codigo === entidade.item_lista_servico) ?? null
+        : null;
+
+    return {
+        servico: new ServiceEntity({
+            ...entidade,
+        }),
+        selectedCodigoNBS: entidade.codigo_nbs
+            ? (
+                findCodigoNBS(entidade.codigo_nbs, codigoNBSOptions) ??
+                new TableCodigoNBSEntity({
+                    id: 0,
+                    codigo: entidade.codigo_nbs,
+                    descricao: entidade.codigo_nbs
+                })
+            )
+            : null,
+        selectedCodigoCNAE: entidade.codigo_cnae
+            ? (
+                findCNAEByCodigo(entidade.codigo_cnae, codigoCNAEOptions) ??
+                new TableCNAEEntity({
+                    id: 0,
+                    codigo: entidade.codigo_cnae,
+                    descricao: entidade.codigo_cnae
+                })
+            )
+            : null,
+        selectedClassificacaoTributaria: entidade.codigo_classificacao_tributaria
+            ? (
+                findClassificacaoTributariaByCodigo(entidade.codigo_classificacao_tributaria, classificacaoTributariaOptions) ??
+                new TableClassificacaoTributariaEntity({
+                    id: 0,
+                    codigo: entidade.codigo_classificacao_tributaria,
+                    descricao: entidade.codigo_classificacao_tributaria,
+                    codigoCst: entidade.codigo_classificacao_tributaria
+                })
+            )
+            : null,
+        selectedCodigoServico: matchedServico ??
+            (entidade.item_lista_servico
+                ? new TableService({
+                    id: 0,
+                    codigo: entidade.item_lista_servico,
+                    descricao: entidade.item_lista_servico,
+                })
+                : null)
+    };
 };
 export const listTheService = async () => {
     try {

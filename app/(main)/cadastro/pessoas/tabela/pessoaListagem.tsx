@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Skeleton } from 'primereact/skeleton';
 import { usePermissions } from '@/app/routes/permissoes';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
@@ -182,3 +182,4 @@ export function ListarClientesFornecedores(
     );
 }
 export default ListarClientesFornecedores;
+

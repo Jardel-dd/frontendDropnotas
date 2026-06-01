@@ -146,15 +146,18 @@ export const updateVendedor = async (
     redirectAfterSave: boolean,
 ) => {
     try {
-        await api.put(`/vendedor`, vendedor);
+        const response = await api.put(`/vendedor`, vendedor);
+        const updated = new VendedorEntity(response.data?.vendedor ?? vendedor);
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso:',
             detail: 'Vendedor atualizado com sucesso!',
         });
+        setVendedor(updated);
         if (redirectAfterSave) {
             router.push('/cadastro/vendedores');
         }
+        return updated;
     } catch (error: any) {
         if (axios.isAxiosError(error) && error.response?.status === 409) {
             msgs.current?.show({
@@ -163,7 +166,7 @@ export const updateVendedor = async (
                 detail:
                     'Já existe um vendedor cadastrado com este CPF ou CNPJ.',
             });
-            return;
+            return null;
         }
         if (axios.isAxiosError(error) && error.response) {
             const { status, data } = error.response;
@@ -186,6 +189,7 @@ export const updateVendedor = async (
                     'Ocorreu um erro inesperado ao atualizar o vendedor.',
             });
         }
+        return null;
     }
 };
 export const handleActiveOrInativeVendedor = async (

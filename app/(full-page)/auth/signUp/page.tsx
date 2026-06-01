@@ -6,7 +6,7 @@ import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import IconVisible from '@/app/shared/IconVisible';
 import { useEffect, useRef, useState } from 'react';
 import Input from '@/app/shared/include/input/input-all';
@@ -310,3 +310,4 @@ function SignUp() {
 }
 
 export default SignUp;
+

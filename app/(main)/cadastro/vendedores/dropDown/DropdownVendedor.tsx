@@ -8,6 +8,7 @@ export default function VendedorDropdownField({
     selectedVendedorId,
     onVendedorChange,
     onAddClick,
+    onEditClick,
     reloadKey = 0,
     hasError,
     errorMessage,
@@ -29,6 +30,7 @@ export default function VendedorDropdownField({
             hasError={hasError}
             errorMessage={errorMessage}
             onAddClick={onAddClick}
+            onEditClick={onEditClick}
             showAddButton
             autoSelectSingle
             showTopLabel

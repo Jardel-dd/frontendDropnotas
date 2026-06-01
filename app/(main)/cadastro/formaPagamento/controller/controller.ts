@@ -124,9 +124,25 @@ export const updateFormaPagamento = async (
     redirectAfterSave: boolean
 ) => {
     try {
-        await api.put(`/forma-pagamento`, formaPagamento);
+        const response = await api.put(`/forma-pagamento`, formaPagamento);
+        const responseData = response?.data;
+        const responseFormaPagamento =
+            responseData &&
+            typeof responseData === 'object' &&
+            'formaPagamento' in responseData
+                ? (responseData as { formaPagamento?: FormaPagamentoEntity | Record<string, unknown> }).formaPagamento
+                : null;
+        const updated =
+            (responseFormaPagamento && typeof responseFormaPagamento === 'object' ? responseFormaPagamento : null) ??
+            (responseData && typeof responseData === 'object' ? responseData : null) ?? {
+                ...formaPagamento,
+                id: Number(formaPagamentoId)
+            };
         msgs.current?.show({ severity: 'success', summary: 'Sucesso:', detail: 'Forma de Pagamento atualizado com sucesso!' });
-        router.push('/cadastro/formaPagamento');
+        if (redirectAfterSave) {
+            router.push('/cadastro/formaPagamento');
+        }
+        return new FormaPagamentoEntity(updated);
     } catch (error) {
         if (axios.isAxiosError(error)) {
             console.error('Detalhes do erro de Axios:', error.response?.data);

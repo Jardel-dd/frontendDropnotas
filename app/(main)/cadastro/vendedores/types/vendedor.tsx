@@ -22,6 +22,7 @@ export interface VendedorFieldsProps {
 export interface VendedorFormProps {
     vendedor: any;
     initialId?: string | null;
+    preloadedVendedor?: VendedorEntity | null;
     onSuccess?: () => void;
     msgs: RefObject<Messages | null>;
     onVendedorChange?: (servico: VendedorEntity) => void;
@@ -30,6 +31,7 @@ export interface VendedorFormProps {
     redirectAfterSave?: boolean;
     onClose?: () => void;
     onSaved?: (created: VendedorEntity) => void;
+    onLoadingChange?: (loading: boolean) => void;
     showBTNPGCreatedDialog?: boolean;
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
@@ -39,6 +41,7 @@ export interface VendedorDropdownFieldProps {
     selectedVendedorId?: number | null;
     onVendedorChange: (vendedor: VendedorEntity | null) => void;
     onAddClick: () => void;
+    onEditClick?: (vendedor: VendedorEntity) => void;
     reloadKey?: number;
     hasError?: boolean;
     errorMessage?: string;

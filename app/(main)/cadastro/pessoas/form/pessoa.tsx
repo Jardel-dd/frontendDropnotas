@@ -23,6 +23,7 @@ export function PessoaFields({
     onDropdownChange,
     onContatoChange,
     onAddContrato,
+    onEditContrato,
     onContratoChange,
     onCNAEChange,
     onSearchCnpj,
@@ -372,6 +373,7 @@ export function PessoaFields({
                                             errorMessage={errors.selectedContrato}
                                             showAddButton
                                             onAddClick={onAddContrato}
+                                            onEditClick={onEditContrato}
                                             autoSelectSingle={false}
                                         />
                                     </div>

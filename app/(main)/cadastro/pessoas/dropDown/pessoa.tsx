@@ -7,6 +7,7 @@ export default function PessoaDropdownField({
     selectedPessoa,
     selectedPessoaId,
     onPessoaChange,
+    onEditClick,
     reloadKey = 0,
     id = "selectedPessoa",
     hasError,
@@ -38,6 +39,7 @@ export default function PessoaDropdownField({
             autoSelectSingle={autoSelectSingle}
             showAddButton={showAddButton}
             onAddClick={onAddClick}
+            onEditClick={onEditClick}
             placeholder={placeholder}
             hasError={hasError}
             errorMessage={errorMessage}

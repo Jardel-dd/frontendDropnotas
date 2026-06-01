@@ -13,9 +13,19 @@ export type ApiListItem = { id: string;[key: string]: any };
 export interface ContratoFormRef {
     handleSave: () => Promise<void>;
 }
+export interface PreloadedContratoData {
+    dataContrato: ContratoEntity;
+    selectedEmpresa: CompanyEntity | null;
+    selectedService: ServiceEntity | null;
+    selectedCategoriaContrato: CategoryContratosEntity | null;
+    selectedFormaPagamento: FormaPagamentoEntity | null;
+    pessoa: PessoaEntity[];
+    selectedPessoa: PessoaEntity[];
+}
 export interface ContratoFormProps {
     contrato: any;
     initialId?: string | null;
+    preloadedContrato?: PreloadedContratoData | null;
     onSuccess?: () => void;
     msgs: RefObject<Messages | null>;
     onContratoChange?: (contrato: ContratoEntity) => void;
@@ -23,7 +33,8 @@ export interface ContratoFormProps {
     setContrato: React.Dispatch<React.SetStateAction<ContratoEntity>>;
     redirectAfterSave?: boolean;
     onClose?: () => void;
-    onSaved?: (created: ContratoEntity) => void;
+    onSaved?: (created: ContratoEntity) => void | Promise<void>;
+    onLoadingChange?: (loading: boolean) => void;
     showBTNPGCreatedDialog?: boolean;
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
@@ -64,10 +75,15 @@ export interface ContratoFieldsProps {
     ) => void;
     onPessoaChange: (pessoas: PessoaEntity[]) => void;
     onAddEmpresa: () => void;
+    onEditEmpresa: (empresa: CompanyEntity) => void;
     onAddServico: () => void;
+    onEditServico: (service: ServiceEntity) => void;
     onAddCategoriaContrato: () => void;
+    onEditCategoriaContrato: (categoriaContrato: CategoryContratosEntity) => void;
     onAddFormaPagamento: () => void;
+    onEditFormaPagamento: (formaPagamento: FormaPagamentoEntity) => void;
     onAddPessoa: () => void;
+    onEditPessoa: (pessoa: PessoaEntity) => void;
     onValidateDescricao: () => void;
 }
 export type FormContratoCreatedProps =

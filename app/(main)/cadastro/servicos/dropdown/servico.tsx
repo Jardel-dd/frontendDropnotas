@@ -7,6 +7,7 @@ export default function ServicoDropdownField({
     selectedService,
     selectedServiceId,
     onServiceChange,
+    onEditClick,
     reloadKey = 0,
     id = "selectedService",
     hasError,
@@ -42,6 +43,7 @@ export default function ServicoDropdownField({
             autoSelectSingle={autoSelectSingle}
             showAddButton={showAddButton}
             onAddClick={onAddClick}
+            onEditClick={onEditClick}
             topLabel={topLabel}
             showTopLabel={showTopLabel}
             required={required}

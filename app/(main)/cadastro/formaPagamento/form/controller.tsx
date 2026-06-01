@@ -1,7 +1,7 @@
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { FormaPagamentoFields } from './formaPagamento';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
@@ -13,7 +13,7 @@ import { createdFormaPagamento, fetchFormaPagamentoByID, updateFormaPagamento } 
 import { createEmptyFormaPagamento, toFormaPagamentoEntity, FormCreatedFormaPagamentoProps, FormaPagamentoFormProps, FormaPagamentoFormRef } from '../types/formaPagamento';
 
 export const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, FormaPagamentoFormProps>(
-    ({ initialId, msgs, onFormaPagamentoChange, onErrorsChange, redirectAfterSave, onSaved, onClose, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
+    ({ initialId, preloadedFormaPagamento, msgs, onFormaPagamentoChange, onErrorsChange, redirectAfterSave, onSaved, onClose, onLoadingChange, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
         const router = useRouter();
         const onFormaPagamentoChangeRef = useRef(onFormaPagamentoChange);
         const onErrorsChangeRef = useRef(onErrorsChange);
@@ -87,17 +87,23 @@ export const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, For
 
             try {
                 if (isEditMode && initialId) {
-                    await updateFormaPagamento(initialId, formaPagamento, msgs, router, setErrors, setIsLoading, redirectAfterSave ?? true);
-                    onSaved?.(formaPagamento);
-                    onClose?.();
+                    const updated = await updateFormaPagamento(initialId, formaPagamento, msgs, router, setErrors, setIsLoading, redirectAfterSave ?? true);
+                    if (updated) {
+                        await onSaved?.(updated);
+                        if (!onSaved) {
+                            onClose?.();
+                        }
+                    }
                     return;
                 }
 
                 const created = await createdFormaPagamento(formaPagamento, msgs, router, setFormaPagamento, setErrors, setIsLoading, redirectAfterSave ?? true);
 
                 if (created) {
-                    onSaved?.(created);
-                    onClose?.();
+                    await onSaved?.(created);
+                    if (!onSaved) {
+                        onClose?.();
+                    }
                 }
             } finally {
                 setStateDisableBtnCreatedFormaPagamento(false);
@@ -125,11 +131,20 @@ export const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, For
         useEffect(() => {
             if (initialId) {
                 setIsEditMode(true);
+                setIsLoading(true);
+
+                if (preloadedFormaPagamento && String(preloadedFormaPagamento.id) === String(initialId)) {
+                    const formaPagamentoPrecarregada = toFormaPagamentoEntity(preloadedFormaPagamento);
+                    setFormaPagamento(formaPagamentoPrecarregada);
+                    setIsLoading(false);
+                    return;
+                }
+
                 listagemFormaPagamentoID(initialId).finally(() => setIsLoading(false));
                 return;
             }
             setIsLoading(false);
-        }, [initialId]);
+        }, [initialId, preloadedFormaPagamento]);
 
         useEffect(() => {
             if (Object.values(touchedFields).some(Boolean)) {
@@ -144,6 +159,10 @@ export const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, For
         useEffect(() => {
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
+
+        useEffect(() => {
+            onLoadingChange?.(isLoading || isLoadingBtnCreated);
+        }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
 
         if (isLoading && initialId) {
             return <LoadingScreen loadingText="Carregando informações da Forma de Pagamento selecionada..." />;
@@ -180,3 +199,4 @@ export const FormCreatedFormaPagamento = forwardRef<FormaPagamentoFormRef, FormC
     return <FormaPagamentoFields {...props} />;
 });
 FormCreatedFormaPagamento.displayName = 'FormCreatedFormaPagamento';
+

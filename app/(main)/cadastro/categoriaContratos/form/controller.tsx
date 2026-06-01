@@ -12,12 +12,14 @@ import { CategoriaContratoFields } from './categoriaContratos';
 export type { CategoriaContratoFieldsProps,CategoriaContratoFormProps,CategoriaContratoFormRef,FormCategoriaContratoCreatedProps} from '../types/categoriaContratos';
 export const CategoriaContratoFormContainer = forwardRef<CategoriaContratoFormRef, CategoriaContratoFormProps>(({
             initialId,
+            preloadedCategoriaContrato,
             msgs,
             onCategoriaContratoChange,
             onErrorsChange,
             redirectAfterSave,
             onSaved,
             onClose,
+            onLoadingChange,
             showBTNPGCreatedDialog,
             showBTNPGCreatedAll,
             onBackClick
@@ -102,7 +104,7 @@ export const CategoriaContratoFormContainer = forwardRef<CategoriaContratoFormRe
 
             try {
                 if (isEditMode && categoriaContratoId) {
-                    await updateCategoriaContrato(
+                    const updated = await updateCategoriaContrato(
                         categoriaContratoId,
                         categoriaContrato,
                         msgs,
@@ -111,8 +113,12 @@ export const CategoriaContratoFormContainer = forwardRef<CategoriaContratoFormRe
                         setIsLoading,
                         redirectAfterSave ?? false
                     );
-                    onSaved?.(categoriaContrato);
-                    onClose?.();
+                    if (updated) {
+                        await onSaved?.(updated);
+                        if (!onSaved) {
+                            onClose?.();
+                        }
+                    }
                     return;
                 }
 
@@ -127,8 +133,10 @@ export const CategoriaContratoFormContainer = forwardRef<CategoriaContratoFormRe
                 );
 
                 if (created) {
-                    onSaved?.(created);
-                    onClose?.();
+                    await onSaved?.(created);
+                    if (!onSaved) {
+                        onClose?.();
+                    }
                 }
             } catch (error) {
                 console.error(
@@ -180,6 +188,13 @@ export const CategoriaContratoFormContainer = forwardRef<CategoriaContratoFormRe
         useEffect(() => {
             if (categoriaContratoId) {
                 setIsEditMode(true);
+
+                if (preloadedCategoriaContrato && String(preloadedCategoriaContrato.id) === String(categoriaContratoId)) {
+                    setCategoriaContrato(preloadedCategoriaContrato);
+                    setIsLoading(false);
+                    return;
+                }
+
                 listagemCategoriaContratoID(
                     categoriaContratoId
                 ).finally(() => setIsLoading(false));
@@ -187,7 +202,7 @@ export const CategoriaContratoFormContainer = forwardRef<CategoriaContratoFormRe
             }
 
             setIsLoading(false);
-        }, [categoriaContratoId]);
+        }, [categoriaContratoId, preloadedCategoriaContrato]);
 
         useEffect(() => {
             if (
@@ -212,6 +227,10 @@ export const CategoriaContratoFormContainer = forwardRef<CategoriaContratoFormRe
                 categoriaContrato
             );
         }, [categoriaContrato]);
+
+        useEffect(() => {
+            onLoadingChange?.(isLoading || isLoadingBtnCreated);
+        }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
 
         if (isLoading && categoriaContratoId) {
             return (

@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import ListarContratos from './tabela/contratoListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
@@ -301,3 +301,4 @@ const Contratos: React.FC = () => {
     );
 };
 export default Contratos;
+

@@ -4,10 +4,12 @@ import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
 import { DropdownChangeEvent } from "primereact/dropdown";
 import { Messages } from "primereact/messages";
 import { RefObject } from "react";
+import { VendedorEntity } from "@/app/entity/VendedorEntity";
 
 export interface PessoaFormProps {
     pessoa: any;
     initialId?: string | null;
+    preloadedPessoa?: PreloadedPessoaData | null;
     onSuccess?: () => void;
     msgs: RefObject<Messages | null>;
     onPessoaChange?: (pessoa: PessoaEntity) => void;
@@ -15,7 +17,8 @@ export interface PessoaFormProps {
     setPessoa?: React.Dispatch<React.SetStateAction<any>>;
     redirectAfterSave?: boolean;
     onClose?: () => void;
-    onSaved?: (created: PessoaEntity) => void;
+    onSaved?: (created: PessoaEntity) => void | Promise<void>;
+    onLoadingChange?: (loading: boolean) => void;
     showBTNPGCreatedDialog?: boolean;
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
@@ -43,6 +46,7 @@ export interface PessoaFieldsProps {
     onDropdownChange: (event: DropdownChangeEvent) => void;
     onContatoChange: (event: DropdownChangeEvent) => void;
     onAddContrato: () => void;
+    onEditContrato?: (contrato: ContratoEntity) => void;
     onContratoChange: (contrato: ContratoEntity | null) => void;
     onCNAEChange: (cnae: TableCNAEEntity | null) => void;
     onSearchCnpj: () => Promise<void>;
@@ -54,6 +58,7 @@ export interface PessoaDropdownFieldProps {
     selectedPessoa: PessoaEntity | null;
     selectedPessoaId?: number | null;
     onPessoaChange: (pessoa: PessoaEntity | null) => void;
+    onEditClick?: (pessoa: PessoaEntity) => void;
     reloadKey?: number;
     id?: string;
     hasError?: boolean;
@@ -65,4 +70,8 @@ export interface PessoaDropdownFieldProps {
     onAddClick?: () => void;
     autoSelectSingle?: boolean;
     showAddButton?: boolean;
+}
+export interface PreloadedPessoaData {
+    dataPessoa: PessoaEntity;
+    selectedVendedor: VendedorEntity | null;
 }

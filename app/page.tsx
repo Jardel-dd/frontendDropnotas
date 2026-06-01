@@ -6,13 +6,13 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { classNames } from 'primereact/utils';
-import { Messages } from 'primereact/messages';
 import IconVisible from './shared/IconVisible';
 import Input from './shared/include/input/input-all';
 import React, { useState, useRef, useEffect } from 'react';
 import { UsuarioContaEntity } from './entity/UsuarioContaEntity';
 import PrivateRoute from '@/app/routes/protected/protectedRoute';
 import '../app/(full-page)/auth/signIn/controller/styleSignIn.css';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import useEnterKeyNavigation from '@/app/utils/useEnterKeyNavigation';
 import { validateFormSignIn } from '@/app/(full-page)/auth/signIn/validate';
 import { authLogin } from '@/app/(full-page)/auth/signIn/controller/controller';
@@ -175,3 +175,4 @@ const SignIn: React.FC = () => {
     );
 };
 export default SignIn;
+

@@ -7,6 +7,7 @@ export default function FormaPagamentoDropdownField({
     selectedFormaPagamento,
     selectedFormaPagamentoId,
     onFormaPagamentoChange,
+    onEditClick,
     reloadKey = 0,
     hasError,
     errorMessage,
@@ -37,6 +38,7 @@ export default function FormaPagamentoDropdownField({
             autoSelectSingle={autoSelectSingle}
             showAddButton={showAddButton}
             onAddClick={onAddClick}
+            onEditClick={onEditClick}
             topLabel="Forma de pagamento:"
             showTopLabel
             required={required}

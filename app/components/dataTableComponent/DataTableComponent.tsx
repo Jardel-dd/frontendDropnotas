@@ -9,7 +9,7 @@ import { Column } from 'primereact/column';
 import { useRouter } from 'next/navigation';
 import { Divider } from 'primereact/divider';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { IconReal } from '@/app/utils/icons/icons';
 import { ChangeEvent, useRef, useState } from 'react';
 import { confirmDialog } from 'primereact/confirmdialog';
@@ -215,3 +215,4 @@ export function CancelarNfs({ nota, msgs }: CancelarNfsActionProps) {
         </>
     );
 }
+

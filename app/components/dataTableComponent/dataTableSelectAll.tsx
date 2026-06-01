@@ -7,18 +7,23 @@ import { DataTable } from "primereact/datatable";
 import { NfsEntity } from "@/app/entity/NfsEntity";
 import { downloadPdfNota, downloadXmlNota, visualizarPdfNota } from "@/app/(main)/notaServico/controller/controller";
 import LoadingScreen from "@/app/loading";
+import { useIsDesktop, useIsMobile } from "../responsiveCelular/responsive";
 
 export interface GenericColumn<T> {
     field: keyof T;
     header: string;
     style?: React.CSSProperties;
     body?: (rowData: T) => React.ReactNode;
+    headerStyle?: React.CSSProperties;
+    className?: string;
+
 }
 interface DataTableSelectableProps<T extends NfsEntity> {
     data: T[];
     selected: T[];
     onSelectionChange: (selected: T[]) => void;
-    columns: { field: keyof T; header: string; body?: (rowData: T) => JSX.Element }[];
+    // columns: { field: keyof T; header: string; body?: (rowData: T) => JSX.Element }[];
+    columns: GenericColumn<T>[];
     dataKey: keyof T;
     rowClick?: boolean;
     minWidth?: string;
@@ -44,6 +49,8 @@ export function DataTableSelectable<T extends NfsEntity>({
     className,
     isRowSelectable = (rowData) => rowData.status_nota !== "REJEITADA"
 }: DataTableSelectableProps<T>) {
+    const isMobile = useIsMobile();
+    const isDesktop = useIsDesktop();
     const selectableRows = data.filter(isRowSelectable);
     const allSelectableRowsSelected =
         selectableRows.length > 0 &&
@@ -91,7 +98,8 @@ export function DataTableSelectable<T extends NfsEntity>({
                 ) : "Nenhum resultado encontrado na pesquisa"
             }
         >
-            <Column
+{isDesktop && (
+ <Column
                 headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
                 header={
                     <Checkbox
@@ -110,8 +118,32 @@ export function DataTableSelectable<T extends NfsEntity>({
                         )}
                     </div>
                 )}
-                style={{ width: "3rem", textAlign: "center" }}
+                style={{ width: "5px", textAlign: "center" }}
             />
+)}
+            {isMobile && (
+            <Column
+                headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8', width:"10px", maxWidth:"15px",  }}
+                header={
+                    <Checkbox
+                        checked={allSelectableRowsSelected}
+                        disabled={selectableRows.length === 0}
+                        onChange={handleSelectAllToggle}
+                    />
+                }
+                body={(rowData) => (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        {isRowSelectable(rowData) && (
+                            <Checkbox
+                                checked={selected.some((n) => n.id === rowData.id)}
+                                onChange={(e) => toggleSelection(rowData, e.checked!)}
+                            />
+                        )}
+                    </div>
+                )}
+                style={{ width: "5px", textAlign: "center" }}
+            />
+            )}
 
             {columns.map((col) => (
                 <Column
@@ -119,7 +151,10 @@ export function DataTableSelectable<T extends NfsEntity>({
                     field={String(col.field)}
                     header={col.header}
                     body={col.body}
-                    headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
+                    headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8',  
+                        ...col.headerStyle }}
+                    style={col.style}
+                    className={col.className}
                 />
             ))}
 

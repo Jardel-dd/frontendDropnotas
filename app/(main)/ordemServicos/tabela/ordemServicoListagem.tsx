@@ -1,7 +1,7 @@
 'use client';
 import LoadingScreen from '@/app/loading';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { getStatusClassOs } from '../types/statusClassNfs';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
@@ -199,3 +199,4 @@ export function ListarOrdemServico(
     );
 }
 export default ListarOrdemServico;
+

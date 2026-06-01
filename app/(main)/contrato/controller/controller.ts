@@ -138,6 +138,7 @@ export const createContrato = async (
     setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
     msgs: any,
     router: AppRouterInstance,
+    redirectAfterSave = true,
 ) => {
     try {
         const contratoDataToSend = {
@@ -150,12 +151,16 @@ export const createContrato = async (
         console.log('Enviando dados do contrato:', contratoDataToSend);
         const response = await api.post('/contrato', contratoDataToSend);
         console.log('Resposta da API apos criacao:', response.data);
+        const created = response?.data?.contrato ?? response?.data;
         msgs.current?.show({ severity: 'success', summary: 'Sucesso:', detail: 'Contrato cadastrado com sucesso!' });
         setSelectedFormadePagamento(null);
         setSelectedCompany(null);
         setSelectedCategoriaContrato(null);
         setSelectedPessoa([]);
-        router.push('/contrato');
+        if (redirectAfterSave) {
+            router.push('/contrato');
+        }
+        return created;
     } catch (error) {
         console.error('Erro ao cadastrar contrato:', error);
         if (axios.isAxiosError(error) && error.response) {
@@ -174,6 +179,7 @@ export const createContrato = async (
                 detail: 'Erro inesperado ao cadastrar Contrato.',
             });
         }
+        return null;
     }
 };
 export const updateContrato = async (
@@ -183,18 +189,36 @@ export const updateContrato = async (
     msgs: any,
     router: AppRouterInstance,
     setContrato: React.Dispatch<React.SetStateAction<ContratoEntity>>,
+    redirectAfterSave = true,
 ) => {
     try {
         const contratoDataToUpdate = {
             ...contrato,
         };
-        await api.put(`/contrato`, contratoDataToUpdate);
+        const response = await api.put(`/contrato`, contratoDataToUpdate);
+        const responseData = response?.data;
+        const responseContrato =
+            responseData &&
+            typeof responseData === 'object' &&
+            'contrato' in responseData
+                ? (responseData as { contrato?: ContratoEntity | Record<string, unknown> }).contrato
+                : null;
+        const updated =
+            (responseContrato && typeof responseContrato === 'object' ? responseContrato : null) ??
+            (responseData && typeof responseData === 'object' ? responseData : null) ?? {
+            ...contratoDataToUpdate,
+            id: Number(contratoID)
+        };
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso:',
             detail: 'Contrato atualizado com sucesso!',
         });
-        router.push('/contrato');
+        setContrato(new ContratoEntity(updated));
+        if (redirectAfterSave) {
+            router.push('/contrato');
+        }
+        return updated;
     } catch (error: any) {
         if (axios.isAxiosError(error) && error.response) {
             const { status, data } = error.response;
@@ -213,6 +237,7 @@ export const updateContrato = async (
                 detail: 'Erro inesperado ao atualizar Contrato.',
             });
         }
+        return null;
     }
 };
 export const handleActiveOrInativeContrato = async (
@@ -342,4 +367,3 @@ export const fetchContratoByID  = async (contratoId: string) => {
         throw error;
     }
 };
-

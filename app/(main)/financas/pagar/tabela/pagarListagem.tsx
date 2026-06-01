@@ -2,7 +2,7 @@
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Skeleton } from 'primereact/skeleton';
 import { Dispatch, SetStateAction, useContext } from 'react';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
@@ -210,3 +210,4 @@ export function ListarContasPagar({
     );
 }
 export default ListarContasPagar;
+

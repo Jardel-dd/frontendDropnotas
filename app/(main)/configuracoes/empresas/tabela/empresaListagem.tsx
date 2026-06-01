@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
@@ -275,3 +275,4 @@ export function ListarEmpresas({
     );
 }
 export default ListarEmpresas;
+

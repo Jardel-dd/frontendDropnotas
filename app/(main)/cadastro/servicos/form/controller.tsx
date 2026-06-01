@@ -3,29 +3,27 @@ import '@/app/styles/styledGlobal.css';
 import { ServicoFields } from './servico';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import { getServicoValidationErrors, validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { createServico, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
+import { createServico, fetchServiceFormDataByID, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
 import { createEmptyServico, FormCreatedServicoProps, ServiceFormProps, ServiceFormRef } from '../types/servico';
-import { fetchAllCodigoNBS, fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
-import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria, findClassificacaoTributariaByCodigo } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
+import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
 import { TableService } from '@/app/entity/TableServiceEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
-import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 
 
 export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>(
-    ({ initialId, msgs, onServicoChange, onErrorsChange, redirectAfterSave, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
+    ({ initialId, preloadedServico, msgs, onServicoChange, onErrorsChange, redirectAfterSave, onClose, onSaved, onLoadingChange, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
         const router = useRouter();
         const servicoId = initialId;
         const onServicoChangeRef = useRef(onServicoChange);
@@ -56,13 +54,20 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
             setIsLoadingBtnCreated(true);
             try {
                 if (isEditMode && servicoId) {
-                    await updateServico(servicoId, servico, setErrors, msgs, router, setServico, redirectAfterSave ?? true);
+                    const updated = await updateServico(servicoId, servico, setErrors, msgs, router, setServico, redirectAfterSave ?? true);
+                    if (updated) {
+                        await onSaved?.(updated);
+                        if (!onSaved) {
+                            onClose?.();
+                        }
+                    }
                 } else {
                     const created = await createServico(servico, setErrors, msgs, router, setServico, redirectAfterSave ?? true);
-                    onSaved?.(created);
+                    await onSaved?.(created);
+                    if (!onSaved) {
+                        onClose?.();
+                    }
                 }
-
-                onClose?.();
             } finally {
                 setIsLoadingBtnCreated(false);
                 setStateDisableBtnCreatedService(false);
@@ -174,77 +179,12 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         const listagemServicosID = async (id: string) => {
             try {
                 setIsLoading(true);
-                const { servico } = await fetchServicesByID(id);
-                const entidade = new ServiceEntity(servico);
-                const [allServices, codigoNBSOptions, codigoCNAEOptions, classificacaoTributariaOptions] = await Promise.all([
-                    fetchAllTabelaServico(),
-                    entidade.codigo_nbs ? fetchFilteredCodigoNBS(entidade.codigo_nbs) : Promise.resolve([] as TableCodigoNBSEntity[]),
-                    entidade.codigo_cnae ? fetchFilteredCnae(entidade.codigo_cnae) : Promise.resolve([] as TableCNAEEntity[]),
-                    entidade.codigo_classificacao_tributaria ? fetchFilteredClassificacaoTributaria(entidade.codigo_classificacao_tributaria) : Promise.resolve([] as TableClassificacaoTributariaEntity[])
-                ]);
-                setServico(
-                    new ServiceEntity({
-                        ...entidade,
-                    })
-                );
-                if (entidade.codigo_nbs) {
-                    const matchedCodigoNBS = findCodigoNBS(entidade.codigo_nbs, codigoNBSOptions);
-                    setSelectedCodigoNBS(
-                        matchedCodigoNBS ??
-                        new TableCodigoNBSEntity({
-                            id: 0,
-                            codigo: entidade.codigo_nbs,
-                            descricao: entidade.codigo_nbs
-                        })
-                    );
-                } else {
-                    setSelectedCodigoNBS(null);
-                }
-                if (entidade.codigo_cnae) {
-                    const matchedCodigoCNAE = findCNAEByCodigo(entidade.codigo_cnae, codigoCNAEOptions);
-                    setSelectedCodigoCNAE(
-                        matchedCodigoCNAE ??
-                        new TableCNAEEntity({
-                            id: 0,
-                            codigo: entidade.codigo_cnae,
-                            descricao: entidade.codigo_cnae
-                        })
-                    );
-                } else {
-                    setSelectedCodigoCNAE(null);
-                }
-                if (entidade.codigo_classificacao_tributaria) {
-                    const matchedClassificacaoTributaria = findClassificacaoTributariaByCodigo(
-                        entidade.codigo_classificacao_tributaria,
-                        classificacaoTributariaOptions
-                    );
-                    setSelectedClassificacaoTributaria(
-                        matchedClassificacaoTributaria ??
-                        new TableClassificacaoTributariaEntity({
-                            id: 0,
-                            codigo: entidade.codigo_classificacao_tributaria,
-                            descricao: entidade.codigo_classificacao_tributaria,
-                            codigoCst: entidade.codigo_classificacao_tributaria
-                        })
-                    );
-                } else {
-                    setSelectedClassificacaoTributaria(null);
-                }
-                if (entidade.item_lista_servico) {
-                    setSelectedCodigoServico(
-                        new TableService({
-                            id: 0,
-                            codigo: entidade.item_lista_servico,
-                            descricao: entidade.item_lista_servico,
-                        })
-                    );
-                }
-                const itemCodigo = entidade.item_lista_servico;
-                const matchedServico = allServices.find(
-                    option => option.codigo === itemCodigo
-                );
-
-                setSelectedCodigoServico(matchedServico ?? null);
+                const serviceFormData = await fetchServiceFormDataByID(id);
+                setServico(serviceFormData.servico);
+                setSelectedCodigoNBS(serviceFormData.selectedCodigoNBS);
+                setSelectedCodigoCNAE(serviceFormData.selectedCodigoCNAE);
+                setSelectedClassificacaoTributaria(serviceFormData.selectedClassificacaoTributaria);
+                setSelectedCodigoServico(serviceFormData.selectedCodigoServico);
             } finally {
                 setIsLoading(false);
             }
@@ -261,12 +201,24 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         useEffect(() => {
             if (initialId) {
                 setIsEditMode(true);
+
+                if (preloadedServico?.servico?.id && String(preloadedServico.servico.id) === String(initialId)) {
+                    setServico(preloadedServico.servico);
+                    setSelectedCodigoNBS(preloadedServico.selectedCodigoNBS);
+                    setSelectedCodigoCNAE(preloadedServico.selectedCodigoCNAE);
+                    setSelectedClassificacaoTributaria(preloadedServico.selectedClassificacaoTributaria);
+                    setSelectedCodigoServico(preloadedServico.selectedCodigoServico);
+                    setIsLoading(false);
+                    return;
+                }
+
                 listagemServicosID(initialId).finally(() => setIsLoading(false));
                 return;
             }
 
+            setIsEditMode(false);
             setIsLoading(false);
-        }, [initialId]);
+        }, [initialId, preloadedServico]);
         useEffect(() => {
             if (Object.values(touchedFields).some((touched) => touched)) {
                 validateFieldsServicos(servico, setErrors, msgs);
@@ -278,6 +230,9 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         useEffect(() => {
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
+        useEffect(() => {
+            onLoadingChange?.(isLoading || isLoadingBtnCreated);
+        }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
         if (isLoading && initialId) {
             return <LoadingScreen loadingText="Carregando informações do Serviço selecionado..." />;
         }
@@ -354,3 +309,4 @@ export const FormCreatedServico = forwardRef<ServiceFormRef, FormCreatedServicoP
     return <ServicoFields {...props} />;
 });
 FormCreatedServico.displayName = 'FormCreatedServico';
+

@@ -4,9 +4,20 @@ export function ensureSelectedItemsInList(list: any[], selectedItems: any[], dat
     if (!dataKey || !Array.isArray(selectedItems) || selectedItems.length === 0) {
         return list;
     }
-    const existingKeys = new Set(list.map((item) => normalize(item?.[dataKey])));
+
+    const selectedItemsByKey = new Map(
+        selectedItems.map((item) => [normalize(item?.[dataKey]), item])
+    );
+
+    const mergedList = list.map((item) => {
+        const itemKey = normalize(item?.[dataKey]);
+        return selectedItemsByKey.get(itemKey) ?? item;
+    });
+
+    const existingKeys = new Set(mergedList.map((item) => normalize(item?.[dataKey])));
     const missingItems = selectedItems.filter((item) => !existingKeys.has(normalize(item?.[dataKey])));
-    return missingItems.length > 0 ? [...missingItems, ...list] : list;
+
+    return missingItems.length > 0 ? [...missingItems, ...mergedList] : mergedList;
 }
 export type MultiSelectProps = {
     selectedItems: any[];
@@ -27,6 +38,7 @@ export type MultiSelectProps = {
     initialSelectedValues?: Array<string | number>;
     showAddButton?: boolean;
     onAddClick?: () => void;
+    onEditClick?: (item: any) => void;
     minSearchChars?: number;
     maxResults?: number;
     showTopLabel?: boolean;

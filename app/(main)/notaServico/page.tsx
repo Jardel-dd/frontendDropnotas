@@ -8,7 +8,7 @@ import LoadingScreen from '@/app/loading';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { createEmptyPessoa } from './types/notaServico';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
@@ -20,19 +20,21 @@ import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { PessoaFormRef } from '../cadastro/pessoas/types/pessoa';
+import type { PessoaFormRef, PreloadedPessoaData } from '../cadastro/pessoas/types/pessoa';
 import { validateFieldsPrepararNfs } from './controller/validation';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import { FormCreatedPessoa } from '../cadastro/pessoas/form/controller';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
 import { FormCreatedServico } from '../cadastro/servicos/form/controller';
+import type { PreloadedServicoData } from '../cadastro/servicos/types/servico';
 import FormEmpresaCreated from '../configuracoes/empresas/form/controller';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { DropDownFilterNotaServico } from '@/app/shared/optionsDropDown/options';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
+import type { PreloadedEmpresaData } from '../configuracoes/empresas/types/empresa';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
@@ -44,6 +46,9 @@ import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterCompo
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { consumeNotaServicoFeedback, exportarPdfNotasServico, listNotaServico } from './controller/controller';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import { fetchCompanyDropdownByID, fetchCompanyFormDataByID } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { fetchPessoasById } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { fetchServiceFormDataByID, fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
 
 
 const buildEmptyNotaServicoPagination = (pageSize: number, pageNumber = 0) => ({
@@ -93,9 +98,15 @@ const NotaServico: React.FC = () => {
     const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
     const [reloadKeyEmpresa, setReloadKeyEmpresa] = useState(0);
     const [reloadKeyServico, setReloadKeyServico] = useState(0);
+    const [empresaDialogKey, setEmpresaDialogKey] = useState(0);
+    const [pessoaDialogKey, setPessoaDialogKey] = useState(0);
+    const [servicoDialogKey, setServicoDialogKey] = useState(0);
     const [showModalPessoa, setShowModalPessoa] = useState(false);
     const [showModalEmpresa, setShowModalEmpresa] = useState(false);
     const [showModalServico, setShowModalServico] = useState(false);
+    const [isPessoaDialogLoading, setIsPessoaDialogLoading] = useState(false);
+    const [isEmpresaDialogLoading, setIsEmpresaDialogLoading] = useState(false);
+    const [isServicoDialogLoading, setIsServicoDialogLoading] = useState(false);
     const [loadingExportPdf, setLoadingExportPdf] = useState(false);
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -114,9 +125,15 @@ const NotaServico: React.FC = () => {
     const [selectedStatusNotaServico, setSelectedStatusNotaServico] = useState<string>('');
     const [draftSelectedPessoa, setDraftSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedPessoaDialog, setSelectedPessoaDialog] = useState<PessoaEntity | null>(null);
+    const [preloadedPessoa, setPreloadedPessoa] = useState<PreloadedPessoaData | null>(null);
+    const [editingPessoaId, setEditingPessoaId] = useState<string | null>(null);
     const [draftSelectedEmpresa, setDraftSelectedEmpresa] = useState<CompanyEntity | null>(null);
     const [selectedEmpresaDialog, setSelectedEmpresaDialog] = useState<CompanyEntity | null>(null);
+    const [preloadedEmpresa, setPreloadedEmpresa] = useState<PreloadedEmpresaData | null>(null);
+    const [editingEmpresaId, setEditingEmpresaId] = useState<string | null>(null);
     const [selectedServicoDialog, setSelectedServicoDialog] = useState<ServiceEntity | null>(null);
+    const [preloadedServico, setPreloadedServico] = useState<PreloadedServicoData | null>(null);
+    const [editingServicoId, setEditingServicoId] = useState<string | null>(null);
     const [draftSelectedVendedor, setDraftSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [draftSelectedStatusNotaServico, setDraftSelectedStatusNotaServico] = useState<string>('');
     const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>(buildEmptyNotaServicoPagination(10));
@@ -450,11 +467,56 @@ const NotaServico: React.FC = () => {
     const handlePessoaContrato = (updatedPessoa: PessoaEntity) => {
         setPessoa(updatedPessoa);
     };
-    const handlePessoaSaved = (created: PessoaEntity) => {
+    const openCreatePessoaDialog = () => {
+        setIsPessoaDialogLoading(true);
+        setEditingPessoaId(null);
+        setPreloadedPessoa(null);
+        setPessoaDialogKey((current) => current + 1);
+        setShowModalPessoa(true);
+    };
+    const openEditPessoaDialog = async (pessoaSelecionada: PessoaEntity) => {
+        if (!pessoaSelecionada?.id) {
+            return;
+        }
+
+        setIsPessoaDialogLoading(true);
+        try {
+            const pessoaId = String(pessoaSelecionada.id);
+            const pessoaPrecarregada = await fetchPessoasById(pessoaId);
+            setPreloadedPessoa({
+                dataPessoa: pessoaPrecarregada.dataPessoa,
+                selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null
+            });
+            setEditingPessoaId(pessoaId);
+            setPessoaDialogKey((current) => current + 1);
+            setShowModalPessoa(true);
+        } catch (error) {
+            console.error('Erro ao prÃ©-carregar cliente/fornecedor para ediÃ§Ã£o:', error);
+            setIsPessoaDialogLoading(false);
+        }
+    };
+    const closePessoaDialog = () => {
         setShowModalPessoa(false);
-        setSelectedPessoaDialog(created);
-        handlePrepararNfsChange('id_cliente', created.id);
-        setReloadKeyPessoa((current) => current + 1);
+        setEditingPessoaId(null);
+        setIsPessoaDialogLoading(true);
+        setPreloadedPessoa(null);
+    };
+    const handlePessoaSaved = async (created: PessoaEntity) => {
+        setIsPessoaDialogLoading(true);
+        let pessoaAtualizada = created;
+
+        try {
+            if (created?.id) {
+                const response = await fetchPessoasById(String(created.id));
+                pessoaAtualizada = response.dataPessoa;
+            }
+
+            setSelectedPessoaDialog(pessoaAtualizada);
+            handlePrepararNfsChange('id_cliente', pessoaAtualizada.id);
+            setReloadKeyPessoa((current) => current + 1);
+        } finally {
+            closePessoaDialog();
+        }
     };
     const search = async (filters?: {
         dateRange: DateRangeValue;
@@ -551,20 +613,107 @@ const NotaServico: React.FC = () => {
     const handleEmpresa = (updatedEmpresa: CompanyEntity) => {
         setEmpresa(updatedEmpresa);
     };
-    const handleEmpresaSaved = (created: CompanyEntity) => {
+    const openCreateEmpresaDialog = () => {
+        setIsEmpresaDialogLoading(true);
+        setEditingEmpresaId(null);
+        setPreloadedEmpresa(null);
+        setEmpresaDialogKey((current) => current + 1);
+        setShowModalEmpresa(true);
+    };
+    const openEditEmpresaDialog = async (empresaSelecionada: CompanyEntity) => {
+        if (!empresaSelecionada?.id) {
+            return;
+        }
+
+        setIsEmpresaDialogLoading(true);
+        try {
+            const empresaId = String(empresaSelecionada.id);
+            const companyFormData = await fetchCompanyFormDataByID(empresaId);
+            setPreloadedEmpresa(companyFormData);
+            setEditingEmpresaId(empresaId);
+            setEmpresaDialogKey((current) => current + 1);
+            setShowModalEmpresa(true);
+        } catch (error) {
+            console.error('Erro ao prÃ©-carregar empresa para ediÃ§Ã£o:', error);
+            setIsEmpresaDialogLoading(false);
+        } finally {
+        }
+    };
+    const closeEmpresaDialog = () => {
         setShowModalEmpresa(false);
-        setSelectedEmpresaDialog(created);
-        handlePrepararNfsChange('id_empresa', created.id);
-        setReloadKeyEmpresa((current) => current + 1);
+        setEditingEmpresaId(null);
+        setIsEmpresaDialogLoading(true);
+        setPreloadedEmpresa(null);
+    };
+    const handleEmpresaSaved = async (created: CompanyEntity) => {
+        setIsEmpresaDialogLoading(true);
+        let empresaAtualizada = created;
+
+        try {
+            if (created?.id) {
+                const response = await fetchCompanyDropdownByID(String(created.id));
+                if (response) {
+                    empresaAtualizada = response;
+                }
+            }
+
+            setSelectedEmpresaDialog(empresaAtualizada);
+            handlePrepararNfsChange('id_empresa', empresaAtualizada.id);
+            setReloadKeyEmpresa((current) => current + 1);
+        } finally {
+            closeEmpresaDialog();
+        }
+    };
+    const openCreateServicoDialog = () => {
+        setIsServicoDialogLoading(true);
+        setEditingServicoId(null);
+        setPreloadedServico(null);
+        setServicoDialogKey((current) => current + 1);
+        setShowModalServico(true);
+    };
+    const openEditServicoDialog = async (servicoSelecionado: ServiceEntity) => {
+        if (!servicoSelecionado?.id) {
+            return;
+        }
+
+        setIsServicoDialogLoading(true);
+        try {
+            const servicoId = String(servicoSelecionado.id);
+            const serviceFormData = await fetchServiceFormDataByID(servicoId);
+            setPreloadedServico(serviceFormData);
+            setEditingServicoId(servicoId);
+            setServicoDialogKey((current) => current + 1);
+            setShowModalServico(true);
+        } catch (error) {
+            console.error('Erro ao prÃ©-carregar serviÃ§o para ediÃ§Ã£o:', error);
+            setIsServicoDialogLoading(false);
+        }
+    };
+    const closeServicoDialog = () => {
+        setShowModalServico(false);
+        setEditingServicoId(null);
+        setIsServicoDialogLoading(true);
+        setPreloadedServico(null);
     };
     const handleErrorsChange = (updatedErrors: Record<string, string>) => {
         setErrors(updatedErrors);
     };
-    const handleServiceSaved = (created: ServiceEntity) => {
-        setShowModalServico(false);
-        setSelectedServicoDialog(created);
-        handlePrepararNfsChange('id_servico', created.id);
-        setReloadKeyServico((current) => current + 1);
+    const handleServiceSaved = async (created: ServiceEntity) => {
+        setIsServicoDialogLoading(true);
+        let servicoAtualizado = created;
+
+        try {
+            if (created?.id) {
+                const response = await fetchServicesByID(String(created.id));
+                servicoAtualizado = response.servico;
+            }
+
+            setSelectedServicoDialog(servicoAtualizado);
+            handlePrepararNfsChange('id_servico', servicoAtualizado.id);
+            setReloadKeyServico((current) => current + 1);
+        } finally {
+            closeServicoDialog();
+        }
     };
     useEffect(() => {
         if (!showDialogPreparaNfs) return;
@@ -751,7 +900,7 @@ const NotaServico: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-3">
+                            <div className="mt-3" >
                                 {canSearchNotaServico ? (
                                     <ListarNotaServico
                                         loading={loading}
@@ -890,7 +1039,7 @@ const NotaServico: React.FC = () => {
                                         )}
                                         {canCreateNotaServico && (
                                             <div>
-                                                <Button label="Novo" icon="pi pi-plus" onClick={handleNavigate} className="p-button-primary-novo" />
+                                                <Button label="Emitir" icon="pi pi-plus" onClick={handleNavigate} className="p-button-primary-novo" />
                                             </div>
                                         )}
                                     </div>
@@ -923,7 +1072,10 @@ const NotaServico: React.FC = () => {
                                 </div>
                             )}
                         </div>
-                        <Dialog
+                     
+                    </>
+                )}
+                   <Dialog
                             header="Preparar NFS-e"
                             visible={showDialogPreparaNfs}
                             style={{ width: '500px' }}
@@ -934,7 +1086,7 @@ const NotaServico: React.FC = () => {
                             }}
                             footer={
                                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0.5rem' }}>
-                                    <Button label="Confirmar"  style={{ boxShadow: 'none' }} disabled={disableConfirmarPrepararNfs} onClick={handleConfirmPreparaNfs}  />
+                                    <Button label="Preparar"  style={{ boxShadow: 'none' }} disabled={disableConfirmarPrepararNfs} onClick={handleConfirmPreparaNfs}  />
                                     <Button
                                         label="Cancelar"
                                         onClick={() => {
@@ -955,7 +1107,8 @@ const NotaServico: React.FC = () => {
                                     selectedEmpresa={selectedEmpresaDialog}
                                     onEmpresaChange={handleEmpresaChangeDialog}
                                     showAddButton
-                                    onAddClick={() => setShowModalEmpresa(true)}
+                                    onAddClick={openCreateEmpresaDialog}
+                                    onEditClick={openEditEmpresaDialog}
                                     hasError={!!errors.selectedEmpresa}
                                     errorMessage={errors.selectedEmpresa}
                                 />
@@ -967,7 +1120,8 @@ const NotaServico: React.FC = () => {
                                     selectedPessoa={selectedPessoaDialog}
                                     onPessoaChange={handlePessoaChangeDialog}
                                     showAddButton
-                                    onAddClick={() => setShowModalPessoa(true)}
+                                    onAddClick={openCreatePessoaDialog}
+                                    onEditClick={openEditPessoaDialog}
                                     hasError={!!errors.selectedCliente}
                                     errorMessage={errors.selectedCliente}
                                 />
@@ -979,7 +1133,8 @@ const NotaServico: React.FC = () => {
                                     selectedService={selectedServicoDialog}
                                     onServiceChange={handleServicoChangeDialog}
                                     showAddButton
-                                    onAddClick={() => setShowModalServico(true)}
+                                    onAddClick={openCreateServicoDialog}
+                                    onEditClick={openEditServicoDialog}
                                     hasError={!!errors.selectedServico}
                                     errorMessage={errors.selectedServico}
                                 />
@@ -1038,58 +1193,84 @@ const NotaServico: React.FC = () => {
                                 </div>
                             </div>
                         </DialogFilter>
-                        <DialogFilter header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
+                        <DialogFilter
+                            header={editingEmpresaId ? "Editar Empresa" : "Adicionar Empresa"}
+                            visible={showModalEmpresa}
+                            onHide={closeEmpresaDialog}
+                            loading={isEmpresaDialogLoading}
+                            loadingText={editingEmpresaId ? 'Carregando informaÃ§Ãµes da Empresa...' : 'Abrindo cadastro de Empresa...'}
+                        >
                             <FormEmpresaCreated
+                                key={`${editingEmpresaId ?? 'novo'}-${empresaDialogKey}`}
                                 msgs={msgs}
                                 ref={formRef}
                                 empresa={empresa}
-                                initialId={null}
+                                initialId={editingEmpresaId}
+                                preloadedEmpresa={preloadedEmpresa}
                                 setEmpresa={setEmpresa}
                                 onEmpresaChange={handleEmpresa}
                                 onErrorsChange={handleErrorsChange}
                                 redirectAfterSave={false}
                                 onSaved={handleEmpresaSaved}
-                                onClose={() => setShowModalEmpresa(false)}
+                                onLoadingChange={setIsEmpresaDialogLoading}
+                                onClose={closeEmpresaDialog}
                                 showBTNPGCreatedDialog
-                                onBackClick={() => setShowModalEmpresa(false)}
+                                onBackClick={closeEmpresaDialog}
                             />
                         </DialogFilter>
-                        <DialogFilter header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
+                        <DialogFilter
+                            header={editingPessoaId ? "Editar Cliente ou Fornecedor" : "Adicionar Cliente ou Fornecedor"}
+                            visible={showModalPessoa}
+                            onHide={closePessoaDialog}
+                            loading={isPessoaDialogLoading}
+                            loadingText={editingPessoaId ? 'Carregando informaÃ§Ãµes do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
+                        >
                             <FormCreatedPessoa
+                                key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
                                 msgs={msgs}
                                 ref={formRef}
                                 pessoa={pessoa}
-                                initialId={null}
+                                initialId={editingPessoaId}
+                                preloadedPessoa={preloadedPessoa}
                                 setPessoa={setPessoa}
                                 onPessoaChange={handlePessoaContrato}
                                 onErrorsChange={() => { }}
                                 redirectAfterSave={false}
                                 onSaved={handlePessoaSaved}
-                                onClose={() => setShowModalPessoa(false)}
+                                onLoadingChange={setIsPessoaDialogLoading}
+                                onClose={closePessoaDialog}
                                 showBTNPGCreatedDialog
-                                onBackClick={() => setShowModalPessoa(false)}
+                                onBackClick={closePessoaDialog}
                             />
                         </DialogFilter>
-                        <DialogFilter header="Adicionar Serviço" visible={showModalServico} onHide={() => setShowModalServico(false)}>
+                        <DialogFilter
+                            header={editingServicoId ? "Editar Serviço" : "Adicionar Serviço"}
+                            visible={showModalServico}
+                            onHide={closeServicoDialog}
+                            loading={isServicoDialogLoading}
+                            loadingText={editingServicoId ? 'Carregando informaÃ§Ãµes do Serviço...' : 'Abrindo cadastro de Serviço...'}
+                        >
                             <FormCreatedServico
+                                key={`${editingServicoId ?? 'novo'}-${servicoDialogKey}`}
                                 msgs={msgs}
                                 ref={formRef}
                                 servico={servico}
-                                initialId={null}
+                                initialId={editingServicoId}
+                                preloadedServico={preloadedServico}
                                 setServico={setServico}
                                 onServicoChange={handleServico}
                                 onErrorsChange={handleErrorsChange}
                                 redirectAfterSave={false}
                                 onSaved={handleServiceSaved}
-                                onClose={() => setShowModalServico(false)}
+                                onLoadingChange={setIsServicoDialogLoading}
+                                onClose={closeServicoDialog}
                                 showBTNPGCreatedDialog
-                                onBackClick={() => setShowModalServico(false)}
+                                onBackClick={closeServicoDialog}
                             />
                         </DialogFilter>
-                    </>
-                )}
             </div>
         </div>
     );
 };
 export default NotaServico;
+

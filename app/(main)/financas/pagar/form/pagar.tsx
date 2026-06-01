@@ -3,7 +3,7 @@
 import '@/app/styles/styledGlobal.css';
 import api from '@/app/services/api';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import Input from '@/app/shared/include/input/input-all';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
@@ -384,3 +384,4 @@ const FormContasPagarCreated = forwardRef<ContasPagarFormRef, FormCreatedContasP
 FormContasPagarCreated.displayName = 'FormContasPagarCreated';
 
 export default FormContasPagarCreated;
+

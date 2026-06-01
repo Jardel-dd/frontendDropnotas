@@ -22,7 +22,6 @@ type CreatedNotaServicoResult = {
     redirected: boolean;
 };
 
-
 const normalizeOptionalNumberToZero = (value: unknown): number => {
     if (value === null || value === undefined || value === '') {
         return 0;
@@ -34,7 +33,6 @@ const normalizeOptionalNumberToZero = (value: unknown): number => {
     const normalized = Number(value);
     return Number.isFinite(normalized) ? normalized : 0;
 };
-
 const persistNotaServicoFeedback = (feedback: NotaServicoFeedback) => {
     if (typeof window === 'undefined') {
         return;
@@ -42,7 +40,6 @@ const persistNotaServicoFeedback = (feedback: NotaServicoFeedback) => {
 
     window.sessionStorage.setItem(NOTA_SERVICO_FEEDBACK_KEY, JSON.stringify(feedback));
 };
-
 export const consumeNotaServicoFeedback = (): NotaServicoFeedback | null => {
     if (typeof window === 'undefined') {
         return null;
@@ -186,11 +183,23 @@ export const prepararCorrecaoNotaServico = async (
         const payload = params.referencia
             ? { referencia: params.referencia }
             : { id: params.id };
+        console.group('[NotaServico] Preparar correcao da NFS-e');
+        console.log('Payload enviado para /nfse/preparar-emissao:', payload);
         const response = await api.post('/nfse/preparar-emissao', payload);
+        console.log('Status HTTP:', response.status);
+        console.log('Headers da resposta:', response.headers);
+        console.log('Body retornado pelo backend:', response.data);
+        console.groupEnd();
 
         return response.data;
     } catch (error: any) {
+        console.group('[NotaServico] Erro ao preparar correcao da NFS-e');
+        console.log('Payload original:', params);
+        console.log('Status HTTP:', error.response?.status);
+        console.log('Headers da resposta:', error.response?.headers);
+        console.log('Body retornado pelo backend:', error.response?.data);
         console.error('Erro ao preparar correcao da NFS-e:', error);
+        console.groupEnd();
 
         msgs?.current?.show({
             severity: 'error',
@@ -239,10 +248,23 @@ export const prepararNotaServico = async (
     router?: AppRouterInstance
 ) => {
     try {
+        console.group('[NotaServico] Preparar emissao da NFS-e');
+        console.log('Payload enviado para /nfse/preparar-emissao:', prepararNfs);
         const response = await api.post('/nfse/preparar-emissao', prepararNfs);
-        console.log('[NotaServico] Retorno do backend ao preparar NFS-e:', response.data);
+        console.log('Status HTTP:', response.status);
+        console.log('Headers da resposta:', response.headers);
+        console.log('Body retornado pelo backend:', response.data);
+        console.groupEnd();
         return response.data;
     } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.group('[NotaServico] Erro ao preparar emissao da NFS-e');
+            console.log('Payload original:', prepararNfs);
+            console.log('Status HTTP:', error.response?.status);
+            console.log('Headers da resposta:', error.response?.headers);
+            console.log('Body retornado pelo backend:', error.response?.data);
+            console.groupEnd();
+        }
         console.error('Erro ao preparar NFS-e:', error);
         if (axios.isAxiosError(error)) {
             const msg = error.response?.data?.message || 'Erro ao preparar NFS-e.';
@@ -327,11 +349,10 @@ export const createdNotaServico = async (
                 redirected: false
             };
         }
-
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso:',
-            detail: 'NFS-e cadastrada com sucesso!'
+            detail: 'NFS-e Emitida com sucesso!'
         });
         return {
             wasCreated: true,
@@ -450,7 +471,6 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
         });
     }
 };
-
 export const exportarPdfNotasServico = async (
     payload: ExportarPdfNfsePayload,
     msgs: React.RefObject<Messages | null>

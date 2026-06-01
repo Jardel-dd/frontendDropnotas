@@ -4,7 +4,7 @@ import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
@@ -154,3 +154,4 @@ export function ListarContratos({
     );
 }
 export default ListarContratos;
+

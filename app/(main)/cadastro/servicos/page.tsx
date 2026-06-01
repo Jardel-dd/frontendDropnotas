@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import ListarServicos from './tabela/servicoListagem';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
@@ -18,6 +18,34 @@ import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarServico, deletarServico, listServico } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+
+const createInitialPagination = (pageSize: number) => ({
+    pageable: {
+        pageNumber: 0,
+        pageSize,
+        sort: {
+            empty: true,
+            sorted: false,
+            unsorted: true
+        },
+        offset: 0,
+        paged: true,
+        unpaged: false
+    },
+    totalPages: 1,
+    totalElements: 0,
+    last: true,
+    size: pageSize,
+    number: 0,
+    sort: {
+        empty: true,
+        sorted: false,
+        unsorted: true
+    },
+    numberOfElements: 0,
+    first: true,
+    empty: false
+});
 
 function Servicos() {
     const router = useRouter();
@@ -66,33 +94,9 @@ function Servicos() {
     const [visible, setVisible] = useState<boolean>(false);
     const [isServicosCreated, setIsServicosCreated] = useState(false);
     const [listarInativos, setListarInativos] = useState<boolean>(false);
-    const [listPaginationServicos, setListPaginationServicos] = useState<Record<string, any>>({
-        pageable: {
-            pageNumber: 0,
-            pageSize: pageSize,
-            sort: {
-                empty: true,
-                sorted: false,
-                unsorted: true
-            },
-            offset: 0,
-            paged: true,
-            unpaged: false
-        },
-        totalPages: 1,
-        totalElements: 2,
-        last: true,
-        size: 20,
-        number: 0,
-        sort: {
-            empty: true,
-            sorted: false,
-            unsorted: true
-        },
-        numberOfElements: 0,
-        first: true,
-        empty: false
-    });
+    const [listPaginationServicos, setListPaginationServicos] = useState<Record<string, any>>(createInitialPagination(pageSize));
+    const safePagination = listPaginationServicos ?? createInitialPagination(pageSize);
+    const safePageable = safePagination.pageable ?? createInitialPagination(pageSize).pageable;
     const handleNavigate = () => {
         router.push('/cadastro/servicos/created');
         setIsServicosCreated(true);
@@ -102,10 +106,10 @@ function Servicos() {
         try {
             const Servicos = await listServico(
                 {
-                    ...listPaginationServicos,
+                    ...safePagination,
                     pageable: {
-                        ...listPaginationServicos.pageable,
-                        pageNumber: pageNumber ?? listPaginationServicos.pageable.pageNumber,
+                        ...safePageable,
+                        pageNumber: pageNumber ?? safePageable.pageNumber,
                         pageSize: pageSize
                     }
                 },
@@ -113,7 +117,7 @@ function Servicos() {
                 setLoading,
                 _searchTerm ?? searchTerm
             );
-            setListPaginationServicos(Servicos);
+            setListPaginationServicos(Servicos ?? createInitialPagination(pageSize));
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
@@ -133,9 +137,9 @@ function Servicos() {
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationServicos((prev) => ({
-            ...prev,
+            ...(prev ?? createInitialPagination(pageSize)),
             pageable: {
-                ...prev.pageable,
+                ...(prev?.pageable ?? createInitialPagination(pageSize).pageable),
                 pageNumber: selectedPage
             }
         }));
@@ -218,9 +222,9 @@ function Servicos() {
                         <div style={{ marginTop: 'auto' }}>
                             <div className="custom-paginator">
                                 <CustomPaginator
-                                    first={listPaginationServicos.pageable.pageNumber * listPaginationServicos.pageable.pageSize}
+                                    first={safePageable.pageNumber * safePageable.pageSize}
                                     rows={pageSize}
-                                    totalRecords={listPaginationServicos.totalElements}
+                                    totalRecords={safePagination.totalElements ?? 0}
                                     onPageChange={onPageChange}
                                     isMobile
                                 />
@@ -286,9 +290,9 @@ function Servicos() {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <CustomPaginator
-                                first={listPaginationServicos.pageable.pageNumber * listPaginationServicos.pageable.pageSize}
+                                first={safePageable.pageNumber * safePageable.pageSize}
                                 rows={pageSize}
-                                totalRecords={listPaginationServicos.totalElements}
+                                totalRecords={safePagination.totalElements ?? 0}
                                 onPageChange={onPageChange} />
                         </div>
                     </div>
@@ -298,3 +302,4 @@ function Servicos() {
     );
 }
 export default Servicos;
+

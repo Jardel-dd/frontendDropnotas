@@ -36,7 +36,7 @@ export default function CriarContrato() {
         setContrato(updatedContrato);
     };
     return (
-        <div>
+       <div className="card styled-container-main-all-routes"  >
           <ContratoFormCreated
                     msgs={msgs}
                     ref={formRef}

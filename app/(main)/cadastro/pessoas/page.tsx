@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import ListarPessoa from './tabela/pessoaListagem';
 import { usePermissions } from '@/app/routes/permissoes';
 import { ClienteFornecedorFilter } from './types/pessoa';
@@ -344,3 +344,4 @@ const ClientesFornecedores: React.FC = () => {
     );
 };
 export default ClientesFornecedores;
+

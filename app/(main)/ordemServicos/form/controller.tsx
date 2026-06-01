@@ -1,6 +1,6 @@
 'use client';
 import LoadingScreen from '@/app/loading';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { OrdemServicoFields } from './ordemServico';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
@@ -433,3 +433,4 @@ export const FormOrdemServicoCreated = forwardRef<OrdemServicoFormRef, FormCreat
     return <OrdemServicoFields {...props} />;
 });
 FormOrdemServicoCreated.displayName = 'FormOrdemServicoCreated';
+

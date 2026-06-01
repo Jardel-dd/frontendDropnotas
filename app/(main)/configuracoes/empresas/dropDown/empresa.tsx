@@ -11,6 +11,7 @@ export default function EmpresaDropdownField({
     selectedEmpresa,
     selectedEmpresaId,
     onEmpresaChange,
+    onEditClick,
     reloadKey = 0,
     id = "selectedEmpresa",
     hasError,
@@ -42,6 +43,7 @@ export default function EmpresaDropdownField({
             autoSelectSingle={autoSelectSingle}
             showAddButton={showAddButton}
             onAddClick={onAddClick}
+            onEditClick={onEditClick}
             placeholder={placeholder}
             hasError={hasError}
             errorMessage={errorMessage}

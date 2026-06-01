@@ -45,13 +45,15 @@ export const createEmptyServico = () =>
 export interface ServiceFormProps {
     servico: ServiceEntity;
     initialId?: string | null;
+    preloadedServico?: PreloadedServicoData | null;
     msgs: RefObject<Messages | null>;
     onServicoChange?: (servico: ServiceEntity) => void;
     onErrorsChange?: (errors: Record<string, string>) => void;
     setServico?: Dispatch<SetStateAction<ServiceEntity>>;
     redirectAfterSave?: boolean;
     onClose?: () => void;
-    onSaved?: (created: ServiceEntity) => void;
+    onSaved?: (created: ServiceEntity) => void | Promise<void>;
+    onLoadingChange?: (loading: boolean) => void;
     showBTNPGCreatedDialog?: boolean;
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
@@ -91,6 +93,7 @@ export interface ServicoDropdownFieldProps {
     selectedService: ServiceEntity | null;
     selectedServiceId?: number | null;
     onServiceChange: (service: ServiceEntity | null) => void;
+    onEditClick?: (service: ServiceEntity) => void;
     reloadKey?: number;
     id?: string;
     hasError?: boolean;
@@ -104,5 +107,12 @@ export interface ServicoDropdownFieldProps {
     autoSelectSingle?: boolean;
     fetchAllItems?: () => Promise<ServiceEntity[]>;
     fetchFilteredItems?: (filter: string) => Promise<ServiceEntity[]>;
+}
+export interface PreloadedServicoData {
+    servico: ServiceEntity;
+    selectedCodigoCNAE: TableCNAEEntity | null;
+    selectedCodigoNBS: TableCodigoNBSEntity | null;
+    selectedCodigoServico: TableService | null;
+    selectedClassificacaoTributaria: TableClassificacaoTributariaEntity | null;
 }
 export type FormCreatedServicoProps = ServicoFieldsProps | ServiceFormProps;

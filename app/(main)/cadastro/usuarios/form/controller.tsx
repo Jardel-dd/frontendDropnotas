@@ -5,7 +5,7 @@ import { Toast } from 'primereact/toast';
 import { UsuarioFields } from './usuario';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
@@ -335,4 +335,5 @@ export const FormCreatedUsuario = forwardRef<UsuarioFormRef, FormCreatedUsuarioP
     return <UsuarioFields {...props} />;
 });
 FormCreatedUsuario.displayName = 'FormCreatedUsuario';
+
 

@@ -4,10 +4,11 @@ import { PessoaFields } from './pessoa';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Divider } from 'primereact/divider';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { getCitiesFromState } from '@/app/entity/maps';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { DropdownChangeEvent } from 'primereact/dropdown';
+import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
@@ -22,10 +23,13 @@ import { validateFieldsPessoa } from '@/app/(main)/cadastro/pessoas/controller/v
 import { FormPessoaCreatedProps, PessoaFormProps, PessoaFormRef } from '../types/pessoa';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import VendedorDropdownField from '@/app/(main)/cadastro/vendedores/dropDown/DropdownVendedor';
+import { ContratoFormCreated } from '@/app/(main)/contrato/form/controller';
+import { ContratoFormRef, PreloadedContratoData } from '@/app/(main)/contrato/types/contratos';
 import { fetchAllCnae, fetchFilteredCnae } from '@/app/components/fetchAll/listAllCnae/controller';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdPessoa, fetchPessoasById, updatePessoa } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { ContratoEntity } from '@/app/entity/ContratoEntity';
+import { fetchVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import { fetchContratoByID, fetchContratosById } from '@/app/(main)/contrato/controller/controller';
 export const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string | null => {
     if (pessoa.pessoa_cliente && pessoa.pessoa_fornecedor) return 'AMBOS';
     if (pessoa.pessoa_cliente) return 'pessoa_cliente';
@@ -40,12 +44,14 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
     (
         {
             initialId,
+            preloadedPessoa,
             msgs,
             onPessoaChange,
             onErrorsChange,
             redirectAfterSave,
             onClose,
             onSaved,
+            onLoadingChange,
             showBTNPGCreatedDialog,
             showBTNPGCreatedAll,
             onBackClick
@@ -55,6 +61,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const router = useRouter();
         const pessoaId = initialId;
         const formRef = useRef<VendedorFormRef>(null);
+        const formContratoRef = useRef<ContratoFormRef>(null);
         const onPessoaChangeRef = useRef(onPessoaChange);
         const onErrorsChangeRef = useRef(onErrorsChange);
         const [isLoading, setIsLoading] = useState(true);
@@ -86,9 +93,18 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             })
         );
         const [reloadKeyVendedor, setReloadKeyVendedor] = useState(0);
+        const [vendedorDialogKey, setVendedorDialogKey] = useState(0);
+        const [contratoDialogKey, setContratoDialogKey] = useState(0);
         const [loadingCep, setLoadingCep] = useState(false);
         const [loadingCnpj, setLoadingCnpj] = useState(false);
         const [showModalVendedor, setShowModalVendedor] = useState(false);
+        const [editingVendedorId, setEditingVendedorId] = useState<string | null>(null);
+        const [showModalContrato, setShowModalContrato] = useState(false);
+        const [editingContratoId, setEditingContratoId] = useState<string | null>(null);
+        const [isVendedorDialogLoading, setIsVendedorDialogLoading] = useState(true);
+        const [isContratoDialogLoading, setIsContratoDialogLoading] = useState(true);
+        const [preloadedVendedor, setPreloadedVendedor] = useState<VendedorEntity | null>(null);
+        const [preloadedContrato, setPreloadedContrato] = useState<PreloadedContratoData | null>(null);
         const [selectedContato, setSelectedContato] = useState<string | null>(null);
         const [selectedContrato, setSelectedContrato] = useState<ContratoEntity | null>(null);
         const [errors, setErrors] = useState<Record<string, string>>({});
@@ -97,7 +113,25 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
         const [reloadKeyContrato] = useState(0);
+        const [reloadKeyContratoDropdown, setReloadKeyContratoDropdown] = useState(0);
         const [stateDisableBtnCreatedClienteFornecedor, setStateDisableBtnCreatedClienteFornecedor] = useState(false);
+        const [contrato, setContrato] = useState<ContratoEntity>(
+            new ContratoEntity({
+                ativo: true,
+                id: 0,
+                descricao: '',
+                valor_servico: null,
+                periodicidade: '',
+                emitir_boleto: false,
+                enviar_email: false,
+                enviar_whatsapp: false,
+                id_servico: null,
+                id_empresa: null,
+                id_categoria_contrato: null,
+                id_forma_pagamento: null,
+                id_clientes_contrato: [0]
+            })
+        );
         const [pessoa, setPessoa] = useState<PessoaEntity>(
             new PessoaEntity({
                 id: 0,
@@ -193,11 +227,20 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setIsLoadingBtnCreated(true);
             try {
                 if (isEditMode && pessoaId) {
-                    await updatePessoa(pessoaId, pessoa, setErrors, msgs, router, setPessoa);
+                    const updated = await updatePessoa(pessoaId, pessoa, setErrors, msgs, router, setPessoa, redirectAfterSave ?? true);
+                    if (updated) {
+                        await onSaved?.(updated);
+                        if (!onSaved) {
+                            onClose?.();
+                        }
+                    }
                 } else {
                     const created = await createdPessoa(pessoa, setErrors, msgs, router, setPessoa, redirectAfterSave ?? true);
                     if (created) {
-                        onSaved?.(created);
+                        await onSaved?.(created);
+                        if (!onSaved) {
+                            onClose?.();
+                        }
                     }
                 }
             } finally {
@@ -208,13 +251,132 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const handleVendedor = (updatedVendedor: VendedorEntity) => {
             setVendedor(updatedVendedor);
         };
-        const handleVendedorSaved = (created: VendedorEntity) => {
+        const openCreateVendedorDialog = () => {
+            setIsVendedorDialogLoading(true);
+            setEditingVendedorId(null);
+            setPreloadedVendedor(null);
+            setVendedorDialogKey((current) => current + 1);
+            setShowModalVendedor(true);
+        };
+        const openEditVendedorDialog = async (vendedorSelecionado: VendedorEntity) => {
+            if (!vendedorSelecionado?.id) {
+                return;
+            }
+
+            setIsVendedorDialogLoading(true);
+            try {
+                const vendedorId = String(vendedorSelecionado.id);
+                const { dataVendedor } = await fetchVendedor(vendedorId);
+                setPreloadedVendedor(dataVendedor);
+                setEditingVendedorId(vendedorId);
+                setVendedorDialogKey((current) => current + 1);
+                setShowModalVendedor(true);
+            } catch (error) {
+                console.error('Erro ao pré-carregar vendedor para edição:', error);
+                setIsVendedorDialogLoading(false);
+            }
+        };
+        const closeVendedorDialog = () => {
             setShowModalVendedor(false);
+            setEditingVendedorId(null);
+            setIsVendedorDialogLoading(true);
+            setPreloadedVendedor(null);
+        };
+        const openCreateContratoDialog = () => {
+            setIsContratoDialogLoading(true);
+            setEditingContratoId(null);
+            setPreloadedContrato(null);
+            setContratoDialogKey((current) => current + 1);
+            setShowModalContrato(true);
+        };
+        const openEditContratoDialog = async (contratoSelecionado: ContratoEntity) => {
+            if (!contratoSelecionado?.id) {
+                return;
+            }
+
+            setIsContratoDialogLoading(true);
+            try {
+                const contratoId = String(contratoSelecionado.id);
+                console.log('[PessoaForm] abrindo edicao de contrato', { contratoId, contratoSelecionado });
+                const contratoPrecarregado = await fetchContratosById(contratoId);
+                console.log('[PessoaForm] preload do contrato concluido', contratoPrecarregado);
+                setPreloadedContrato(contratoPrecarregado);
+                setEditingContratoId(contratoId);
+                setContratoDialogKey((current) => current + 1);
+                setShowModalContrato(true);
+            } catch (error) {
+                console.error('Erro ao pré-carregar contrato para edição:', error);
+                setIsContratoDialogLoading(false);
+            }
+        };
+        const closeContratoDialog = () => {
+            console.log('[PessoaForm] closeContratoDialog chamado', {
+                editingContratoId,
+                showModalContrato
+            });
+            setShowModalContrato(false);
+            setEditingContratoId(null);
+            setPreloadedContrato(null);
+            window.setTimeout(() => {
+                setIsContratoDialogLoading(false);
+            }, 200);
+        };
+        const handleContratoFormChange = (updatedContrato: ContratoEntity) => {
+            setContrato(updatedContrato);
+        };
+        const handleVendedorSaved = (created: VendedorEntity) => {
+            closeVendedorDialog();
             setSelectedVendedor(created);
             handleAllChanges({
                 target: { id: 'id_vendedor_padrao', value: created.id, type: 'input' }
             });
             setReloadKeyVendedor((current) => current + 1);
+        };
+        const handleContratoSaved = async (created: ContratoEntity) => {
+            console.log('[PessoaForm] handleContratoSaved chamado', created);
+            setIsContratoDialogLoading(true);
+            let contratoAtualizado = created;
+
+            try {
+                if (created?.id) {
+                    const response = await fetchContratoByID(String(created.id));
+                    contratoAtualizado = new ContratoEntity(response.contrato);
+                }
+
+                setSelectedContrato(contratoAtualizado);
+                setPessoa((prev) =>
+                    prev.copyWith({
+                        id_contrato: contratoAtualizado.id
+                    })
+                );
+                setErrors((prevErrors) => {
+                    const newErrors = { ...prevErrors };
+                    delete newErrors.selectedContrato;
+                    return newErrors;
+                });
+                setContrato(
+                    new ContratoEntity({
+                        ativo: true,
+                        id: 0,
+                        descricao: '',
+                        valor_servico: null,
+                        periodicidade: '',
+                        emitir_boleto: false,
+                        enviar_email: false,
+                        enviar_whatsapp: false,
+                        id_servico: null,
+                        id_empresa: null,
+                        id_categoria_contrato: null,
+                        id_forma_pagamento: null,
+                        id_clientes_contrato: [0]
+                    })
+                );
+                setReloadKeyContratoDropdown((current) => current + 1);
+            } catch (error) {
+                console.error('[PessoaForm] erro ao recarregar contrato salvo:', error);
+            } finally {
+                closeContratoDialog();
+            }
         };
         const handleVendedorChange = (vendedorSelecionado: VendedorEntity | null) => {
             setSelectedVendedor(vendedorSelecionado);
@@ -305,12 +467,32 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         useEffect(() => {
             if (pessoaId) {
                 setIsEditMode(true);
+
+                if (preloadedPessoa?.dataPessoa?.id && String(preloadedPessoa.dataPessoa.id) === String(pessoaId)) {
+                    setPessoa(preloadedPessoa.dataPessoa);
+                    setSelectedContato(mapPessoaContatoToSelection(preloadedPessoa.dataPessoa));
+                    setSelectedContrato(null);
+                    setSelectedCNAE(
+                        preloadedPessoa.dataPessoa.cnae_fiscal
+                            ? new TableCNAEEntity({
+                                id: 0,
+                                codigo: preloadedPessoa.dataPessoa.cnae_fiscal,
+                                descricao: preloadedPessoa.dataPessoa.cnae_fiscal
+                            })
+                            : null
+                    );
+                    setSelectedVendedor(preloadedPessoa.selectedVendedor ?? null);
+                    setIsLoading(false);
+                    return;
+                }
+
                 listagemPessoaID(pessoaId).finally(() => setIsLoading(false));
                 return;
             }
 
+            setIsEditMode(false);
             setIsLoading(false);
-        }, [pessoaId]);
+        }, [pessoaId, preloadedPessoa]);
         useEffect(() => {
             if (Object.values(touchedFields).some((touched) => touched)) {
                 validatePessoaForm();
@@ -322,6 +504,16 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         useEffect(() => {
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
+        useEffect(() => {
+            onLoadingChange?.(isLoading || isLoadingBtnCreated);
+        }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
+        useEffect(() => {
+            console.log('[PessoaForm] estado do dialog de contrato alterado', {
+                showModalContrato,
+                editingContratoId,
+                isContratoDialogLoading
+            });
+        }, [showModalContrato, editingContratoId, isContratoDialogLoading]);
         if (isLoading && pessoaId) {
             return <LoadingScreen  loadingText="Carregando informacoes do Cliente ou Fornecedor selecionado..." />;
         }
@@ -336,7 +528,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             !pessoa?.razao_social ||
             !pessoa.codigo_regime_tributario ||
             !pessoa.contribuinte ||
-            (!selectedVendedor && !pessoa.id_vendedor_padrao) ||
             !pessoa.endereco ||
             !pessoa.email;
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
@@ -354,13 +545,14 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                 selectedCNAE={selectedCNAE}
                                 loadingCnpj={loadingCnpj}
                                 hasFocused={hasFocused}
-                                reloadKeyContrato={reloadKeyContrato}
+                                reloadKeyContrato={reloadKeyContrato + reloadKeyContratoDropdown}
                                 onAddContato={() => {}}
                                 onFocusFirstField={() => setHasFocused(true)}
                                 onChange={handleAllChanges}
                                 onDropdownChange={handleDropdownChange}
                                 onContatoChange={handleContatoChange}
-                                onAddContrato={() => {}}
+                                onAddContrato={openCreateContratoDialog}
+                                onEditContrato={openEditContratoDialog}
                                 onContratoChange={handleContratoChange}
                                 onCNAEChange={handleCNAEChange}
                                 onSearchCnpj={handleSearchPessoaCnpj}
@@ -377,7 +569,8 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                     selectedVendedorId={pessoa.id_vendedor_padrao ?? null}
                                     reloadKey={reloadKeyVendedor}
                                     onVendedorChange={handleVendedorChange}
-                                    onAddClick={() => setShowModalVendedor(true)}
+                                    onAddClick={openCreateVendedorDialog}
+                                    onEditClick={openEditVendedorDialog}
                                     hasError={!!errors.selectedVendedor}
                                     errorMessage={errors.selectedVendedor}
                                 />
@@ -416,20 +609,54 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                         )}
                     </div>
                 </div>
-                <DialogFilter header="Adicionar Vendedor" visible={showModalVendedor} onHide={() => setShowModalVendedor(false)}>
+                <DialogFilter
+                    header={editingVendedorId ? "Editar Vendedor" : "Adicionar Vendedor"}
+                    visible={showModalVendedor}
+                    onHide={closeVendedorDialog}
+                    loading={isVendedorDialogLoading}
+                    loadingText={editingVendedorId ? 'Carregando informações do Vendedor...' : 'Abrindo cadastro de Vendedor...'}
+                >
                     <FormCreatedVendedor
+                        key={`${editingVendedorId ?? 'novo'}-${vendedorDialogKey}`}
                         msgs={msgs}
                         ref={formRef}
                         vendedor={vendedor}
-                        initialId={null}
+                        initialId={editingVendedorId}
+                        preloadedVendedor={preloadedVendedor}
                         setVendedor={setVendedor}
                         onVendedorChange={handleVendedor}
                         onErrorsChange={handleErrorsChange}
                         redirectAfterSave={false}
                         onSaved={handleVendedorSaved}
-                        onClose={() => setShowModalVendedor(false)}
+                        onLoadingChange={setIsVendedorDialogLoading}
+                        onClose={closeVendedorDialog}
                         showBTNPGCreatedDialog
-                        onBackClick={() => setShowModalVendedor(false)}
+                        onBackClick={closeVendedorDialog}
+                    />
+                </DialogFilter>
+                <DialogFilter
+                    header={editingContratoId ? "Editar Contrato" : "Adicionar Contrato"}
+                    visible={showModalContrato}
+                    onHide={closeContratoDialog}
+                    loading={isContratoDialogLoading}
+                    loadingText={editingContratoId ? 'Carregando informações do Contrato...' : 'Abrindo cadastro de Contrato...'}
+                >
+                    <ContratoFormCreated
+                        key={`${editingContratoId ?? 'novo'}-${contratoDialogKey}`}
+                        msgs={msgs}
+                        ref={formContratoRef}
+                        contrato={contrato}
+                        initialId={editingContratoId}
+                        preloadedContrato={preloadedContrato}
+                        setContrato={setContrato}
+                        onContratoChange={handleContratoFormChange}
+                        onErrorsChange={handleErrorsChange}
+                        redirectAfterSave={false}
+                        onSaved={handleContratoSaved}
+                        onLoadingChange={setIsContratoDialogLoading}
+                        onClose={closeContratoDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closeContratoDialog}
                     />
                 </DialogFilter>
             </>
@@ -447,3 +674,4 @@ export const FormCreatedPessoa = forwardRef<PessoaFormRef, FormPessoaCreatedProp
     return <PessoaFields {...props} />;
 });
 FormCreatedPessoa.displayName = 'FormCreatedPessoa';
+

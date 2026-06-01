@@ -4,7 +4,7 @@ import './fotter.css';
 import '@/app/styles/styledGlobal.css';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
@@ -505,3 +505,4 @@ const OrdemServicos: React.FC = () => {
     );
 };
 export default OrdemServicos;
+
