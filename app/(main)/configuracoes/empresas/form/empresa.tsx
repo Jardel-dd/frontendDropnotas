@@ -37,6 +37,7 @@ export function EmpresaFields({
     isDesktop,
     isDarkMode,
     isPasswordVisible,
+    isCertificatePasswordRequired,
     selectedCNAE,
     userConta,
     selectedUserConta,
@@ -107,6 +108,7 @@ export function EmpresaFields({
         'webservice_senha',
         'webservice_chaveacesso'
     ]);
+    const hasUploadedCertificate = Boolean(empresa.certificado_digital || empresa.nome_certificado_digital);
     const hasCertDigitalErrors = hasAnyTabError([
         'certificado_digital',
         'senha_certificado_digital'
@@ -186,7 +188,7 @@ export function EmpresaFields({
                                 </div>
                                 <div className="col-12  lg:col-4 ">
                                     <div className="p-field">
-                                        <Input value={empresa.inscricao_estadual || ''} onChange={onChange} label="Inscrição Estadual" id="inscricao_estadual" type="number" hasError={!!errors.inscricao_estadual} errorMessage={errors.inscricao_estadual} topLabel="Inscrição Estadual:" showTopLabel required />
+                                        <Input value={empresa.inscricao_estadual || ''} onChange={onChange} label="Inscrição Estadual" id="inscricao_estadual" type="number" hasError={!!errors.inscricao_estadual} errorMessage={errors.inscricao_estadual} topLabel="Inscrição Estadual:" showTopLabel />
                                     </div>
                                 </div>
                                 <div className="col-12 lg:col-4">
@@ -364,23 +366,25 @@ export function EmpresaFields({
                             <div className="file-upload-container mt-1"
                                 style={{ display: 'flex', alignItems: 'center' }}>
                                 <FileUpload ref={fileUploadRef} name="file" url="./upload" id="certificado_digital" customUpload chooseLabel={empresa.nome_certificado_digital || 'Upload Certificado A1'} mode="basic" disabled={loadingFileUpload} accept=".pfx,.p12,.cer,.crt,.cert" onSelect={onFileChangeCertificado} onClear={onClearCertificado} className={`p-fileupload-basic w-full ${isDarkMode ? 'dark-mode' : 'light-mode'} ${errors.certificado_digital ? 'p-invalid' : ''}`} withCredentials={false} />
-                                {empresa.certificado_digital && <Button icon="pi pi-trash" outlined severity="danger" aria-label="Cancel" onClick={onRemoveFile} style={{ width: '10%', marginLeft: '1rem' }} />}
+                                {hasUploadedCertificate && <Button icon="pi pi-trash" outlined severity="danger" aria-label="Cancel" onClick={onRemoveFile} style={{ width: '10%', marginLeft: '1rem' }} />}
                             </div>
                             {errors.certificado_digital && <small className="p-error">{errors.certificado_digital}</small>}
                         </div>
-                        <div className="col-12 lg:col-4 " style={{ marginTop: "2px" }}>
-                            <Input value={empresa.senha_certificado_digital || ''}
-                                onChange={onChange} label="Senha" id="senha_certificado_digital"
-                                type={isPasswordVisible ? 'text' : 'password'} useRightButton
-                                outlined iconLeft="pi pi-key" iconRight={<IconVisible isPasswordVisible={isPasswordVisible} />}
-                                onClick={onTogglePasswordVisibility} hasError={!!errors.senha_certificado_digital}
-                                errorMessage={errors.senha_certificado_digital}
-                                topLabel="Senha:"
-                                showTopLabel required
-                            />
-                        </div>
-                        {empresaId && (
+                        {hasUploadedCertificate && (
                             <>
+                                <div className="col-12 lg:col-4 " style={{ marginTop: "2px" }}>
+                                    <Input value={empresa.senha_certificado_digital || ''}
+                                        onChange={onChange} label="Senha" id="senha_certificado_digital"
+                                        type={isPasswordVisible ? 'text' : 'password'} useRightButton
+                                        outlined iconLeft="pi pi-key" iconRight={<IconVisible isPasswordVisible={isPasswordVisible} />}
+                                        onClick={onTogglePasswordVisibility} hasError={!!errors.senha_certificado_digital}
+                                        errorMessage={errors.senha_certificado_digital}
+                                        topLabel="Senha:"
+                                        showTopLabel required={isCertificatePasswordRequired}
+                                    />
+                                </div>
+                                {empresaId && (
+                                    <>
                                 <div className="col-12  lg:col-2 lg:mb-0">
                                     <Input value={empresa.data_vencimento_certificado_digital || ''} onChange={onChange} label="" id="data_vencimento_certificado_digital" useRightButton outlined readOnly topLabel="Data vencimento Certificado:" showTopLabel />
                                 </div>
@@ -426,6 +430,8 @@ export function EmpresaFields({
                                         />
                                     </div>
                                 </div>
+                                    </>
+                                )}
                             </>
                         )}
                     </div>

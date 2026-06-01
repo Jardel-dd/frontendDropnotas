@@ -26,6 +26,7 @@ interface SearchDropdownProps<T> {
     onBlur?: () => void;
     showAddButton?: boolean;
     onAddClick?: () => void;
+    onEditClick?: (item: T) => void;
     minSearchChars?: number;
     maxResults?: number;
     className?:string;
@@ -45,7 +46,12 @@ function ensureSelectedInList<T extends Record<string, any>>(list: T[], selected
     }
     const selId = normalize(selected[optionValue]);
     const found = list.some((it) => normalize(it[optionValue]) === selId);
-    return found ? list : [selected, ...list];
+
+    if (!found) {
+        return [selected, ...list];
+    }
+
+    return list.map((it) => (normalize(it[optionValue]) === selId ? selected : it));
 }
 
 export const DropdownSearch = <T extends Record<string, any>>({
@@ -65,6 +71,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
     errorMessage,
     showAddButton,
     onAddClick,
+    onEditClick,
     onBlur,
     minSearchChars = 2,
     maxResults = 20,
@@ -249,7 +256,23 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const handleAddButtonClick = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();
         event.stopPropagation();
+        dropdownRef.current?.hide();
+        onBlur?.();
         onAddClick?.();
+    };
+    const handleEditButtonMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+    const handleEditButtonClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        dropdownRef.current?.hide();
+        onBlur?.();
+
+        if (selectedItemRef.current) {
+            onEditClick?.(selectedItemRef.current);
+        }
     };
     const handleCloseButtonMouseDown = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();
@@ -268,20 +291,23 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const handleClearButtonClick = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();
         event.stopPropagation();
+        setFilterValue('');
+        debouncedFilter.cancel();
+        selectedItemRef.current = null;
+        initialOptionValueRef.current = null;
         onItemChangeRef.current?.(null);
+        void loadAll();
     };
     const hasSelectedValue = selectedItem !== null;
-    const showHeaderButtons = showAddButton || hasSelectedValue;
+    const canEditSelected = Boolean(onEditClick && hasSelectedValue);
+    const canClearFilter = hasSelectedValue || filterValue.trim().length > 0;
+    const showHeaderButtons = showAddButton || canEditSelected || canClearFilter;
 
     useEffect(() => {
         if (!selectedItem) return;
 
-        const hasInList = optionValue ? items.some((it) => normalize(it[optionValue]) === normalize(selectedItem[optionValue])) : items.includes(selectedItem);
-
-        if (!hasInList) {
-            setItems((prev) => ensureSelectedInList(prev, selectedItem, optionValue));
-        }
-    }, [selectedItem, optionValue, items]);
+        setItems((prev) => ensureSelectedInList(prev, selectedItem, optionValue));
+    }, [selectedItem, optionValue]);
 
     useEffect(() => {
         return () => {
@@ -375,6 +401,42 @@ export const DropdownSearch = <T extends Record<string, any>>({
                                             aria-label="Adicionar"
                                             onMouseDown={handleAddButtonMouseDown}
                                             onClick={handleAddButtonClick}
+                                        />
+                                    )}
+                                    {canEditSelected && (
+                                        <Button
+                                            type="button"
+                                            style={{
+                                                height: '30px',
+                                                width: '40px',
+                                                boxShadow: 'none'
+                                            }}
+                                            tooltip="Editar"
+                                            icon="pi pi-pencil"
+                                            aria-label="Editar"
+                                            severity="info"
+                                            raised
+                                            outlined
+                                            onMouseDown={handleEditButtonMouseDown}
+                                            onClick={handleEditButtonClick}
+                                        />
+                                    )}
+                                    {canClearFilter && (
+                                        <Button
+                                            type="button"
+                                            style={{
+                                                height: '30px',
+                                                width: '40px',
+                                                boxShadow: 'none'
+                                            }}
+                                            tooltip="Remover filtro"
+                                            icon="pi pi-filter-slash"
+                                            aria-label="Remover filtro"
+                                            severity="warning"
+                                            raised
+                                            outlined
+                                            onMouseDown={handleClearButtonMouseDown}
+                                            onClick={handleClearButtonClick}
                                         />
                                     )}
                                     <Button

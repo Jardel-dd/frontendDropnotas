@@ -108,12 +108,29 @@ export const updateCategoriaContrato = async (
     redirectAfterSave: boolean
 ) => {
     try {
-        await api.put(`/categoria-contrato`, categoriaContrato);
+        const response = await api.put(`/categoria-contrato`, categoriaContrato);
+        const responseData = response?.data;
+        const responseCategoriaContrato =
+            responseData &&
+            typeof responseData === 'object' &&
+            'categoriaContrato' in responseData
+                ? (responseData as { categoriaContrato?: CategoryContratosEntity | Record<string, unknown> }).categoriaContrato
+                : null;
+        const updated =
+            (responseCategoriaContrato && typeof responseCategoriaContrato === 'object' ? responseCategoriaContrato : null) ??
+            (responseData && typeof responseData === 'object' ? responseData : null) ?? {
+                ...categoriaContrato,
+                id: Number(categoriaContratoId)
+            };
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso:',
             detail: 'Categoria Contrato atualizado com sucesso!'
         });
+        if (redirectAfterSave) {
+            router.push('/cadastro/categoriaContratos');
+        }
+        return new CategoryContratosEntity(updated);
     } catch (error) {
         if (axios.isAxiosError(error)) {
             const status = error.response?.status;

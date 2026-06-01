@@ -4,7 +4,7 @@ import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { VendedorFields } from './vendedor';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { getCitiesFromState } from '@/app/entity/maps';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
@@ -19,8 +19,8 @@ import {createEmptyVendedor, FormCreatedVendedorProps, VendedorFormProps, Vended
 import { createdVendedor, fetchVendedor, updateVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 
 export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormProps>(
-    ({ initialId, msgs, onVendedorChange, 
-        onErrorsChange, redirectAfterSave, onClose, onSaved, 
+    ({ initialId, preloadedVendedor, msgs, onVendedorChange, 
+        onErrorsChange, redirectAfterSave, onClose, onSaved, onLoadingChange,
         showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
         const router = useRouter();
         const vendedorId = initialId;
@@ -37,7 +37,6 @@ export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormPro
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [stateDisableBtnCreatedVendedor, setStateDisableBtnCreatedVendedor] = useState(false);
         const [vendedor, setVendedor] = useState<VendedorEntity>(createEmptyVendedor());
-
         const handleAllChanges = (event: any) => {
             const id = event?.target?.id;
             const type = event?.target?.type;
@@ -98,7 +97,13 @@ export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormPro
             setIsLoadingBtnCreated(true);
             try {
                 if (isEditMode && vendedorId) {
-                    await updateVendedor(vendedorId, vendedor, setErrors, msgs, router, setVendedor, redirectAfterSave ?? true);
+                    const updated = await updateVendedor(vendedorId, vendedor, setErrors, msgs, router, setVendedor, redirectAfterSave ?? true);
+
+                    if (!updated) {
+                        return;
+                    }
+
+                    onSaved?.(updated);
                 } else {
                     const created = await createdVendedor(vendedor, setErrors, msgs, router, redirectAfterSave ?? true, setVendedor);
                     onSaved?.(created);
@@ -130,12 +135,26 @@ export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormPro
         useEffect(() => {
             if (vendedorId) {
                 setIsEditMode(true);
+
+                if (preloadedVendedor?.id && String(preloadedVendedor.id) === vendedorId) {
+                    setVendedor(preloadedVendedor);
+                    setIsLoading(false);
+                    return;
+                }
+
                 listagemVendedorID(vendedorId).finally(() => setIsLoading(false));
                 return;
             }
 
+            setIsEditMode(false);
+            setVendedor(createEmptyVendedor());
+            setErrors({});
+            setTouchedFields({});
             setIsLoading(false);
-        }, [vendedorId]);
+        }, [preloadedVendedor, vendedorId]);
+        useEffect(() => {
+            onLoadingChange?.(isLoading || isLoadingBtnCreated);
+        }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
         useEffect(() => {
             if (Object.values(touchedFields).some((touched) => touched)) {
                 validateFieldsVendedor(vendedor, setErrors, msgs);
@@ -230,3 +249,4 @@ export const FormCreatedVendedor = forwardRef<VendedorFormRef, FormCreatedVended
     return <VendedorFields {...props} />;
 });
 FormCreatedVendedor.displayName = 'FormCreatedVendedor';
+

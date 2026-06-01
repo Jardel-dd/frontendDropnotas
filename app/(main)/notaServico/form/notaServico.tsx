@@ -1,7 +1,7 @@
 'use client';
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { getCitiesFromState } from '@/app/entity/maps';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
@@ -119,10 +119,7 @@ export function NotaServicoFields({
                         options={regimeEspecialTributarioOptionsCompany}
                         onChange={onDropdownChangeRegime}
                         label="Selecione o Regime Tributario"
-                        hasError={!!errors.regime_especial_tributacao}
-                        errorMessage={errors.regime_especial_tributacao}
                         showTopLabel
-                        required
                         topLabel="Regime Especial Tributário:"
                     />
                 </div>
@@ -416,12 +413,14 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             setLoading(true);
 
             try {
+                console.log('[NotaServico] Iniciando correcao por referencia:', correctionReference);
                 const response = await prepararCorrecaoNotaServico(
                     {
                         referencia: correctionReference
                     },
                     msgs
                 );
+                console.log('[NotaServico] Resposta recebida no formulario de correcao:', response);
                 const notaServicoCarregada = buildNotaServicoFromResponse(response?.nfse ?? response);
                 const competenciaDate = parseCompetenciaDate(notaServicoCarregada.competencia);
 
@@ -516,3 +515,4 @@ const FormNotaServicoCreated = forwardRef<NotaServicoFormRef, FormCreatedNotaSer
 });
 FormNotaServicoCreated.displayName = 'FormNotaServicoCreated';
 export default FormNotaServicoCreated;
+

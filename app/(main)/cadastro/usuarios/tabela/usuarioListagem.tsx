@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import { Skeleton } from 'primereact/skeleton';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
@@ -202,3 +202,4 @@ export function ListarUserConta(
     );
 }
 export default ListarUserConta;
+

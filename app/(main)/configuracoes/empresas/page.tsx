@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import ListarEmpresas from './tabela/empresaListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { usePermissions } from '@/app/routes/permissoes';
@@ -320,3 +320,4 @@ const Empresas: React.FC = () => {
 };
 
 export default Empresas;
+

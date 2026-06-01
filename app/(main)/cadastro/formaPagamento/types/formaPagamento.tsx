@@ -2,6 +2,44 @@ import { Messages } from "primereact/messages";
 import { DropdownChangeEvent } from "primereact/dropdown";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { FormaPagamentoEntity, TipoFormaPagamento } from "@/app/entity/FormaPagamento";
+
+const normalizeTextToken = (value?: string | null) =>
+    value
+        ?.normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '_')
+        .toUpperCase() ?? '';
+
+const normalizeTipoFormaPagamento = (value?: string | null): TipoFormaPagamento => {
+    const normalizedValue = normalizeTextToken(value);
+
+    const formaPagamentoMap: Record<string, TipoFormaPagamento> = {
+        DINHEIRO: TipoFormaPagamento.DINHEIRO,
+        CARTAO_CREDITO: TipoFormaPagamento.CARTAO_CREDITO,
+        CARTAO_DEBITO: TipoFormaPagamento.CARTAO_DEBITO,
+        PIX: TipoFormaPagamento.PIX,
+        BOLETO: TipoFormaPagamento.BOLETO,
+        CARTEIRA_DIGITAL: TipoFormaPagamento.CARTEIRA_DIGITAL,
+        OUTROS: TipoFormaPagamento.OUTROS
+    };
+
+    return formaPagamentoMap[normalizedValue] ?? (value as TipoFormaPagamento) ?? ('' as TipoFormaPagamento);
+};
+
+const normalizeTipoTaxa = (value?: string | null) => {
+    const normalizedValue = normalizeTextToken(value);
+
+    if (normalizedValue === 'FIXA') {
+        return 'FIXA';
+    }
+
+    if (normalizedValue === 'PORCENTAGEM') {
+        return 'PORCENTAGEM';
+    }
+
+    return value ?? '';
+};
+
 export const createEmptyFormaPagamento = () =>
     new FormaPagamentoEntity({
         ativo: true,
@@ -16,11 +54,14 @@ export const createEmptyFormaPagamento = () =>
 export const toFormaPagamentoEntity = (formaPagamento?: Partial<FormaPagamentoEntity> | null) =>
     new FormaPagamentoEntity({
         ...createEmptyFormaPagamento(),
-        ...(formaPagamento ?? {})
+        ...(formaPagamento ?? {}),
+        tipo_forma_pagamento: normalizeTipoFormaPagamento(formaPagamento?.tipo_forma_pagamento),
+        tipo_taxa: normalizeTipoTaxa(formaPagamento?.tipo_taxa)
     });
 export interface FormaPagamentoFormProps {
     formaPagamento: FormaPagamentoEntity;
     initialId?: string | null;
+    preloadedFormaPagamento?: FormaPagamentoEntity | null;
     msgs: RefObject<Messages | null>;
     onFormaPagamentoChange?: (
         formaPagamento: FormaPagamentoEntity
@@ -32,8 +73,9 @@ export interface FormaPagamentoFormProps {
         SetStateAction<FormaPagamentoEntity>
     >;
     redirectAfterSave?: boolean;
-    onSaved?: (created: FormaPagamentoEntity) => void;
+    onSaved?: (created: FormaPagamentoEntity) => void | Promise<void>;
     onClose?: () => void;
+    onLoadingChange?: (loading: boolean) => void;
     showBTNPGCreatedDialog?: boolean;
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
@@ -56,6 +98,7 @@ export interface FormaPagamentoDropdownFieldProps {
     onFormaPagamentoChange: (
         formaPagamento: FormaPagamentoEntity | null
     ) => void;
+    onEditClick?: (formaPagamento: FormaPagamentoEntity) => void;
     reloadKey?: number;
     hasError?: boolean;
     errorMessage?: string;

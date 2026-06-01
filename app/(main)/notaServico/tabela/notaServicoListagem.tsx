@@ -4,7 +4,7 @@ import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { NfsEntity } from '@/app/entity/NfsEntity';
 import { useRouter } from 'next/navigation';
 import { StatusNota } from '../types/statusClassNfs';
@@ -43,11 +43,9 @@ export function ListarNotaServico({
     const { layoutConfig } = useContext(LayoutContext);
     const { permissaoNfse } = usePermissions();
     const isDarkMode = layoutConfig.colorScheme === 'dark';
-
     const canCorrectRejectedNota = permissaoNfse.update;
     const canCancelNota = permissaoNfse.delete;
     const canSelectPendingNota = permissaoNfse.update;
-
     const handleCorrecao = (nota: NfsEntity) => {
         const query = new URLSearchParams();
 
@@ -227,17 +225,21 @@ export function ListarNotaServico({
                             dataKey="id"
                             loading={loading}
                             isDarkMode={isDarkMode}
-                            className="table-mobile"
+                            className='responsive-table'
                             columns={[
                                 {
                                     field: 'numero_rps',
-                                    header: 'Número',
+                                    header: 'N°',
+                                    style: {
+                                        width: '8px',
+                                        maxWidth: '8px',
+                                    },
                                     body: (data) => (loading ? <Skeleton /> : <span>{highlightSearchTerm(limitarText(data.numero_rps, 25), searchTerm)}</span>)
                                 },
                                 {
                                     field: 'razao_social_cliente',
-                                    header: 'Nome Cliente',
-                                    body: (data) => <span>{highlightSearchTerm(limitarText(data.razao_social_cliente, 25), searchTerm)}</span>
+                                    header: 'Cliente',
+                                    body: (data) => <span>{highlightSearchTerm(limitarText(data.razao_social_cliente, 15), searchTerm)}</span>
                                 },
                                 {
                                     field: 'status_nota',
@@ -258,3 +260,4 @@ export function ListarNotaServico({
     );
 }
 export default ListarNotaServico;
+

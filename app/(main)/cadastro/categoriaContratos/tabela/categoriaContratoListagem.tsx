@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Skeleton } from 'primereact/skeleton';
 import { usePermissions } from '@/app/routes/permissoes';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
@@ -153,3 +153,4 @@ export function ListarCategoriaContrato({
     );
 }
 export default ListarCategoriaContrato;
+

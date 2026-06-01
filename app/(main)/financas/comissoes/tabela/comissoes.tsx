@@ -1,7 +1,7 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { ComissaoEntity } from '@/app/entity/comissoesEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
@@ -123,3 +123,4 @@ export function ListarComissoes({
     );
 }
 export default ListarComissoes;
+

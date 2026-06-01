@@ -3,7 +3,7 @@ import './style.css';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { PermissoesFields } from './permissoes';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { TreeCheckboxSelectionKeys } from 'primereact/tree';
@@ -212,3 +212,4 @@ export const FormPermissoesCreated = forwardRef<PermissoesFormRef, FormCreatedPe
 });
 FormPermissoesCreated.displayName = 'FormPermissoesCreated';
 export default FormPermissoesCreated;
+

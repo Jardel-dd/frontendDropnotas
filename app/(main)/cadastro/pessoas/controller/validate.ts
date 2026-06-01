@@ -62,10 +62,6 @@ const validateCamposComunsPessoa = (
     if (!hasValidEmail(pessoa.email)) {
         return { email: 'Email invalido. Por favor, digite um email valido.' };
     }
-    if (!selectedVendedor && !pessoa.id_vendedor_padrao) {
-        return { selectedVendedor: 'Este Campo deve ser selecionado.' };
-    }
-
     return validateEnderecoPessoa(pessoa);
 };
 export const validateFieldsPessoa = (

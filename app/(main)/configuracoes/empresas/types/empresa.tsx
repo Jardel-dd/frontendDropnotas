@@ -14,6 +14,7 @@ export interface EmpresaDropdownFieldProps {
     selectedEmpresa: CompanyEntity | null;
     selectedEmpresaId?: number | null;
     onEmpresaChange: (pessoa: CompanyEntity | null) => void;
+    onEditClick?: (empresa: CompanyEntity) => void;
     reloadKey?: number;
     id?: string;
     hasError?: boolean;
@@ -30,17 +31,26 @@ export interface EmpresaDropdownFieldProps {
 export interface EmpresaFormProps {
     empresa: any;
     initialId?: string | null;
+    preloadedEmpresa?: PreloadedEmpresaData | null;
     onSuccess?: () => void;
     msgs: RefObject<Messages | null>;
     onEmpresaChange?: (empresa: CompanyEntity) => void;
     onErrorsChange?: (errors: Record<string, string>) => void;
     setEmpresa?: React.Dispatch<React.SetStateAction<any>>;
     redirectAfterSave?: boolean;
-    onSaved?: (created: CompanyEntity) => void;
+    onSaved?: (created: CompanyEntity) => void | Promise<void>;
     onClose?: () => void;
+    onLoadingChange?: (loading: boolean) => void;
     showBTNPGCreatedDialog?: boolean;
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
+}
+
+export interface PreloadedEmpresaData {
+    empresa: CompanyEntity;
+    userConta: UsuarioContaEntity[];
+    selectedUserConta: UsuarioContaEntity[];
+    selectedCNAE: TableCNAEEntity | null;
 }
 
 export interface EmpresaFormRef {
@@ -58,6 +68,7 @@ export interface EmpresaFieldsProps {
     isDesktop: boolean;
     isDarkMode: boolean;
     isPasswordVisible: boolean;
+    isCertificatePasswordRequired: boolean;
     selectedCNAE: TableCNAEEntity | null;
     userConta: UsuarioContaEntity[];
     selectedUserConta: UsuarioContaEntity[];

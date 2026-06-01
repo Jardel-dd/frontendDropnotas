@@ -2,8 +2,10 @@ import api from '@/app/services/api';
 import '@/app/styles/styledGlobal.css';
 import { CompanyEntity } from '../../../../entity/CompanyEntity';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
+import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 import { getToken } from '@/app/services/token';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
+import type { PreloadedEmpresaData } from '../types/empresa';
 
 const BASE64_IMAGE_DATA_URL_REGEX = /^data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/i;
 const IMAGE_URL_REGEX = /^(https?:\/\/|blob:|\/)/i;
@@ -164,8 +166,15 @@ export const updateEmpresa = async (
 ) => {
     try {
         const empresaParaEnviar = { ...empresa };
+        const shouldKeepExistingCertificate = !empresaParaEnviar.certificado_digital?.trim() && !!empresaParaEnviar.nome_certificado_digital;
         if (empresaParaEnviar.cnpj) {
             empresaParaEnviar.cnpj = empresaParaEnviar.cnpj.replace(/\D/g, '');
+        }
+        if (!empresaParaEnviar.senha_certificado_digital?.trim()) {
+            delete (empresaParaEnviar as Partial<CompanyEntity>).senha_certificado_digital;
+        }
+        if (shouldKeepExistingCertificate) {
+            delete (empresaParaEnviar as Partial<CompanyEntity>).certificado_digital;
         }
         const logoEmpresaAtual = empresaParaEnviar.logo_empresa?.trim() ?? '';
         const shouldSkipLogoOnUpdate = !logoAlterada && IMAGE_URL_REGEX.test(logoEmpresaAtual);
@@ -193,7 +202,19 @@ export const updateEmpresa = async (
         };
         console.log(' enviado para o backend:', empresaData);
         const response = await api.put(`/empresa`, empresaData);
-        const created = response?.data?.empresa ?? response?.data;
+        const responseData = response?.data;
+        const responseEmpresa =
+            responseData &&
+            typeof responseData === 'object' &&
+            'empresa' in responseData
+                ? (responseData as { empresa?: CompanyEntity | Record<string, unknown> }).empresa
+                : null;
+        const created =
+            (responseEmpresa && typeof responseEmpresa === 'object' ? responseEmpresa : null) ??
+            (responseData && typeof responseData === 'object' ? responseData : null) ?? {
+                ...empresaData,
+                id: Number(empresaId)
+            };
         console.log(' Resp do backend:', response?.data);
         msgs.current?.show({
             severity: 'success',
@@ -535,6 +556,26 @@ export const fetchCompanyByID = async (empresaId: string) => {
         console.error("Erro ao buscar empresa:", error);
         throw error;
     }
+};
+export const fetchCompanyFormDataByID = async (empresaId: string): Promise<PreloadedEmpresaData> => {
+    const { empresa, userConta, selectedUserConta } = await fetchCompanyByID(empresaId);
+    const logoEmpresaSource = await resolveLogoEmpresaSource(empresa.logo_empresa);
+    const cnaeOptions = empresa.cnae_fiscal ? await fetchFilteredCnae(empresa.cnae_fiscal) : [];
+    const empresaNormalizada = new CompanyEntity({
+        ...empresa,
+        logo_empresa: logoEmpresaSource,
+        aliquota_outras_retencoes: empresa.aliquota_outras_retencoes ?? 0,
+        aliquota_deducoes: empresa.aliquota_deducoes ?? 0,
+        percentual_desconto_incondicionado: empresa.percentual_desconto_incondicionado ?? 0,
+        percentual_desconto_condicionado: empresa.percentual_desconto_condicionado ?? 0
+    });
+
+    return {
+        empresa: empresaNormalizada,
+        userConta,
+        selectedUserConta,
+        selectedCNAE: findCNAEByCodigo(empresa.cnae_fiscal, cnaeOptions)
+    };
 };
 export const fetchCompanyDropdownByID = async (empresaId: string): Promise<CompanyEntity | null> => {
     try {

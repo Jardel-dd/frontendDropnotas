@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css'
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
@@ -163,3 +163,4 @@ export function ListarPerfilUsers(
     );
 }
 export default ListarPerfilUsers;
+

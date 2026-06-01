@@ -6,7 +6,8 @@ export const validateFieldsEmpresas = (
     selectedUserConta: UsuarioContaEntity | null,
     setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
     msgs: React.RefObject<any>,
-    telefoneObrigatorio = false
+    telefoneObrigatorio = false,
+    senhaCertificadoObrigatoria = true
 ) => {
     let valid = true;
     const errorMessages: string[] = [];
@@ -26,9 +27,6 @@ export const validateFieldsEmpresas = (
         valid = false;
     } else if (!empresa.atividade_principal || empresa.atividade_principal.trim().length < 2) {
         newErrors.atividade_principal = 'Campo deve ter no minimo 2 caracteres.';
-        valid = false;
-    } else if (!empresa.inscricao_estadual || empresa.inscricao_estadual.length < 9) {
-        newErrors.inscricao_estadual = 'Campo deve ter no minimo 9 caracteres.';
         valid = false;
     } else if (!empresa.inscricao_municipal || empresa.inscricao_municipal.length < 2) {
         newErrors.inscricao_municipal = 'Campo deve ter no minimo 2 caracteres.';
@@ -151,7 +149,7 @@ export const validateFieldsEmpresas = (
     } else if (!empresa.certificado_digital && !empresa.nome_certificado_digital) {
         newErrors.certificado_digital = 'O certificado digital e obrigatorio.';
         valid = false;
-    } else if (!empresa.senha_certificado_digital || empresa.senha_certificado_digital.length < 3) {
+    } else if (senhaCertificadoObrigatoria && (!empresa.senha_certificado_digital || empresa.senha_certificado_digital.length < 3)) {
         newErrors.senha_certificado_digital = 'Campo deve ter no minimo 3 numeros.';
         valid = false;
     } else {

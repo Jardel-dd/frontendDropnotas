@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import ListarVendedores from './tabela/vendedorListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
@@ -289,3 +289,4 @@ const Vendedores: React.FC = () => {
     );
 };
 export default Vendedores;
+

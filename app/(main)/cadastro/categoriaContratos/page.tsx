@@ -3,7 +3,7 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Divider } from 'primereact/divider';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import { CheckboxChangeEvent } from 'primereact/checkbox';
@@ -347,5 +347,6 @@ const CategoriaContrato: React.FC = () => {
 };
 
 export default CategoriaContrato;
+
 
 

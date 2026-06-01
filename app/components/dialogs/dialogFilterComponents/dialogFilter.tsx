@@ -1,5 +1,6 @@
 'use client';
 import "./style.css";
+import LoadingScreen from '@/app/loading';
 import React, { CSSProperties, ReactNode } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
@@ -25,6 +26,8 @@ type BaseDialogProps = {
     saveDisabled?: boolean;
     cancelDisabled?: boolean;
     clearDisabled?: boolean;
+    loading?: boolean;
+    loadingText?: string;
 
     dismissableMask?: boolean;
     closable?: boolean;
@@ -55,6 +58,8 @@ const DialogFilter: React.FC<BaseDialogProps> = ({
     saveDisabled = false,
     cancelDisabled = false,
     clearDisabled = false,
+    loading = false,
+    loadingText = 'Carregando informações...',
     dismissableMask = true,
     closable = true,
     draggable = false,
@@ -115,17 +120,34 @@ const DialogFilter: React.FC<BaseDialogProps> = ({
             visible={visible}
             onHide={onHide}
             modal
-            footer={footer}
+            footer={loading ? null : footer}
             className={className}
-            dismissableMask={dismissableMask}
-            closable={closable}
+            dismissableMask={loading ? false : dismissableMask}
+            closable={loading ? false : closable}
             draggable={draggable}
             resizable={false}
             breakpoints={breakpoints}
             contentStyle={contentStyle}
-            style={{ width, height, padding: 0, margin: 0, ...style }}
+            style={{ width, height, padding: 0, margin: 0, ...style, zIndex:"9" }}
         >
-            {children}
+            <div style={{ position: 'relative', minHeight: loading ? '320px' : undefined }}>
+                <div style={{ visibility: loading ? 'hidden' : 'visible' }}>
+                    {children}
+                </div>
+                {loading && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            inset: 0,
+                            zIndex: 2,
+                            display: 'flex',
+                            alignItems: 'stretch'
+                        }}
+                    >
+                        <LoadingScreen loadingText={loadingText} fullScreen={false} overlayOpacity={1} />
+                    </div>
+                )}
+            </div>
         </Dialog>
     );
 };

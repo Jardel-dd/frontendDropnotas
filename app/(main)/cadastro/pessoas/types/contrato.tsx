@@ -4,6 +4,7 @@ export interface ContratoDropdownFieldProps {
     selectedContrato: ContratoEntity | null;
     selectedContratoId?: number | null;
     onContratoChange: (contrato: ContratoEntity | null) => void;
+    onEditClick?: (contrato: ContratoEntity) => void;
     reloadKey?: number;
     id?: string;
     hasError?: boolean;

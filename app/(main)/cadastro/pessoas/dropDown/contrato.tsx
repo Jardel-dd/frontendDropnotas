@@ -7,6 +7,7 @@ export default function ContratoDropdownField({
     selectedContrato,
     selectedContratoId,
     onContratoChange,
+    onEditClick,
     reloadKey = 0,
     hasError,
     errorMessage,
@@ -37,6 +38,7 @@ export default function ContratoDropdownField({
             autoSelectSingle={autoSelectSingle}
             showAddButton={showAddButton}
             onAddClick={onAddClick}
+            onEditClick={onEditClick}
             className={`${className} ${hasError ? 'p-invalid' : ''}`}
             topLabel="Contrato:"
             showTopLabel

@@ -3,7 +3,7 @@ import { Toast } from 'primereact/toast';
 import { EmpresaFields } from './empresa';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
@@ -22,10 +22,9 @@ import type {  EmpresaFormProps, EmpresaFormRef, FormEmpresaCreatedProps } from 
 import { validateFieldsEmpresas } from '@/app/(main)/configuracoes/empresas/controller/validation';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type Dispatch, type SetStateAction } from 'react';
-import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyByID, resolveLogoEmpresaSource, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyFormDataByID, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { FormCreatedUsuario, UsuarioFormRef } from '@/app/(main)/cadastro/usuarios/form/controller';
 import { createEmptyUserConta } from '@/app/(main)/cadastro/usuarios/types/usuario';
-import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 
 export type { EmpresaFieldsProps, EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
 
@@ -35,12 +34,14 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
     (
         {
             initialId,
+            preloadedEmpresa,
             msgs,
             onEmpresaChange,
             onErrorsChange,
             redirectAfterSave,
             onSaved,
             onClose,
+            onLoadingChange,
             showBTNPGCreatedDialog,
             showBTNPGCreatedAll,
             onBackClick
@@ -117,8 +118,18 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [selectedUserConta, setSelectedUserConta] = useState<UsuarioContaEntity[]>([]);
         const [stateDisableBtnCreatedCompany, setStateDisableBtnCreatedCompany] = useState(false);
+        const hasExistingCertificate = Boolean(empresa.nome_certificado_digital);
+        const hasNewCertificateUpload = Boolean(empresa.certificado_digital);
+        const shouldRequireCertificatePassword = !isEditMode || hasNewCertificateUpload || !hasExistingCertificate;
         const validateEmpresaForm = (empresaAtual = empresa, selectedUser = selectedUserConta[0]) =>
-            validateFieldsEmpresas(empresaAtual, selectedUser, setErrors, msgs, TELEFONE_OBRIGATORIO);
+            validateFieldsEmpresas(
+                empresaAtual,
+                selectedUser,
+                setErrors,
+                msgs,
+                TELEFONE_OBRIGATORIO,
+                shouldRequireCertificatePassword
+            );
         const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
             const { id, value, checked, type } = event.target;
             let newValue = type === 'checkbox' || type === 'switch' ? checked : value;
@@ -229,14 +240,32 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                 prev.copyWith({
                     certificado_digital: '',
                     nome_certificado_digital: '',
-                    data_vencimento_certificado_digital: ''
+                    data_vencimento_certificado_digital: '',
+                    status_certificado_digital: '',
+                    senha_certificado_digital: ''
                 })
             );
-            setErrors((prev) => ({ ...prev, certificado_digital: '' }));
+            setErrors((prev) => ({
+                ...prev,
+                certificado_digital: '',
+                senha_certificado_digital: ''
+            }));
         };
         const handleRemoveFile = () => {
-            setEmpresa((prev) => prev.copyWith({ certificado_digital: '' }));
-            setErrors((prev) => ({ ...prev, certificado_digital: '' }));
+            setEmpresa((prev) =>
+                prev.copyWith({
+                    certificado_digital: '',
+                    nome_certificado_digital: '',
+                    data_vencimento_certificado_digital: '',
+                    status_certificado_digital: '',
+                    senha_certificado_digital: ''
+                })
+            );
+            setErrors((prev) => ({
+                ...prev,
+                certificado_digital: '',
+                senha_certificado_digital: ''
+            }));
             fileUploadRef.current?.clear();
         };
         const handleUserContaSaved = (created: UsuarioContaEntity) => {
@@ -311,8 +340,10 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                     const updated = await updateEmpresa(empresaId, data as CompanyEntity, selectedUserConta, logoAlterada, setErrors, msgs, router, redirectAfterSave ?? true);
 
                     if (updated) {
-                        onSaved?.(updated);
-                        onClose?.();
+                        await onSaved?.(updated);
+                        if (!onSaved) {
+                            onClose?.();
+                        }
                     }
                 } else {
                     const created = await createdEmpresa(
@@ -327,8 +358,10 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                     );
 
                     if (created) {
-                        onSaved?.(created);
-                        onClose?.();
+                        await onSaved?.(created);
+                        if (!onSaved) {
+                            onClose?.();
+                        }
                     }
                 }
             } finally {
@@ -339,23 +372,12 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         const listagemEmpresaID = async (currentEmpresaId: string) => {
             try {
                 setIsLoading(true);
-                const { empresa, userConta, selectedUserConta } = await fetchCompanyByID(currentEmpresaId);
-                const logoEmpresaSource = await resolveLogoEmpresaSource(empresa.logo_empresa);
-                const cnaeOptions = empresa.cnae_fiscal ? await fetchFilteredCnae(empresa.cnae_fiscal) : [];
-                const empresaNormalizada = new CompanyEntity({
-                    ...empresa,
-                    logo_empresa: logoEmpresaSource,
-                    aliquota_outras_retencoes: empresa.aliquota_outras_retencoes ?? 0,
-                    aliquota_deducoes: empresa.aliquota_deducoes ?? 0,
-                    percentual_desconto_incondicionado: empresa.percentual_desconto_incondicionado ?? 0,
-                    percentual_desconto_condicionado: empresa.percentual_desconto_condicionado ?? 0
-                });
-
-                setEmpresa(empresaNormalizada);
+                const companyFormData = await fetchCompanyFormDataByID(currentEmpresaId);
+                setEmpresa(companyFormData.empresa);
                 setLogoAlterada(false);
-                setUserConta(userConta);
-                setSelectedUserConta(selectedUserConta);
-                setSelectedCNAE(findCNAEByCodigo(empresa.cnae_fiscal, cnaeOptions));
+                setUserConta(companyFormData.userConta);
+                setSelectedUserConta(companyFormData.selectedUserConta);
+                setSelectedCNAE(companyFormData.selectedCNAE);
             } finally {
                 setIsLoading(false);
             }
@@ -372,23 +394,45 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         useEffect(() => {
             if (empresaId) {
                 setIsEditMode(true);
+
+                if (preloadedEmpresa?.empresa?.id && String(preloadedEmpresa.empresa.id) === String(empresaId)) {
+                    setEmpresa(preloadedEmpresa.empresa);
+                    setLogoAlterada(false);
+                    setUserConta(preloadedEmpresa.userConta);
+                    setSelectedUserConta(preloadedEmpresa.selectedUserConta);
+                    setSelectedCNAE(preloadedEmpresa.selectedCNAE);
+                    setIsLoading(false);
+                    return;
+                }
+
                 listagemEmpresaID(empresaId).finally(() => setIsLoading(false));
                 return;
             }
 
+            setIsEditMode(false);
             setIsLoading(false);
-        }, [empresaId]);
+        }, [empresaId, preloadedEmpresa]);
         useEffect(() => {
             if (Object.values(touchedFields).some((touched) => touched)) {
-                validateFieldsEmpresas(empresa, selectedUserConta[0], setErrors, msgs, TELEFONE_OBRIGATORIO);
+                validateFieldsEmpresas(
+                    empresa,
+                    selectedUserConta[0],
+                    setErrors,
+                    msgs,
+                    TELEFONE_OBRIGATORIO,
+                    shouldRequireCertificatePassword
+                );
             }
-        }, [empresa, selectedUserConta, touchedFields, msgs]);
+        }, [empresa, selectedUserConta, touchedFields, msgs, shouldRequireCertificatePassword]);
         useEffect(() => {
             onEmpresaChangeRef.current?.(empresa);
         }, [empresa]);
         useEffect(() => {
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
+        useEffect(() => {
+            onLoadingChange?.(isLoading || isLoadingBtnCreated);
+        }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
         if (isLoading && empresaId) {
             return <LoadingScreen loadingText="Carregando informações da Empresa selecionada..." />;
         }
@@ -418,7 +462,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
             typeof empresa.incentivo_fiscal !== 'boolean' ||
             !empresa.tipo_rps ||
             (!empresa.certificado_digital && !empresa.nome_certificado_digital) ||
-            !empresa.senha_certificado_digital ||
+            (shouldRequireCertificatePassword && !empresa.senha_certificado_digital) ||
             !hasValidUserContaSelection;
 
         return (
@@ -435,6 +479,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                     isDesktop={isDesktop}
                     isDarkMode={isDarkMode}
                     isPasswordVisible={isPasswordVisible}
+                    isCertificatePasswordRequired={shouldRequireCertificatePassword}
                     selectedCNAE={selectedCNAE}
                     userConta={userConta}
                     selectedUserConta={selectedUserConta}
@@ -514,3 +559,4 @@ export const FormEmpresaCreated = forwardRef<EmpresaFormRef, FormEmpresaCreatedP
 FormEmpresaCreated.displayName = 'FormEmpresaCreated';
 
 export default FormEmpresaCreated;
+

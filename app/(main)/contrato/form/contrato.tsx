@@ -39,10 +39,15 @@ export function ContratoFields({
     onFormaPagamentoChange,
     onPessoaChange,
     onAddEmpresa,
+    onEditEmpresa,
     onAddServico,
+    onEditServico,
     onAddCategoriaContrato,
+    onEditCategoriaContrato,
     onAddFormaPagamento,
+    onEditFormaPagamento,
     onAddPessoa,
+    onEditPessoa,
     onValidateDescricao
 }: ContratoFieldsProps) {
     return (
@@ -105,6 +110,7 @@ export function ContratoFields({
                                 errorMessage={errors.selectedCompany}
                                 showAddButton
                                 onAddClick={onAddEmpresa}
+                                onEditClick={onEditEmpresa}
                                 autoSelectSingle
                                 required
                             />
@@ -119,6 +125,7 @@ export function ContratoFields({
                                 errorMessage={errors.selectedService}
                                 showAddButton
                                 onAddClick={onAddServico}
+                                onEditClick={onEditServico}
                                 autoSelectSingle
                                 required
                             />
@@ -133,6 +140,7 @@ export function ContratoFields({
                                 errorMessage={errors.selectedCategoriaContrato}
                                 showAddButton
                                 onAddClick={onAddCategoriaContrato}
+                                onEditClick={onEditCategoriaContrato}
                                 autoSelectSingle
                                 required
                             />
@@ -147,6 +155,7 @@ export function ContratoFields({
                                 errorMessage={errors.selectedFormadePagamento}
                                 showAddButton
                                 onAddClick={onAddFormaPagamento}
+                                onEditClick={onEditFormaPagamento}
                                 autoSelectSingle={false}
                                 required
                             />
@@ -166,6 +175,7 @@ export function ContratoFields({
                                 initialSelectedValues={contrato.id_clientes_contrato ?? []}
                                 showAddButton
                                 onAddClick={onAddPessoa}
+                                onEditClick={onEditPessoa}
                                 placeholder="Selecione Cliente ou Fornecedor"
                                 topLabel="Cliente ou Fornecedor:"
                                 showTopLabel
@@ -173,7 +183,7 @@ export function ContratoFields({
                                 showChips={false}                            />
                         </div>
                     </div>
-                    <div className="grid formgrid contrato-switch-group">
+                    <div className="grid formgrid contrato-switch-group w-full">
                         <div className="col-12 md:col-2">
                             <div className="switchRow">
                                 <InputSwitch

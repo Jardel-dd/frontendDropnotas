@@ -4,7 +4,7 @@ import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { ContratoFields } from './contrato';
 import { useRouter } from 'next/navigation';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
@@ -25,18 +25,31 @@ import { FormCreatedFormaPagamento } from '../../cadastro/formaPagamento/form/co
 import FormCategoriaContratoCreated from '../../cadastro/categoriaContratos/form/controller';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import { listTheFormaPagamento } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
+import { toFormaPagamentoEntity } from '@/app/(main)/cadastro/formaPagamento/types/formaPagamento';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
-import type {ContratoFormProps, ContratoFormRef,FormContratoCreatedProps} from '../types/contratos';
+import type { ContratoFormProps, ContratoFormRef, FormContratoCreatedProps } from '../types/contratos';
 import { createContrato, fetchContratosById, updateContrato } from '@/app/(main)/contrato/controller/controller';
-export type {ContratoFieldsProps, ContratoFormProps,ContratoFormRef,FormContratoCreatedProps} from '../types/contratos';
+import type { PreloadedEmpresaData } from '@/app/(main)/configuracoes/empresas/types/empresa';
+import { fetchCompanyDropdownByID, fetchCompanyFormDataByID } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import type { PreloadedPessoaData } from '@/app/(main)/cadastro/pessoas/types/pessoa';
+import { fetchPessoasById } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import type { PreloadedServicoData } from '@/app/(main)/cadastro/servicos/types/servico';
+import { fetchServiceFormDataByID, fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
+import { fetchFormaPagamentoByID } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
+import { fetchCategoriaContratoByID } from '@/app/(main)/cadastro/categoriaContratos/controller/controller';
+export type { ContratoFieldsProps, ContratoFormProps, ContratoFormRef, FormContratoCreatedProps } from '../types/contratos';
 const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
     (
         {
             initialId,
+            preloadedContrato,
             msgs,
             onContratoChange,
             onErrorsChange,
+            redirectAfterSave,
             onClose,
+            onSaved,
+            onLoadingChange,
             showBTNPGCreatedDialog,
             showBTNPGCreatedAll,
             onBackClick
@@ -155,11 +168,21 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
         const [reloadKeyEmpresa, setReloadKeyEmpresa] = useState(0);
         const [reloadKeyServico, setReloadKeyServico] = useState(0);
+        const [pessoaDialogKey, setPessoaDialogKey] = useState(0);
+        const [empresaDialogKey, setEmpresaDialogKey] = useState(0);
+        const [servicoDialogKey, setServicoDialogKey] = useState(0);
+        const [formaPagamentoDialogKey, setFormaPagamentoDialogKey] = useState(0);
+        const [categoriaContratoDialogKey, setCategoriaContratoDialogKey] = useState(0);
         const [showModalPessoa, setShowModalPessoa] = useState(false);
         const [showModalServico, setShowModalServico] = useState(false);
         const [showModalEmpresa, setShowModalEmpresa] = useState(false);
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
+        const [isPessoaDialogLoading, setIsPessoaDialogLoading] = useState(false);
+        const [isEmpresaDialogLoading, setIsEmpresaDialogLoading] = useState(false);
+        const [isServicoDialogLoading, setIsServicoDialogLoading] = useState(false);
+        const [isFormaPagamentoDialogLoading, setIsFormaPagamentoDialogLoading] = useState(false);
+        const [isCategoriaContratoDialogLoading, setIsCategoriaContratoDialogLoading] = useState(false);
         const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity[]>([]);
         const [reloadKeyFormaPagamento, setReloadKeyFormaPagamento] = useState(0);
         const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoEntity>(
@@ -190,6 +213,16 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         );
         const [selectedFormadePagamento, setSelectedFormadePagamento] = useState<FormaPagamentoEntity | null>(null);
         const [selectedCategoriaContrato, setSelectedCategoriaContrato] = useState<CategoryContratosEntity | null>(null);
+        const [preloadedPessoa, setPreloadedPessoa] = useState<PreloadedPessoaData | null>(null);
+        const [editingPessoaId, setEditingPessoaId] = useState<string | null>(null);
+        const [preloadedEmpresa, setPreloadedEmpresa] = useState<PreloadedEmpresaData | null>(null);
+        const [editingEmpresaId, setEditingEmpresaId] = useState<string | null>(null);
+        const [preloadedServico, setPreloadedServico] = useState<PreloadedServicoData | null>(null);
+        const [editingServicoId, setEditingServicoId] = useState<string | null>(null);
+        const [preloadedFormaPagamento, setPreloadedFormaPagamento] = useState<FormaPagamentoEntity | null>(null);
+        const [editingFormaPagamentoId, setEditingFormaPagamentoId] = useState<string | null>(null);
+        const [preloadedCategoriaContrato, setPreloadedCategoriaContrato] = useState<CategoryContratosEntity | null>(null);
+        const [editingCategoriaContratoId, setEditingCategoriaContratoId] = useState<string | null>(null);
         const clearErrors = (...keys: string[]) => {
             setErrors((prevErrors) => {
                 const newErrors = { ...prevErrors };
@@ -253,12 +286,55 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
 
             clearErrors('service', 'selectedService');
         };
-        const handleServiceSaved = (created: ServiceEntity) => {
+        const openCreateServicoDialog = () => {
+            setIsServicoDialogLoading(true);
+            setEditingServicoId(null);
+            setPreloadedServico(null);
+            setServicoDialogKey((current) => current + 1);
+            setShowModalServico(true);
+        };
+        const openEditServicoDialog = async (servicoSelecionado: ServiceEntity) => {
+            if (!servicoSelecionado?.id) {
+                return;
+            }
+
+            setIsServicoDialogLoading(true);
+
+            try {
+                const servicoId = String(servicoSelecionado.id);
+                const serviceFormData = await fetchServiceFormDataByID(servicoId);
+                setPreloadedServico(serviceFormData);
+                setEditingServicoId(servicoId);
+                setServicoDialogKey((current) => current + 1);
+                setShowModalServico(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar servico para edicao do contrato:', error);
+                setIsServicoDialogLoading(false);
+            }
+        };
+        const closeServicoDialog = () => {
             setShowModalServico(false);
-            setSelectedService(created);
-            updateContratoField('id_servico', created.id);
-            clearErrors('service', 'selectedService');
-            setReloadKeyServico((current) => current + 1);
+            setEditingServicoId(null);
+            setIsServicoDialogLoading(true);
+            setPreloadedServico(null);
+        };
+        const handleServiceSaved = async (created: ServiceEntity) => {
+            setIsServicoDialogLoading(true);
+            let servicoAtualizado = created;
+
+            try {
+                if (created?.id) {
+                    const response = await fetchServicesByID(String(created.id));
+                    servicoAtualizado = response.servico;
+                }
+
+                setSelectedService(servicoAtualizado);
+                updateContratoField('id_servico', servicoAtualizado.id);
+                clearErrors('service', 'selectedService');
+                setReloadKeyServico((current) => current + 1);
+            } finally {
+                closeServicoDialog();
+            }
         };
         const handleFormaPagamentoChange = (formaPagamentoSelecionada: FormaPagamentoEntity | null) => {
             setSelectedFormadePagamento(formaPagamentoSelecionada);
@@ -270,14 +346,48 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
             clearErrors('formaPagamento', 'selectedFormadePagamento');
         };
         const handleFormaPagamento = (updatedFormaPagamento: FormaPagamentoEntity) => {
-            setFormaPagamento(updatedFormaPagamento);
+            setFormaPagamento(toFormaPagamentoEntity(updatedFormaPagamento));
+        };
+        const openCreateFormaPagamentoDialog = () => {
+            setIsFormaPagamentoDialogLoading(true);
+            setEditingFormaPagamentoId(null);
+            setPreloadedFormaPagamento(null);
+            setFormaPagamentoDialogKey((current) => current + 1);
+            setShowModalFormaPagamento(true);
+        };
+        const openEditFormaPagamentoDialog = async (formaPagamentoSelecionada: FormaPagamentoEntity) => {
+            if (!formaPagamentoSelecionada?.id) {
+                return;
+            }
+
+            setIsFormaPagamentoDialogLoading(true);
+
+            try {
+                const formaPagamentoId = String(formaPagamentoSelecionada.id);
+                const response = await fetchFormaPagamentoByID(formaPagamentoId);
+                const formaPagamentoPrecarregada = toFormaPagamentoEntity(response.formaPagamento);
+                setFormaPagamento(formaPagamentoPrecarregada);
+                setPreloadedFormaPagamento(formaPagamentoPrecarregada);
+                setEditingFormaPagamentoId(formaPagamentoId);
+                setFormaPagamentoDialogKey((current) => current + 1);
+                setShowModalFormaPagamento(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar forma de pagamento para edicao do contrato:', error);
+                setIsFormaPagamentoDialogLoading(false);
+            }
+        };
+        const closeFormaPagamentoDialog = () => {
+            setShowModalFormaPagamento(false);
+            setEditingFormaPagamentoId(null);
+            setIsFormaPagamentoDialogLoading(true);
+            setPreloadedFormaPagamento(null);
         };
         const handleFormaPagamentoSaved = async (created: FormaPagamentoEntity) => {
             try {
-                setShowModalFormaPagamento(false);
+                setIsFormaPagamentoDialogLoading(true);
                 const createdId = Number((created as any).id ?? (created as any).id_forma_pagamento);
-                const allFormaPagamento = await listTheFormaPagamento();
-                const match = allFormaPagamento.find((item: any) => Number(item.id) === createdId);
+                const response = createdId ? await fetchFormaPagamentoByID(String(createdId)) : null;
+                const match = response?.formaPagamento ? toFormaPagamentoEntity(response.formaPagamento) : null;
 
                 if (match) {
                     setSelectedFormadePagamento(match);
@@ -297,17 +407,60 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
             } catch (error) {
                 console.error('[handleFormaPagamentoSaved] erro:', error);
                 setReloadKeyFormaPagamento((current) => current + 1);
+            } finally {
+                closeFormaPagamentoDialog();
             }
         };
-        const handleCategoriaContratoSaved = (created: CategoryContratosEntity) => {
-            setShowModalCategoriaContrato(false);
-            setSelectedCategoriaContrato(created);
-            updateContratoField('id_categoria_contrato', created.id);
-            clearErrors('categoriaContrato', 'selectedCategoriaContrato');
-            setReloadKeyCategoriaContrato((current) => current + 1);
+        const handleCategoriaContratoSaved = async (created: CategoryContratosEntity) => {
+            setIsCategoriaContratoDialogLoading(true);
+            try {
+                const response = created?.id ? await fetchCategoriaContratoByID(String(created.id)) : null;
+                const categoriaAtualizada = response?.categoriaContrato
+                    ? new CategoryContratosEntity(response.categoriaContrato)
+                    : created;
+
+                setSelectedCategoriaContrato(categoriaAtualizada);
+                updateContratoField('id_categoria_contrato', categoriaAtualizada.id);
+                clearErrors('categoriaContrato', 'selectedCategoriaContrato');
+                setReloadKeyCategoriaContrato((current) => current + 1);
+            } finally {
+                closeCategoriaContratoDialog();
+            }
         };
         const handleCategoriaContrato = (updatedCategoriaContrato: CategoryContratosEntity) => {
             setCategoriaContrato(updatedCategoriaContrato);
+        };
+        const openCreateCategoriaContratoDialog = () => {
+            setIsCategoriaContratoDialogLoading(true);
+            setEditingCategoriaContratoId(null);
+            setPreloadedCategoriaContrato(null);
+            setCategoriaContratoDialogKey((current) => current + 1);
+            setShowModalCategoriaContrato(true);
+        };
+        const openEditCategoriaContratoDialog = async (categoriaContratoSelecionada: CategoryContratosEntity) => {
+            if (!categoriaContratoSelecionada?.id) {
+                return;
+            }
+
+            setIsCategoriaContratoDialogLoading(true);
+
+            try {
+                const categoriaContratoId = String(categoriaContratoSelecionada.id);
+                const response = await fetchCategoriaContratoByID(categoriaContratoId);
+                setPreloadedCategoriaContrato(new CategoryContratosEntity(response.categoriaContrato));
+                setEditingCategoriaContratoId(categoriaContratoId);
+                setCategoriaContratoDialogKey((current) => current + 1);
+                setShowModalCategoriaContrato(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar categoria de contrato para edicao do contrato:', error);
+                setIsCategoriaContratoDialogLoading(false);
+            }
+        };
+        const closeCategoriaContratoDialog = () => {
+            setShowModalCategoriaContrato(false);
+            setEditingCategoriaContratoId(null);
+            setIsCategoriaContratoDialogLoading(true);
+            setPreloadedCategoriaContrato(null);
         };
         const handleCategoriaContratoChange = (categoriaContratoSelecionada: CategoryContratosEntity | null) => {
             setSelectedCategoriaContrato(categoriaContratoSelecionada);
@@ -318,23 +471,76 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
 
             clearErrors('categoriaContrato', 'selectedCategoriaContrato');
         };
-        const handlePessoaSaved = (created: PessoaEntity) => {
+        const upsertPessoaInList = (lista: PessoaEntity[], pessoaAtualizada: PessoaEntity) => {
+            const hasPessoa = lista.some((pessoaExistente) => pessoaExistente.id === pessoaAtualizada.id);
+
+            if (!hasPessoa) {
+                return [...lista, pessoaAtualizada];
+            }
+
+            return lista.map((pessoaExistente) =>
+                pessoaExistente.id === pessoaAtualizada.id ? pessoaAtualizada : pessoaExistente
+            );
+        };
+        const openCreatePessoaDialog = () => {
+            setIsPessoaDialogLoading(true);
+            setEditingPessoaId(null);
+            setPreloadedPessoa(null);
+            setPessoaDialogKey((current) => current + 1);
+            setShowModalPessoa(true);
+        };
+        const openEditPessoaDialog = async (pessoaSelecionada: PessoaEntity) => {
+            if (!pessoaSelecionada?.id) {
+                return;
+            }
+
+            setIsPessoaDialogLoading(true);
+
+            try {
+                const pessoaId = String(pessoaSelecionada.id);
+                const pessoaPrecarregada = await fetchPessoasById(pessoaId);
+                setPreloadedPessoa({
+                    dataPessoa: pessoaPrecarregada.dataPessoa,
+                    selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null
+                });
+                setEditingPessoaId(pessoaId);
+                setPessoaDialogKey((current) => current + 1);
+                setShowModalPessoa(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar cliente/fornecedor para edicao do contrato:', error);
+                setIsPessoaDialogLoading(false);
+            }
+        };
+        const closePessoaDialog = () => {
             setShowModalPessoa(false);
-            setSelectedPessoa((prev) => {
-                const nextSelectedPessoa = prev.some((pessoaSelecionada) => pessoaSelecionada.id === created.id)
-                    ? prev
-                    : [...prev, created];
-                updateContratoField('id_clientes_contrato', nextSelectedPessoa.map((pessoaSelecionada) => pessoaSelecionada.id));
-                return nextSelectedPessoa;
-            });
-            clearErrors('selectedPessoa');
-            setReloadKeyPessoa((current) => current + 1);
+            setEditingPessoaId(null);
+            setIsPessoaDialogLoading(true);
+            setPreloadedPessoa(null);
+        };
+        const handlePessoaSaved = async (created: PessoaEntity) => {
+            setIsPessoaDialogLoading(true);
+            let pessoaAtualizada = created;
+
+            try {
+                if (created?.id) {
+                    const response = await fetchPessoasById(String(created.id));
+                    pessoaAtualizada = response.dataPessoa;
+                }
+
+                setPessoa((prev) => upsertPessoaInList(prev, pessoaAtualizada));
+                setSelectedPessoa((prev) => {
+                    const nextSelectedPessoa = upsertPessoaInList(prev, pessoaAtualizada);
+                    updateContratoField('id_clientes_contrato', nextSelectedPessoa.map((pessoaSelecionada) => pessoaSelecionada.id));
+                    return nextSelectedPessoa;
+                });
+                clearErrors('selectedPessoa');
+                setReloadKeyPessoa((current) => current + 1);
+            } finally {
+                closePessoaDialog();
+            }
         };
         const handlePessoaContrato = (updatedPessoa: PessoaEntity) => {
-            setPessoa((prev) => {
-                const exists = prev.some((pessoaExistente) => pessoaExistente.id === updatedPessoa.id);
-                return exists ? prev : [...prev, updatedPessoa];
-            });
+            setPessoa((prev) => upsertPessoaInList(prev, updatedPessoa));
         };
         const handlePessoaChange = (pessoasSelecionadas: PessoaEntity[]) => {
             setSelectedPessoa(pessoasSelecionadas);
@@ -345,20 +551,38 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
             if (event) event.preventDefault();
             if (isLoadingBtnCreated) return;
 
+            console.log('[ContratoForm] handleSubmit iniciado', {
+                isEditMode,
+                contratoId,
+                redirectAfterSave
+            });
             setIsLoadingBtnCreated(true);
             msgs.current?.clear();
 
             try {
                 const isValid = validateContratoForm();
+                console.log('[ContratoForm] resultado da validacao', { isValid });
 
                 if (!isValid) {
+                    console.log('[ContratoForm] envio interrompido por validacao');
                     return;
                 }
 
                 if (isEditMode && contratoId) {
-                    await updateContrato(contratoId, contrato, setErrors, msgs, router, setContrato);
+                    const updated = await updateContrato(contratoId, contrato, setErrors, msgs, router, setContrato, redirectAfterSave ?? true);
+                    console.log('[ContratoForm] retorno do updateContrato', updated);
+
+                    if (updated) {
+                        const normalizedContrato = updated instanceof ContratoEntity ? updated : new ContratoEntity(updated);
+                        console.log('[ContratoForm] chamando onSaved do contrato', normalizedContrato);
+                        await onSaved?.(normalizedContrato);
+                        if (!onSaved) {
+                            console.log('[ContratoForm] chamando onClose do contrato');
+                            onClose?.();
+                        }
+                    }
                 } else {
-                    await createContrato(
+                    const created = await createContrato(
                         contrato,
                         selectedCategoriaContrato,
                         selectedCompany!,
@@ -370,10 +594,23 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                         setSelectedPessoa,
                         setErrors,
                         msgs,
-                        router
+                        router,
+                        redirectAfterSave ?? true
                     );
+                    console.log('[ContratoForm] retorno do createContrato', created);
+
+                    if (created) {
+                        const normalizedContrato = created instanceof ContratoEntity ? created : new ContratoEntity(created);
+                        console.log('[ContratoForm] chamando onSaved do contrato criado', normalizedContrato);
+                        await onSaved?.(normalizedContrato);
+                        if (!onSaved) {
+                            console.log('[ContratoForm] chamando onClose do contrato criado');
+                            onClose?.();
+                        }
+                    }
                 }
             } finally {
+                console.log('[ContratoForm] finalizando submit');
                 setIsLoadingBtnCreated(false);
             }
         };
@@ -408,12 +645,58 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         const handleEmpresa = (updatedEmpresa: CompanyEntity) => {
             setEmpresa(updatedEmpresa);
         };
-        const handleEmpresaSaved = (created: CompanyEntity) => {
+        const openCreateEmpresaDialog = () => {
+            setIsEmpresaDialogLoading(true);
+            setEditingEmpresaId(null);
+            setPreloadedEmpresa(null);
+            setEmpresaDialogKey((current) => current + 1);
+            setShowModalEmpresa(true);
+        };
+        const openEditEmpresaDialog = async (empresaSelecionada: CompanyEntity) => {
+            if (!empresaSelecionada?.id) {
+                return;
+            }
+
+            setIsEmpresaDialogLoading(true);
+
+            try {
+                const empresaId = String(empresaSelecionada.id);
+                const companyFormData = await fetchCompanyFormDataByID(empresaId);
+                setPreloadedEmpresa(companyFormData);
+                setEditingEmpresaId(empresaId);
+                setEmpresaDialogKey((current) => current + 1);
+                setShowModalEmpresa(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar empresa para edicao do contrato:', error);
+                setIsEmpresaDialogLoading(false);
+            }
+        };
+        const closeEmpresaDialog = () => {
             setShowModalEmpresa(false);
-            setSelectedCompany(created);
-            updateContratoField('id_empresa', created.id);
-            clearErrors('selectedCompany');
-            setReloadKeyEmpresa((current) => current + 1);
+            setEditingEmpresaId(null);
+            setIsEmpresaDialogLoading(true);
+            setPreloadedEmpresa(null);
+        };
+        const handleEmpresaSaved = async (created: CompanyEntity) => {
+            setIsEmpresaDialogLoading(true);
+            let empresaAtualizada = created;
+
+            try {
+                if (created?.id) {
+                    const response = await fetchCompanyDropdownByID(String(created.id));
+
+                    if (response) {
+                        empresaAtualizada = response;
+                    }
+                }
+
+                setSelectedCompany(empresaAtualizada);
+                updateContratoField('id_empresa', empresaAtualizada.id);
+                clearErrors('selectedCompany');
+                setReloadKeyEmpresa((current) => current + 1);
+            } finally {
+                closeEmpresaDialog();
+            }
         };
         const listagemContratoId = async (currentContratoId: string) => {
             try {
@@ -456,13 +739,35 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         useEffect(() => {
             if (contratoId) {
                 setIsEditMode(true);
+
+                if (preloadedContrato && String(preloadedContrato.dataContrato.id) === String(contratoId)) {
+                    setContrato(preloadedContrato.dataContrato);
+                    setSelectedCompany(preloadedContrato.selectedEmpresa ?? null);
+                    setSelectedService(preloadedContrato.selectedService ?? null);
+                    setSelectedCategoriaContrato(preloadedContrato.selectedCategoriaContrato ?? null);
+                    setSelectedFormadePagamento(preloadedContrato.selectedFormaPagamento ?? null);
+                    setPessoa(preloadedContrato.pessoa ?? []);
+                    setSelectedPessoa(preloadedContrato.selectedPessoa ?? []);
+                    setIsLoading(false);
+                    return;
+                }
+
                 listagemContratoId(contratoId);
                 return;
             }
 
+            setIsEditMode(false);
             setSelectedPessoa([]);
             setIsLoading(false);
-        }, [contratoId]);
+        }, [contratoId, preloadedContrato]);
+        useEffect(() => {
+            console.log('[ContratoForm] loading alterado', {
+                isLoading,
+                isLoadingBtnCreated,
+                loadingCombinado: isLoading || isLoadingBtnCreated
+            });
+            onLoadingChange?.(isLoading || isLoadingBtnCreated);
+        }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
         useEffect(() => {
             if (Object.values(touchedFields).some((touched) => touched)) {
                 validateFieldsContrato(
@@ -486,6 +791,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         if (isLoading && contratoId) {
             return <LoadingScreen loadingText="Carregando informações do Contrato selecionado..." />;
         }
+        const isDialogMode = Boolean(showBTNPGCreatedDialog || onClose || onBackClick);
         const isSubmitDisabled =
             isLoadingBtnCreated ||
             Object.keys(errors).length > 0 ||
@@ -498,143 +804,197 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
             (selectedPessoa.length === 0 && !(contrato.id_clientes_contrato?.length ?? 0)) ||
             !contrato.periodicidade;
         return (
-            <div className="p-fluid">
-                <Messages ref={msgs} className="custom-messages" />
-                <div className="card styled-container-main-all-routes">
-                    <ContratoFields
-                        contrato={contrato}
-                        errors={errors}
-                        selectedPessoa={selectedPessoa}
-                        pessoaOptions={pessoa}
-                        selectedCompany={selectedCompany}
-                        selectedService={selectedService}
-                        selectedCategoriaContrato={selectedCategoriaContrato}
-                        selectedFormaPagamento={selectedFormadePagamento}
-                        reloadKeyPessoa={reloadKeyPessoa}
-                        reloadKeyEmpresa={reloadKeyEmpresa}
-                        reloadKeyServico={reloadKeyServico}
-                        reloadKeyCategoriaContrato={reloadKeyCategoriaContrato}
-                        reloadKeyFormaPagamento={reloadKeyFormaPagamento}
-                        onChange={handleAllChanges}
-                        onDropdownChange={handleDropdownChange}
-                        onNumberChange={handleNumberChange}
-                        onCompanyChange={handleCompanyChange}
-                        onServiceChange={handleServicoChange}
-                        onCategoriaContratoChange={handleCategoriaContratoChange}
-                        onFormaPagamentoChange={handleFormaPagamentoChange}
-                        onPessoaChange={handlePessoaChange}
-                        onAddEmpresa={() => setShowModalEmpresa(true)}
-                        onAddServico={() => setShowModalServico(true)}
-                        onAddCategoriaContrato={() => setShowModalCategoriaContrato(true)}
-                        onAddFormaPagamento={() => setShowModalFormaPagamento(true)}
-                        onAddPessoa={() => setShowModalPessoa(true)}
-                        onValidateDescricao={() => {
-                            setTouchedFields((prev) => ({ ...prev, descricao: true }));
-                            validateContratoForm();
-                        }}
-                    />
-                    <div className="StyleContainer-btn-Created">
-                        {showBTNPGCreatedAll && (
-                            <BTNPGCreatedAll
-                                onClick={async () => await handleSubmit()}
-                                label="Salvar"
-                                disabled={isSubmitDisabled}
-                                icon="pi pi-save"
-                            />
-                        )}
-                        {showBTNPGCreatedDialog && (
-                            <BTNPGCreatedDialog
-                                onClick={async () => await handleSubmit()}
-                                disabled={isSubmitDisabled}
-                                icon="pi pi-save"
-                                onBackClick={onBackClick}
-                                onClose={onClose}
-                                label="Salvar"
-                            />
-                        )}
+            <>
+                <div className={` shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
+                    <Messages ref={msgs} className="custom-messages" />
+                    <div className="scrollable-container shared-form-content">
+                        <ContratoFields
+                            contrato={contrato}
+                            errors={errors}
+                            selectedPessoa={selectedPessoa}
+                            pessoaOptions={pessoa}
+                            selectedCompany={selectedCompany}
+                            selectedService={selectedService}
+                            selectedCategoriaContrato={selectedCategoriaContrato}
+                            selectedFormaPagamento={selectedFormadePagamento}
+                            reloadKeyPessoa={reloadKeyPessoa}
+                            reloadKeyEmpresa={reloadKeyEmpresa}
+                            reloadKeyServico={reloadKeyServico}
+                            reloadKeyCategoriaContrato={reloadKeyCategoriaContrato}
+                            reloadKeyFormaPagamento={reloadKeyFormaPagamento}
+                            onChange={handleAllChanges}
+                            onDropdownChange={handleDropdownChange}
+                            onNumberChange={handleNumberChange}
+                            onCompanyChange={handleCompanyChange}
+                            onServiceChange={handleServicoChange}
+                            onCategoriaContratoChange={handleCategoriaContratoChange}
+                            onFormaPagamentoChange={handleFormaPagamentoChange}
+                            onPessoaChange={handlePessoaChange}
+                            onAddEmpresa={openCreateEmpresaDialog}
+                            onEditEmpresa={openEditEmpresaDialog}
+                            onAddServico={openCreateServicoDialog}
+                            onEditServico={openEditServicoDialog}
+                            onAddCategoriaContrato={openCreateCategoriaContratoDialog}
+                            onEditCategoriaContrato={openEditCategoriaContratoDialog}
+                            onAddFormaPagamento={openCreateFormaPagamentoDialog}
+                            onEditFormaPagamento={openEditFormaPagamentoDialog}
+                            onAddPessoa={openCreatePessoaDialog}
+                            onEditPessoa={openEditPessoaDialog}
+                            onValidateDescricao={() => {
+                                setTouchedFields((prev) => ({ ...prev, descricao: true }));
+                                validateContratoForm();
+                            }}
+                        />
                     </div>
-                    <DialogFilter header="Adicionar Serviço" visible={showModalServico} onHide={() => setShowModalServico(false)}>
-                        <FormCreatedServico
-                            msgs={msgs}
-                            ref={formRef}
-                            servico={servico}
-                            initialId={null}
-                            setServico={setServico}
-                            onServicoChange={handleServico}
-                            onErrorsChange={handleErrorsChange}
-                            redirectAfterSave={false}
-                            onSaved={handleServiceSaved}
-                            onClose={() => setShowModalServico(false)}
-                            showBTNPGCreatedDialog
-                            onBackClick={() => setShowModalServico(false)}
-                        />
-                    </DialogFilter>
-                    <DialogFilter header="Adicionar Forma de Pagamento" visible={showModalFormaPagamento} onHide={() => setShowModalFormaPagamento(false)}>
-                        <FormCreatedFormaPagamento
-                            msgs={msgs}
-                            ref={formRef}
-                            formaPagamento={formaPagamento}
-                            initialId={null}
-                            setFormaPagamento={setFormaPagamento}
-                            onFormaPagamentoChange={handleFormaPagamento}
-                            onErrorsChange={handleErrorsChange}
-                            redirectAfterSave={false}
-                            onSaved={handleFormaPagamentoSaved}
-                            onClose={() => setShowModalFormaPagamento(false)}
-                            showBTNPGCreatedDialog
-                            onBackClick={() => setShowModalFormaPagamento(false)}
-                        />
-                    </DialogFilter>
-                    <DialogFilter header="Adicionar Categoria de Contratos" visible={showModalCategoriaContrato} onHide={() => setShowModalCategoriaContrato(false)}>
-                        <FormCategoriaContratoCreated
-                            msgs={msgs}
-                            ref={formRef}
-                            categoriaContrato={categoriaContrato}
-                            initialId={null}
-                            setCategoriaContrato={setCategoriaContrato}
-                            onCategoriaContratoChange={handleCategoriaContrato}
-                            onErrorsChange={handleErrorsChange}
-                            redirectAfterSave={false}
-                            onSaved={handleCategoriaContratoSaved}
-                            onClose={() => setShowModalCategoriaContrato(false)}
-                            showBTNPGCreatedDialog
-                            onBackClick={() => setShowModalCategoriaContrato(false)}
-                        />
-                    </DialogFilter>
-                    <DialogFilter header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
-                        <FormCreatedPessoa
-                            msgs={msgs}
-                            ref={formRef}
-                            pessoa={pessoa}
-                            initialId={null}
-                            setPessoa={setPessoa}
-                            onPessoaChange={handlePessoaContrato}
-                            onErrorsChange={handleErrorsChange}
-                            redirectAfterSave={false}
-                            onSaved={handlePessoaSaved}
-                            onClose={() => setShowModalPessoa(false)}
-                            showBTNPGCreatedDialog
-                            onBackClick={() => setShowModalPessoa(false)}
-                        />
-                    </DialogFilter>
-                    <DialogFilter header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
-                        <FormEmpresaCreated
-                            msgs={msgs}
-                            ref={formRef}
-                            empresa={empresa}
-                            initialId={null}
-                            setEmpresa={setEmpresa}
-                            onEmpresaChange={handleEmpresa}
-                            onErrorsChange={handleErrorsChange}
-                            redirectAfterSave={false}
-                            onSaved={handleEmpresaSaved}
-                            onClose={() => setShowModalEmpresa(false)}
-                            showBTNPGCreatedDialog
-                            onBackClick={() => setShowModalEmpresa(false)}
-                        />
-                    </DialogFilter>
+
+
                 </div>
-            </div>
+                <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
+                    {showBTNPGCreatedAll && (
+                        <BTNPGCreatedAll
+                            onClick={async () => await handleSubmit()}
+                            label="Salvar"
+                            disabled={isSubmitDisabled}
+                            icon="pi pi-save"
+                        />
+                    )}
+                    {showBTNPGCreatedDialog && (
+                        <BTNPGCreatedDialog
+                            onClick={async () => await handleSubmit()}
+                            disabled={isSubmitDisabled}
+                            icon="pi pi-save"
+                            onBackClick={onBackClick}
+                            onClose={onClose}
+                            label="Salvar"
+                        />
+                    )}
+                </div>
+                <DialogFilter
+                    header={editingServicoId ? 'Editar Servico' : 'Adicionar Servico'}
+                    visible={showModalServico}
+                    onHide={closeServicoDialog}
+                    loading={isServicoDialogLoading}
+                    loadingText={editingServicoId ? 'Carregando informacoes do Servico...' : 'Abrindo cadastro de Servico...'}
+                >
+                    <FormCreatedServico
+                        key={`${editingServicoId ?? 'novo'}-${servicoDialogKey}`}
+                        msgs={msgs}
+                        ref={formRef}
+                        servico={servico}
+                        initialId={editingServicoId}
+                        preloadedServico={preloadedServico}
+                        setServico={setServico}
+                        onServicoChange={handleServico}
+                        onErrorsChange={handleErrorsChange}
+                        redirectAfterSave={false}
+                        onSaved={handleServiceSaved}
+                        onLoadingChange={setIsServicoDialogLoading}
+                        onClose={closeServicoDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closeServicoDialog}
+                    />
+                </DialogFilter>
+                <DialogFilter
+                    header={editingFormaPagamentoId ? 'Editar Forma de Pagamento' : 'Adicionar Forma de Pagamento'}
+                    visible={showModalFormaPagamento}
+                    onHide={closeFormaPagamentoDialog}
+                    loading={isFormaPagamentoDialogLoading}
+                    loadingText={editingFormaPagamentoId ? 'Carregando informacoes da Forma de Pagamento...' : 'Abrindo cadastro de Forma de Pagamento...'}
+                >
+                    <FormCreatedFormaPagamento
+                        key={`${editingFormaPagamentoId ?? 'novo'}-${formaPagamentoDialogKey}`}
+                        msgs={msgs}
+                        ref={formRef}
+                        formaPagamento={formaPagamento}
+                        initialId={editingFormaPagamentoId}
+                        preloadedFormaPagamento={preloadedFormaPagamento}
+                        setFormaPagamento={setFormaPagamento}
+                        onFormaPagamentoChange={handleFormaPagamento}
+                        onErrorsChange={handleErrorsChange}
+                        redirectAfterSave={false}
+                        onSaved={handleFormaPagamentoSaved}
+                        onLoadingChange={setIsFormaPagamentoDialogLoading}
+                        onClose={closeFormaPagamentoDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closeFormaPagamentoDialog}
+                    />
+                </DialogFilter>
+                <DialogFilter
+                    header={editingCategoriaContratoId ? 'Editar Categoria de Contratos' : 'Adicionar Categoria de Contratos'}
+                    visible={showModalCategoriaContrato}
+                    onHide={closeCategoriaContratoDialog}
+                    loading={isCategoriaContratoDialogLoading}
+                    loadingText={editingCategoriaContratoId ? 'Carregando informacoes da Categoria de Contratos...' : 'Abrindo cadastro de Categoria de Contratos...'}
+                >
+                    <FormCategoriaContratoCreated
+                        key={`${editingCategoriaContratoId ?? 'novo'}-${categoriaContratoDialogKey}`}
+                        msgs={msgs}
+                        ref={formRef}
+                        categoriaContrato={categoriaContrato}
+                        initialId={editingCategoriaContratoId}
+                        preloadedCategoriaContrato={preloadedCategoriaContrato}
+                        setCategoriaContrato={setCategoriaContrato}
+                        onCategoriaContratoChange={handleCategoriaContrato}
+                        onErrorsChange={handleErrorsChange}
+                        redirectAfterSave={false}
+                        onSaved={handleCategoriaContratoSaved}
+                        onLoadingChange={setIsCategoriaContratoDialogLoading}
+                        onClose={closeCategoriaContratoDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closeCategoriaContratoDialog}
+                    />
+                </DialogFilter>
+                <DialogFilter
+                    header={editingPessoaId ? 'Editar Cliente ou Fornecedor' : 'Adicionar Cliente ou Fornecedor'}
+                    visible={showModalPessoa}
+                    onHide={closePessoaDialog}
+                    loading={isPessoaDialogLoading}
+                    loadingText={editingPessoaId ? 'Carregando informacoes do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
+                >
+                    <FormCreatedPessoa
+                        key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
+                        msgs={msgs}
+                        ref={formRef}
+                        pessoa={pessoa}
+                        initialId={editingPessoaId}
+                        preloadedPessoa={preloadedPessoa}
+                        setPessoa={setPessoa}
+                        onPessoaChange={handlePessoaContrato}
+                        onErrorsChange={handleErrorsChange}
+                        redirectAfterSave={false}
+                        onSaved={handlePessoaSaved}
+                        onLoadingChange={setIsPessoaDialogLoading}
+                        onClose={closePessoaDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closePessoaDialog}
+                    />
+                </DialogFilter>
+                <DialogFilter
+                    header={editingEmpresaId ? 'Editar Empresa' : 'Adicionar Empresa'}
+                    visible={showModalEmpresa}
+                    onHide={closeEmpresaDialog}
+                    loading={isEmpresaDialogLoading}
+                    loadingText={editingEmpresaId ? 'Carregando informacoes da Empresa...' : 'Abrindo cadastro de Empresa...'}
+                >
+                    <FormEmpresaCreated
+                        key={`${editingEmpresaId ?? 'novo'}-${empresaDialogKey}`}
+                        msgs={msgs}
+                        ref={formRef}
+                        empresa={empresa}
+                        initialId={editingEmpresaId}
+                        preloadedEmpresa={preloadedEmpresa}
+                        setEmpresa={setEmpresa}
+                        onEmpresaChange={handleEmpresa}
+                        onErrorsChange={handleErrorsChange}
+                        redirectAfterSave={false}
+                        onSaved={handleEmpresaSaved}
+                        onLoadingChange={setIsEmpresaDialogLoading}
+                        onClose={closeEmpresaDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closeEmpresaDialog}
+                    />
+                </DialogFilter>
+            </>
         );
     }
 );

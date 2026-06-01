@@ -3,7 +3,7 @@ import './styled.css';
 import dayjs from 'dayjs';
 import '@/app/styles/styledGlobal.css';
 import { fetchDashboard } from './controller';
-import { Messages } from 'primereact/messages';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { RelatorioDashboardParams } from './types';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
@@ -328,3 +328,4 @@ const ComponentDashboard: React.FC = () => {
     );
 };
 export default ComponentDashboard;
+

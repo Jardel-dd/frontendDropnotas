@@ -49,17 +49,35 @@ export const updatePessoa = async (
     msgs: any,
     router: AppRouterInstance,
     setPessoa: React.Dispatch<React.SetStateAction<PessoaEntity>>,
+    redirectAfterSave = true,
 ) => {
     try {
         const pessoaDataToUpdate = buildPessoaPayload(pessoa);
         console.log('Dados pessoa):', pessoaDataToUpdate);
-        await api.put(`/pessoa`, pessoaDataToUpdate);
+        const response = await api.put(`/pessoa`, pessoaDataToUpdate);
+        const responseData = response?.data;
+        const responsePessoa =
+            responseData &&
+            typeof responseData === 'object' &&
+            'pessoa' in responseData
+                ? (responseData as { pessoa?: PessoaEntity | Record<string, unknown> }).pessoa
+                : null;
+        const updated =
+            (responsePessoa && typeof responsePessoa === 'object' ? responsePessoa : null) ??
+            (responseData && typeof responseData === 'object' ? responseData : null) ?? {
+                ...pessoaDataToUpdate,
+                id: Number(pessoaId)
+            };
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso:',
             detail: 'Pessoa atualizado com sucesso!',
         });
-        router.push('/cadastro/pessoas');
+        setPessoa(new PessoaEntity(updated));
+        if (redirectAfterSave) {
+            router.push('/cadastro/pessoas');
+        }
+        return updated;
     } catch (error: any) {
         if (axios.isAxiosError(error) && error.response) {
             const { status, data } = error.response;
@@ -78,6 +96,7 @@ export const updatePessoa = async (
                 detail: 'Erro inesperado ao atualizar Pessoa.',
             });
         }
+        return null;
     }
 };
 export const ativarPessoa = async (
