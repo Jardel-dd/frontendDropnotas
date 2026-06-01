@@ -293,9 +293,9 @@ export const createdNotaServico = async (
         console.log('Response NFS:', response);
         if (response.data?.status_nota?.trim().toUpperCase() === 'REJEITADA' && redirectAfterSave) {
             persistNotaServicoFeedback({
-                severity: 'warn',
-                summary: 'Emissao nao concluida',
-                detail: 'Nao foi possivel emitir esta Nota fiscal no momento, efetue a correcao ou a emissao de uma nova Nota.'
+                severity: 'error',
+                summary: 'Atenção',
+                detail: 'Não foi possivel emitir o Nota Fiscal no momento, efetue a correção ou a emissao de uma nova Nota.'
             });
             router.push('/notaServico');
             return {
@@ -303,12 +303,11 @@ export const createdNotaServico = async (
                 redirected: true
             };
         }
-
         if (redirectAfterSave) {
             persistNotaServicoFeedback({
                 severity: 'success',
                 summary: 'Sucesso:',
-                detail: 'NFS-e cadastrada com sucesso!'
+                detail: 'NFS-e Emitida com sucesso!'
             });
             router.push('/notaServico');
             return {
@@ -316,7 +315,6 @@ export const createdNotaServico = async (
                 redirected: true
             };
         }
-
         if (response.data?.status_nota?.trim().toUpperCase() === 'REJEITADA') {
             msgs.current?.show({
                 severity: 'warn',
