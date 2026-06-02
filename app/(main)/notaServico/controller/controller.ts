@@ -22,6 +22,33 @@ type CreatedNotaServicoResult = {
     redirected: boolean;
 };
 
+const extractBackendErrorMessage = (data: any, fallback: string): string => {
+    if (!data) {
+        return fallback;
+    }
+
+    if (typeof data === 'string') {
+        return data.trim() || fallback;
+    }
+
+    if (typeof data?.message === 'string' && data.message.trim()) {
+        return data.message.trim();
+    }
+
+    if (typeof data?.mensagem === 'string' && data.mensagem.trim()) {
+        return data.mensagem.trim();
+    }
+
+    if (Array.isArray(data?.errors)) {
+        const firstError = data.errors.find((item: unknown) => typeof item === 'string' && item.trim());
+        if (firstError) {
+            return firstError.trim();
+        }
+    }
+
+    return fallback;
+};
+
 const normalizeOptionalNumberToZero = (value: unknown): number => {
     if (value === null || value === undefined || value === '') {
         return 0;
@@ -359,7 +386,6 @@ export const createdNotaServico = async (
             redirected: false
         };
     } catch (error: any) {
-        let summaryMessage = 'Erro';
         let detailMessage = 'Ocorreu um erro ao cadastrar a NFS-e.';
         if (error.response) {
             console.group('retorno:');
@@ -367,11 +393,15 @@ export const createdNotaServico = async (
             console.log('Headers:', error.response.headers);
             console.log('resp:', error.response.data);
             console.groupEnd();
+            detailMessage = extractBackendErrorMessage(
+                error.response.data,
+                'Ocorreu um erro ao cadastrar a NFS-e.'
+            );
             if (error.response?.status === 409) {
                 msgs.current?.show({
                     severity: 'warn',
                     summary: 'Nota já emitida',
-                    detail: 'Já existe uma emissão recente de Nota Fiscal para esta empresa, cliente e serviço.',
+                    detail: detailMessage || 'Já existe uma emissão recente de Nota Fiscal para esta empresa, cliente e serviço.',
                     life: 7000
                 });
                 return {

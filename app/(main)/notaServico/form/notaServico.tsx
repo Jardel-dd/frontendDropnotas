@@ -1,5 +1,7 @@
 'use client';
+import '../styled.css';
 import { Toast } from 'primereact/toast';
+import { Message } from 'primereact/message';
 import LoadingScreen from '@/app/loading';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { getCitiesFromState } from '@/app/entity/maps';
@@ -11,7 +13,7 @@ import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import NotaServico from '@/app/(main)/notaServico/emitirNfsE/nfse';
 import { DatePicker } from '@/app/components/calendarComponent/datePicker';
 import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
-import {  DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
+import { DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { validateFieldsNotaServico } from '@/app/(main)/notaServico/controller/validation';
@@ -35,7 +37,7 @@ const buildEnderecoEntity = (endereco?: Partial<EnderecoEntity> | null) =>
         nome_pais: endereco?.nome_pais ?? '',
         uf: endereco?.uf ?? '',
         telefone: endereco?.telefone ?? ''
-});
+    });
 const buildContatoEntity = (contato?: Partial<ContatoEntity> | string | null) =>
     new ContatoEntity({
         email: typeof contato === 'string' ? contato : contato?.email ?? ''
@@ -80,8 +82,37 @@ const buildNotaServicoFromResponse = (nfseData?: Partial<NfsEntity>) => {
         })
     });
 };
+const getPreparedNfseFromResponse = (response?: any): Partial<NfsEntity> | undefined => {
+    if (!response || typeof response !== 'object') {
+        return undefined;
+    }
+
+    if (response.dados_emissao?.nfse) {
+        return response.dados_emissao.nfse;
+    }
+
+    if (response.nfse) {
+        return response.nfse;
+    }
+
+    return response;
+};
+const getMensagemRetornoFromResponse = (response?: any): string | null => {
+    if (!response || typeof response !== 'object') {
+        return null;
+    }
+
+    const mensagemRetorno = response.mensagem_retorno ?? response.dados_emissao?.mensagem_retorno;
+
+    if (typeof mensagemRetorno !== 'string') {
+        return null;
+    }
+
+    return mensagemRetorno.trim() || null;
+};
 export function NotaServicoFields({
     gerarNfse,
+    mensagemRetornoCorrecao,
     errors,
     loadingCep,
     dateRange,
@@ -101,17 +132,18 @@ export function NotaServicoFields({
 }: NotaServicoFieldsProps) {
     return (
         <div className="shared-form-tabbed-layout">
+
             <div className="grid formgrid">
-              <div className="col-12 lg:col-3">
+                <div className="col-12 lg:col-3">
                     <DatePicker
-                     value={dateRange ? dateRange[0] : new Date()} 
-                     onChange={onDateChange} 
-                     label="Competência:" 
-                     showTopLabel 
-                     topLabel="Competência:" 
-                     required
-                     />
-                     </div>
+                        value={dateRange ? dateRange[0] : new Date()}
+                        onChange={onDateChange}
+                        label="Competência:"
+                        showTopLabel
+                        topLabel="Competência:"
+                        required
+                    />
+                </div>
                 <div className="col-12 lg:col-3" >
                     <Dropdown
                         id="regime_especial_tributacao"
@@ -123,6 +155,16 @@ export function NotaServicoFields({
                         topLabel="Regime Especial Tributário:"
                     />
                 </div>
+                <div className="col-12 lg:col-6 nota-servico-return-message-row" >
+                {mensagemRetornoCorrecao && (
+                        <Message
+                            severity="error"
+                            text={mensagemRetornoCorrecao}
+                            className="nota-servico-return-message"
+                        />
+                )}
+                    </div>
+
             </div>
             <div className="shared-form-tabbed-body">
                 <NotaServico
@@ -131,9 +173,9 @@ export function NotaServicoFields({
                     handleDropdownChange={onDropdownChange}
                     handleSubmit={onSubmit}
                     errors={errors}
-                    handleSearchCep={() => {}}
+                    handleSearchCep={() => { }}
                     setLoadingCep={setLoadingCep}
-                    setNfs={() => {}}
+                    setNfs={() => { }}
                     setError={setErrors}
                     msgs={msgs}
                     router={router}
@@ -167,14 +209,15 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         hasPrepararParams
             ? 'Preparando NFS-e...'
             : hasCorrectionReference || hasInitialId
-              ? 'Carregando NFS-e para correcao...'
-              : 'Emitindo NFS-e...'
+                ? 'Carregando NFS-e para correcao...'
+                : 'Emitindo NFS-e...'
     );
     const [loadingCep, setLoadingCep] = useState(false);
     const [gerarNfse, setGerarNfse] = useState<NfsEntity>(notaServico instanceof NfsEntity ? notaServico : createEmptyNfse());
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [isValidationActive, setIsValidationActive] = useState(false);
     const [dateRange, setDateRange] = useState<Date[] | null>([new Date(), new Date()]);
+    const [mensagemRetornoCorrecao, setMensagemRetornoCorrecao] = useState<string | null>(null);
     const [selectedEmpresa] = useState<CompanyEntity | null>(null);
     const [selectedCliente] = useState<PessoaEntity | null>(null);
     const [selectedServico] = useState<ServiceEntity | null>(null);
@@ -190,23 +233,23 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             const updateField = (target: any) =>
                 target?.copyWith
                     ? target.copyWith({
-                          [id]: value
-                      })
+                        [id]: value
+                    })
                     : {
-                          ...(target ?? {}),
-                          [id]: value
-                      };
+                        ...(target ?? {}),
+                        [id]: value
+                    };
 
             return nfse.copyWith({
                 [bloco]: subBloco
                     ? blocoAtual?.copyWith
                         ? blocoAtual.copyWith({
-                              [subBloco]: updateField(blocoAtual?.[subBloco])
-                          })
+                            [subBloco]: updateField(blocoAtual?.[subBloco])
+                        })
                         : {
-                              ...(blocoAtual ?? {}),
-                              [subBloco]: updateField(blocoAtual?.[subBloco])
-                          }
+                            ...(blocoAtual ?? {}),
+                            [subBloco]: updateField(blocoAtual?.[subBloco])
+                        }
                     : updateField(blocoAtual)
             });
         });
@@ -374,6 +417,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         const prepararEmissao = async () => {
             setLoadingText('Preparando NFS-e...');
             setLoading(true);
+            setMensagemRetornoCorrecao(null);
             try {
                 const payload = new PrepararNfs({
                     id_empresa,
@@ -382,8 +426,10 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                 });
                 const response = await prepararNotaServico(payload, selectedEmpresa, selectedCliente, selectedServico, setErrors, msgs, router);
 
-                if (response?.nfse) {
-                    const notaServicoPreparada = buildNotaServicoFromResponse(response.nfse);
+                const preparedNfse = getPreparedNfseFromResponse(response);
+
+                if (preparedNfse) {
+                    const notaServicoPreparada = buildNotaServicoFromResponse(preparedNfse);
                     const competenciaDate = parseCompetenciaDate(notaServicoPreparada.competencia);
 
                     setGerarNfse(notaServicoPreparada);
@@ -411,6 +457,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         const carregarNotaParaCorrecao = async () => {
             setLoadingText('Carregando NFS-e para correcao...');
             setLoading(true);
+            setMensagemRetornoCorrecao(null);
 
             try {
                 console.log('[NotaServico] Iniciando correcao por referencia:', correctionReference);
@@ -421,7 +468,8 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                     msgs
                 );
                 console.log('[NotaServico] Resposta recebida no formulario de correcao:', response);
-                const notaServicoCarregada = buildNotaServicoFromResponse(response?.nfse ?? response);
+                setMensagemRetornoCorrecao(getMensagemRetornoFromResponse(response));
+                const notaServicoCarregada = buildNotaServicoFromResponse(getPreparedNfseFromResponse(response));
                 const competenciaDate = parseCompetenciaDate(notaServicoCarregada.competencia);
 
                 setGerarNfse(notaServicoCarregada);
@@ -442,10 +490,11 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         const carregarNotaPorId = async () => {
             setLoadingText('Carregando NFS-e para correcao...');
             setLoading(true);
+            setMensagemRetornoCorrecao(null);
 
             try {
                 const response = await fetchNotaServicoByID(initialId);
-                const notaServicoCarregada = buildNotaServicoFromResponse(response?.nfse ?? response);
+                const notaServicoCarregada = buildNotaServicoFromResponse(getPreparedNfseFromResponse(response));
                 const competenciaDate = parseCompetenciaDate(notaServicoCarregada.competencia);
 
                 setGerarNfse(notaServicoCarregada);
@@ -477,6 +526,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                 <Messages ref={msgs} className="custom-messages" />
                 <NotaServicoFields
                     gerarNfse={gerarNfse}
+                    mensagemRetornoCorrecao={mensagemRetornoCorrecao}
                     errors={errors}
                     loadingCep={loadingCep}
                     dateRange={dateRange}
@@ -497,8 +547,8 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             </div>
             <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`} style={{ marginTop: 'auto' }}>
                 {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Emitir" disabled={isSubmitDisabled} icon="pi pi-save" />}
-                {showBTNPGCreatedDialog && <BTNPGCreatedDialog 
-                onClick={handleSubmit} label="Emitir" disabled={isSubmitDisabled} icon="pi pi-save" onBackClick={onBackClick} onClose={onClose} />}
+                {showBTNPGCreatedDialog && <BTNPGCreatedDialog
+                    onClick={handleSubmit} label="Emitir" disabled={isSubmitDisabled} icon="pi pi-save" onBackClick={onBackClick} onClose={onClose} />}
             </div>
         </div>
     );

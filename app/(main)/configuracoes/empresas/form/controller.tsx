@@ -111,6 +111,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [isPasswordVisible, setIsPasswordVisible] = useState(false);
         const [showModalUserConta, setShowModalUserConta] = useState(false);
+        const [editingUserContaId, setEditingUserContaId] = useState<string | null>(null);
         const [userConta, setUserConta] = useState<UsuarioContaEntity[]>([]);
         const [userContaForm, setUserContaForm] = useState<UsuarioContaEntity>(createEmptyUserConta());
         const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
@@ -227,6 +228,24 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         const handleUserContaFormChange = (updatedUserConta: UsuarioContaEntity) => {
             setUserContaForm(updatedUserConta);
         };
+        const openCreateUserContaDialog = () => {
+            setEditingUserContaId(null);
+            setUserContaForm(createEmptyUserConta());
+            setShowModalUserConta(true);
+        };
+        const openEditUserContaDialog = (userContaSelecionado: UsuarioContaEntity) => {
+            if (!userContaSelecionado?.id) {
+                return;
+            }
+
+            setEditingUserContaId(String(userContaSelecionado.id));
+            setShowModalUserConta(true);
+        };
+        const closeUserContaDialog = () => {
+            setShowModalUserConta(false);
+            setEditingUserContaId(null);
+            setUserContaForm(createEmptyUserConta());
+        };
         const handleFileChangeCertificado = (event: FileUploadSelectEvent) => {
             if (event.files && event.files.length > 0) {
                 setErrors((prev) => ({ ...prev, certificado_digital: '' }));
@@ -269,14 +288,21 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
             fileUploadRef.current?.clear();
         };
         const handleUserContaSaved = (created: UsuarioContaEntity) => {
-            const userAlreadyExists = selectedUserConta.some((user) => user.id === created.id);
-            const updatedSelectedUsers = userAlreadyExists ? selectedUserConta : [...selectedUserConta, created];
+            const replaceOrAppendUser = (lista: UsuarioContaEntity[]) => {
+                const existingIndex = lista.findIndex((user) => user.id === created.id);
 
-            setShowModalUserConta(false);
+                if (existingIndex === -1) {
+                    return [...lista, created];
+                }
+
+                return lista.map((user) => (user.id === created.id ? created : user));
+            };
+            const updatedSelectedUsers = replaceOrAppendUser(selectedUserConta);
+
+            closeUserContaDialog();
             setSelectedUserConta(updatedSelectedUsers);
             setUserConta((prevUsers) => {
-                const existsInOptions = prevUsers.some((user) => user.id === created.id);
-                return existsInOptions ? prevUsers : [...prevUsers, created];
+                return replaceOrAppendUser(prevUsers);
             });
             handleAllChanges({
                 target: { id: 'id_usuarios_acesso', value: updatedSelectedUsers.map((user) => user.id), type: 'input' }
@@ -491,7 +517,8 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                     onDropdownChangeEndereco={handleDropdownChangeEndereco}
                     onNumberChange={handleNumberChange}
                     onUserChange={handleUserChange}
-                    onOpenUserContaModal={() => setShowModalUserConta(true)}
+                    onOpenUserContaModal={openCreateUserContaDialog}
+                    onEditUserConta={openEditUserContaDialog}
                     onCNAEChange={handleCNAEChange}
                     onSearchCnpj={handleSearchEmpresaCnpj}
                     onValidateCnpj={handleValidateCnpj}
@@ -523,21 +550,21 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                         />
                     )}
                 </div>
-                 <DialogFilter header="Adicionar Usuários" visible={showModalUserConta} onHide={() => setShowModalUserConta(false)}>
+                 <DialogFilter header={editingUserContaId ? 'Editar Usuários' : 'Adicionar Usuários'} visible={showModalUserConta} onHide={closeUserContaDialog}>
                         <FormCreatedUsuario
-                            key={reloadKeyUserConta}
+                            key={`${editingUserContaId ?? 'novo'}-${reloadKeyUserConta}`}
                             msgs={msgs}
                             ref={formRef}
                             userConta={userContaForm}
-                            initialId={null}
+                            initialId={editingUserContaId}
                             setUserConta={setUserContaForm}
                             onUserContaChange={handleUserContaFormChange}
                             onErrorsChange={handleErrorsChange}
                             redirectAfterSave={false}
                             showBTNPGCreatedDialog={true}
                             onSaved={handleUserContaSaved}
-                            onClose={() => setShowModalUserConta(false)}
-                            onBackClick={() => setShowModalUserConta(false)}
+                            onClose={closeUserContaDialog}
+                            onBackClick={closeUserContaDialog}
                         />
                     </DialogFilter>
             </div>
