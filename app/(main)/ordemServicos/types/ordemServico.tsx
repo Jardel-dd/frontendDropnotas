@@ -52,6 +52,7 @@ export interface OrdemServicoFieldsProps {
     reloadKeyPessoa: number;
     reloadKeyEmpresa: number;
     reloadKeyServico: number;
+    reloadKeyVendedor: number;
     reloadKeyFormaPagamento: number;
     selectedCliente: PessoaEntity | null;
     selectedEmpresa: CompanyEntity | null;
@@ -66,10 +67,15 @@ export interface OrdemServicoFieldsProps {
     onFormaPagamentoChange: (formaPagamento: FormaPagamentoEntity | null) => void;
     onServicoChange: (servico: ServiceEntity | null) => void;
     onAddEmpresa: () => void;
+    onEditEmpresa: (empresa: CompanyEntity) => void;
     onAddPessoa: () => void;
+    onEditPessoa: (pessoa: PessoaEntity) => void;
     onAddVendedor: () => void;
+    onEditVendedor: (vendedor: VendedorEntity) => void;
     onAddFormaPagamento: () => void;
+    onEditFormaPagamento: (formaPagamento: FormaPagamentoEntity) => void;
     onAddServico: () => void;
+    onEditServico: (servico: ServiceEntity) => void;
     onValidateDescricao: () => void;
 }
 

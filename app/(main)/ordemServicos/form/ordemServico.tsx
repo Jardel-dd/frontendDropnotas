@@ -7,12 +7,11 @@ import { OrdemServicoFieldsProps } from '../types/ordemServico';
 import { DatePicker } from '@/app/components/calendarComponent/datePicker';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import PessoaDropdownField from '@/app/(main)/cadastro/pessoas/dropDown/pessoa';
-import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import EmpresaDropdownField from '@/app/(main)/configuracoes/empresas/dropDown/empresa';
 import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dropDown/formaPagamento';
 import { fetchFilteredService, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
-import { fetchAllVendedores, fetchFilteredVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import VendedorDropdownField from '@/app/(main)/cadastro/vendedores/dropDown/DropdownVendedor';
 export type { FormCreatedOrdemServicoProps, OrdemServicoFieldsProps, OrdemServicoFormProps, OrdemServicoFormRef } from '../types/ordemServico';
 
 export function OrdemServicoFields({
@@ -21,6 +20,7 @@ export function OrdemServicoFields({
     reloadKeyPessoa,
     reloadKeyEmpresa,
     reloadKeyServico,
+    reloadKeyVendedor,
     reloadKeyFormaPagamento,
     selectedCliente,
     selectedEmpresa,
@@ -35,10 +35,15 @@ export function OrdemServicoFields({
     onFormaPagamentoChange,
     onServicoChange,
     onAddEmpresa,
+    onEditEmpresa,
     onAddPessoa,
+    onEditPessoa,
     onAddVendedor,
+    onEditVendedor,
     onAddFormaPagamento,
+    onEditFormaPagamento,
     onAddServico,
+    onEditServico,
     onValidateDescricao
 }: OrdemServicoFieldsProps) {
     return (
@@ -74,7 +79,9 @@ export function OrdemServicoFields({
                         errorMessage={errors.selectedEmpresa}
                         showAddButton
                         onAddClick={onAddEmpresa}
+                        onEditClick={onEditEmpresa}
                         autoSelectSingle
+                        required
                     />
                 </div>
                 <div className="col-12 lg:col-4 ">
@@ -89,6 +96,8 @@ export function OrdemServicoFields({
                         autoSelectSingle
                         showAddButton
                         onAddClick={onAddPessoa}
+                        onEditClick={onEditPessoa}
+                        required
                         topLabel="Cliente ou Fornecedor:"
                     />
                 </div>
@@ -106,28 +115,22 @@ export function OrdemServicoFields({
                         autoSelectSingle
                         showAddButton
                         onAddClick={onAddServico}
+                        onEditClick={onEditServico}
                         showTopLabel
                         required
                         topLabel="Serviço:"
                     />
                 </div>
                  <div className="col-12 lg:col-4 ">
-                    <DropdownSearch<VendedorEntity>
-                        id="selectedVendedor"
-                        selectedItem={selectedVendedor}
-                        onItemChange={onVendedorChange}
-                        fetchAllItems={fetchAllVendedores}
-                        fetchFilteredItems={fetchFilteredVendedor}
-                        optionLabel="razao_social"
-                        placeholder="Selecione o Vendedor"
+                    <VendedorDropdownField
+                        selectedVendedor={selectedVendedor}
+                        reloadKey={reloadKeyVendedor}
+                        onVendedorChange={onVendedorChange}
+                        onAddClick={onAddVendedor}
+                        onEditClick={onEditVendedor}
                         hasError={!!errors.selectedVendedor}
                         errorMessage={errors.selectedVendedor}
-                        autoSelectSingle={false}
-                        showAddButton
-                        onAddClick={onAddVendedor}
-                        showTopLabel
                         required
-                        topLabel="Vendedor:"
                     />
                 </div>
                 <div className="col-12 lg:col-4 ">
@@ -139,6 +142,7 @@ export function OrdemServicoFields({
                         errorMessage={errors.selectedFormaPagamento}
                         showAddButton
                         onAddClick={onAddFormaPagamento}
+                        onEditClick={onEditFormaPagamento}
                     />
                 </div>
                 <div className="col-12 lg:col-2">
@@ -150,7 +154,7 @@ export function OrdemServicoFields({
                         id="servicos.quantidade"
                         type="number"
                         showTopLabel
-                        topLabel="Quantidade de servicos:"
+                        topLabel="Quantidade de serviços:"
                         hasError={!!errors['servicos.quantidade']}
                         errorMessage={errors['servicos.quantidade']}
                     />
@@ -222,4 +226,3 @@ export function OrdemServicoFields({
         </>
     );
 }
-

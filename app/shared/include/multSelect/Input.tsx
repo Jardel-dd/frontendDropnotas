@@ -11,6 +11,10 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import LoadingScreenComponent from '@/app/loading/loadingComponent';
 import { ensureSelectedItemsInList, MultiSelectProps, normalize } from './types/types';
 
+const MULTISELECT_LOADING_OPTION = {
+    __loading: true,
+    id: '__loading__'
+};
 
 function CustomMultiSelect({
     selectedItems,
@@ -46,18 +50,43 @@ function CustomMultiSelect({
     const [loading, setLoading] = useState(false);
     const [hasLoadedAllOptions, setHasLoadedAllOptions] = useState(false);
     const multiSelectRef = useRef<MultiSelect>(null);
-
+    const wrapperRef = useRef<HTMLDivElement>(null);
     const didAutoSelectRef = useRef(false);
     const selectedItemsRef = useRef<any[]>(selectedItems);
     const initialSelectedValuesRef = useRef<Array<string | number>>(initialSelectedValues);
+    const loadingRef = useRef(false);
+    const [panelWidth, setPanelWidth] = useState<number | null>(null);
     useEffect(() => {
         selectedItemsRef.current = selectedItems;
     }, [selectedItems]);
     useEffect(() => {
         initialSelectedValuesRef.current = initialSelectedValues;
     }, [initialSelectedValues]);
-    const loadAll = async () => {
+    useEffect(() => {
+        loadingRef.current = loading;
+    }, [loading]);
+    useEffect(() => {
+        const updatePanelWidth = () => {
+            const nextWidth = wrapperRef.current?.getBoundingClientRect().width ?? null;
+            setPanelWidth(nextWidth);
+        };
+
+        updatePanelWidth();
+        window.addEventListener('resize', updatePanelWidth);
+
+        return () => {
+            window.removeEventListener('resize', updatePanelWidth);
+        };
+    }, []);
+    const buildLoadingOptions = () => [MULTISELECT_LOADING_OPTION];
+    const loadAll = async (clearItems = false) => {
+        if (loadingRef.current) return;
+
         setLoading(true);
+        if (clearItems) {
+            setFilteredOptions(buildLoadingOptions());
+        }
+
         try {
             const data = fetchAllItems ? await fetchAllItems() : options;
             let arr = Array.isArray(data) ? data.slice(0, maxResults) : [];
@@ -117,10 +146,12 @@ function CustomMultiSelect({
         }
     }, [options, fetchAllItems, autoSelectSingle, filterValue, onChange, dataKey]);
     const handleShow = async () => {
+        setPanelWidth(wrapperRef.current?.getBoundingClientRect().width ?? null);
+
         if (fetchAllItems && !loading) {
             if (!hasLoadedAllOptions || filteredOptions.length === 0 || filterValue.trim().length === 0) {
                 setFilterValue('');
-                await loadAll();
+                await loadAll(true);
                 return;
             }
 
@@ -134,7 +165,7 @@ function CustomMultiSelect({
         setFilterValue(value);
         const trimmed = value.trim();
         if (!trimmed) {
-            await loadAll();
+            await loadAll(true);
             return;
         }
 
@@ -142,6 +173,7 @@ function CustomMultiSelect({
 
         if (fetchFilteredItems) {
             setLoading(true);
+            setFilteredOptions(buildLoadingOptions());
             try {
                 const data = await fetchFilteredItems(trimmed);
                 setFilteredOptions(
@@ -223,7 +255,7 @@ function CustomMultiSelect({
     const canEditSelected = Boolean(onEditClick && Array.isArray(selectedItems) && selectedItems.length === 1);
     const showHeaderButtons = showAddButton || canEditSelected || hasSelectedValues;
     return (
-        <div className="p-field" style={{ width: '100%', height: '85px', maxHeight: "85px" }}>
+        <div ref={wrapperRef} className="p-field" style={{ width: '100%', height: '85px', maxHeight: "85px" }}>
             {showTopLabel && topLabel && (
                 <div style={{ height: 25, display: "flex", alignItems: "center" }}>
                     <label className="filter-label">
@@ -243,16 +275,26 @@ function CustomMultiSelect({
                         optionLabel={optionLabel}
                         dataKey={dataKey}
                         placeholder={loading ? 'Carregando...' : placeholder}
+                        emptyMessage="Nenhum resultado encontrado"
+                        optionDisabled={(option) => Boolean(option?.__loading)}
+                        itemTemplate={(option) => {
+                            if (option?.__loading) {
+                                return (
+                                    <div style={{ padding: '0.5rem 0' }}>
+                                        <LoadingScreenComponent fullScreen={false} loadingText="Carregando..." />
+                                    </div>
+                                );
+                            }
+
+                            return String(option?.[optionLabel] ?? '');
+                        }}
                         selectedItemsLabel="{0} itens selecionados"
+                        panelStyle={{
+                            width: panelWidth ? `${panelWidth}px` : undefined,
+                            maxWidth: 'calc(100vw - 1rem)'
+                        }}
                         style={{ boxShadow: 'none', background: isDarkMode ? '#293B51' : '#FFFFFF', display: "flex" }}
                         maxSelectedLabels={maxSelectedLabels}
-                        panelFooterTemplate={
-                            loading ? (
-                                <div style={{ padding: '0.75rem', display: 'flex', justifyContent: 'center' }}>
-                                    <LoadingScreenComponent fullScreen={false} loadingText="Carregando..." />
-                                </div>
-                            ) : null
-                        }
                         panelClassName="custom-multiselect-panel"
                         className={`w-full ${className ?? ''} ${hasError ? 'p-invalid' : ''}`}
                         filter
@@ -333,10 +375,10 @@ function CustomMultiSelect({
                                                     boxShadow: 'none'
                                                 }}
 
-                                                tooltip="Limpar"
-                                                icon="pi pi-trash"
-                                                aria-label="Limpar"
-                                                severity="secondary"
+                                                tooltip="Remover filtro"
+                                                icon="pi pi-filter-slash"
+                                                aria-label="Remover filtro"
+                                                severity="warning"
                                                 outlined
                                                 raised
                                             onMouseDown={handleClearButtonMouseDown}
