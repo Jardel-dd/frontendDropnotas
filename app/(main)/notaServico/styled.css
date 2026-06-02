@@ -209,11 +209,19 @@
     align-items: center;
     width: auto;
     margin-top: 0;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    flex-shrink: 0;
 }
 
 .paginator-wrapper {
     margin-top: auto;
 }
+
+.nota-servico-return-message-row {
+    display: flex;
+    height: 38px;
+    margin-top: 25px;
+}
+
+.nota-servico-return-message {
+  height: 38px;
+}
+

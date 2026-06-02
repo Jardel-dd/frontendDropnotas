@@ -381,31 +381,29 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsRefreshingUser(true);
 
       try {
-        console.info('[UserContext] Iniciando refresh do usuario logado.', {
-          userId: currentUser.id
-        });
-
+        // console.info('[UserContext] Iniciando refresh do usuario logado.', {
+        //   userId: currentUser.id
+        // });
         const response = await api.get(`/usuario-conta/${currentUser.id}`, buildFreshAuthRequestConfig());
         const latestUserData = response.data ?? {};
-        console.info('[UserContext] Resposta recebida de /usuario-conta/{id}.', {
-          userId: currentUser.id,
-          responseKeys: Object.keys(latestUserData),
-          hasPerfilUsuarioSnakeCase: !!latestUserData?.perfil_usuario,
-          idPerfilUsuario:
-            latestUserData?.id_perfil_usuario ??
-            latestUserData?.perfil_usuario?.id ??
-            null
-        });
-
+        // console.info('[UserContext] Resposta recebida de /usuario-conta/{id}.', {
+        //   userId: currentUser.id,
+        //   responseKeys: Object.keys(latestUserData),
+        //   hasPerfilUsuarioSnakeCase: !!latestUserData?.perfil_usuario,
+        //   idPerfilUsuario:
+        //     latestUserData?.id_perfil_usuario ??
+        //     latestUserData?.perfil_usuario?.id ??
+        //     null
+        // });
         const resolvedPerfilUsuario = await resolveLatestPerfilUsuario(latestUserData, currentUser);
         const perfilUsuario = resolvedPerfilUsuario.perfil_usuario;
 
-        console.info('[UserContext] Perfil do usuario resolvido para sincronizacao.', {
-          userId: currentUser.id,
-          source: resolvedPerfilUsuario.source,
-          perfilId: resolvedPerfilUsuario.perfilId,
-          perfil_usuario: getPerfilUsuarioDebugSnapshot(perfilUsuario as Record<string, any> | undefined)
-        });
+        // console.info('[UserContext] Perfil do usuario resolvido para sincronizacao.', {
+        //   userId: currentUser.id,
+        //   source: resolvedPerfilUsuario.source,
+        //   perfilId: resolvedPerfilUsuario.perfilId,
+        //   perfil_usuario: getPerfilUsuarioDebugSnapshot(perfilUsuario as Record<string, any> | undefined)
+        // });
 
         const syncedUser = buildSyncedUser(
           normalizeUserPayload(latestUserData, currentUser, perfilUsuario),

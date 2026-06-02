@@ -109,7 +109,6 @@ export default function CriarNotaServico() {
     const handleErrorsChange = (updatedErrors: Record<string, string>) => {
         setErrors(updatedErrors);
     };
-
     useEffect(() => {
         if (canAccessNotaServicoPage) {
             return;

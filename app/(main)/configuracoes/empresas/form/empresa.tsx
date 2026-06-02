@@ -50,6 +50,7 @@ export function EmpresaFields({
     onNumberChange,
     onUserChange,
     onOpenUserContaModal,
+    onEditUserConta,
     onCNAEChange,
     onSearchCnpj,
     onValidateCnpj,
@@ -242,7 +243,7 @@ export function EmpresaFields({
                     }
                 >
                     <div className="grid formgrid">
-                        <div className="col-12 mb-1 lg:col-3 lg:mb-0">
+                        <div className="col-12 mb-1 lg:col-5 lg:mb-0">
                             <div className="p-field">
                                 <CustomMultiSelect
                                     id=""
@@ -257,6 +258,7 @@ export function EmpresaFields({
                                     dataKey="id"
                                     showAddButton
                                     onAddClick={onOpenUserContaModal}
+                                    onEditClick={onEditUserConta}
                                     initialSelectedValues={empresa.id_usuarios_acesso ?? []}
                                     placeholder="Selecione os Usuários" showChips
                                     topLabel="Usuários:"

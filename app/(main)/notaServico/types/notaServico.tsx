@@ -31,6 +31,7 @@ export interface NotaServicoFormProps {
 }
 export interface NotaServicoFieldsProps {
     gerarNfse: NfsEntity;
+    mensagemRetornoCorrecao?: string | null;
     errors: Record<string, string>;
     loadingCep: boolean;
     dateRange: Date[] | null;
