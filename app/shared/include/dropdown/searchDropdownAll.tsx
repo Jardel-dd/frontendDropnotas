@@ -99,10 +99,14 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const requestSequenceRef = useRef(0);
     const activeRequestCountRef = useRef(0);
 
-    const beginRequest = () => {
+    const beginRequest = (clearItems = false) => {
         activeRequestCountRef.current += 1;
         loadingRef.current = true;
         setLoading(true);
+
+        if (clearItems) {
+            setItems([]);
+        }
 
         requestSequenceRef.current += 1;
         return requestSequenceRef.current;
@@ -150,7 +154,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const loadAll = async () => {
         if (loadingRef.current) return;
 
-        const requestId = beginRequest();
+        const requestId = beginRequest(true);
         try {
             const data = await fetchAllItems();
             let limited = Array.isArray(data) ? data.slice(0, maxResults) : [];
@@ -217,7 +221,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
         }
         if (trimmed.length < minSearchChars) return;
 
-        const requestId = beginRequest();
+        const requestId = beginRequest(true);
         try {
             const data = await fetchFilteredItems(trimmed);
             let limited = Array.isArray(data) ? data.slice(0, maxResults) : [];

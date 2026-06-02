@@ -20,6 +20,15 @@ import { validateFieldsOrdemServico } from '@/app/(main)/ordemServicos/controlle
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdOrdemServico, fetchOrdemServiceByID } from '@/app/(main)/ordemServicos/controller/controller';
+import type { PreloadedPessoaData } from '@/app/(main)/cadastro/pessoas/types/pessoa';
+import type { PreloadedServicoData } from '@/app/(main)/cadastro/servicos/types/servico';
+import type { PreloadedEmpresaData } from '@/app/(main)/configuracoes/empresas/types/empresa';
+import { fetchPessoasById } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { fetchServiceFormDataByID, fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
+import { fetchVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import { fetchCompanyDropdownByID, fetchCompanyFormDataByID } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { fetchFormaPagamentoByID } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
+import { toFormaPagamentoEntity } from '@/app/(main)/cadastro/formaPagamento/types/formaPagamento';
 import { createEmptyEmpresa, createEmptyFormaPagamento, createEmptyOrdemServico, createEmptyPessoa, createEmptyServico, createEmptyVendedor, type FormCreatedOrdemServicoProps, type NestedFormRef, type OrdemServicoFieldsProps, type OrdemServicoFormProps, type OrdemServicoFormRef } from '../types/ordemServico';
 export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
     ({ initialId, msgs, onOrdemServicoChange, onErrorsChange, redirectAfterSave = true, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
@@ -39,7 +48,13 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
         const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
         const [reloadKeyEmpresa, setReloadKeyEmpresa] = useState(0);
         const [reloadKeyServico, setReloadKeyServico] = useState(0);
+        const [reloadKeyVendedor, setReloadKeyVendedor] = useState(0);
         const [reloadKeyFormaPagamento, setReloadKeyFormaPagamento] = useState(0);
+        const [pessoaDialogKey, setPessoaDialogKey] = useState(0);
+        const [empresaDialogKey, setEmpresaDialogKey] = useState(0);
+        const [servicoDialogKey, setServicoDialogKey] = useState(0);
+        const [vendedorDialogKey, setVendedorDialogKey] = useState(0);
+        const [formaPagamentoDialogKey, setFormaPagamentoDialogKey] = useState(0);
         const [showModalPessoa, setShowModalPessoa] = useState(false);
         const [showModalEmpresa, setShowModalEmpresa] = useState(false);
         const [showModalServico, setShowModalServico] = useState(false);
@@ -52,6 +67,21 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
         const [selectedServico, setSelectedServico] = useState<ServiceEntity | null>(null);
         const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
         const [selectedFormaPagamento, setSelectedFormaPagamento] = useState<FormaPagamentoEntity | null>(null);
+        const [isPessoaDialogLoading, setIsPessoaDialogLoading] = useState(false);
+        const [isEmpresaDialogLoading, setIsEmpresaDialogLoading] = useState(false);
+        const [isServicoDialogLoading, setIsServicoDialogLoading] = useState(false);
+        const [isVendedorDialogLoading, setIsVendedorDialogLoading] = useState(false);
+        const [isFormaPagamentoDialogLoading, setIsFormaPagamentoDialogLoading] = useState(false);
+        const [editingPessoaId, setEditingPessoaId] = useState<string | null>(null);
+        const [editingEmpresaId, setEditingEmpresaId] = useState<string | null>(null);
+        const [editingServicoId, setEditingServicoId] = useState<string | null>(null);
+        const [editingVendedorId, setEditingVendedorId] = useState<string | null>(null);
+        const [editingFormaPagamentoId, setEditingFormaPagamentoId] = useState<string | null>(null);
+        const [preloadedPessoa, setPreloadedPessoa] = useState<PreloadedPessoaData | null>(null);
+        const [preloadedEmpresa, setPreloadedEmpresa] = useState<PreloadedEmpresaData | null>(null);
+        const [preloadedServico, setPreloadedServico] = useState<PreloadedServicoData | null>(null);
+        const [preloadedVendedor, setPreloadedVendedor] = useState<VendedorEntity | null>(null);
+        const [preloadedFormaPagamento, setPreloadedFormaPagamento] = useState<FormaPagamentoEntity | null>(null);
         const [stateDisableBtnCreatedOrdemServico, setStateDisableBtnCreatedOrdemServico] = useState(false);
         const clearFieldError = (field: string) => {
             setErrors((prev) => {
@@ -87,7 +117,26 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
         };
 
         const handleServicoChange = (servicoSelecionado: ServiceEntity | null) => {
-            if (!servicoSelecionado) return;
+            if (!servicoSelecionado) {
+                setSelectedServico(null);
+                setEmitirOS((prev) =>
+                    prev.copyWith({
+                        servicos: new DetalServiceOSEntity({
+                            ...prev.servicos,
+                            id_servico: 0,
+                            descricao: '',
+                            codigo: '',
+                            descricao_completa: '',
+                            valor_servico: 0,
+                            valor_desconto: 0,
+                            quantidade: prev.servicos.quantidade || 1
+                        })
+                    })
+                );
+                clearFieldError('selectedService');
+                return;
+            }
+
             setSelectedServico(servicoSelecionado);
             setEmitirOS((prev) =>
                 prev.copyWith({
@@ -106,7 +155,23 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
         };
 
         const handleFormaPagamentoChange = (formaPagamentoSelecionada: FormaPagamentoEntity | null) => {
-            if (!formaPagamentoSelecionada) return;
+            if (!formaPagamentoSelecionada) {
+                setSelectedFormaPagamento(null);
+                setEmitirOS((prev) =>
+                    prev.copyWith({
+                        id_forma_pagamento: 0,
+                        formas_recebimento: new Formas_recebimento({
+                            id_forma_recebimento: 0,
+                            valor_taxa: 0,
+                            valor_recebido: 0,
+                            percentual_taxa: 0
+                        })
+                    })
+                );
+                clearFieldError('selectedFormaPagamento');
+                return;
+            }
+
             setSelectedFormaPagamento(formaPagamentoSelecionada);
             setEmitirOS((prev) =>
                 prev.copyWith({
@@ -123,7 +188,13 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
         };
 
         const handleVendedorChange = (vendedorSelecionado: VendedorEntity | null) => {
-            if (!vendedorSelecionado) return;
+            if (!vendedorSelecionado) {
+                setSelectedVendedor(null);
+                handleAllChanges({ target: { id: 'id_vendedor', value: 0, type: 'input' } });
+                clearFieldError('selectedVendedor');
+                return;
+            }
+
             setSelectedVendedor(vendedorSelecionado);
             handleAllChanges({ target: { id: 'id_vendedor', value: vendedorSelecionado.id, type: 'input' } });
             clearFieldError('selectedVendedor');
@@ -179,58 +250,275 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
         const handleEmpresa = (updatedEmpresa: CompanyEntity) => {
             setEmpresa(updatedEmpresa);
         };
-        const handleEmpresaSaved = (created: CompanyEntity) => {
+        const openCreateEmpresaDialog = () => {
+            setIsEmpresaDialogLoading(true);
+            setEditingEmpresaId(null);
+            setPreloadedEmpresa(null);
+            setEmpresaDialogKey((current) => current + 1);
+            setShowModalEmpresa(true);
+        };
+        const openEditEmpresaDialog = async (empresaSelecionada: CompanyEntity) => {
+            if (!empresaSelecionada?.id) {
+                return;
+            }
+
+            setIsEmpresaDialogLoading(true);
+
+            try {
+                const empresaId = String(empresaSelecionada.id);
+                const companyFormData = await fetchCompanyFormDataByID(empresaId);
+                setPreloadedEmpresa(companyFormData);
+                setEditingEmpresaId(empresaId);
+                setEmpresaDialogKey((current) => current + 1);
+                setShowModalEmpresa(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar empresa para edicao da ordem de servico:', error);
+                setIsEmpresaDialogLoading(false);
+            }
+        };
+        const closeEmpresaDialog = () => {
             setShowModalEmpresa(false);
-            setEmpresa(created);
-            setSelectedEmpresa(created);
-            handleAllChanges({ target: { id: 'id_empresa', value: created.id, type: 'input' } });
-            clearFieldError('selectedEmpresa');
-            setReloadKeyEmpresa((current) => current + 1);
+            setEditingEmpresaId(null);
+            setIsEmpresaDialogLoading(true);
+            setPreloadedEmpresa(null);
+        };
+        const handleEmpresaSaved = async (created: CompanyEntity) => {
+            setIsEmpresaDialogLoading(true);
+            let empresaAtualizada = created;
+
+            try {
+                if (created?.id) {
+                    const response = await fetchCompanyDropdownByID(String(created.id));
+
+                    if (response) {
+                        empresaAtualizada = response;
+                    }
+                }
+
+                setEmpresa(empresaAtualizada);
+                setSelectedEmpresa(empresaAtualizada);
+                handleAllChanges({ target: { id: 'id_empresa', value: empresaAtualizada.id, type: 'input' } });
+                clearFieldError('selectedEmpresa');
+                setReloadKeyEmpresa((current) => current + 1);
+            } finally {
+                closeEmpresaDialog();
+            }
         };
         const handlePessoa = (updatedPessoa: PessoaEntity) => {
             setPessoa([updatedPessoa]);
         };
-        const handlePessoaSaved = (created: PessoaEntity) => {
+        const openCreatePessoaDialog = () => {
+            setIsPessoaDialogLoading(true);
+            setEditingPessoaId(null);
+            setPreloadedPessoa(null);
+            setPessoaDialogKey((current) => current + 1);
+            setShowModalPessoa(true);
+        };
+        const openEditPessoaDialog = async (pessoaSelecionada: PessoaEntity) => {
+            if (!pessoaSelecionada?.id) {
+                return;
+            }
+
+            setIsPessoaDialogLoading(true);
+
+            try {
+                const pessoaId = String(pessoaSelecionada.id);
+                const pessoaPrecarregada = await fetchPessoasById(pessoaId);
+                setPreloadedPessoa({
+                    dataPessoa: pessoaPrecarregada.dataPessoa,
+                    selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null
+                });
+                setEditingPessoaId(pessoaId);
+                setPessoaDialogKey((current) => current + 1);
+                setShowModalPessoa(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar cliente/fornecedor para edicao da ordem de servico:', error);
+                setIsPessoaDialogLoading(false);
+            }
+        };
+        const closePessoaDialog = () => {
             setShowModalPessoa(false);
-            setSelectedCliente(created);
-            handleAllChanges({ target: { id: 'id_cliente', value: created.id, type: 'input' } });
-            clearFieldError('selectedCliente');
-            setReloadKeyPessoa((current) => current + 1);
+            setEditingPessoaId(null);
+            setIsPessoaDialogLoading(true);
+            setPreloadedPessoa(null);
+        };
+        const handlePessoaSaved = async (created: PessoaEntity) => {
+            setIsPessoaDialogLoading(true);
+            let pessoaAtualizada = created;
+
+            try {
+                if (created?.id) {
+                    const response = await fetchPessoasById(String(created.id));
+                    pessoaAtualizada = response.dataPessoa;
+                }
+
+                setPessoa([pessoaAtualizada]);
+                setSelectedCliente(pessoaAtualizada);
+                handleAllChanges({ target: { id: 'id_cliente', value: pessoaAtualizada.id, type: 'input' } });
+                clearFieldError('selectedCliente');
+                setReloadKeyPessoa((current) => current + 1);
+            } finally {
+                closePessoaDialog();
+            }
         };
         const handleServico = (updatedServico: ServiceEntity) => {
             setServico(updatedServico);
         };
+        const openCreateServicoDialog = () => {
+            setIsServicoDialogLoading(true);
+            setEditingServicoId(null);
+            setPreloadedServico(null);
+            setServicoDialogKey((current) => current + 1);
+            setShowModalServico(true);
+        };
+        const openEditServicoDialog = async (servicoSelecionado: ServiceEntity) => {
+            if (!servicoSelecionado?.id) {
+                return;
+            }
 
-        const handleServiceSaved = (created: ServiceEntity) => {
+            setIsServicoDialogLoading(true);
+
+            try {
+                const servicoId = String(servicoSelecionado.id);
+                const serviceFormData = await fetchServiceFormDataByID(servicoId);
+                setPreloadedServico(serviceFormData);
+                setEditingServicoId(servicoId);
+                setServicoDialogKey((current) => current + 1);
+                setShowModalServico(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar servico para edicao da ordem de servico:', error);
+                setIsServicoDialogLoading(false);
+            }
+        };
+        const closeServicoDialog = () => {
             setShowModalServico(false);
-            setServico(created);
-            handleServicoChange(created);
-            setReloadKeyServico((current) => current + 1);
+            setEditingServicoId(null);
+            setIsServicoDialogLoading(true);
+            setPreloadedServico(null);
+        };
+        const handleServiceSaved = async (created: ServiceEntity) => {
+            setIsServicoDialogLoading(true);
+            let servicoAtualizado = created;
+
+            try {
+                if (created?.id) {
+                    const response = await fetchServicesByID(String(created.id));
+                    servicoAtualizado = response.servico;
+                }
+
+                setServico(servicoAtualizado);
+                handleServicoChange(servicoAtualizado);
+                setReloadKeyServico((current) => current + 1);
+            } finally {
+                closeServicoDialog();
+            }
         };
 
         const handleVendedor = (updatedVendedor: VendedorEntity) => {
             setVendedor(updatedVendedor);
         };
+        const openCreateVendedorDialog = () => {
+            setIsVendedorDialogLoading(true);
+            setEditingVendedorId(null);
+            setPreloadedVendedor(null);
+            setVendedorDialogKey((current) => current + 1);
+            setShowModalVendedor(true);
+        };
+        const openEditVendedorDialog = async (vendedorSelecionado: VendedorEntity) => {
+            if (!vendedorSelecionado?.id) {
+                return;
+            }
 
-        const handleVendedorSaved = (created: VendedorEntity) => {
+            setIsVendedorDialogLoading(true);
+            try {
+                const vendedorId = String(vendedorSelecionado.id);
+                const { dataVendedor } = await fetchVendedor(vendedorId);
+                setPreloadedVendedor(dataVendedor);
+                setEditingVendedorId(vendedorId);
+                setVendedorDialogKey((current) => current + 1);
+                setShowModalVendedor(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar vendedor para edicao da ordem de servico:', error);
+                setIsVendedorDialogLoading(false);
+            }
+        };
+        const closeVendedorDialog = () => {
             setShowModalVendedor(false);
-            setVendedor(created);
-            setSelectedVendedor(created);
-            handleAllChanges({ target: { id: 'id_vendedor', value: created.id, type: 'input' } });
-            clearFieldError('selectedVendedor');
+            setEditingVendedorId(null);
+            setIsVendedorDialogLoading(true);
+            setPreloadedVendedor(null);
+        };
+        const handleVendedorSaved = async (created: VendedorEntity) => {
+            setIsVendedorDialogLoading(true);
+            let vendedorAtualizado = created;
+
+            try {
+                if (created?.id) {
+                    const { dataVendedor } = await fetchVendedor(String(created.id));
+                    vendedorAtualizado = dataVendedor;
+                }
+
+                setVendedor(vendedorAtualizado);
+                setSelectedVendedor(vendedorAtualizado);
+                handleAllChanges({ target: { id: 'id_vendedor', value: vendedorAtualizado.id, type: 'input' } });
+                clearFieldError('selectedVendedor');
+                setReloadKeyVendedor((current) => current + 1);
+            } finally {
+                closeVendedorDialog();
+            }
         };
 
         const handleFormaPagamento = (updatedFormaPagamento: FormaPagamentoEntity) => {
             setFormaPagamento(updatedFormaPagamento);
         };
+        const openCreateFormaPagamentoDialog = () => {
+            setIsFormaPagamentoDialogLoading(true);
+            setEditingFormaPagamentoId(null);
+            setPreloadedFormaPagamento(null);
+            setFormaPagamentoDialogKey((current) => current + 1);
+            setShowModalFormaPagamento(true);
+        };
+        const openEditFormaPagamentoDialog = async (formaPagamentoSelecionada: FormaPagamentoEntity) => {
+            if (!formaPagamentoSelecionada?.id) {
+                return;
+            }
 
-        const handleFormaPagamentoSaved = (created: FormaPagamentoEntity) => {
-            const createdId = Number((created as any).id ?? (created as any).id_forma_pagamento ?? 0);
-            const createdEntity = new FormaPagamentoEntity({ ...createEmptyFormaPagamento(), ...created, id: createdId } as any);
+            setIsFormaPagamentoDialogLoading(true);
+
+            try {
+                const formaPagamentoId = String(formaPagamentoSelecionada.id);
+                const response = await fetchFormaPagamentoByID(formaPagamentoId);
+                setPreloadedFormaPagamento(toFormaPagamentoEntity(response.formaPagamento));
+                setEditingFormaPagamentoId(formaPagamentoId);
+                setFormaPagamentoDialogKey((current) => current + 1);
+                setShowModalFormaPagamento(true);
+            } catch (error) {
+                console.error('Erro ao pre-carregar forma de pagamento para edicao da ordem de servico:', error);
+                setIsFormaPagamentoDialogLoading(false);
+            }
+        };
+        const closeFormaPagamentoDialog = () => {
             setShowModalFormaPagamento(false);
-            setFormaPagamento(createdEntity);
-            handleFormaPagamentoChange(createdEntity);
-            setReloadKeyFormaPagamento((current) => current + 1);
+            setEditingFormaPagamentoId(null);
+            setIsFormaPagamentoDialogLoading(true);
+            setPreloadedFormaPagamento(null);
+        };
+        const handleFormaPagamentoSaved = async (created: FormaPagamentoEntity) => {
+            setIsFormaPagamentoDialogLoading(true);
+            let formaPagamentoAtualizada = created;
+
+            try {
+                if (created?.id) {
+                    const response = await fetchFormaPagamentoByID(String(created.id));
+                    formaPagamentoAtualizada = toFormaPagamentoEntity(response.formaPagamento);
+                }
+
+                setFormaPagamento(formaPagamentoAtualizada);
+                handleFormaPagamentoChange(formaPagamentoAtualizada);
+                setReloadKeyFormaPagamento((current) => current + 1);
+            } finally {
+                closeFormaPagamentoDialog();
+            }
         };
 
         const handleErrorsChange = (updatedErrors: Record<string, string>) => {
@@ -310,6 +598,7 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                             reloadKeyPessoa={reloadKeyPessoa}
                             reloadKeyEmpresa={reloadKeyEmpresa}
                             reloadKeyServico={reloadKeyServico}
+                            reloadKeyVendedor={reloadKeyVendedor}
                             reloadKeyFormaPagamento={reloadKeyFormaPagamento}
                             selectedCliente={selectedCliente}
                             selectedEmpresa={selectedEmpresa}
@@ -323,11 +612,16 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                             onVendedorChange={handleVendedorChange}
                             onFormaPagamentoChange={handleFormaPagamentoChange}
                             onServicoChange={handleServicoChange}
-                            onAddEmpresa={() => setShowModalEmpresa(true)}
-                            onAddPessoa={() => setShowModalPessoa(true)}
-                            onAddVendedor={() => setShowModalVendedor(true)}
-                            onAddFormaPagamento={() => setShowModalFormaPagamento(true)}
-                            onAddServico={() => setShowModalServico(true)}
+                            onAddEmpresa={openCreateEmpresaDialog}
+                            onEditEmpresa={openEditEmpresaDialog}
+                            onAddPessoa={openCreatePessoaDialog}
+                            onEditPessoa={openEditPessoaDialog}
+                            onAddVendedor={openCreateVendedorDialog}
+                            onEditVendedor={openEditVendedorDialog}
+                            onAddFormaPagamento={openCreateFormaPagamentoDialog}
+                            onEditFormaPagamento={openEditFormaPagamentoDialog}
+                            onAddServico={openCreateServicoDialog}
+                            onEditServico={openEditServicoDialog}
                             onValidateDescricao={handleValidateDescricao}
                         />
                     </div>
@@ -338,84 +632,129 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                         <BTNPGCreatedDialog onClick={handleSubmit} label="Emitir Ordem" disabled={isSubmitDisabled} icon="pi pi-save" onBackClick={onBackClick} onClose={onClose} />}
                     </div>
                 </div>
-                <DialogFilter header="Adicionar Empresa" visible={showModalEmpresa} onHide={() => setShowModalEmpresa(false)}>
+                <DialogFilter
+                    header={editingEmpresaId ? 'Editar Empresa' : 'Adicionar Empresa'}
+                    visible={showModalEmpresa}
+                    onHide={closeEmpresaDialog}
+                    loading={isEmpresaDialogLoading}
+                    loadingText={editingEmpresaId ? 'Carregando informacoes da Empresa...' : 'Abrindo cadastro de Empresa...'}
+                >
                     <FormEmpresaCreated
+                        key={`${editingEmpresaId ?? 'novo'}-${empresaDialogKey}`}
                         msgs={msgs}
                         ref={formRef}
                         empresa={empresa}
-                        initialId={null}
+                        initialId={editingEmpresaId}
+                        preloadedEmpresa={preloadedEmpresa}
                         setEmpresa={setEmpresa}
                         onEmpresaChange={handleEmpresa}
                         onErrorsChange={handleErrorsChange}
                         redirectAfterSave={false}
                         onSaved={handleEmpresaSaved}
-                        onClose={() => setShowModalEmpresa(false)}
+                        onLoadingChange={setIsEmpresaDialogLoading}
+                        onClose={closeEmpresaDialog}
                         showBTNPGCreatedDialog
-                        onBackClick={() => setShowModalEmpresa(false)}
+                        onBackClick={closeEmpresaDialog}
                     />
                 </DialogFilter>
-                <DialogFilter header="Adicionar Servico" visible={showModalServico} onHide={() => setShowModalServico(false)}>
+                <DialogFilter
+                    header={editingServicoId ? 'Editar Servico' : 'Adicionar Servico'}
+                    visible={showModalServico}
+                    onHide={closeServicoDialog}
+                    loading={isServicoDialogLoading}
+                    loadingText={editingServicoId ? 'Carregando informacoes do Servico...' : 'Abrindo cadastro de Servico...'}
+                >
                     <FormCreatedServico
+                        key={`${editingServicoId ?? 'novo'}-${servicoDialogKey}`}
                         msgs={msgs}
                         ref={formRef}
                         servico={servico}
-                        initialId={null}
+                        initialId={editingServicoId}
+                        preloadedServico={preloadedServico}
                         setServico={setServico}
                         onServicoChange={handleServico}
                         onErrorsChange={handleErrorsChange}
                         redirectAfterSave={false}
                         onSaved={handleServiceSaved}
-                        onClose={() => setShowModalServico(false)}
+                        onLoadingChange={setIsServicoDialogLoading}
+                        onClose={closeServicoDialog}
                         showBTNPGCreatedDialog
-                        onBackClick={() => setShowModalServico(false)}
+                        onBackClick={closeServicoDialog}
                     />
                 </DialogFilter>
-                <DialogFilter header="Adicionar Cliente ou Fornecedor" visible={showModalPessoa} onHide={() => setShowModalPessoa(false)}>
+                <DialogFilter
+                    header={editingPessoaId ? 'Editar Cliente ou Fornecedor' : 'Adicionar Cliente ou Fornecedor'}
+                    visible={showModalPessoa}
+                    onHide={closePessoaDialog}
+                    loading={isPessoaDialogLoading}
+                    loadingText={editingPessoaId ? 'Carregando informacoes do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
+                >
                     <FormCreatedPessoa
+                        key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
                         msgs={msgs}
                         ref={formRef}
                         pessoa={pessoa}
-                        initialId={null}
+                        initialId={editingPessoaId}
+                        preloadedPessoa={preloadedPessoa}
                         setPessoa={setPessoa}
                         onPessoaChange={handlePessoa}
                         onErrorsChange={handleErrorsChange}
                         redirectAfterSave={false}
                         onSaved={handlePessoaSaved}
-                        onClose={() => setShowModalPessoa(false)}
+                        onLoadingChange={setIsPessoaDialogLoading}
+                        onClose={closePessoaDialog}
                         showBTNPGCreatedDialog
-                        onBackClick={() => setShowModalPessoa(false)}
+                        onBackClick={closePessoaDialog}
                     />
                 </DialogFilter>
-                <DialogFilter header="Adicionar Forma de Pagamento" visible={showModalFormaPagamento} onHide={() => setShowModalFormaPagamento(false)}>
+                <DialogFilter
+                    header={editingFormaPagamentoId ? 'Editar Forma de Pagamento' : 'Adicionar Forma de Pagamento'}
+                    visible={showModalFormaPagamento}
+                    onHide={closeFormaPagamentoDialog}
+                    loading={isFormaPagamentoDialogLoading}
+                    loadingText={editingFormaPagamentoId ? 'Carregando informacoes da Forma de Pagamento...' : 'Abrindo cadastro de Forma de Pagamento...'}
+                >
                     <FormCreatedFormaPagamento
+                        key={`${editingFormaPagamentoId ?? 'novo'}-${formaPagamentoDialogKey}`}
                         msgs={msgs}
                         ref={formRef}
                         formaPagamento={formaPagamento}
-                        initialId={null}
+                        initialId={editingFormaPagamentoId}
+                        preloadedFormaPagamento={preloadedFormaPagamento}
                         setFormaPagamento={setFormaPagamento}
                         onFormaPagamentoChange={handleFormaPagamento}
                         onErrorsChange={handleErrorsChange}
                         redirectAfterSave={false}
                         onSaved={handleFormaPagamentoSaved}
-                        onClose={() => setShowModalFormaPagamento(false)}
+                        onLoadingChange={setIsFormaPagamentoDialogLoading}
+                        onClose={closeFormaPagamentoDialog}
                         showBTNPGCreatedDialog
-                        onBackClick={() => setShowModalFormaPagamento(false)}
+                        onBackClick={closeFormaPagamentoDialog}
                     />
                 </DialogFilter>
-                <DialogFilter header="Adicionar Vendedor" visible={showModalVendedor} onHide={() => setShowModalVendedor(false)}>
+                <DialogFilter
+                    header={editingVendedorId ? 'Editar Vendedor' : 'Adicionar Vendedor'}
+                    visible={showModalVendedor}
+                    onHide={closeVendedorDialog}
+                    loading={isVendedorDialogLoading}
+                    loadingText={editingVendedorId ? 'Carregando informacoes do Vendedor...' : 'Abrindo cadastro de Vendedor...'}
+                >
                     <FormCreatedVendedor
+                        key={`${editingVendedorId ?? 'novo'}-${vendedorDialogKey}`}
                         msgs={msgs}
                         ref={formRef}
                         vendedor={vendedor}
-                        initialId={null}
+                        initialId={editingVendedorId}
+                        preloadedVendedor={preloadedVendedor}
                         setVendedor={setVendedor}
                         onVendedorChange={handleVendedor}
                         onErrorsChange={handleErrorsChange}
                         redirectAfterSave={false}
                         onSaved={handleVendedorSaved}
-                        onClose={() => setShowModalVendedor(false)}
+                        onLoadingChange={setIsVendedorDialogLoading}
+                        onClose={closeVendedorDialog}
                         showBTNPGCreatedDialog
-                        onBackClick={() => setShowModalVendedor(false)}
+                        onBackClick={closeVendedorDialog}
                     />
                 </DialogFilter>
             </>
