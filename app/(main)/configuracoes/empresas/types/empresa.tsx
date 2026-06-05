@@ -25,6 +25,7 @@ export interface EmpresaDropdownFieldProps {
     required?: boolean;
     onAddClick?: () => void;
     autoSelectSingle?: boolean;
+    loadOnMount?: boolean;
     showAddButton?: boolean;
 }
 

@@ -105,5 +105,7 @@ export interface FormaPagamentoDropdownFieldProps {
     showAddButton?: boolean;
     onAddClick?: () => void;
     autoSelectSingle?: boolean;
+    loadOnMount?: boolean;
+    useCachedAllItems?: boolean;
 }
 export type FormCreatedFormaPagamentoProps = | FormaPagamentoFieldsProps| FormaPagamentoFormProps;

@@ -5,6 +5,7 @@ import { Messages } from 'primereact/messages';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
+import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
@@ -266,17 +267,67 @@ export const fetchContratosById = async (contratoID: string) => {
         const { data: dataContrato } = await api.get(`/contrato/${contratoID}`);
         console.log('Contrato selecionado:', dataContrato);
         const contratoInstanciado = new ContratoEntity(dataContrato);
+        const clientesContrato = Array.isArray(dataContrato?.clientes_contrato)
+            ? dataContrato.clientes_contrato
+            : [];
         const pessoasResumo = Array.isArray(dataContrato?.pessoasResumo)
             ? dataContrato.pessoasResumo
             : dataContrato?.pessoaResumo
               ? [dataContrato.pessoaResumo]
               : [];
-        let selectedPessoa: PessoaEntity[] = pessoasResumo
-            .filter((pessoaResumo: Pick<PessoaEntity, 'id' | 'razao_social'> | null) => !!pessoaResumo?.id)
-            .map((pessoaResumo: Pick<PessoaEntity, 'id' | 'razao_social'>) => ({
-                id: pessoaResumo.id,
-                razao_social: pessoaResumo.razao_social ?? 'Nome nao disponivel'
+        let selectedPessoa: PessoaEntity[] = clientesContrato
+            .filter((cliente: Pick<PessoaEntity, 'id' | 'razao_social' | 'nome_fantasia'> | null) => !!cliente?.id)
+            .map((cliente: Pick<PessoaEntity, 'id' | 'razao_social' | 'nome_fantasia'>) => ({
+                id: cliente.id,
+                razao_social: cliente.razao_social ?? cliente.nome_fantasia ?? 'Nome nao disponivel',
+                nome_fantasia: cliente.nome_fantasia ?? cliente.razao_social ?? 'Nome nao disponivel'
             } as PessoaEntity));
+
+        if (selectedPessoa.length === 0) {
+            selectedPessoa = pessoasResumo
+                .filter((pessoaResumo: Pick<PessoaEntity, 'id' | 'razao_social' | 'nome_fantasia'> | null) => !!pessoaResumo?.id)
+                .map((pessoaResumo: Pick<PessoaEntity, 'id' | 'razao_social' | 'nome_fantasia'>) => ({
+                    id: pessoaResumo.id,
+                    razao_social: pessoaResumo.razao_social ?? pessoaResumo.nome_fantasia ?? 'Nome nao disponivel',
+                    nome_fantasia: pessoaResumo.nome_fantasia ?? pessoaResumo.razao_social ?? 'Nome nao disponivel'
+                } as PessoaEntity));
+        }
+
+        const selectedEmpresa = dataContrato?.id_empresa
+            ? ({
+                id: dataContrato.id_empresa,
+                razao_social: dataContrato.razao_social_empresa ?? 'Empresa selecionada',
+                nome_fantasia: dataContrato.nome_fantasia_empresa ?? dataContrato.razao_social_empresa ?? 'Empresa selecionada'
+            } as CompanyEntity)
+            : null;
+
+        const selectedService = dataContrato?.id_servico
+            ? ({
+                id: dataContrato.id_servico,
+                descricao: dataContrato.descricao_servico ?? 'Servico selecionado'
+            } as ServiceEntity)
+            : null;
+
+        const selectedFormaPagamento = dataContrato?.id_forma_pagamento
+            ? ({
+                id: dataContrato.id_forma_pagamento,
+                descricao: dataContrato.descricao_forma_pagamento ?? 'Forma de pagamento selecionada'
+            } as FormaPagamentoEntity)
+            : null;
+
+        const selectedCategoriaContrato = dataContrato?.id_categoria_contrato &&
+            (dataContrato.descricao_categoria_contrato ||
+                dataContrato.nome_categoria_contrato ||
+                dataContrato.categoria_contrato?.descricao)
+            ? ({
+                id: dataContrato.id_categoria_contrato,
+                descricao:
+                    dataContrato.descricao_categoria_contrato ??
+                    dataContrato.nome_categoria_contrato ??
+                    dataContrato.categoria_contrato?.descricao,
+                ativo: true
+            } as CategoryContratosEntity)
+            : null;
 
         if (selectedPessoa.length === 0 && Array.isArray(dataContrato?.id_clientes_contrato) && dataContrato.id_clientes_contrato.length > 0) {
             const pessoasCarregadas = await Promise.all(
@@ -303,11 +354,11 @@ export const fetchContratosById = async (contratoID: string) => {
             serviceList: [],
             categoriaList: [],
             formaPagamentoList: [],
-            selectedEmpresa: null,
-            selectedService: null,
-            selectedCategoriaContrato: null,
-            selectedFormaPagamento: null,
-            pessoa: [],
+            selectedEmpresa,
+            selectedService,
+            selectedCategoriaContrato,
+            selectedFormaPagamento,
+            pessoa: selectedPessoa,
             selectedPessoa,
         };
     } catch (error) {

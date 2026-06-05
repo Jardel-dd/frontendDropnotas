@@ -1,5 +1,5 @@
 import { ContratoEntity } from "@/app/entity/ContratoEntity";
-import { ContratoDropdownFieldProps } from "../types/contrato";
+import { ContratoDropdownFieldProps } from "../../cadastro/pessoas/types/contrato";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
 import { fetchContratoByID, fetchFilteredContrato, listTheContrato } from "@/app/(main)/contrato/controller/controller";
 
@@ -43,6 +43,7 @@ export default function ContratoDropdownField({
             topLabel="Contrato:"
             showTopLabel
             required={required}
+            autoLoadAndSelectSingle
         />
     );
 }

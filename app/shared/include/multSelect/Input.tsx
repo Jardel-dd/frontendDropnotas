@@ -31,6 +31,7 @@ function CustomMultiSelect({
     fetchFilteredItems,
     fetchAllItems,
     autoSelectSingle = false,
+    autoLoadAndSelectSingle = false,
     dataKey,
     initialSelectedValues = [],
     showAddButton = false,
@@ -40,7 +41,8 @@ function CustomMultiSelect({
     maxResults = 50,
     showTopLabel,
     topLabel,
-    required
+    required,
+    reloadAllOnShow = false
 }: MultiSelectProps) {
     const { layoutConfig } = useContext(LayoutContext);
     const isMobile = useIsMobile();
@@ -55,7 +57,45 @@ function CustomMultiSelect({
     const selectedItemsRef = useRef<any[]>(selectedItems);
     const initialSelectedValuesRef = useRef<Array<string | number>>(initialSelectedValues);
     const loadingRef = useRef(false);
+    const didCheckSingleOptionRef = useRef(false);
     const [panelWidth, setPanelWidth] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (!autoLoadAndSelectSingle || !fetchAllItems) {
+            return;
+        }
+        if (didCheckSingleOptionRef.current) {
+            return;
+        }
+        didCheckSingleOptionRef.current = true;
+        const checkSingleOption = async () => {
+            console.log('CHECK SINGLE OPTION');
+            try {
+                const data = await fetchAllItems();
+              if (Array.isArray(data)) {
+    setFilteredOptions(data);
+    setHasLoadedAllOptions(true);
+    if (
+        data.length === 1 &&
+        selectedItemsRef.current.length === 0 &&
+        initialSelectedValuesRef.current.length === 0
+    ) {
+        didAutoSelectRef.current = true;
+
+        onChange({
+            value: [data[0]]
+        });
+    }
+}
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        checkSingleOption();
+    }, []);
+
+
     useEffect(() => {
         selectedItemsRef.current = selectedItems;
     }, [selectedItems]);
@@ -149,7 +189,13 @@ function CustomMultiSelect({
         setPanelWidth(wrapperRef.current?.getBoundingClientRect().width ?? null);
 
         if (fetchAllItems && !loading) {
-            if (!hasLoadedAllOptions || filteredOptions.length === 0 || filterValue.trim().length === 0) {
+            if (reloadAllOnShow) {
+                setFilterValue('');
+                await loadAll(filteredOptions.length === 0);
+                return;
+            }
+
+            if (!hasLoadedAllOptions || filteredOptions.length === 0) {
                 setFilterValue('');
                 await loadAll(true);
                 return;
@@ -269,6 +315,7 @@ function CustomMultiSelect({
                     <MultiSelect
                         ref={multiSelectRef}
                         id={id}
+
                         value={selectedItems}
                         onChange={onChange}
                         options={filteredOptions}
@@ -344,9 +391,9 @@ function CustomMultiSelect({
                                                 tooltip="Adicionar"
                                                 icon="pi pi-plus"
                                                 aria-label="Adicionar"
-                                            onMouseDown={handleAddButtonMouseDown}
-                                            onClick={handleAddButtonClick}
-                                        />
+                                                onMouseDown={handleAddButtonMouseDown}
+                                                onClick={handleAddButtonClick}
+                                            />
                                         )}
                                         {canEditSelected && (
                                             <Button
@@ -381,8 +428,8 @@ function CustomMultiSelect({
                                                 severity="warning"
                                                 outlined
                                                 raised
-                                            onMouseDown={handleClearButtonMouseDown}
-                                            onClick={handleClearButtonClick}
+                                                onMouseDown={handleClearButtonMouseDown}
+                                                onClick={handleClearButtonClick}
                                             />
                                         )}
                                         <Button

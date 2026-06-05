@@ -46,6 +46,7 @@ export default function PessoaDropdownField({
             showTopLabel={showTopLabel}
             required={required}
             topLabel={topLabel}
+            autoLoadAndSelectSingle
         />
     );
 }

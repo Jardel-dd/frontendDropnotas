@@ -7,6 +7,7 @@ const AppMenu = () => {
     const { userConta } = useUserContext();
 
     const model = useMemo(() => {
+        
         return filterVisibleMenuItems([
             {
                 label: 'Dashboard',
@@ -25,7 +26,7 @@ const AppMenu = () => {
                         visible: hasPermissionAccess(userConta, 'pessoa')
                     },
                     {
-                        label: 'Servicos',
+                        label: 'Serviços',
                         icon: 'pi pi-ticket',
                         to: '/cadastro/servicos',
                         visible: hasPermissionAccess(userConta, 'servico')
@@ -37,13 +38,13 @@ const AppMenu = () => {
                         visible: hasPermissionAccess(userConta, 'vendedor')
                     },
                     {
-                        label: 'Usuarios',
+                        label: 'Usuários',
                         icon: 'pi pi-users',
                         to: '/cadastro/usuarios',
                         visible: hasPermissionAccess(userConta, 'usuarioConta')
                     },
                     {
-                        label: 'Permissoes',
+                        label: 'Permissões',
                         icon: 'pi pi-unlock',
                         to: '/cadastro/permissoes',
                         visible: hasPermissionAccess(userConta, 'perfilUsuario')
@@ -69,19 +70,19 @@ const AppMenu = () => {
                 visible: hasPermissionAccess(userConta, 'contrato')
             },
             {
-                label: 'Ordem de Servicos',
+                label: 'Ordens de Serviços',
                 icon: 'pi pi-wrench',
                 to: '/ordemServicos',
                 visible: hasPermissionAccess(userConta, 'ordemServico')
             },
             {
-                label: 'Nota de Servicos',
+                label: 'NFS-e',
                 icon: 'pi pi-book',
                 to: '/notaServico',
                 visible: hasPermissionAccess(userConta, 'nfse')
             },
             {
-                label: 'Financas',
+                label: 'Finanças',
                 icon: 'pi pi-money-bill',
                 to: '/financas',
                 visible: hasPermissionAccess(userConta, 'financeiro'),
@@ -97,18 +98,18 @@ const AppMenu = () => {
                         to: '/financas/receber',
                     },
                     {
-                        label: 'Comissoes',
+                        label: 'Comissões',
                         icon: 'pi pi-dollar',
                         to: '/financas/comissoes',
                     }
                 ],
             },
             {
-                label: 'Relatorios',
+                label: 'Relatório',
                 icon: 'pi pi-chart-bar',
                 items: [
                     {
-                        label: 'Servicos',
+                        label: 'Serviços',
                         icon: 'pi pi-wrench',
                         to: '/relatorios/servicos',
                     },
@@ -120,7 +121,7 @@ const AppMenu = () => {
                 ],
             },
             {
-                label: 'Configuracoes',
+                label: 'Configurações',
                 icon: 'pi pi-cog',
                 to: '/configuracoes',
                 visible: hasPermissionAccess(userConta, 'empresa') || hasPermissionAccess(userConta, 'is_usuario_principal'),
@@ -137,11 +138,16 @@ const AppMenu = () => {
                         to: '/configuracoes/geral',
                     }
                 ],
+                
             },
+           
+           
+            
         ]);
     }, [userConta]);
-
-    return <AppSubMenu key={JSON.stringify(model)} model={model} />;
+  
+    return <AppSubMenu key={JSON.stringify(model)} model={model}
+     />;
 };
 
 export default AppMenu;

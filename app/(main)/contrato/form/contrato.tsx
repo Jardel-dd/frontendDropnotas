@@ -1,6 +1,8 @@
 'use client';
 import 'primeicons/primeicons.css';
 import '@/app/styles/styledGlobal.css';
+import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { IconReal } from '@/app/utils/icons/icons';
 import { InputSwitch } from 'primereact/inputswitch';
 import Input from '@/app/shared/include/input/input-all';
@@ -15,6 +17,8 @@ import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dr
 import CategoriaContratoDropdownField from '@/app/(main)/cadastro/categoriaContratos/dropDown/categoriaContratos';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 export type {ContratoFieldsProps, ContratoFormProps, ContratoFormRef,FormContratoCreatedProps} from '../types/contratos';
+
+const PESSOA_CONTRATO_MULTISELECT_CACHE_TIME_MS = 5 * 60 * 1000;
 
 export function ContratoFields({
     contrato,
@@ -50,6 +54,18 @@ export function ContratoFields({
     onEditPessoa,
     onValidateDescricao
 }: ContratoFieldsProps) {
+    const queryClient = useQueryClient();
+    const fetchAllPessoasWithCache = useCallback(
+        () =>
+            queryClient.fetchQuery({
+                queryKey: ['multiselect', 'contrato', 'pessoas', 'all', reloadKeyPessoa],
+                queryFn: listThePessoas,
+                staleTime: PESSOA_CONTRATO_MULTISELECT_CACHE_TIME_MS,
+                gcTime: PESSOA_CONTRATO_MULTISELECT_CACHE_TIME_MS
+            }),
+        [queryClient, reloadKeyPessoa]
+    );
+
     return (
         <div className="scrollable-container">
             <div className="custom-flex-row">
@@ -127,6 +143,7 @@ export function ContratoFields({
                                 onAddClick={onAddServico}
                                 onEditClick={onEditServico}
                                 autoSelectSingle
+                                useCachedAllItems
                                 required
                             />
                         </div>
@@ -142,6 +159,7 @@ export function ContratoFields({
                                 onAddClick={onAddCategoriaContrato}
                                 onEditClick={onEditCategoriaContrato}
                                 autoSelectSingle
+                                useCachedAllItems
                                 required
                             />
                         </div>
@@ -157,6 +175,7 @@ export function ContratoFields({
                                 onAddClick={onAddFormaPagamento}
                                 onEditClick={onEditFormaPagamento}
                                 autoSelectSingle={false}
+                                useCachedAllItems
                                 required
                             />
                         </div>
@@ -170,8 +189,9 @@ export function ContratoFields({
                                 options={pessoaOptions}
                                 optionLabel="razao_social"
                                 dataKey="id"
-                                fetchAllItems={listThePessoas}
+                                fetchAllItems={fetchAllPessoasWithCache}
                                 fetchFilteredItems={fetchFilteredPessoas}
+                                reloadAllOnShow
                                 initialSelectedValues={contrato.id_clientes_contrato ?? []}
                                 showAddButton
                                 onAddClick={onAddPessoa}

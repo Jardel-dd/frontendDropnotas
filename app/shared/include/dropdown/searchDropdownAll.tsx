@@ -29,15 +29,17 @@ interface SearchDropdownProps<T> {
     onEditClick?: (item: T) => void;
     minSearchChars?: number;
     maxResults?: number;
-    className?:string;
+    className?: string;
     autoSelectSingle?: boolean;
     showTopLabel?: boolean;
     topLabel?: string | ReactNode;
     required?: boolean;
+    loadOnMount?: boolean;
+    autoLoadAndSelectSingle?: boolean;
+    reloadAllOnShow?: boolean;
 }
 
 const normalize = (v: any) => (v === null || v === undefined ? null : String(v));
-
 function ensureSelectedInList<T extends Record<string, any>>(list: T[], selected: T | null, optionValue?: keyof T) {
     if (!selected) return list;
     if (!optionValue) {
@@ -76,9 +78,12 @@ export const DropdownSearch = <T extends Record<string, any>>({
     minSearchChars = 2,
     maxResults = 20,
     autoSelectSingle = false,
+    autoLoadAndSelectSingle = false,
     showTopLabel,
     topLabel,
     required,
+    loadOnMount = false,
+    reloadAllOnShow = false,
     className,
 }: SearchDropdownProps<T>) => {
     const [items, setItems] = useState<T[]>([]);
@@ -94,24 +99,22 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const initialOptionValueRef = useRef<string | number | null | undefined>(initialOptionValue);
     const onItemChangeRef = useRef(onItemChange);
     const didAutoSelectRef = useRef(false);
+    const didLoadOnMountRef = useRef(false);
     const loadingRef = useRef(false);
     const hasLoadedAllItemsRef = useRef(false);
     const requestSequenceRef = useRef(0);
     const activeRequestCountRef = useRef(0);
-
+    const loadAllRef = useRef<() => Promise<void>>(async () => undefined);
     const beginRequest = (clearItems = false) => {
         activeRequestCountRef.current += 1;
         loadingRef.current = true;
         setLoading(true);
-
         if (clearItems) {
             setItems([]);
         }
-
         requestSequenceRef.current += 1;
         return requestSequenceRef.current;
     };
-
     const finishRequest = () => {
         activeRequestCountRef.current = Math.max(0, activeRequestCountRef.current - 1);
         const stillLoading = activeRequestCountRef.current > 0;
@@ -119,7 +122,6 @@ export const DropdownSearch = <T extends Record<string, any>>({
         loadingRef.current = stillLoading;
         setLoading(stillLoading);
     };
-
     const isLatestRequest = (requestId: number) => requestId === requestSequenceRef.current;
     useEffect(() => {
         selectedItemRef.current = selectedItem;
@@ -130,7 +132,6 @@ export const DropdownSearch = <T extends Record<string, any>>({
     useEffect(() => {
         initialOptionValueRef.current = initialOptionValue;
     }, [initialOptionValue]);
-
     useEffect(() => {
         onItemChangeRef.current = onItemChange;
     }, [onItemChange]);
@@ -140,6 +141,41 @@ export const DropdownSearch = <T extends Record<string, any>>({
     useEffect(() => {
         hasLoadedAllItemsRef.current = hasLoadedAllItems;
     }, [hasLoadedAllItems]);
+    useEffect(() => {
+        if (!autoLoadAndSelectSingle) return;
+        if (
+            selectedItemRef.current ||
+            initialOptionValueRef.current !== null && initialOptionValueRef.current !== undefined
+        ) {
+            return;
+        }
+        let mounted = true;
+        const loadSingleItemIfExists = async () => {
+            try {
+                const data = await fetchAllItems();
+                if (!mounted || !Array.isArray(data)) return;
+                if (data.length === 1) {
+                    didAutoSelectRef.current = true;
+                    setItems(data);
+                    setHasLoadedAllItems(true);
+                    hasLoadedAllItemsRef.current = true;
+                    onItemChangeRef.current?.(data[0]);
+                }
+            } catch (error) {
+                console.error(
+                    'Erro ao verificar seleção automática:',
+                    error
+                );
+            }
+        };
+
+        loadSingleItemIfExists();
+
+        return () => {
+            mounted = false;
+        };
+    }, [autoLoadAndSelectSingle, fetchAllItems]);
+
     const selectedValue = optionValue && selectedItem ? selectedItem[optionValue] ?? null : selectedItem ?? null;
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -154,7 +190,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const loadAll = async () => {
         if (loadingRef.current) return;
 
-        const requestId = beginRequest(true);
+        const requestId = beginRequest(items.length === 0);
         try {
             const data = await fetchAllItems();
             let limited = Array.isArray(data) ? data.slice(0, maxResults) : [];
@@ -168,7 +204,13 @@ export const DropdownSearch = <T extends Record<string, any>>({
                 const targetValue = normalize(rawTargetValue);
                 let match = data.find((it) => normalize(it[ov]) === targetValue) ?? null;
 
-                if (!match && rawTargetValue !== null && rawTargetValue !== undefined && fetchItemByValue) {
+                if (
+                    !match &&
+                    !selectedItemRef.current &&
+                    rawTargetValue !== null &&
+                    rawTargetValue !== undefined &&
+                    fetchItemByValue
+                ) {
                     match = await fetchItemByValue(rawTargetValue);
                 }
 
@@ -177,17 +219,26 @@ export const DropdownSearch = <T extends Record<string, any>>({
                     onItemChangeRef.current?.(match);
                 }
             }
+            const hasPresetSelection =
+                resolvedSelectedItem !== null ||
+                initialOptionValueRef.current !== null && initialOptionValueRef.current !== undefined;
+            if (
+                autoSelectSingle &&
+                !didAutoSelectRef.current &&
+                !hasPresetSelection &&
+                Array.isArray(data) &&
+                data.length === 1
+            ) {
+                didAutoSelectRef.current = true;
+                resolvedSelectedItem = data[0];
+                onItemChangeRef.current?.(data[0]);
+            }
 
             if (!isLatestRequest(requestId)) return;
 
             limited = ensureSelectedInList(limited, resolvedSelectedItem, optionValueRef.current);
 
             setItems(limited);
-
-            if (autoSelectSingle && !didAutoSelectRef.current && !selectedItemRef.current && Array.isArray(data) && data.length === 1) {
-                didAutoSelectRef.current = true;
-                onItemChangeRef.current?.(data[0]);
-            }
 
             setHasLoadedAllItems(true);
             hasLoadedAllItemsRef.current = true;
@@ -199,15 +250,67 @@ export const DropdownSearch = <T extends Record<string, any>>({
             finishRequest();
         }
     };
+    loadAllRef.current = loadAll;
+
+    useEffect(() => {
+        if (!loadOnMount || didLoadOnMountRef.current) {
+            return;
+        }
+
+        didLoadOnMountRef.current = true;
+        if (selectedItemRef.current) {
+            setItems((prev) => ensureSelectedInList(prev, selectedItemRef.current, optionValueRef.current));
+            return;
+        }
+
+        if (
+            optionValueRef.current &&
+            initialOptionValueRef.current !== null &&
+            initialOptionValueRef.current !== undefined &&
+            fetchItemByValue
+        ) {
+            void (async () => {
+                const requestId = beginRequest(true);
+                try {
+                    const resolvedItem = await fetchItemByValue(initialOptionValueRef.current as string | number);
+
+                    if (!isLatestRequest(requestId)) return;
+
+                    if (resolvedItem) {
+                        onItemChangeRef.current?.(resolvedItem);
+                        setItems((prev) => ensureSelectedInList(prev, resolvedItem, optionValueRef.current));
+                    } else {
+                        setItems([]);
+                    }
+                } catch (error) {
+                    if (!isLatestRequest(requestId)) return;
+                    console.error('Erro ao carregar item inicial do dropdown:', error);
+                    setItems([]);
+                } finally {
+                    finishRequest();
+                }
+            })();
+            return;
+        }
+
+        void loadAllRef.current();
+    }, [loadOnMount]);
+
     const loadAllIfNeeded = async () => {
-        if (hasLoadedAllItemsRef.current || loadingRef.current) return;
+        if (loadingRef.current) return;
+        if (hasLoadedAllItemsRef.current) return;
         await loadAll();
     };
-
     const handleShow = async () => {
+        if (reloadAllOnShow) {
+            await loadAll();
+            return;
+        }
+
         await loadAllIfNeeded();
     };
     const handleFocus = async () => {
+        if (reloadAllOnShow) return;
         if (filterValue.trim().length > 0) return;
         await loadAllIfNeeded();
     };
@@ -297,6 +400,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
         event.stopPropagation();
         setFilterValue('');
         debouncedFilter.cancel();
+        didAutoSelectRef.current = false;
         selectedItemRef.current = null;
         initialOptionValueRef.current = null;
         onItemChangeRef.current?.(null);
@@ -320,9 +424,9 @@ export const DropdownSearch = <T extends Record<string, any>>({
     }, [debouncedFilter]);
 
     return (
-        <div ref={wrapperRef} className="p-field" style={{ width: '100%', height:'85px', maxHeight:"85px"}}>
+        <div ref={wrapperRef} className="p-field" style={{ width: '100%', height: '85px', maxHeight: "85px" }}>
             {showTopLabel && topLabel && (
-                <div style={{ height: 'var(--form-label-height)', display:"flex", alignItems:"center" }}>
+                <div style={{ height: 'var(--form-label-height)', display: "flex", alignItems: "center" }}>
                     <label className="filter-label">
                         {topLabel}
                         {required && <Mandatory />}
@@ -330,7 +434,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
                 </div>
             )}
             <div className={`p-inputgroup flex-1 custom-input-number styled-on-focus styled-on-hover ${hasError ? 'input-error' : ''}`}
-                  style={{ border: hasError ? '1px solid #fca5a5' : (isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da'), borderRadius: '6px' }}>
+                style={{ border: hasError ? '1px solid #fca5a5' : (isDarkMode ? '1px solid #3e4f62' : '1px solid #ced4da'), borderRadius: '6px' }}>
                 <Dropdown
                     ref={dropdownRef}
                     id={id}
@@ -371,10 +475,10 @@ export const DropdownSearch = <T extends Record<string, any>>({
                         border: 'none',
                         height: 'var(--form-control-height)',
                         minHeight: 'var(--form-control-height)'
-                        
+
                     }}
                     filterTemplate={() => (
-                        <div className="p-2 flex align-items-center gap-2" style={{ width: '100%',height:"40px" }}>
+                        <div className="p-2 flex align-items-center gap-2" style={{ width: '100%', height: "40px" }}>
                             <InputText
                                 autoFocus
                                 type="text"
@@ -466,7 +570,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
                 />
             </div>
             <div style={{ height: 'var(--form-feedback-height)', display: 'flex', alignItems: 'flex-end' }}> {errorMessage && <small className="p-error block">{errorMessage}</small>}
-        </div>
+            </div>
         </div>
     );
 };

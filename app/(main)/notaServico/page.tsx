@@ -43,13 +43,13 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import { createEmptyEmpresa, createEmptyServico } from '../ordemServicos/types/ordemServico';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { downloadPdfButton, downloadXmlButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { consumeNotaServicoFeedback, exportarPdfNotasServico, listNotaServico } from './controller/controller';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import { fetchCompanyDropdownByID, fetchCompanyFormDataByID } from '@/app/(main)/configuracoes/empresas/controller/controller';
-import { fetchPessoasById } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { fetchFilteredPessoas, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { fetchServiceFormDataByID, fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
-
 
 const buildEmptyNotaServicoPagination = (pageSize: number, pageNumber = 0) => ({
     content: [],
@@ -79,6 +79,24 @@ const buildEmptyNotaServicoPagination = (pageSize: number, pageNumber = 0) => ({
     first: pageNumber === 0,
     empty: true
 });
+const formatAuthorizedNotaDateTime = (value?: string) => {
+    if (!value) {
+        return '-';
+    }
+
+    const parsedDate = dayjs(value);
+
+    return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY [às] HH:mm') : '-';
+};
+const formatAuthorizedNotaValue = (value?: string | number) => {
+    const parsedValue = typeof value === 'string' ? Number(value.includes(',') ? value.replace(/\./g, '').replace(',', '.') : value) : Number(value);
+
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(Number.isFinite(parsedValue) ? parsedValue : 0);
+};
+const getAuthorizedNotaEmail = (nota: Partial<NfsEntity> | null) => nota?.tomador?.contato?.email || (nota?.tomador as any)?.email || '-';
 
 const NotaServico: React.FC = () => {
     const router = useRouter();
@@ -111,6 +129,8 @@ const NotaServico: React.FC = () => {
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showExportPdfDialog, setShowExportPdfDialog] = useState(false);
+    const [showAuthorizedNotaDialog, setShowAuthorizedNotaDialog] = useState(false);
+    const [authorizedNota, setAuthorizedNota] = useState<Partial<NfsEntity> | null>(null);
     const [pessoa, setPessoa] = useState<PessoaEntity>(createEmptyPessoa());
     const [showDialogPreparaNfs, setShowDialogPreparaNfs] = useState(false);
     const [dateRange, setDateRange] = useState<DateRangeValue>([null, null]);
@@ -202,7 +222,7 @@ const NotaServico: React.FC = () => {
                 cpf_cnpj: 0,
                 razao_social: '',
                 contato: new ContatoEntity({
-                    email: '',
+                    email: ''
                 }),
                 endereco: new EnderecoEntity({
                     cep: '',
@@ -251,7 +271,6 @@ const NotaServico: React.FC = () => {
             setLoading(false);
             return;
         }
-
         setLoading(true);
         try {
             const appliedFilters = filters ?? {
@@ -261,16 +280,19 @@ const NotaServico: React.FC = () => {
                 selectedVendedor,
                 selectedStatusNotaServico
             };
-            const data = await listNotaServico({
-                page: pageNumber,
-                size: pageSize,
-                termo,
-                status: appliedFilters.selectedStatusNotaServico,
-                dateRange: appliedFilters.dateRange,
-                id_empresa: appliedFilters.selectedEmpresa?.id,
-                id_cliente: appliedFilters.selectedPessoa?.id,
-                id_vendedor: appliedFilters.selectedVendedor?.id
-            }, msgs);
+            const data = await listNotaServico(
+                {
+                    page: pageNumber,
+                    size: pageSize,
+                    termo,
+                    status: appliedFilters.selectedStatusNotaServico,
+                    dateRange: appliedFilters.dateRange,
+                    id_empresa: appliedFilters.selectedEmpresa?.id,
+                    id_cliente: appliedFilters.selectedPessoa?.id,
+                    id_vendedor: appliedFilters.selectedVendedor?.id
+                },
+                msgs
+            );
 
             setListPaginationNotaServico(data);
         } finally {
@@ -296,8 +318,7 @@ const NotaServico: React.FC = () => {
     const handleVendedorChange = (vendedor: VendedorEntity | null) => {
         setDraftSelectedVendedor(vendedor);
     };
-    const validatePrepararNfsDialog = (empresa = selectedEmpresaDialog, servico = selectedServicoDialog, cliente = selectedPessoaDialog) =>
-     validateFieldsPrepararNfs(prepararNfs, empresa, servico, cliente, setErrors, msgs);
+    const validatePrepararNfsDialog = (empresa = selectedEmpresaDialog, servico = selectedServicoDialog, cliente = selectedPessoaDialog) => validateFieldsPrepararNfs(prepararNfs, empresa, servico, cliente, setErrors, msgs);
     const handlePrepararNfsChange = (field: 'id_empresa' | 'id_cliente' | 'id_servico', value: number) => {
         setPrepararNfs((prev) =>
             prev.copyWith({
@@ -328,22 +349,22 @@ const NotaServico: React.FC = () => {
     };
     const handleEmitirNotas = async () => {
         if (!canUpdateNotaServico || selectedNotas.length === 0) return;
-        const notaIds = selectedNotas
+        const notaReferencias = selectedNotas
             .filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE')
-            .map((nota) => nota.id);
-        if (notaIds.length === 0) return;
-        console.log('IDs das notas selecionadas para emissão:', notaIds);
+            .map((nota) => nota.referencia?.trim())
+            .filter((referencia): referencia is string => Boolean(referencia));
+        if (notaReferencias.length === 0) return;
+        console.log('Referências das notas selecionadas para emissão:', notaReferencias);
         try {
-            const response = await api.post('/nfse/emitir-pendentes', { ids: notaIds });
+            const response = await api.post('/nfse/emitir-lote', { referencias: notaReferencias });
             console.log('Notas enviadas com sucesso:', response);
-            toast.current?.show({
+            msgs.current?.show({
                 severity: 'success',
                 summary: 'Sucesso:',
-                detail: `Foram enviadas ${notaIds.length} nota${notaIds.length > 1 ? 's' : ''} para emissão.`
+                detail: `Foram enviadas ${notaReferencias.length} nota${notaReferencias.length > 1 ? 's' : ''} para emissão.`
             });
         } catch (error) {
-            console.error('Erro ao emitir notas pendentes:', error);
-            toast.current?.show({
+            msgs.current?.show({
                 severity: 'error',
                 summary: 'Atenção:',
                 detail: 'Falha ao emitir notas pendentes.'
@@ -356,9 +377,7 @@ const NotaServico: React.FC = () => {
             return;
         }
 
-        setSelectedNotas(
-            notas.filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE')
-        );
+        setSelectedNotas(notas.filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE'));
     };
     const getActiveFilters = () => ({
         dateRange,
@@ -388,24 +407,25 @@ const NotaServico: React.FC = () => {
         setLoadingExportPdf(true);
         try {
             const totalRegistros = Number(listPaginationNotaServico?.totalElements ?? 0);
-            const response = await listNotaServico({
-                page: 0,
-                size: Math.max(totalRegistros, pageSize, 1),
-                termo: searchTerm,
-                status: activeFilters.selectedStatusNotaServico,
-                dateRange: activeFilters.dateRange,
-                id_empresa: activeFilters.selectedEmpresa?.id,
-                id_cliente: activeFilters.selectedPessoa?.id,
-                id_vendedor: activeFilters.selectedVendedor?.id
-            }, msgs);
-            const referencias = (response?.content ?? [])
-                .map((nota: NfsEntity) => nota.referencia?.trim())
-                .filter((referencia: string | undefined): referencia is string => Boolean(referencia));
+            const response = await listNotaServico(
+                {
+                    page: 0,
+                    size: Math.max(totalRegistros, pageSize, 1),
+                    termo: searchTerm,
+                    status: activeFilters.selectedStatusNotaServico,
+                    dateRange: activeFilters.dateRange,
+                    id_empresa: activeFilters.selectedEmpresa?.id,
+                    id_cliente: activeFilters.selectedPessoa?.id,
+                    id_vendedor: activeFilters.selectedVendedor?.id
+                },
+                msgs
+            );
+            const referencias = (response?.content ?? []).map((nota: NfsEntity) => nota.referencia?.trim()).filter((referencia: string | undefined): referencia is string => Boolean(referencia));
             const dateParams = mapDateRangeToParams(activeFilters.dateRange);
             await exportarPdfNotasServico(
                 {
                     data_hora_inicio: dateParams.data_hora_inicio ?? '',
-                    data_hora_fim: dateParams.data_hora_fim ?? '',
+                    data_hora_fim: dateParams.data_hora_fim ?? ''
                 },
                 msgs
             );
@@ -478,7 +498,6 @@ const NotaServico: React.FC = () => {
         if (!pessoaSelecionada?.id) {
             return;
         }
-
         setIsPessoaDialogLoading(true);
         try {
             const pessoaId = String(pessoaSelecionada.id);
@@ -518,13 +537,7 @@ const NotaServico: React.FC = () => {
             closePessoaDialog();
         }
     };
-    const search = async (filters?: {
-        dateRange: DateRangeValue;
-        selectedEmpresa: CompanyEntity | null;
-        selectedPessoa: PessoaEntity | null;
-        selectedVendedor: VendedorEntity | null;
-        selectedStatusNotaServico: string;
-    }) => {
+    const search = async (filters?: { dateRange: DateRangeValue; selectedEmpresa: CompanyEntity | null; selectedPessoa: PessoaEntity | null; selectedVendedor: VendedorEntity | null; selectedStatusNotaServico: string }) => {
         if (!canSearchNotaServico) {
             clearNotaServicoResults();
             return;
@@ -675,7 +688,6 @@ const NotaServico: React.FC = () => {
         if (!servicoSelecionado?.id) {
             return;
         }
-
         setIsServicoDialogLoading(true);
         try {
             const servicoId = String(servicoSelecionado.id);
@@ -732,13 +744,16 @@ const NotaServico: React.FC = () => {
             setLoading(true);
 
             try {
-                const data = await listNotaServico({
-                    page: 0,
-                    size: pageSize,
-                    termo: '',
-                    status: '',
-                    dateRange: [null, null]
-                }, msgs);
+                const data = await listNotaServico(
+                    {
+                        page: 0,
+                        size: pageSize,
+                        termo: '',
+                        status: '',
+                        dateRange: [null, null]
+                    },
+                    msgs
+                );
 
                 setListPaginationNotaServico(data);
             } finally {
@@ -754,15 +769,25 @@ const NotaServico: React.FC = () => {
             return;
         }
 
+        const { notaAutorizada, ...messageFeedback } = feedback;
+
         msgs.current?.show({
-            ...feedback,
+            ...messageFeedback,
             life: 7000
         });
+
+        if (notaAutorizada) {
+            setAuthorizedNota(notaAutorizada);
+            setShowAuthorizedNotaDialog(true);
+        }
     }, []);
     if (loadingPrepararNfs) {
         return <LoadingScreen loadingText={'Preparando NFS-E...'} />;
     }
     const disableConfirmarPrepararNfs = stateDisableBtnPrepararNfse || Object.keys(errors).length > 0 || !selectedEmpresaDialog || !selectedPessoaDialog || !selectedServicoDialog;
+    const authorizedNotaEmpresa = authorizedNota?.razao_social_empresa || authorizedNota?.prestador?.razao_social || '-';
+    const authorizedNotaCliente = authorizedNota?.razao_social_cliente || authorizedNota?.tomador?.razao_social || '-';
+    const canDownloadAuthorizedNota = Boolean(authorizedNota?.id);
     return (
         <div className="w-full">
             <Toast ref={toast} />
@@ -771,7 +796,7 @@ const NotaServico: React.FC = () => {
                 {isMobile && (
                     <>
                         <div className="card styled-container-main-all-routes">
-                            <div style={{ marginTop: "8px", marginLeft: "8px", width: "100%" }}>
+                            <div style={{ marginTop: '8px', marginLeft: '8px', width: '100%' }}>
                                 <div className="grid formgrid w-full" style={{ maxHeight: '74px' }}>
                                     {canSearchNotaServico && (
                                         <div className="col-7 mb-0 lg:col-3  ">
@@ -791,90 +816,91 @@ const NotaServico: React.FC = () => {
                                         </div>
                                     )}
                                     <div className={`${canSearchNotaServico ? 'col-5' : 'col-12'} mb-0 lg:col-3 `}>
-                                        <div className="nota-servico-mobile-buttons" style={{ position: "relative" }}>
+                                        <div className="nota-servico-mobile-buttons" style={{ position: 'relative' }}>
                                             {canUpdateNotaServico && selectedNotas.length > 0 && (
                                                 <Button
                                                     icon="pi pi-send"
                                                     label={`Emitir selecionadas (${selectedNotas.length})`}
                                                     onClick={handleEmitirNotas}
                                                     outlined
-                                                    severity='success'
+                                                    severity="success"
                                                     style={{
-                                                        position: "absolute",
-                                                        top: "-10px",
-                                                        width: "200px",
-                                                        right: "0",
-                                                        height: "28px",
-                                                        boxShadow: "none"
+                                                        position: 'absolute',
+                                                        top: '-10px',
+                                                        width: '200px',
+                                                        right: '0',
+                                                        height: '28px',
+                                                        boxShadow: 'none'
                                                     }}
                                                 />
                                             )}
                                         </div>
                                         <div className="container-BTN-Filter-Created nota-servico-mobile-actions">
                                             {canSearchNotaServico && (
-                                                <FilterOverlay
-                                                    onOpen={syncDraftFilters}
-                                                    onApply={handleApplyFilters}
-                                                    onClear={handleClearFilters}
-                                                    buttonClassName="height-2-8rem-ml-1rem-mobile"
-                                                >
-                                                <div className="col-12 lg:col-12 ">
-                                                    <DateRangePicker
-                                                        showTopLabel
-                                                        topLabel="Filtar por Data:"
-                                                        onClear={() => setDraftDateRange([null, null])}
-                                                        onBuscar={(inicio: Date, fim: Date) => {
-                                                            setDraftDateRange([dayjs(inicio), dayjs(fim)]);
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <EmpresaDropdownField
-                                                        selectedEmpresa={draftSelectedEmpresa}
-                                                        onEmpresaChange={handleEmpresaChange}
-                                                        hasError={!!errors.selectedCompany}
-                                                        errorMessage={errors.selectedCompany}
-                                                    />
-                                                </div>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <PessoaDropdownField
-                                                        selectedPessoa={draftSelectedPessoa}
-                                                        onPessoaChange={handlePessoaChange}
-                                                        reloadKey={reloadKeyPessoa}
-                                                        hasError={!!errors.selectedPessoa}
-                                                        errorMessage={errors.selectedPessoa}
-                                                    />
-                                                </div>
-                                                <div className="col-12 lg:col-12">
-                                                    <DropdownSearch<VendedorEntity>
-                                                        id="selectedVendedor"
-                                                        selectedItem={draftSelectedVendedor}
-                                                        onItemChange={handleVendedorChange}
-                                                        fetchAllItems={listTheVendedor}
-                                                        fetchFilteredItems={fetchFilteredVendedor}
-                                                        optionLabel="razao_social"
-                                                        placeholder="Selecione o Serviço"
-                                                        hasError={!!errors.selectedVendedor}
-                                                        errorMessage={errors.selectedVendedor}
-                                                        topLabel="Vendedor:"
-                                                        showTopLabel
-                                                    />
-                                                </div>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <Dropdown
-                                                        id="selectedStatusNotaServico"
-                                                        value={draftSelectedStatusNotaServico}
-                                                        options={DropDownFilterNotaServico}
-                                                        optionLabel="label"
-                                                        optionValue="value"
-                                                        placeholder="Selecione"
-                                                        onChange={(e) => setDraftSelectedStatusNotaServico(e.value)}
-                                                        className="custom-multiselect w-full"
-                                                        label={''}
-                                                        topLabel="Status:"
-                                                        showTopLabel
-                                                    />
-                                                </div>
+                                                <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <DateRangePicker
+                                                            showTopLabel
+                                                            topLabel="Filtar por Data:"
+                                                            onClear={() => setDraftDateRange([null, null])}
+                                                            onBuscar={(inicio: Date, fim: Date) => {
+                                                                setDraftDateRange([dayjs(inicio), dayjs(fim)]);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <DropdownSearch<CompanyEntity>
+                                                            id="selectedEmpresa"
+                                                            selectedItem={draftSelectedEmpresa}
+                                                            onItemChange={handleEmpresaChange}
+                                                            fetchAllItems={listTheCompany}
+                                                            fetchFilteredItems={fetchFilteredCompany}
+                                                            optionLabel="razao_social"
+                                                            placeholder="Selecione a Empresa"
+                                                            topLabel="Empresa:"
+                                                            showTopLabel
+                                                            autoLoadAndSelectSingle={false}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <PessoaDropdownField
+                                                            selectedPessoa={draftSelectedPessoa}
+                                                            onPessoaChange={handlePessoaChange}
+                                                            reloadKey={reloadKeyPessoa}
+                                                            hasError={!!errors.selectedPessoa}
+                                                            errorMessage={errors.selectedPessoa}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12 lg:col-12">
+                                                        <DropdownSearch<VendedorEntity>
+                                                            id="selectedVendedor"
+                                                            selectedItem={draftSelectedVendedor}
+                                                            onItemChange={handleVendedorChange}
+                                                            fetchAllItems={listTheVendedor}
+                                                            fetchFilteredItems={fetchFilteredVendedor}
+                                                            optionLabel="razao_social"
+                                                            placeholder="Selecione o Serviço"
+                                                            hasError={!!errors.selectedVendedor}
+                                                            errorMessage={errors.selectedVendedor}
+                                                            topLabel="Vendedor:"
+                                                            showTopLabel
+                                                        />
+                                                    </div>
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <Dropdown
+                                                            id="selectedStatusNotaServico"
+                                                            value={draftSelectedStatusNotaServico}
+                                                            options={DropDownFilterNotaServico}
+                                                            optionLabel="label"
+                                                            optionValue="value"
+                                                            placeholder="Selecione"
+                                                            onChange={(e) => setDraftSelectedStatusNotaServico(e.value)}
+                                                            className="custom-multiselect w-full"
+                                                            label={''}
+                                                            topLabel="Status:"
+                                                            showTopLabel
+                                                        />
+                                                    </div>
                                                 </FilterOverlay>
                                             )}
                                             <div className="nota-servico-mobile-buttons">
@@ -891,16 +917,13 @@ const NotaServico: React.FC = () => {
                                                         onClick={handleOpenExportPdfDialog}
                                                     />
                                                 )}
-                                                {canCreateNotaServico && (
-                                                    <Button label="" icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                                )}
+                                                {canCreateNotaServico && <Button label="" icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />}
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-3" >
+                            <div className="mt-3">
                                 {canSearchNotaServico ? (
                                     <ListarNotaServico
                                         loading={loading}
@@ -969,59 +992,74 @@ const NotaServico: React.FC = () => {
                                     {canSearchNotaServico && (
                                         <div className="Container-Btn-Filter-Desktop">
                                             <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
-                                            <div className="grid formgrid">
-                                                <div className="col-12 lg:col-12 ">
-                                                    <EmpresaDropdownField
-                                                        selectedEmpresa={draftSelectedEmpresa}
-                                                        onEmpresaChange={handleEmpresaChange}
-                                                        hasError={!!errors.selectedCompany}
-                                                        errorMessage={errors.selectedCompany}
-                                                    />
+                                                <div className="grid formgrid">
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <DropdownSearch<CompanyEntity>
+                                                            id="selectedEmpresa"
+                                                            selectedItem={draftSelectedEmpresa}
+                                                            onItemChange={handleEmpresaChange}
+                                                            fetchAllItems={listTheCompany}
+                                                            fetchFilteredItems={fetchFilteredCompany}
+                                                            optionLabel="razao_social"
+                                                            placeholder="Selecione a Empresa"
+                                                            topLabel="Empresa:"
+                                                            showTopLabel
+                                                            autoLoadAndSelectSingle={false}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <DropdownSearch<PessoaEntity>
+                                                            id="selectedPessoa"
+                                                            selectedItem={draftSelectedPessoa}
+                                                            onItemChange={handlePessoaChange}
+                                                            fetchAllItems={listThePessoas}
+                                                            fetchFilteredItems={fetchFilteredPessoas}
+                                                            optionLabel="razao_social"
+                                                            placeholder="Selecione um cliente ou Fornecedor"
+                                                            topLabel="Cliente ou fornecedor:"
+                                                            showTopLabel
+                                                            autoLoadAndSelectSingle={false}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12 lg:col-12">
+                                                        <DropdownSearch<VendedorEntity>
+                                                            id="selectedVendedor"
+                                                            selectedItem={draftSelectedVendedor}
+                                                            onItemChange={handleVendedorChange}
+                                                            fetchAllItems={listTheVendedor}
+                                                            fetchFilteredItems={fetchFilteredVendedor}
+                                                            optionLabel="razao_social"
+                                                            placeholder="Selecione o Serviço"
+                                                            hasError={!!errors.selectedVendedor}
+                                                            errorMessage={errors.selectedVendedor}
+                                                            topLabel="Vendedor:"
+                                                            showTopLabel
+                                                            autoLoadAndSelectSingle={false}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <Dropdown
+                                                            id="selectedStatusNotaServico"
+                                                            value={draftSelectedStatusNotaServico}
+                                                            options={DropDownFilterNotaServico}
+                                                            optionLabel="label"
+                                                            optionValue="value"
+                                                            placeholder="Selecione"
+                                                            onChange={(e) => setDraftSelectedStatusNotaServico(e.value)}
+                                                            className="custom-multiselect w-full"
+                                                            label={''}
+                                                            topLabel="Status:"
+                                                            showTopLabel
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <PessoaDropdownField
-                                                        selectedPessoa={draftSelectedPessoa}
-                                                        onPessoaChange={handlePessoaChange}
-                                                        reloadKey={reloadKeyPessoa}
-                                                        hasError={!!errors.selectedPessoa}
-                                                        errorMessage={errors.selectedPessoa} />
-                                                </div>
-                                                <div className="col-12 lg:col-12">
-                                                    <DropdownSearch<VendedorEntity>
-                                                        id="selectedVendedor"
-                                                        selectedItem={draftSelectedVendedor}
-                                                        onItemChange={handleVendedorChange}
-                                                        fetchAllItems={listTheVendedor}
-                                                        fetchFilteredItems={fetchFilteredVendedor}
-                                                        optionLabel="razao_social"
-                                                        placeholder="Selecione o Serviço"
-                                                        hasError={!!errors.selectedVendedor}
-                                                        errorMessage={errors.selectedVendedor}
-                                                        topLabel="Vendedor:"
-                                                        showTopLabel
-                                                    />
-                                                </div>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <Dropdown
-                                                        id="selectedStatusNotaServico"
-                                                        value={draftSelectedStatusNotaServico}
-                                                        options={DropDownFilterNotaServico}
-                                                        optionLabel="label"
-                                                        optionValue="value"
-                                                        placeholder="Selecione"
-                                                        onChange={(e) => setDraftSelectedStatusNotaServico(e.value)}
-                                                        className="custom-multiselect w-full"
-                                                        label={''}
-                                                        topLabel="Status:"
-                                                        showTopLabel
-                                                    />
-                                                </div>
-                                            </div>
                                             </FilterOverlay>
                                         </div>
                                     )}
                                     <div className="container-button-primary-novo">
-                                        <div className="p-2">{canUpdateNotaServico && selectedNotas.length > 0 && <Button label={`Emitir ${selectedNotas.length} Nota${selectedNotas.length > 1 ? 's' : ''}`} icon="pi pi-send" onClick={handleEmitirNotas} outlined />}</div>
+                                        <div className="p-2">
+                                            {canUpdateNotaServico && selectedNotas.length > 0 && <Button label={`Emitir ${selectedNotas.length} Nota${selectedNotas.length > 1 ? 's' : ''}`} icon="pi pi-send" onClick={handleEmitirNotas} outlined />}
+                                        </div>
                                         {canSearchNotaServico && (
                                             <div className="p-2">
                                                 <Button
@@ -1072,205 +1110,270 @@ const NotaServico: React.FC = () => {
                                 </div>
                             )}
                         </div>
-                     
                     </>
                 )}
-                   <Dialog
-                            header="Preparar NFS-e"
-                            visible={showDialogPreparaNfs}
-                            style={{ width: '500px' }}
-                            draggable={false}
-                            onHide={() => {
-                                clearPreparaNfsDialog();
-                                setShowDialogPreparaNfs(false);
-                            }}
-                            footer={
-                                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0.5rem' }}>
-                                    <Button label="Preparar"  style={{ boxShadow: 'none' }} disabled={disableConfirmarPrepararNfs} onClick={handleConfirmPreparaNfs}  />
-                                    <Button
-                                        label="Cancelar"
-                                        onClick={() => {
-                                            clearPreparaNfsDialog();
-                                            setShowDialogPreparaNfs(false);
-                                        }}
-                                        outlined
-                                        severity="secondary"
-                                        style={{ boxShadow: 'none' }}
-                                    />
-                                </div>
-                            }
-                        >
-                            <div className="col-12 lg:col-12 ">
-                                <EmpresaDropdownField
-                                    id="selectedEmpresa"
-                                    reloadKey={reloadKeyEmpresa}
-                                    selectedEmpresa={selectedEmpresaDialog}
-                                    onEmpresaChange={handleEmpresaChangeDialog}
-                                    showAddButton
-                                    onAddClick={openCreateEmpresaDialog}
-                                    onEditClick={openEditEmpresaDialog}
-                                    hasError={!!errors.selectedEmpresa}
-                                    errorMessage={errors.selectedEmpresa}
-                                />
-                            </div>
-                            <div className="col-12 lg:col-12 ">
-                                <PessoaDropdownField
-                                    id="selectedCliente"
-                                    reloadKey={reloadKeyPessoa}
-                                    selectedPessoa={selectedPessoaDialog}
-                                    onPessoaChange={handlePessoaChangeDialog}
-                                    showAddButton
-                                    onAddClick={openCreatePessoaDialog}
-                                    onEditClick={openEditPessoaDialog}
-                                    hasError={!!errors.selectedCliente}
-                                    errorMessage={errors.selectedCliente}
-                                />
-                            </div>
-                            <div className="col-12 lg:col-12">
-                                <ServicoDropdownField
-                                    id="selectedServico"
-                                    reloadKey={reloadKeyServico}
-                                    selectedService={selectedServicoDialog}
-                                    onServiceChange={handleServicoChangeDialog}
-                                    showAddButton
-                                    onAddClick={openCreateServicoDialog}
-                                    onEditClick={openEditServicoDialog}
-                                    hasError={!!errors.selectedServico}
-                                    errorMessage={errors.selectedServico}
-                                />
-                            </div>
-                        </Dialog>
-                        <DialogFilter
-                            header="Confirmar exportação PDF"
-                            visible={showExportPdfDialog}
-                            onHide={handleCloseExportPdfDialog}
-                            onSave={handleConfirmExportPdf}
-                            onCancel={handleCloseExportPdfDialog}
-                            saveLabel="Confirmar"
-                            cancelLabel="Cancelar"
-                            showSaveButton
-                            showCancelButton
-                            saveDisabled={loadingExportPdf}
-                            cancelDisabled={loadingExportPdf}
-                            width="32rem"
-
-                        >
-                            <div className="flex flex-column gap-4 p-4">
-                                <div className="flex align-items-center gap-2">
-                                    <i
-                                        className="pi pi-file-pdf text-red-500"
-                                        style={{ fontSize: '2rem' }}
-                                    />
-                                    <div className="flex flex-column">
-                                        <span className="text-xl font-semibold">
-                                            Exportação de PDF
-                                        </span>
-                                        <span className="text-600 text-sm">
-                                            Confirme o período que será utilizado na exportação.
-                                        </span>
-                                    </div>
-                                </div>
-                                <div
-                                    className="border-1 border-200 border-round-xl p-4 surface-50" >
-                                    <div className="flex flex-column gap-3">
-                                        <div className="flex justify-content-between align-items-center">
-                                            <span className="font-medium text-700">
-                                                Data inicial
-                                            </span>
-                                            <span className="font-semibold">
-                                                {formatExportDate(dateRange?.[0])}
-                                            </span>
+                <Dialog
+                    header="Nota fiscal emitida"
+                    visible={showAuthorizedNotaDialog}
+                    onHide={() => {
+                        setShowAuthorizedNotaDialog(false);
+                        setAuthorizedNota(null);
+                    }}
+                    draggable={false}
+                    dismissableMask
+                    breakpoints={{ '960px': '92vw' }}
+                    style={{ width: isMobile ? '95vw' : '40rem' }}
+                    footer={
+                        <div className="flex justify-content-between align-items-center gap-3 flex-wrap w-full">
+                            <Button
+                                label="Fechar"
+                                outlined
+                                severity="secondary"
+                                style={{ boxShadow: 'none' }}
+                                onClick={() => {
+                                    setShowAuthorizedNotaDialog(false);
+                                    setAuthorizedNota(null);
+                                }}
+                            />
+                            <div className="flex align-items-center gap-3 flex-wrap">
+                                {canDownloadAuthorizedNota ? (
+                                    <>
+                                        <div className="flex align-items-center gap-2">
+                                            {downloadXmlButton(authorizedNota as NfsEntity, msgs)}
+                                            <span className="text-sm font-medium">Baixar XML</span>
                                         </div>
-                                        <div className="flex justify-content-between align-items-center">
-                                            <span className="font-medium text-700">
-                                                Data final
-                                            </span>
-                                            <span className="font-semibold">
-                                                {formatExportDate(dateRange?.[1])}
-                                            </span>
+                                        <div className="flex align-items-center gap-2">
+                                            {downloadPdfButton(authorizedNota as NfsEntity, msgs)}
+                                            <span className="text-sm font-medium">Baixar PDF</span>
                                         </div>
-                                    </div>
+                                    </>
+                                ) : (
+                                    <span className="text-sm text-600">Arquivos ainda indisponíveis para download.</span>
+                                )}
+                            </div>
+                        </div>
+                    }
+                >
+                    <div className="flex flex-column gap-4 p-2">
+                        <div className="flex align-items-center gap-3">
+                            <i className="pi pi-check-circle text-green-500" style={{ fontSize: '2rem' }} />
+                            <div className="flex flex-column gap-1">
+                                <span className="text-xl font-semibold">NFS-e autorizada com sucesso</span>
+                                <span className="text-600 text-sm">Confira abaixo os principais dados da nota emitida.</span>
+                            </div>
+                        </div>
+                        <div className="grid">
+                            <div className="col-12 md:col-6">
+                                <div className="border-1 border-200 border-round-xl p-3 surface-50 h-full">
+                                    <span className="text-600 text-sm block mb-2">Nome da empresa</span>
+                                    <strong className="block">{authorizedNotaEmpresa}</strong>
                                 </div>
                             </div>
-                        </DialogFilter>
-                        <DialogFilter
-                            header={editingEmpresaId ? "Editar Empresa" : "Adicionar Empresa"}
-                            visible={showModalEmpresa}
-                            onHide={closeEmpresaDialog}
-                            loading={isEmpresaDialogLoading}
-                            loadingText={editingEmpresaId ? 'Carregando informaÃ§Ãµes da Empresa...' : 'Abrindo cadastro de Empresa...'}
-                        >
-                            <FormEmpresaCreated
-                                key={`${editingEmpresaId ?? 'novo'}-${empresaDialogKey}`}
-                                msgs={msgs}
-                                ref={formRef}
-                                empresa={empresa}
-                                initialId={editingEmpresaId}
-                                preloadedEmpresa={preloadedEmpresa}
-                                setEmpresa={setEmpresa}
-                                onEmpresaChange={handleEmpresa}
-                                onErrorsChange={handleErrorsChange}
-                                redirectAfterSave={false}
-                                onSaved={handleEmpresaSaved}
-                                onLoadingChange={setIsEmpresaDialogLoading}
-                                onClose={closeEmpresaDialog}
-                                showBTNPGCreatedDialog
-                                onBackClick={closeEmpresaDialog}
+                            <div className="col-12 md:col-6">
+                                <div className="border-1 border-200 border-round-xl p-3 surface-50 h-full">
+                                    <span className="text-600 text-sm block mb-2">Nome do cliente</span>
+                                    <strong className="block">{authorizedNotaCliente}</strong>
+                                </div>
+                            </div>
+                            <div className="col-12 md:col-6">
+                                <div className="border-1 border-200 border-round-xl p-3 surface-50 h-full">
+                                    <span className="text-600 text-sm block mb-2">Data e hora de emissão</span>
+                                    <strong className="block">{formatAuthorizedNotaDateTime(authorizedNota?.data_emissao)}</strong>
+                                </div>
+                            </div>
+                            <div className="col-12 md:col-6">
+                                <div className="border-1 border-200 border-round-xl p-3 surface-50 h-full">
+                                    <span className="text-600 text-sm block mb-2">Email do tomador</span>
+                                    <strong className="block">{getAuthorizedNotaEmail(authorizedNota)}</strong>
+                                </div>
+                            </div>
+                            <div className="col-12">
+                                <div className="border-1 border-200 border-round-xl p-3 surface-50">
+                                    <span className="text-600 text-sm block mb-2">Valor</span>
+                                    <strong className="block text-xl">{formatAuthorizedNotaValue(authorizedNota?.total_valor_servico)}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Dialog>
+                <Dialog
+                    header="Preparar NFS-e"
+                    visible={showDialogPreparaNfs}
+                    style={{ width: '500px' }}
+                    draggable={false}
+                    onHide={() => {
+                        clearPreparaNfsDialog();
+                        setShowDialogPreparaNfs(false);
+                    }}
+                    footer={
+                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0.5rem' }}>
+                            <Button label="Preparar" style={{ boxShadow: 'none' }} disabled={disableConfirmarPrepararNfs} onClick={handleConfirmPreparaNfs} />
+                            <Button
+                                label="Cancelar"
+                                onClick={() => {
+                                    clearPreparaNfsDialog();
+                                    setShowDialogPreparaNfs(false);
+                                }}
+                                outlined
+                                severity="secondary"
+                                style={{ boxShadow: 'none' }}
                             />
-                        </DialogFilter>
-                        <DialogFilter
-                            header={editingPessoaId ? "Editar Cliente ou Fornecedor" : "Adicionar Cliente ou Fornecedor"}
-                            visible={showModalPessoa}
-                            onHide={closePessoaDialog}
-                            loading={isPessoaDialogLoading}
-                            loadingText={editingPessoaId ? 'Carregando informaÃ§Ãµes do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
-                        >
-                            <FormCreatedPessoa
-                                key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
-                                msgs={msgs}
-                                ref={formRef}
-                                pessoa={pessoa}
-                                initialId={editingPessoaId}
-                                preloadedPessoa={preloadedPessoa}
-                                setPessoa={setPessoa}
-                                onPessoaChange={handlePessoaContrato}
-                                onErrorsChange={() => { }}
-                                redirectAfterSave={false}
-                                onSaved={handlePessoaSaved}
-                                onLoadingChange={setIsPessoaDialogLoading}
-                                onClose={closePessoaDialog}
-                                showBTNPGCreatedDialog
-                                onBackClick={closePessoaDialog}
-                            />
-                        </DialogFilter>
-                        <DialogFilter
-                            header={editingServicoId ? "Editar Serviço" : "Adicionar Serviço"}
-                            visible={showModalServico}
-                            onHide={closeServicoDialog}
-                            loading={isServicoDialogLoading}
-                            loadingText={editingServicoId ? 'Carregando informaÃ§Ãµes do Serviço...' : 'Abrindo cadastro de Serviço...'}
-                        >
-                            <FormCreatedServico
-                                key={`${editingServicoId ?? 'novo'}-${servicoDialogKey}`}
-                                msgs={msgs}
-                                ref={formRef}
-                                servico={servico}
-                                initialId={editingServicoId}
-                                preloadedServico={preloadedServico}
-                                setServico={setServico}
-                                onServicoChange={handleServico}
-                                onErrorsChange={handleErrorsChange}
-                                redirectAfterSave={false}
-                                onSaved={handleServiceSaved}
-                                onLoadingChange={setIsServicoDialogLoading}
-                                onClose={closeServicoDialog}
-                                showBTNPGCreatedDialog
-                                onBackClick={closeServicoDialog}
-                            />
-                        </DialogFilter>
+                        </div>
+                    }
+                >
+                    <div className="col-12 lg:col-12 ">
+                        <EmpresaDropdownField
+                            id="selectedEmpresa"
+                            reloadKey={reloadKeyEmpresa}
+                            selectedEmpresa={selectedEmpresaDialog}
+                            onEmpresaChange={handleEmpresaChangeDialog}
+                            showAddButton
+                            onAddClick={openCreateEmpresaDialog}
+                            onEditClick={openEditEmpresaDialog}
+                            hasError={!!errors.selectedEmpresa}
+                            errorMessage={errors.selectedEmpresa}
+                        />
+                    </div>
+                    <div className="col-12 lg:col-12 ">
+                        <PessoaDropdownField
+                            id="selectedCliente"
+                            reloadKey={reloadKeyPessoa}
+                            selectedPessoa={selectedPessoaDialog}
+                            onPessoaChange={handlePessoaChangeDialog}
+                            showAddButton
+                            onAddClick={openCreatePessoaDialog}
+                            onEditClick={openEditPessoaDialog}
+                            hasError={!!errors.selectedCliente}
+                            errorMessage={errors.selectedCliente}
+                        />
+                    </div>
+                    <div className="col-12 lg:col-12">
+                        <ServicoDropdownField
+                            id="selectedServico"
+                            reloadKey={reloadKeyServico}
+                            selectedService={selectedServicoDialog}
+                            onServiceChange={handleServicoChangeDialog}
+                            showAddButton
+                            onAddClick={openCreateServicoDialog}
+                            onEditClick={openEditServicoDialog}
+                            hasError={!!errors.selectedServico}
+                            errorMessage={errors.selectedServico}
+                        />
+                    </div>
+                </Dialog>
+                <DialogFilter
+                    header="Confirmar exportação PDF"
+                    visible={showExportPdfDialog}
+                    onHide={handleCloseExportPdfDialog}
+                    onSave={handleConfirmExportPdf}
+                    onCancel={handleCloseExportPdfDialog}
+                    saveLabel="Confirmar"
+                    cancelLabel="Cancelar"
+                    showSaveButton
+                    showCancelButton
+                    saveDisabled={loadingExportPdf}
+                    cancelDisabled={loadingExportPdf}
+                    width="32rem"
+                >
+                    <div className="flex flex-column gap-4 p-4">
+                        <div className="flex align-items-center gap-2">
+                            <i className="pi pi-file-pdf text-red-500" style={{ fontSize: '2rem' }} />
+                            <div className="flex flex-column">
+                                <span className="text-xl font-semibold">Exportação de PDF</span>
+                                <span className="text-600 text-sm">Confirme o período que será utilizado na exportação.</span>
+                            </div>
+                        </div>
+                        <div className="border-1 border-200 border-round-xl p-4 surface-50">
+                            <div className="flex flex-column gap-3">
+                                <div className="flex justify-content-between align-items-center">
+                                    <span className="font-medium text-700">Data inicial</span>
+                                    <span className="font-semibold">{formatExportDate(dateRange?.[0])}</span>
+                                </div>
+                                <div className="flex justify-content-between align-items-center">
+                                    <span className="font-medium text-700">Data final</span>
+                                    <span className="font-semibold">{formatExportDate(dateRange?.[1])}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </DialogFilter>
+                <DialogFilter
+                    header={editingEmpresaId ? 'Editar Empresa' : 'Adicionar Empresa'}
+                    visible={showModalEmpresa}
+                    onHide={closeEmpresaDialog}
+                    loading={isEmpresaDialogLoading}
+                    loadingText={editingEmpresaId ? 'Carregando informaÃ§Ãµes da Empresa...' : 'Abrindo cadastro de Empresa...'}
+                >
+                    <FormEmpresaCreated
+                        key={`${editingEmpresaId ?? 'novo'}-${empresaDialogKey}`}
+                        msgs={msgs}
+                        ref={formRef}
+                        empresa={empresa}
+                        initialId={editingEmpresaId}
+                        preloadedEmpresa={preloadedEmpresa}
+                        setEmpresa={setEmpresa}
+                        onEmpresaChange={handleEmpresa}
+                        onErrorsChange={handleErrorsChange}
+                        redirectAfterSave={false}
+                        onSaved={handleEmpresaSaved}
+                        onLoadingChange={setIsEmpresaDialogLoading}
+                        onClose={closeEmpresaDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closeEmpresaDialog}
+                    />
+                </DialogFilter>
+                <DialogFilter
+                    header={editingPessoaId ? 'Editar Cliente ou Fornecedor' : 'Adicionar Cliente ou Fornecedor'}
+                    visible={showModalPessoa}
+                    onHide={closePessoaDialog}
+                    loading={isPessoaDialogLoading}
+                    loadingText={editingPessoaId ? 'Carregando informaÃ§Ãµes do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
+                >
+                    <FormCreatedPessoa
+                        key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
+                        msgs={msgs}
+                        ref={formRef}
+                        pessoa={pessoa}
+                        initialId={editingPessoaId}
+                        preloadedPessoa={preloadedPessoa}
+                        setPessoa={setPessoa}
+                        onPessoaChange={handlePessoaContrato}
+                        onErrorsChange={() => {}}
+                        redirectAfterSave={false}
+                        onSaved={handlePessoaSaved}
+                        onLoadingChange={setIsPessoaDialogLoading}
+                        onClose={closePessoaDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closePessoaDialog}
+                    />
+                </DialogFilter>
+                <DialogFilter
+                    header={editingServicoId ? 'Editar Serviço' : 'Adicionar Serviço'}
+                    visible={showModalServico}
+                    onHide={closeServicoDialog}
+                    loading={isServicoDialogLoading}
+                    loadingText={editingServicoId ? 'Carregando informaÃ§Ãµes do Serviço...' : 'Abrindo cadastro de Serviço...'}
+                >
+                    <FormCreatedServico
+                        key={`${editingServicoId ?? 'novo'}-${servicoDialogKey}`}
+                        msgs={msgs}
+                        ref={formRef}
+                        servico={servico}
+                        initialId={editingServicoId}
+                        preloadedServico={preloadedServico}
+                        setServico={setServico}
+                        onServicoChange={handleServico}
+                        onErrorsChange={handleErrorsChange}
+                        redirectAfterSave={false}
+                        onSaved={handleServiceSaved}
+                        onLoadingChange={setIsServicoDialogLoading}
+                        onClose={closeServicoDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closeServicoDialog}
+                    />
+                </DialogFilter>
             </div>
         </div>
     );
 };
 export default NotaServico;
-

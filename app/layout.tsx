@@ -25,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <body style={{ overflow: 'hidden' }}>
                 <AppProviders>{children}</AppProviders>
             </body>
+            
         </html>
     );
 }

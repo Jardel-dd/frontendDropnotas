@@ -36,10 +36,10 @@ export const validateFieldsContrato = (
         newErrors.descricao = 'A descrição deve ter pelo menos 2 caracteres.';
         valid = false;
     } else if (!contrato.valor_servico || String(contrato.valor_servico).trim().length < 1) {
-        newErrors.valor_servico = 'O Preço deve ter pelo menos 1 digíto.';
+        newErrors.valor_servico = 'Digite um valor valído.';
         valid = false;
     } else if (!contrato.periodicidade) {
-        newErrors.periodicidade = 'A periodicidade deve ter pelo menos 1 digíto.';
+        newErrors.periodicidade = 'Selecione o periodo .';
         valid = false;
     } else if (!hasSelectedCompany && !hasSavedCompanyId) {
         newErrors.selectedCompany = 'Este Campo deve ser selecionado.';

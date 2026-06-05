@@ -1,3 +1,4 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CompanyEntity } from "@/app/entity/CompanyEntity";
 import { EmpresaDropdownFieldProps } from "../types/empresa";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
@@ -6,6 +7,8 @@ import {
     fetchFilteredCompany,
     listTheCompany
 } from "../controller/controller";
+
+const COMPANY_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;
 
 export default function EmpresaDropdownField({
     selectedEmpresa,
@@ -20,10 +23,22 @@ export default function EmpresaDropdownField({
     topLabel = "Empresa:",
     showTopLabel = true,
     required = false,
-    autoSelectSingle = false,
+    autoSelectSingle = true,
+    loadOnMount = false,
     showAddButton = false,
+    autoLoadAndSelectSingle = true,
     onAddClick
-}: EmpresaDropdownFieldProps & { required?: boolean }) {
+}: EmpresaDropdownFieldProps & { required?: boolean,  autoLoadAndSelectSingle?: boolean; }) {
+    const queryClient = useQueryClient();
+    const companyDropdownQueryKey = ["dropdown", "empresa", "all", reloadKey] as const;
+
+    useQuery({
+        queryKey: companyDropdownQueryKey,
+        queryFn: listTheCompany,
+        enabled: loadOnMount,
+        staleTime: COMPANY_DROPDOWN_CACHE_TIME_MS,
+        gcTime: COMPANY_DROPDOWN_CACHE_TIME_MS
+    });
 
     return (
         <DropdownSearch<CompanyEntity>
@@ -31,7 +46,14 @@ export default function EmpresaDropdownField({
             key={reloadKey}
             selectedItem={selectedEmpresa}
             onItemChange={onEmpresaChange}
-            fetchAllItems={listTheCompany}
+            fetchAllItems={() =>
+                queryClient.fetchQuery({
+                    queryKey: companyDropdownQueryKey,
+                    queryFn: listTheCompany,
+                    staleTime: COMPANY_DROPDOWN_CACHE_TIME_MS,
+                    gcTime: COMPANY_DROPDOWN_CACHE_TIME_MS
+                })
+            }
             fetchFilteredItems={fetchFilteredCompany}
             fetchItemByValue={async (value) => {
                 const response = await fetchCompanyDropdownByID(String(value));
@@ -41,6 +63,7 @@ export default function EmpresaDropdownField({
             optionValue="id"
             initialOptionValue={selectedEmpresaId ?? null}
             autoSelectSingle={autoSelectSingle}
+            loadOnMount={loadOnMount}
             showAddButton={showAddButton}
             onAddClick={onAddClick}
             onEditClick={onEditClick}
@@ -50,6 +73,8 @@ export default function EmpresaDropdownField({
             showTopLabel={showTopLabel}
             required={required}
             topLabel={topLabel}
+            autoLoadAndSelectSingle={autoLoadAndSelectSingle}
+            reloadAllOnShow
         />
     );
 }

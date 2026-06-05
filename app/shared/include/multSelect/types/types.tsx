@@ -44,4 +44,6 @@ export type MultiSelectProps = {
     showTopLabel?: boolean;
     topLabel?: string | ReactNode;
     required?: boolean;
+    autoLoadAndSelectSingle?: boolean;
+    reloadAllOnShow?: boolean;
 };

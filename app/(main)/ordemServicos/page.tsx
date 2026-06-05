@@ -4,7 +4,6 @@ import './fotter.css';
 import '@/app/styles/styledGlobal.css';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
@@ -17,19 +16,21 @@ import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { Formas_recebimento } from '@/app/entity/FormaPagamento';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { DetalServiceOSEntity } from '@/app/entity/ServiceEntity';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
-import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
-import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { deletar, fetchOrdemServico, list, preparar } from './controller/controller';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DropDownFilterOrdemOrdemServico } from '@/app/shared/optionsDropDown/options';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
+import { fetchFilteredPessoas, listThePessoas } from '../cadastro/pessoas/controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
 const OrdemServicos: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
@@ -38,10 +39,9 @@ const OrdemServicos: React.FC = () => {
     const msgs = useRef<Messages | null>(null);
     const hasLoadedInitialList = useRef(false);
     const [loading, setLoading] = useState(true);
-    const {permissaoOrdemServico} = usePermissions();
+    const { permissaoOrdemServico } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
-    const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
     const [emitirOS, setEmitirOS] = useState<ServiceOrderEntity>(
         new ServiceOrderEntity({
             id: 0,
@@ -132,7 +132,7 @@ const OrdemServicos: React.FC = () => {
         setDateRange(nextDateRange);
         handleListOrdemServico(0, searchTerm, listarInativos, selectedStatusOrdemServico, nextDateRange);
     };
-     const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
+    const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
         let value = event.target.value;
         if (event.target.type === 'checkbox' || event.target.type === 'switch') {
             value = event.target.checked;
@@ -292,11 +292,11 @@ const OrdemServicos: React.FC = () => {
                                     </div>
                                     <div className="col-4 mb-0 lg:col-2 p-0 " >
                                         <div className="container-BTN-Filter-Created">
-                                            <FilterOverlay 
-                                            onOpen={syncDraftFilters}
-                                            onApply={handleApplyFilters}
-                                             onClear={handleClearFilters}
-                                              buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                            <FilterOverlay
+                                                onOpen={syncDraftFilters}
+                                                onApply={handleApplyFilters}
+                                                onClear={handleClearFilters}
+                                                buttonClassName="height-2-8rem-ml-1rem-mobile">
                                                 <div className="col-12 lg:col-12 ">
                                                     <DateRangePicker
                                                         showTopLabel
@@ -307,24 +307,34 @@ const OrdemServicos: React.FC = () => {
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <EmpresaDropdownField
-                                                        selectedEmpresa={draftSelectedEmpresa}
-                                                        onEmpresaChange={handleCompanyChange}
-                                                        hasError={!!errors.selectedCompany}
-                                                        errorMessage={errors.selectedCompany}
-                                                        showAddButton
-                                                        autoSelectSingle={true}
+                                                    <DropdownSearch<CompanyEntity>
+                                                        id="selectedEmpresa"
+                                                        selectedItem={draftSelectedEmpresa}
+                                                        onItemChange={handleCompanyChange}
+                                                        fetchAllItems={listTheCompany}
+                                                        fetchFilteredItems={fetchFilteredCompany}
+                                                        optionLabel="razao_social"
+                                                        placeholder="Selecione a Empresa"
+                                                        topLabel="Empresa:"
+                                                        showTopLabel
+                                                        autoLoadAndSelectSingle={false}
                                                     />
 
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <PessoaDropdownField
-                                                        selectedPessoa={draftSelectedPessoa}
-                                                        onPessoaChange={handlePessoaChange}
-                                                        reloadKey={reloadKeyPessoa}
-                                                        hasError={!!errors.selectedPessoa}
-                                                        errorMessage={errors.selectedPessoa}
+                                                    <DropdownSearch<PessoaEntity>
+                                                        id="selectedPessoa"
+                                                        selectedItem={draftSelectedPessoa}
+                                                        onItemChange={handlePessoaChange}
+                                                        fetchAllItems={listThePessoas}
+                                                        fetchFilteredItems={fetchFilteredPessoas}
+                                                        optionLabel="razao_social"
+                                                        placeholder="Selecione um cliente ou Fornecedor"
+                                                        topLabel="Cliente ou fornecedor:"
+                                                        showTopLabel
+                                                        autoLoadAndSelectSingle={false}
                                                     />
+
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
                                                     <Dropdown
@@ -343,22 +353,22 @@ const OrdemServicos: React.FC = () => {
                                                 </div>
                                             </FilterOverlay>
                                             {permissaoOrdemServico.create && (
-                                            <Button
-                                                label=""
-                                                className="ml-1rem"
-                                                icon="pi pi-plus"
-                                                onClick={async () => {
-                                                    try {
-                                                        const ordem = await preparar(msgs);
-                                                        if (ordem?.numero != null) {
-                                                            const queryParams = new URLSearchParams({
-                                                                numero: ordem.numero.toString()
-                                                            });
-                                                            router.push(`/ordemServicos/created?${queryParams.toString()}`);
-                                                        }
-                                                    } catch (error) { }
-                                                }}
-                                            />
+                                                <Button
+                                                    label=""
+                                                    className="ml-1rem"
+                                                    icon="pi pi-plus"
+                                                    onClick={async () => {
+                                                        try {
+                                                            const ordem = await preparar(msgs);
+                                                            if (ordem?.numero != null) {
+                                                                const queryParams = new URLSearchParams({
+                                                                    numero: ordem.numero.toString()
+                                                                });
+                                                                router.push(`/ordemServicos/created?${queryParams.toString()}`);
+                                                            }
+                                                        } catch (error) { }
+                                                    }}
+                                                />
                                             )}
                                         </div>
                                     </div>
@@ -382,7 +392,7 @@ const OrdemServicos: React.FC = () => {
                                         rows={listPaginationOrdemServico.pageable.pageSize}
                                         totalRecords={listPaginationOrdemServico.totalElements}
                                         onPageChange={onPageChange}
-                                       isMobile
+                                        isMobile
                                     />
                                 </div>
                             </div>
@@ -414,66 +424,77 @@ const OrdemServicos: React.FC = () => {
                                             <DateRangePicker showTopLabel topLabel="Filtar por Data:" onBuscar={handleDesktopDateRangeSearch} />
                                         </div>
                                         <div className="Container-Btn-Filter-Desktop">
-                                            <FilterOverlay 
-                                            onOpen={syncDraftFilters}
-                                            onApply={handleApplyFilters} 
-                                            onClear={handleClearFilters} 
-                                            buttonClassName="Btn-Filter-Desktop">
+                                            <FilterOverlay
+                                                onOpen={syncDraftFilters}
+                                                onApply={handleApplyFilters}
+                                                onClear={handleClearFilters}
+                                                buttonClassName="Btn-Filter-Desktop">
                                                 <div className="grid formgrid">
-                                                <div className="col-12 lg:col-12 ">
-                                                    <EmpresaDropdownField
-                                                        selectedEmpresa={draftSelectedEmpresa}
-                                                        onEmpresaChange={handleCompanyChange}
-                                                        hasError={!!errors.selectedCompany}
-                                                        errorMessage={errors.selectedCompany}
-                                                    />
-                                                </div>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <PessoaDropdownField
-                                                        selectedPessoa={draftSelectedPessoa}
-                                                        onPessoaChange={handlePessoaChange}
-                                                        reloadKey={reloadKeyPessoa}
-                                                        hasError={!!errors.selectedPessoa}
-                                                        errorMessage={errors.selectedPessoa}
-                                                    />
-                                                </div>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <Dropdown
-                                                        id="selectedstatusOrdemServico"
-                                                        value={draftSelectedStatusOrdemServico}
-                                                        options={DropDownFilterOrdemOrdemServico}
-                                                        optionLabel="label"
-                                                        optionValue="value"
-                                                        placeholder="Selecione"
-                                                        onChange={(e) => setDraftSelectedStatusOrdemServico(e.value)}
-                                                        className="custom-multiselect w-full"
-                                                        label={''}
-                                                        topLabel="Status:"
-                                                        showTopLabel
-                                                    />
-                                                </div>
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <DropdownSearch<CompanyEntity>
+                                                            id="selectedEmpresa"
+                                                            selectedItem={draftSelectedEmpresa}
+                                                            onItemChange={handleCompanyChange}
+                                                            fetchAllItems={listTheCompany}
+                                                            fetchFilteredItems={fetchFilteredCompany}
+                                                            optionLabel="razao_social"
+                                                            placeholder="Selecione a Empresa"
+                                                            topLabel="Empresa:"
+                                                            showTopLabel
+                                                            autoLoadAndSelectSingle={false}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <DropdownSearch<PessoaEntity>
+                                                            id="selectedPessoa"
+                                                            selectedItem={draftSelectedPessoa}
+                                                            onItemChange={handlePessoaChange}
+                                                            fetchAllItems={listThePessoas}
+                                                            fetchFilteredItems={fetchFilteredPessoas}
+                                                            optionLabel="razao_social"
+                                                            placeholder="Selecione um cliente ou Fornecedor"
+                                                            topLabel="Cliente ou fornecedor:"
+                                                            showTopLabel
+                                                            autoLoadAndSelectSingle={false}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12 lg:col-12 ">
+                                                        <Dropdown
+                                                            id="selectedstatusOrdemServico"
+                                                            value={draftSelectedStatusOrdemServico}
+                                                            options={DropDownFilterOrdemOrdemServico}
+                                                            optionLabel="label"
+                                                            optionValue="value"
+                                                            placeholder="Selecione"
+                                                            onChange={(e) => setDraftSelectedStatusOrdemServico(e.value)}
+                                                            className="custom-multiselect w-full"
+                                                            label={''}
+                                                            topLabel="Status:"
+                                                            showTopLabel
+                                                        />
+                                                    </div>
                                                 </div>
                                             </FilterOverlay>
                                         </div>
                                         {permissaoOrdemServico.create && (
-                                        <div className="container-button-primary-novo">
-                                            <Button
-                                                label="Novo"
-                                                className="p-button-primary-novo"
-                                                icon="pi pi-plus"
-                                                onClick={async () => {
-                                                    try {
-                                                        const ordem = await preparar(msgs);
-                                                        if (ordem?.numero != null) {
-                                                            const queryParams = new URLSearchParams({
-                                                                numero: ordem.numero.toString()
-                                                            });
-                                                            router.push(`/ordemServicos/created?${queryParams.toString()}`);
-                                                        }
-                                                    } catch (error) { }
-                                                }}
-                                            />
-                                        </div>
+                                            <div className="container-button-primary-novo">
+                                                <Button
+                                                    label="Novo"
+                                                    className="p-button-primary-novo"
+                                                    icon="pi pi-plus"
+                                                    onClick={async () => {
+                                                        try {
+                                                            const ordem = await preparar(msgs);
+                                                            if (ordem?.numero != null) {
+                                                                const queryParams = new URLSearchParams({
+                                                                    numero: ordem.numero.toString()
+                                                                });
+                                                                router.push(`/ordemServicos/created?${queryParams.toString()}`);
+                                                            }
+                                                        } catch (error) { }
+                                                    }}
+                                                />
+                                            </div>
                                         )}
                                     </div>
                                     <div className="mt-3">

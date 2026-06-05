@@ -18,6 +18,9 @@ import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPi
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
+import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import { fetchFilteredPessoas, listThePessoas } from '../cadastro/pessoas/controller/controller';
 const ComponentDashboard: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -167,26 +170,35 @@ const ComponentDashboard: React.FC = () => {
                                     </div>
                                     <div className="col-3 mb-0 lg:col-3"  >
                                         <div className="container-BTN-Filter-Created">
-                                            <FilterOverlay 
-                                            onApply={search}
-                                            onClear={handleClearFilters}>
+                                            <FilterOverlay
+                                                onApply={search}
+                                                onClear={handleClearFilters}>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <EmpresaDropdownField
-                                                        selectedEmpresa={selectedCompany}
-                                                        onEmpresaChange={handleCompanyChange}
-                                                        reloadKey={reloadKeyEmpresa}
-                                                        hasError={!!errors.selectedCompany}
-                                                        errorMessage={errors.selectedCompany}
+                                                    <DropdownSearch<CompanyEntity>
+                                                        id="selectedEmpresa"
+                                                        selectedItem={selectedCompany}
+                                                        onItemChange={handleCompanyChange}
+                                                        fetchAllItems={listTheCompany}
+                                                        fetchFilteredItems={fetchFilteredCompany}
+                                                        optionLabel="razao_social"
+                                                        placeholder="Selecione a Empresa"
+                                                        topLabel="Empresa:"
+                                                        showTopLabel
+                                                        autoLoadAndSelectSingle={false}
                                                     />
-
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <PessoaDropdownField
-                                                        selectedPessoa={selectedPessoa}
-                                                        onPessoaChange={handlePessoaChange}
-                                                        reloadKey={reloadKeyPessoa}
-                                                        hasError={!!errors.selectedPessoa}
-                                                        errorMessage={errors.selectedPessoa}
+                                                    <DropdownSearch<PessoaEntity>
+                                                        id="selectedPessoa"
+                                                        selectedItem={selectedPessoa}
+                                                        onItemChange={handlePessoaChange}
+                                                        fetchAllItems={listThePessoas}
+                                                        fetchFilteredItems={fetchFilteredPessoas}
+                                                        optionLabel="razao_social"
+                                                        placeholder="Selecione um cliente ou Fornecedor"
+                                                        topLabel="Cliente ou fornecedor:"
+                                                        showTopLabel
+                                                        autoLoadAndSelectSingle={false}
                                                     />
                                                 </div>
                                             </FilterOverlay>
@@ -245,20 +257,31 @@ const ComponentDashboard: React.FC = () => {
                                         <div className="Container-Btn-Filter-Desktop">
                                             <FilterOverlay onApply={search} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
                                                 <div className="col-12 lg:col-12 ">
-                                                    <EmpresaDropdownField
-                                                        selectedEmpresa={selectedCompany}
-                                                        onEmpresaChange={handleCompanyChange}
-                                                        hasError={!!errors.selectedCompany}
-                                                        errorMessage={errors.selectedCompany}
+                                                    <DropdownSearch<CompanyEntity>
+                                                        id="selectedEmpresa"
+                                                        selectedItem={selectedCompany}
+                                                        onItemChange={handleCompanyChange}
+                                                        fetchAllItems={listTheCompany}
+                                                        fetchFilteredItems={fetchFilteredCompany}
+                                                        optionLabel="razao_social"
+                                                        placeholder="Selecione a Empresa"
+                                                        topLabel="Empresa:"
+                                                        showTopLabel
+                                                        autoLoadAndSelectSingle={false}
                                                     />
                                                 </div>
                                                 <div className="col-12 lg:col-12 ">
-                                                    <PessoaDropdownField
-                                                        selectedPessoa={selectedPessoa}
-                                                        onPessoaChange={handlePessoaChange}
-                                                        reloadKey={reloadKeyPessoa}
-                                                        hasError={!!errors.selectedPessoa}
-                                                        errorMessage={errors.selectedPessoa}
+                                                    <DropdownSearch<PessoaEntity>
+                                                        id="selectedPessoa"
+                                                        selectedItem={selectedPessoa}
+                                                        onItemChange={handlePessoaChange}
+                                                        fetchAllItems={listThePessoas}
+                                                        fetchFilteredItems={fetchFilteredPessoas}
+                                                        optionLabel="razao_social"
+                                                        placeholder="Selecione um cliente ou Fornecedor"
+                                                        topLabel="Cliente ou fornecedor:"
+                                                        showTopLabel
+                                                        autoLoadAndSelectSingle={false}
                                                     />
                                                 </div>
                                             </FilterOverlay>
@@ -320,10 +343,15 @@ const ComponentDashboard: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
+
                         </div>
+
                     </>
+
                 )}
+
             </div>
+
         </div>
     );
 };

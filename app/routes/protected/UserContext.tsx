@@ -415,20 +415,18 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .filter((field) => field.startsWith('perfil_usuario.'))
           .map((field) => field.replace('perfil_usuario.', ''));
 
-        console.info('[UserContext] Usuario sincronizado apos refresh.', {
-          userId: syncedUser.id,
-          nome: syncedUser.nome,
-          hasRelevantChanges,
-          changedFields,
-          changedPermissionKeys,
-          perfil_usuario: getPerfilUsuarioDebugSnapshot(syncedUser.perfil_usuario as Record<string, any> | undefined)
-        });
-
+        // console.info('[UserContext] Usuario sincronizado apos refresh.', {
+        //   userId: syncedUser.id,
+        //   nome: syncedUser.nome,
+        //   hasRelevantChanges,
+        //   changedFields,
+        //   changedPermissionKeys,
+        //   perfil_usuario: getPerfilUsuarioDebugSnapshot(syncedUser.perfil_usuario as Record<string, any> | undefined)
+        // });
         if (!hasRelevantChanges) {
-          console.info('[UserContext] Nenhuma diferenca relevante encontrada entre storage e backend. Mantendo dados atuais em memoria/storage.', {
-            userId: currentUser.id
-          });
-
+          // console.info('[UserContext] Nenhuma diferenca relevante encontrada entre storage e backend. Mantendo dados atuais em memoria/storage.', {
+          //   userId: currentUser.id
+          // });
           if (options?.commitCurrentIfUnchanged) {
             setUserData(currentUser);
           }
@@ -494,13 +492,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ? buildSyncedUser(normalizeUserPayload(storedUser, storedUser), storedUser)
           : null;
 
-        console.info('[UserContext] Bootstrap da sessao iniciado.', {
-          hasStoredUser: !!storedUser,
-          hasPersistedAuthSession,
-          storedUserId: storedUser?.id ?? null,
-          shouldSyncOnReload: shouldRefreshStoredUser,
-          perfil_usuario: getPerfilUsuarioDebugSnapshot(storedUser?.perfil_usuario as Record<string, any> | undefined)
-        });
+        // console.info('[UserContext] Bootstrap da sessao iniciado.', {
+        //   hasStoredUser: !!storedUser,
+        //   hasPersistedAuthSession,
+        //   storedUserId: storedUser?.id ?? null,
+        //   shouldSyncOnReload: shouldRefreshStoredUser,
+        //   perfil_usuario: getPerfilUsuarioDebugSnapshot(storedUser?.perfil_usuario as Record<string, any> | undefined)
+        // });
 
         if (storedUser && !hasPersistedAuthSession) {
           console.warn('[UserContext] userConta encontrado sem token/sessao valida. Limpando storage antes de iniciar a tela publica.', {
@@ -513,12 +511,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (syncedStoredUser) {
           userContaRef.current = syncedStoredUser;
 
-          console.info('[UserContext] Sessao encontrada. Priorizando /usuario-conta/{id} antes de popular a variavel global com os dados do usuario.', {
-            userId: syncedStoredUser.id,
-            nome: syncedStoredUser.nome,
-            shouldSyncOnReload: shouldRefreshStoredUser,
-            perfil_usuario: getPerfilUsuarioDebugSnapshot(syncedStoredUser.perfil_usuario as Record<string, any> | undefined)
-          });
+          // console.info('[UserContext] Sessao encontrada. Priorizando /usuario-conta/{id} antes de popular a variavel global com os dados do usuario.', {
+          //   userId: syncedStoredUser.id,
+          //   nome: syncedStoredUser.nome,
+          //   shouldSyncOnReload: shouldRefreshStoredUser,
+          //   perfil_usuario: getPerfilUsuarioDebugSnapshot(syncedStoredUser.perfil_usuario as Record<string, any> | undefined)
+          // });
           await refreshUserData({
             sourceUser: syncedStoredUser,
             commitCurrentIfUnchanged: true,
