@@ -31,6 +31,7 @@ export default function PerfilUserDropdownField({
             topLabel="Permissões deste Usuário:"
             showTopLabel
             required
+            autoLoadAndSelectSingle
         />
     );
 }

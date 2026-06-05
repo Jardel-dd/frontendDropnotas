@@ -7,7 +7,7 @@ import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import {contribuinteOptions, DropDownTipoPessoa, OptionsTipoContrato,regimeTributarioPessoaOptions} from '@/app/shared/optionsDropDown/options';
-import ContratoDropdownField from '../dropDown/contrato';
+import ContratoDropdownField from '../../../contrato/dropDown/contrato';
 export function PessoaFields({
     pessoa,
     errors,

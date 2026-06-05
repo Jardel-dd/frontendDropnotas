@@ -54,4 +54,6 @@ export interface CategoriaContratoDropdownFieldProps {
     showAddButton?: boolean;
     onAddClick?: () => void;
     autoSelectSingle?: boolean;
+    loadOnMount?: boolean;
+    useCachedAllItems?: boolean;
 }

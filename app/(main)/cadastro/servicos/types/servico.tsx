@@ -105,8 +105,10 @@ export interface ServicoDropdownFieldProps {
     showAddButton?: boolean;
     onAddClick?: () => void;
     autoSelectSingle?: boolean;
+    loadOnMount?: boolean;
     fetchAllItems?: () => Promise<ServiceEntity[]>;
     fetchFilteredItems?: (filter: string) => Promise<ServiceEntity[]>;
+    useCachedAllItems?: boolean;
 }
 export interface PreloadedServicoData {
     servico: ServiceEntity;

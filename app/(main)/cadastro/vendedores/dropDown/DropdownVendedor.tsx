@@ -36,6 +36,7 @@ export default function VendedorDropdownField({
             showTopLabel
             required={required}
             topLabel="Vendedor:"
+            autoLoadAndSelectSingle
         />
     );
 }

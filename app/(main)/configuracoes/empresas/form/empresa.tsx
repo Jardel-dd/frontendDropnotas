@@ -264,6 +264,8 @@ export function EmpresaFields({
                                     topLabel="Usuários:"
                                     showTopLabel
                                     required
+                                    autoLoadAndSelectSingle
+
                                 />
                             </div>
                         </div>

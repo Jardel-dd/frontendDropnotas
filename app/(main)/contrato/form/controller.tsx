@@ -761,11 +761,6 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
             setIsLoading(false);
         }, [contratoId, preloadedContrato]);
         useEffect(() => {
-            console.log('[ContratoForm] loading alterado', {
-                isLoading,
-                isLoadingBtnCreated,
-                loadingCombinado: isLoading || isLoadingBtnCreated
-            });
             onLoadingChange?.(isLoading || isLoadingBtnCreated);
         }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
         useEffect(() => {

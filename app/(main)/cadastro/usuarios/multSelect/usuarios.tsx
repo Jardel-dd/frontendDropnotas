@@ -34,6 +34,7 @@ export const UserMultiSelect: React.FC<UserMultiSelectProps> = ({
             hasError={hasError}
             errorMessage={errorMessage}
             showChips={showChips}
+            autoLoadAndSelectSingle
           />
         </div>
       </div>

@@ -3,10 +3,12 @@ import 'primeicons/primeicons.css';
 import '@/app/styles/styledGlobal.css';
 import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
+import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { ContratoFormCreated, ContratoFormRef } from '../form/controller';
 export default function CriarContrato() {
+    const router = useRouter();
     const msgs = useRef<Messages>(null);
     const searchParams = useSearchParams();
     const contratoId = searchParams.get('id');
@@ -35,6 +37,14 @@ export default function CriarContrato() {
     const handleContrato = (updatedContrato: ContratoEntity) => {
         setContrato(updatedContrato);
     };
+    const handleBack = () => {
+        if (window.history.length > 1) {
+            router.back();
+            return;
+        }
+
+        router.replace('/contrato');
+    };
     return (
        <div className="card styled-container-main-all-routes"  >
           <ContratoFormCreated
@@ -45,8 +55,9 @@ export default function CriarContrato() {
                     setContrato={setContrato}
                     onContratoChange={handleContrato}
                     onErrorsChange={handleErrorsChange}
-                    redirectAfterSave={false}
+                    redirectAfterSave={true}
                     showBTNPGCreatedDialog={true}
+                    onBackClick={handleBack}
                 />
         </div>
     );
