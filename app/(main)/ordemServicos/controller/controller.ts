@@ -3,14 +3,13 @@ import api from '@/app/services/api';
 import { Messages } from 'primereact/messages';
 import { RefObject } from 'react';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
-import { ServiceEntity } from '@/app/entity/ServiceEntity';
+import { DetalServiceOSEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
-import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
+import { FormaPagamentoEntity, Formas_recebimento } from '@/app/entity/FormaPagamento';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
-import { ApiListItem, OrdemServicoParams } from '../types/ordemServico';
+import { OrdemServicoParams } from '../types/ordemServico';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
-import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 
@@ -26,7 +25,6 @@ const getEmptyOrdemServicoList = (pageNumber = 0, pageSize = 10) => ({
     first: true,
     empty: true
 });
-
 export const fetchOrdemServico = async (
     params: OrdemServicoParams,
     msgs?: RefObject<Messages | null>
@@ -74,7 +72,7 @@ export const fetchOrdemServico = async (
         throw error;
     }
 };
-export const list = async (
+export const listOrdemServico = async (
     pagination: any,
     listarInativos: boolean,
     setLoading: (v: boolean) => void,
@@ -113,16 +111,21 @@ export const list = async (
         throw error;
     }
 };
-export const deletar = async (id: number, msgs: any, setLoading: (state: boolean) => void, searchTerm: string) => {
+export const deletarOrdemServico = async (
+    OrdemServicoid: number, 
+    msgs: any, 
+    listPaginationOrdemServicos: Record<string, any>,
+    setLoading: (state: boolean) => void,
+    searchTerm: string)=> {
     try {
-        await api.delete(`/ordem-servico/${String(id)}`);
+        await api.delete(`/ordem-servico/${String(OrdemServicoid)}`);
         msgs.current?.clear();
         msgs.current?.show([
             {
                 life: 3000,
                 severity: 'success',
                 summary: 'Sucesso:',
-                detail: 'Ordem de Serviço Cancelada com sucesso.'
+                detail: 'Ordem de Serviço Excluida com sucesso.'
             }
         ]);
     } catch (error) {
@@ -132,7 +135,7 @@ export const deletar = async (id: number, msgs: any, setLoading: (state: boolean
                 life: 3000,
                 severity: 'error',
                 summary: 'Atenção:',
-                detail: 'Houve um erro ao tentar Cancelar Ordem de Serviço, tente novamente.'
+                detail: 'Houve um erro ao tentar Excluida Ordem de Serviço, tente novamente.'
             }
         ]);
     }
@@ -288,47 +291,185 @@ export const createdOrdemServico = async (
         }
     }
 };
-const fetchList = async <T>(
-    endpoint: string,
-    mapFn: (item: ApiListItem) => T
-): Promise<T[]> => {
-    const { data } = await api.get(endpoint);
-    const list: ApiListItem[] = Array.isArray(data.content) ? data.content : [];
-    return list.map(mapFn);
+
+type OrdemServicoServicoResponse = {
+    id?: number | null;
+    id_servico?: number | null;
+    descricao?: string | null;
+    codigo?: string | null;
+    quantidade?: number | null;
+    valor_servico?: number | null;
+    valor_desconto?: number | null;
+};
+
+type OrdemServicoFormaRecebimentoResponse = {
+    id?: number | null;
+    id_forma_pagamento?: number | null;
+    forma_pagamento?: string | null;
+    valor_recebido?: number | null;
+    valor_taxa?: number | null;
+    percentual_taxa?: number | null;
+};
+
+type OrdemServicoResponse = {
+    id?: number | null;
+    numero?: number | null;
+    ativo?: boolean;
+    status?: string | null;
+    descricao?: string | null;
+    consideracoes_finais?: string | null;
+    obervacao_servico?: string | null;
+    observacao_servico?: string | null;
+    observacao_interna?: string | null;
+    data_inicio?: string | null;
+    data_prevista?: string | null;
+    data_conclusao?: string | null;
+    data_hora_inicio?: string | null;
+    data_hora_prevista?: string | null;
+    data_hora_conclusao?: string | null;
+    id_vendedor?: number | null;
+    razao_social_vendedor?: string | null;
+    id_empresa?: number | null;
+    razao_social_empresa?: string | null;
+    id_cliente?: number | null;
+    razao_social_cliente?: string | null;
+    id_forma_pagamento?: number | null;
+    orcar?: boolean;
+    servicos?: OrdemServicoServicoResponse[] | null;
+    formas_recebimento?: OrdemServicoFormaRecebimentoResponse[] | null;
+};
+
+const parseOptionalDate = (value?: string | null) => {
+    if (!value) {
+        return undefined;
+    }
+
+    const parsedDate = new Date(value);
+    return Number.isNaN(parsedDate.getTime()) ? undefined : parsedDate;
+};
+
+const mapOrdemServicoResponseToForm = (ordemServico: OrdemServicoResponse) => {
+    const servico = ordemServico.servicos?.[0] ?? null;
+    const formaRecebimento = ordemServico.formas_recebimento?.[0] ?? null;
+
+    return new ServiceOrderEntity({
+        id: ordemServico.id ?? 0,
+        numero: ordemServico.numero ?? 0,
+        ativo: ordemServico.ativo ?? true,
+        status: ordemServico.status ?? '',
+        descricao: ordemServico.descricao ?? '',
+        consideracoes_finais: ordemServico.consideracoes_finais ?? '',
+        observacao_servico: ordemServico.observacao_servico ?? ordemServico.obervacao_servico ?? '',
+        observacao_interna: ordemServico.observacao_interna ?? '',
+        data_hora_inicio: parseOptionalDate(ordemServico.data_hora_inicio ?? ordemServico.data_inicio),
+        data_hora_prevista: parseOptionalDate(ordemServico.data_hora_prevista ?? ordemServico.data_prevista),
+        data_hora_conclusao: parseOptionalDate(ordemServico.data_hora_conclusao ?? ordemServico.data_conclusao),
+        id_vendedor: ordemServico.id_vendedor ?? 0,
+        id_cliente: ordemServico.id_cliente ?? 0,
+        id_empresa: ordemServico.id_empresa ?? 0,
+        id_forma_pagamento:
+            ordemServico.id_forma_pagamento ??
+            formaRecebimento?.id_forma_pagamento ??
+            formaRecebimento?.id ??
+            0,
+        servicos: new DetalServiceOSEntity({
+            id_servico: servico?.id_servico ?? servico?.id ?? 0,
+            descricao: servico?.descricao ?? '',
+            descricao_completa: servico?.descricao ?? '',
+            codigo: servico?.codigo ?? '',
+            quantidade: servico?.quantidade ?? 1,
+            valor_servico: servico?.valor_servico ?? 0,
+            valor_desconto: servico?.valor_desconto ?? 0
+        }),
+        formas_recebimento: new Formas_recebimento({
+            id: formaRecebimento?.id ?? null,
+            id_forma_recebimento: formaRecebimento?.id_forma_pagamento ?? formaRecebimento?.id ?? 0,
+            valor_taxa: formaRecebimento?.valor_taxa ?? 0,
+            valor_recebido: formaRecebimento?.valor_recebido ?? 0,
+            percentual_taxa: formaRecebimento?.percentual_taxa ?? 0
+        }),
+        orcar: ordemServico.orcar ?? false
+    });
+};
+
+const mapSelectedEmpresa = (ordemServico: OrdemServicoResponse): CompanyEntity | null => {
+    if (!ordemServico.id_empresa) {
+        return null;
+    }
+
+    return {
+        id: ordemServico.id_empresa,
+        razao_social: ordemServico.razao_social_empresa ?? ''
+    } as CompanyEntity;
+};
+
+const mapSelectedCliente = (ordemServico: OrdemServicoResponse): PessoaEntity | null => {
+    if (!ordemServico.id_cliente) {
+        return null;
+    }
+
+    return {
+        id: ordemServico.id_cliente,
+        razao_social: ordemServico.razao_social_cliente ?? ''
+    } as PessoaEntity;
+};
+
+const mapSelectedVendedor = (ordemServico: OrdemServicoResponse): VendedorEntity | null => {
+    if (!ordemServico.id_vendedor) {
+        return null;
+    }
+
+    return {
+        id: ordemServico.id_vendedor,
+        razao_social: ordemServico.razao_social_vendedor ?? ''
+    } as VendedorEntity;
+};
+
+const mapSelectedService = (servico: OrdemServicoServicoResponse | null): ServiceEntity | null => {
+    if (!servico || (!servico.id_servico && !servico.id)) {
+        return null;
+    }
+
+    return {
+        id: servico.id_servico ?? servico.id ?? 0,
+        descricao: servico.descricao ?? '',
+        descricao_completa: servico.descricao ?? '',
+        codigo: servico.codigo ?? '',
+        item_lista_servico: '',
+        valor_servico: servico.valor_servico ?? 0,
+        valor_desconto: servico.valor_desconto ?? 0
+    } as ServiceEntity;
+};
+
+const mapSelectedFormaPagamento = (
+    formaRecebimento: OrdemServicoFormaRecebimentoResponse | null
+): FormaPagamentoEntity | null => {
+    if (!formaRecebimento || (!formaRecebimento.id_forma_pagamento && !formaRecebimento.id)) {
+        return null;
+    }
+
+    return {
+        id: formaRecebimento.id_forma_pagamento ?? formaRecebimento.id ?? 0,
+        descricao: formaRecebimento.forma_pagamento?.trim() ?? '',
+        valor_recebido: formaRecebimento.valor_recebido ?? 0,
+        valor_taxa: formaRecebimento.valor_taxa ?? 0,
+        percentual_taxa: formaRecebimento.percentual_taxa ?? 0
+    } as FormaPagamentoEntity;
 };
 export const fetchOrdemServiceByID = async (ordemServicoID: string) => {
     try {
-        const { data: dataOrdemServico } = await api.get(`/ordem-servico/${ordemServicoID}`);
+        const { data } = await api.get(`/ordem-servico/${ordemServicoID}`);
+        const dataOrdemServico = data as OrdemServicoResponse;
+        const servico = dataOrdemServico.servicos?.[0] ?? null;
+        const formaRecebimento = dataOrdemServico.formas_recebimento?.[0] ?? null;
         console.log("dataOrdemServico selecionado:", dataOrdemServico);
-        const ordemServico = new ServiceOrderEntity(dataOrdemServico);
-        const empresaList = await fetchList<CompanyEntity>("/empresa", e => e as unknown as CompanyEntity);
-        const selectedEmpresa = empresaList.find(e => e.id === dataOrdemServico.id_empresa) ?? null;
-        const vendedorList = await fetchList<VendedorEntity>("/vendedor", e => e as unknown as VendedorEntity);
-        const selectedVendedor = vendedorList.find(e => e.id === dataOrdemServico.id_vendedor) ?? null;
-        const serviceList = await fetchList<ServiceEntity>("/servico", s => s as unknown as ServiceEntity);
-        const selectedService = serviceList.find(
-            s => s.id === dataOrdemServico.servicos?.[0]?.id
-        ) ?? null;
-        const categoriaList = await fetchList<CategoryContratosEntity>("/categoria-contrato", c => c as unknown as CategoryContratosEntity);
-        const selectedCategoriaContrato = categoriaList.find(c => c.id === dataOrdemServico.id_categoria_contrato) ?? null;
-        const formaPagamentoList = await fetchList<FormaPagamentoEntity>("/forma-pagamento", f => f as unknown as FormaPagamentoEntity);
-        const selectedFormaPagamento = formaPagamentoList.find(f => f.id === dataOrdemServico.id_forma_pagamento) ?? null;
-        const clienteList = await fetchList<PessoaEntity>("/pessoa", f => f as unknown as PessoaEntity);
-        const selectedCliente = clienteList.find(f => f.id === dataOrdemServico.id_cliente) ?? null;
         return {
-            dataOrdemServico: ordemServico,
-            empresaList,
-            serviceList,
-            vendedorList,
-            categoriaList,
-            clienteList,
-            formaPagamentoList,
-            selectedEmpresa,
-            selectedCliente,
-            selectedService,
-            selectedVendedor,
-            selectedCategoriaContrato,
-            selectedFormaPagamento,
+            dataOrdemServico: mapOrdemServicoResponseToForm(dataOrdemServico),
+            selectedEmpresa: mapSelectedEmpresa(dataOrdemServico),
+            selectedCliente: mapSelectedCliente(dataOrdemServico),
+            selectedService: mapSelectedService(servico),
+            selectedVendedor: mapSelectedVendedor(dataOrdemServico),
+            selectedFormaPagamento: mapSelectedFormaPagamento(formaRecebimento),
         };
     } catch (error) {
         console.error("Erro ao buscar Ordem Serviço:", error);
@@ -345,5 +486,22 @@ export const fetchOrdemServiceBy1 = async (ordemServicoID: string) => {
     } catch (error) {
         console.error("Erro ao buscar Forma dePagamento:", error);
         throw error;
+    }
+};
+export const handleActiveOrInativeOrdemServicos = async (
+    rowData: ServiceOrderEntity,
+    msgs: any,
+    listPaginationOrdemServico: Record<string, any>,
+    listarInativos: boolean,
+    setLoading: (loading: boolean) => void,
+    searchTerm: string,
+    setListPaginationOrdemServico: (data: any) => void
+) => {
+    try {
+        await deletarOrdemServico(rowData.id!, msgs, listPaginationOrdemServico, setLoading, searchTerm);
+        const refreshList = await listOrdemServico(listPaginationOrdemServico, listarInativos, setLoading, searchTerm);
+        setListPaginationOrdemServico(refreshList);
+    } catch (error) {
+        console.error("Erro ao ativar/desativar Ordem Serviço;:", error);
     }
 };

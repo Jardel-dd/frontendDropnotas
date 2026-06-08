@@ -14,6 +14,7 @@ const buildPessoaPayload = (pessoa: PessoaEntity) => ({
     ...pessoa,
     cnpj: pessoa.cnpj && pessoa.cnpj.replace(/\D/g, '').length > 0 ? pessoa.cnpj : null,
     cpf: pessoa.cpf && pessoa.cpf.replace(/\D/g, '').length > 0 ? pessoa.cpf : null,
+    email: (pessoa.email ?? '').trim(),
     cnae_fiscal: nullableString(pessoa.cnae_fiscal),
     inscricao_estadual: nullableString(pessoa.inscricao_estadual),
     inscricao_municipal: nullableString(pessoa.inscricao_municipal),

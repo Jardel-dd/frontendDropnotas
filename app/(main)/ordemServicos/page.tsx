@@ -22,7 +22,7 @@ import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { deletar, fetchOrdemServico, list, preparar } from './controller/controller';
+import { fetchOrdemServico, listOrdemServico, preparar } from './controller/controller';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DropDownFilterOrdemOrdemServico } from '@/app/shared/optionsDropDown/options';
@@ -147,7 +147,7 @@ const OrdemServicos: React.FC = () => {
         try {
             const periodoToSend = periodo ?? dateRange;
             const statusToSend = status ?? selectedStatusOrdemServico;
-            const ordemServicos = await list(
+            const ordemServicos = await listOrdemServico(
                 {
                     ...listPaginationOrdemServico,
                     pageable: {
@@ -382,7 +382,6 @@ const OrdemServicos: React.FC = () => {
                                     setListPaginationOrdemServico={setListPaginationOrdemServico}
                                     searchTerm={searchTerm}
                                     listarInativos={false}
-                                    deletar={(id) => deletar(id, msgs, setLoading, searchTerm)}
                                 />
                             </div>
                             <div style={{ marginTop: 'auto' }}>
@@ -505,7 +504,6 @@ const OrdemServicos: React.FC = () => {
                                             setListPaginationOrdemServico={setListPaginationOrdemServico}
                                             searchTerm={searchTerm}
                                             listarInativos={false}
-                                            deletar={(id) => deletar(id, msgs, setLoading, searchTerm)}
                                         />
                                     </div>
                                 </div>

@@ -125,7 +125,6 @@ export default function CriarNotaServico() {
     if (!canAccessNotaServicoPage) {
         return <LoadingScreen loadingText="Redirecionando..." />;
     }
-
     return (
         <div className="card styled-container-main-all-routes">
             <NotaServicoForm

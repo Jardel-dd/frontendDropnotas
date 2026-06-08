@@ -1125,6 +1125,32 @@ const NotaServico: React.FC = () => {
                     style={{ width: isMobile ? '95vw' : '40rem' }}
                     footer={
                         <div className="flex justify-content-between align-items-center gap-3 flex-wrap w-full">
+                             <div className="flex align-items-center gap-3 flex-wrap">
+                                {canDownloadAuthorizedNota ? (
+                                    <>
+                                        {downloadXmlButton(authorizedNota as NfsEntity, msgs, {
+                                            label: 'Baixar XML',
+                                            className: 'p-button-outlined p-button-info',
+                                            style: {
+                                                width: 'auto',
+                                                height: 'auto',
+                                                boxShadow: 'none'
+                                            }
+                                        })}
+                                        {downloadPdfButton(authorizedNota as NfsEntity, msgs, {
+                                            label: 'Baixar PDF',
+                                            className: 'p-button-outlined',
+                                            style: {
+                                                width: 'auto',
+                                                height: 'auto',
+                                                boxShadow: 'none'
+                                            }
+                                        })}
+                                    </>
+                                ) : (
+                                    <span className="text-sm text-600">Arquivos ainda indisponíveis para download.</span>
+                                )}
+                            </div>
                             <Button
                                 label="Fechar"
                                 outlined
@@ -1135,22 +1161,7 @@ const NotaServico: React.FC = () => {
                                     setAuthorizedNota(null);
                                 }}
                             />
-                            <div className="flex align-items-center gap-3 flex-wrap">
-                                {canDownloadAuthorizedNota ? (
-                                    <>
-                                        <div className="flex align-items-center gap-2">
-                                            {downloadXmlButton(authorizedNota as NfsEntity, msgs)}
-                                            <span className="text-sm font-medium">Baixar XML</span>
-                                        </div>
-                                        <div className="flex align-items-center gap-2">
-                                            {downloadPdfButton(authorizedNota as NfsEntity, msgs)}
-                                            <span className="text-sm font-medium">Baixar PDF</span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <span className="text-sm text-600">Arquivos ainda indisponíveis para download.</span>
-                                )}
-                            </div>
+                           
                         </div>
                     }
                 >
