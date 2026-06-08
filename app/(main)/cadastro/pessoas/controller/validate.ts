@@ -4,7 +4,10 @@ import { ContratoEntity } from "@/app/entity/ContratoEntity";
 
 type ErrorsMap = Record<string, string>;
 
-const hasValidEmail = (email?: string) => !!email?.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const hasValidEmail = (email?: string) => {
+    const normalizedEmail = email?.trim() ?? '';
+    return !!normalizedEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+};
 const hasMinLengthWhenFilled = (value: string | null | undefined, minLength: number) =>
     !value?.trim() || value.trim().length >= minLength;
 
@@ -44,7 +47,7 @@ const validateCamposComunsPessoa = (
     selectedVendedor: VendedorEntity | null,
     selectedContrato: ContratoEntity | null,
 ): ErrorsMap => {
-    if (!pessoa.codigo_regime_tributario) {
+    if (pessoa.tipo_pessoa !== 'PESSOA_FISICA' && !pessoa.codigo_regime_tributario) {
         return { selectedRegime: 'Este Campo deve ser selecionado.' };
     }
     if (!pessoa.contribuinte) {
@@ -87,12 +90,10 @@ export const validateFieldsPessoa = (
     } else if (pessoa.tipo_pessoa === 'PESSOA_FISICA') {
         if (!pessoa.cpf || pessoa.cpf.replace(/\D/g, '').length < 11) {
             newErrors = { cpf: 'Campo deve ter no minimo 11 caracteres.' };
-        } else if (!pessoa.rg || pessoa.rg.trim().length < 9) {
+        } else if (pessoa.rg && pessoa.rg.trim().length > 0 && pessoa.rg.trim().length < 9) {
             newErrors = { rg: 'Campo deve ter no minimo 9 caracteres.' };
         } else if (!pessoa.razao_social || pessoa.razao_social.trim().length < 2) {
             newErrors = { razao_social: 'Campo deve ter no minimo 2 caracteres.' };
-        } else if (!pessoa.cnae_fiscal) {
-            newErrors = { cnae_fiscal: 'Este Campo deve ser selecionado.' };
         } else {
             newErrors = validateCamposComunsPessoa(pessoa, selectedVendedor, selectedContrato);
         }

@@ -171,19 +171,26 @@ export function DataTableSelectable<T extends NfsEntity>({
 }
 export const downloadPdfButton = (
     nota: NfsEntity,
-    msgs: React.RefObject<Messages | null>
+    msgs: React.RefObject<Messages | null>,
+    options?: {
+        label?: string;
+        className?: string;
+        style?: React.CSSProperties;
+    }
 ) => {
     return (
         <Button
             icon="pi pi-file-pdf"
+            label={options?.label}
             tooltip="Baixar PDF"
-            className="p-button-text bottom-All-plus-datatableDetails"
+            className={options?.className ?? "p-button-text bottom-All-plus-datatableDetails"}
             style={{
                 fontSize: '1rem',
                 width: '2rem',
                 height: '2rem',
                 color: 'GOLD',
-                boxShadow: "none"
+                boxShadow: "none",
+                ...options?.style
             }}
             onClick={() => downloadPdfNota(nota, msgs)}
         />
@@ -191,19 +198,26 @@ export const downloadPdfButton = (
 };
 export const downloadXmlButton = (
     nota: NfsEntity,
-    msgs: React.RefObject<Messages | null>
+    msgs: React.RefObject<Messages | null>,
+    options?: {
+        label?: string;
+        className?: string;
+        style?: React.CSSProperties;
+    }
 ) => {
     return (
         <Button
             icon="pi pi-code"
+            label={options?.label}
             tooltip="Baixar XML"
-            className="p-button-text bottom-All-plus-datatableDetails"
+            className={options?.className ?? "p-button-text bottom-All-plus-datatableDetails"}
             style={{
                 fontSize: '1rem',
                 width: '2rem',
                 height: '2rem',
                 color: '#1976D2',
-                boxShadow: "none"
+                boxShadow: "none",
+                ...options?.style
             }}
             onClick={() => downloadXmlNota(nota, msgs)}
         />

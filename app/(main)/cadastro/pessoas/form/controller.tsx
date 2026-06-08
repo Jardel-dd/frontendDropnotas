@@ -523,10 +523,9 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             Object.keys(errors).length > 0 ||
             (pessoa.tipo_pessoa === 'PESSOA_JURIDICA' && !pessoa.cnpj) ||
             (pessoa.tipo_pessoa === 'PESSOA_FISICA' && !pessoa.cpf) ||
-            (pessoa.tipo_pessoa === 'PESSOA_FISICA' && !pessoa.rg) ||
             (pessoa.tipo_pessoa === 'ESTRANGEIRO' && !pessoa.documento_estrangeiro) ||
             !pessoa?.razao_social ||
-            !pessoa.codigo_regime_tributario ||
+            (pessoa.tipo_pessoa !== 'PESSOA_FISICA' && !pessoa.codigo_regime_tributario) ||
             !pessoa.contribuinte ||
             !pessoa.endereco ||
             !pessoa.email;

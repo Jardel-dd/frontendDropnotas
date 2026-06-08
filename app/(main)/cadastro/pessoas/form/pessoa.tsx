@@ -210,7 +210,6 @@ export function PessoaFields({
                             errorMessage={errors.rg}
                             onClickSearch={function (): void { }}
                             showTopLabel
-                            required
                             topLabel="RG:"
                         />
                     </div>
@@ -237,7 +236,6 @@ export function PessoaFields({
                             hasError={!!errors.selectedRegime}
                             errorMessage={errors.selectedRegime}
                             showTopLabel
-                            required
                             topLabel="Código Regime Tributario:"
                         />
                     </div>
@@ -343,7 +341,7 @@ export function PessoaFields({
                     errorMessage={errors.cnae_fiscal}
                     topLabel="CNAE Fiscal"
                     showTopLabel
-                    required
+                    required={pessoa.tipo_pessoa !== 'PESSOA_FISICA'}
                 />
             </div>
             <div className="col-12 lg:col-3 ">
