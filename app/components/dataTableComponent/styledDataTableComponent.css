@@ -11,6 +11,7 @@
         font-size: 0.7rem !important;
         white-space: nowrap;
         height: auto;
+
     }
 
     .responsive-table .p-datatable-tbody > tr > td {
@@ -18,13 +19,13 @@
         font-size: 0.7rem !important;
         white-space: nowrap;
         height: 65px;
-        width: 20px;
-        max-width: 50px;
+        width: 10px;
+
      
     }
 
     .responsive-table .p-button {
-        width: 200px !important;
+        width: 20px !important;
         height: 18px !important;
         font-size: 0.rem !important;
     }
@@ -36,5 +37,13 @@
 
     .responsive-table .p-checkbox-icon {
         font-size: 9px;
+    }
+
+    .responsive-table .p-datatable-tbody > tr.p-datatable-row-expansion > td,
+    .responsive-table .p-datatable-row-expansion > td {
+        height: auto !important;
+        width: auto !important;
+        white-space: normal !important;
+        padding: 0 !important;
     }
 }

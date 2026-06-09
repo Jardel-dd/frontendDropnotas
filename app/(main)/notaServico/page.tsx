@@ -97,6 +97,8 @@ const formatAuthorizedNotaValue = (value?: string | number) => {
     }).format(Number.isFinite(parsedValue) ? parsedValue : 0);
 };
 const getAuthorizedNotaEmail = (nota: Partial<NfsEntity> | null) => nota?.tomador?.contato?.email || (nota?.tomador as any)?.email || '-';
+const NOTA_SERVICO_MOBILE_CARD_FALLBACK_HEIGHT = 224;
+const NOTA_SERVICO_MOBILE_CARD_GAP = 12;
 
 const NotaServico: React.FC = () => {
     const router = useRouter();
@@ -110,7 +112,10 @@ const NotaServico: React.FC = () => {
     const canUpdateNotaServico = permissaoNfse.update;
     const msgs = useRef<Messages | null>(null);
     const formRef = useRef<PessoaFormRef>(null);
+    const mobileListWrapperRef = useRef<HTMLDivElement | null>(null);
     const [loading, setLoading] = useState(true);
+    const [mobilePageSize, setMobilePageSize] = useState(() => Math.max(pageSize, 1));
+    const [mobilePageSizeReady, setMobilePageSizeReady] = useState(() => !isMobile);
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
     const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
@@ -156,7 +161,9 @@ const NotaServico: React.FC = () => {
     const [editingServicoId, setEditingServicoId] = useState<string | null>(null);
     const [draftSelectedVendedor, setDraftSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [draftSelectedStatusNotaServico, setDraftSelectedStatusNotaServico] = useState<string>('');
-    const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>(buildEmptyNotaServicoPagination(10));
+    const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>(() =>
+        buildEmptyNotaServicoPagination(Math.max(pageSize, 1))
+    );
     const [loadingPrepararNfs, setLoadingPrepararNfs] = useState(false);
     const [prepararNfs, setPrepararNfs] = useState<PrepararNfs>(
         new PrepararNfs({
@@ -240,9 +247,10 @@ const NotaServico: React.FC = () => {
             })
         })
     );
+    const resolvedPageSize = isMobile ? mobilePageSize : pageSize;
     const clearNotaServicoResults = (pageNumber = 0) => {
         setSelectedNotas([]);
-        setListPaginationNotaServico(buildEmptyNotaServicoPagination(pageSize, pageNumber));
+        setListPaginationNotaServico(buildEmptyNotaServicoPagination(resolvedPageSize, pageNumber));
     };
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setGerarNfse,
@@ -283,7 +291,7 @@ const NotaServico: React.FC = () => {
             const data = await listNotaServico(
                 {
                     page: pageNumber,
-                    size: pageSize,
+                    size: resolvedPageSize,
                     termo,
                     status: appliedFilters.selectedStatusNotaServico,
                     dateRange: appliedFilters.dateRange,
@@ -410,7 +418,7 @@ const NotaServico: React.FC = () => {
             const response = await listNotaServico(
                 {
                     page: 0,
-                    size: Math.max(totalRegistros, pageSize, 1),
+                    size: Math.max(totalRegistros, resolvedPageSize, 1),
                     termo: searchTerm,
                     status: activeFilters.selectedStatusNotaServico,
                     dateRange: activeFilters.dateRange,
@@ -733,9 +741,87 @@ const NotaServico: React.FC = () => {
         validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs);
     }, [prepararNfs, selectedEmpresaDialog, selectedPessoaDialog, selectedServicoDialog, showDialogPreparaNfs]);
     useEffect(() => {
+        if (!isMobile) {
+            setMobilePageSizeReady(true);
+            return;
+        }
+
+        const calculateMobilePageSize = () => {
+            const wrapper = mobileListWrapperRef.current;
+
+            if (!wrapper) {
+                setMobilePageSize((current) => (current === Math.max(pageSize, 1) ? current : Math.max(pageSize, 1)));
+                setMobilePageSizeReady(true);
+                return;
+            }
+
+            const wrapperHeight = wrapper.getBoundingClientRect().height;
+            const selectAll = wrapper.querySelector('.nota-servico-mobile-select-all') as HTMLElement | null;
+            const cards = Array.from(wrapper.querySelectorAll('.nota-servico-mobile-card')) as HTMLElement[];
+            const reservedHeight =
+                (selectAll?.getBoundingClientRect().height ?? 0) +
+                (selectAll ? NOTA_SERVICO_MOBILE_CARD_GAP : 0);
+            const measuredCardHeight =
+                cards.length > 0
+                    ? Math.max(...cards.map((card) => card.getBoundingClientRect().height))
+                    : NOTA_SERVICO_MOBILE_CARD_FALLBACK_HEIGHT;
+            const measuredStride =
+                cards.length > 1
+                    ? cards[1].getBoundingClientRect().top - cards[0].getBoundingClientRect().top
+                    : measuredCardHeight + NOTA_SERVICO_MOBILE_CARD_GAP;
+
+            if (wrapperHeight <= 0) {
+                setMobilePageSize((current) => (current === Math.max(pageSize, 1) ? current : Math.max(pageSize, 1)));
+                setMobilePageSizeReady(true);
+                return;
+            }
+
+            const availableHeight = Math.max(wrapperHeight - reservedHeight, measuredCardHeight);
+            const nextPageSize =
+                availableHeight <= measuredCardHeight
+                    ? 1
+                    : Math.max(
+                          1,
+                          1 + Math.floor((availableHeight - measuredCardHeight) / measuredStride)
+                      );
+
+            setMobilePageSize((current) => (current === nextPageSize ? current : nextPageSize));
+            setMobilePageSizeReady(true);
+        };
+
+        calculateMobilePageSize();
+
+        const wrapper = mobileListWrapperRef.current;
+        const resizeObserver =
+            wrapper && typeof ResizeObserver !== 'undefined'
+                ? new ResizeObserver(() => {
+                      calculateMobilePageSize();
+                  })
+                : null;
+
+        if (wrapper && resizeObserver) {
+            resizeObserver.observe(wrapper);
+        }
+
+        const handleWindowResize = () => {
+            calculateMobilePageSize();
+        };
+
+        window.addEventListener('resize', handleWindowResize);
+
+        return () => {
+            window.removeEventListener('resize', handleWindowResize);
+            resizeObserver?.disconnect();
+        };
+    }, [isMobile, pageSize, listPaginationNotaServico?.content?.length, selectedNotas.length]);
+    useEffect(() => {
+        if (isMobile && !mobilePageSizeReady) {
+            return;
+        }
+
         if (!canSearchNotaServico) {
             setSelectedNotas([]);
-            setListPaginationNotaServico(buildEmptyNotaServicoPagination(pageSize));
+            setListPaginationNotaServico(buildEmptyNotaServicoPagination(resolvedPageSize));
             setLoading(false);
             return;
         }
@@ -747,7 +833,7 @@ const NotaServico: React.FC = () => {
                 const data = await listNotaServico(
                     {
                         page: 0,
-                        size: pageSize,
+                        size: resolvedPageSize,
                         termo: '',
                         status: '',
                         dateRange: [null, null]
@@ -762,7 +848,7 @@ const NotaServico: React.FC = () => {
         };
 
         loadInitialNotaServico();
-    }, [canSearchNotaServico, pageSize]);
+    }, [canSearchNotaServico, isMobile, mobilePageSizeReady, resolvedPageSize]);
     useEffect(() => {
         const feedback = consumeNotaServicoFeedback();
         if (!feedback) {
@@ -923,7 +1009,7 @@ const NotaServico: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-3">
+                            <div ref={mobileListWrapperRef} className="nota-servico-mobile-list-wrapper mt-3">
                                 {canSearchNotaServico ? (
                                     <ListarNotaServico
                                         loading={loading}
@@ -940,7 +1026,7 @@ const NotaServico: React.FC = () => {
                                 )}
                             </div>
                             {canSearchNotaServico && (
-                                <div style={{ marginTop: 'auto' }}>
+                                <div className="nota-servico-mobile-paginator">
                                     <div className="custom-paginator">
                                         <CustomPaginator
                                             first={listPaginationNotaServico.pageable.pageNumber * listPaginationNotaServico.pageable.pageSize}
