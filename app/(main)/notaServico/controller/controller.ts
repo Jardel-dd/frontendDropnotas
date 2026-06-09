@@ -10,6 +10,7 @@ import { DetalPrestadorValoresEntity, ServiceEntity } from '@/app/entity/Service
 import { ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams } from '../types/notaServico';
 
 const NOTA_SERVICO_FEEDBACK_KEY = 'notaServicoFeedback';
+const inflightNotaServicoRequests = new Map<string, Promise<any>>();
 
 type NotaServicoFeedback = {
     severity: 'success' | 'warn' | 'error';
@@ -148,10 +149,24 @@ export const fetchNotaServico = async (params: NotaFiscalParams, msgs?: any) => 
             }
         });
 
-        const response = await api.get(`/nfse?${searchParams.toString()}`);
+        const requestKey = searchParams.toString();
+        const existingRequest = inflightNotaServicoRequests.get(requestKey);
+        if (existingRequest) {
+            return await existingRequest;
+        }
 
-        console.log('resposta', response.data);
-        return response.data;
+        const requestPromise = api
+            .get(`/nfse?${requestKey}`)
+            .then((response) => {
+                console.log('resposta', response.data);
+                return response.data;
+            })
+            .finally(() => {
+                inflightNotaServicoRequests.delete(requestKey);
+            });
+
+        inflightNotaServicoRequests.set(requestKey, requestPromise);
+        return await requestPromise;
     } catch (error: any) {
         console.error('Erro ao buscar notas fiscais:', error);
         if (error.response?.status === 403) {

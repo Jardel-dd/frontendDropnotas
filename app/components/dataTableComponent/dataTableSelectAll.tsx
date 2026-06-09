@@ -1,9 +1,9 @@
-import React, { JSX, useState } from "react";
+import React from "react";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Messages } from "primereact/messages";
 import { Checkbox } from "primereact/checkbox";
-import { DataTable } from "primereact/datatable";
+import { DataTable, DataTableRowToggleEvent } from "primereact/datatable";
 import { NfsEntity } from "@/app/entity/NfsEntity";
 import { downloadPdfNota, downloadXmlNota, visualizarPdfNota } from "@/app/(main)/notaServico/controller/controller";
 import LoadingScreen from "@/app/loading";
@@ -33,6 +33,10 @@ interface DataTableSelectableProps<T extends NfsEntity> {
     className?: string;
     extraActionsTemplate?: (rowData: T) => React.ReactNode;
     isRowSelectable?: (rowData: T) => boolean;
+    expandedRows?: T[];
+    onExpandedRowsChange?: (rows: T[]) => void;
+    rowExpansionTemplate?: (rowData: T) => React.ReactNode;
+    showExpandButton?: boolean;
 }
 export function DataTableSelectable<T extends NfsEntity>({
     data,
@@ -47,7 +51,11 @@ export function DataTableSelectable<T extends NfsEntity>({
     selected,
     extraActionsTemplate,
     className,
-    isRowSelectable = (rowData) => rowData.status_nota !== "REJEITADA"
+    isRowSelectable = (rowData) => rowData.status_nota !== "REJEITADA",
+    expandedRows,
+    onExpandedRowsChange,
+    rowExpansionTemplate,
+    showExpandButton = false
 }: DataTableSelectableProps<T>) {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -92,57 +100,69 @@ export function DataTableSelectable<T extends NfsEntity>({
             tableStyle={{ minWidth }}
             loading={loading}
             className={className}
+            expandedRows={rowExpansionTemplate ? expandedRows : undefined}
+            onRowToggle={(e: DataTableRowToggleEvent) => {
+                if (!onExpandedRowsChange) return;
+                onExpandedRowsChange(Array.isArray(e.data) ? (e.data as T[]) : []);
+            }}
+            rowExpansionTemplate={rowExpansionTemplate}
             emptyMessage={
                 loading ? (
                     <LoadingScreen loadingText={""} />
                 ) : "Nenhum resultado encontrado na pesquisa"
-            }
-        >
-{isDesktop && (
- <Column
-                headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
-                header={
-                    <Checkbox
-                        checked={allSelectableRowsSelected}
-                        disabled={selectableRows.length === 0}
-                        onChange={handleSelectAllToggle}
-                    />
-                }
-                body={(rowData) => (
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        {isRowSelectable(rowData) && (
-                            <Checkbox
-                                checked={selected.some((n) => n.id === rowData.id)}
-                                onChange={(e) => toggleSelection(rowData, e.checked!)}
-                            />
-                        )}
-                    </div>
-                )}
-                style={{ width: "5px", textAlign: "center" }}
-            />
-)}
+            }>
+            {showExpandButton && rowExpansionTemplate && (
+                <Column
+                    expander
+                    headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8', width: "3rem" }}
+                    style={{ width: "3rem", textAlign: "center" }}
+                />
+            )}
+            {isDesktop && (
+                <Column
+                    headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
+                    header={
+                        <Checkbox
+                            checked={allSelectableRowsSelected}
+                            disabled={selectableRows.length === 0}
+                            onChange={handleSelectAllToggle}
+                        />
+                    }
+                    body={(rowData) => (
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            {isRowSelectable(rowData) && (
+                                <Checkbox
+                                    checked={selected.some((n) => n.id === rowData.id)}
+                                    onChange={(e) => toggleSelection(rowData, e.checked!)}
+                                />
+                            )}
+                        </div>
+                    )}
+                    style={{ width: "5px", textAlign: "center" }}
+                />
+            )}
             {isMobile && (
-            <Column
-                headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8', width:"10px", maxWidth:"15px",  }}
-                header={
-                    <Checkbox
-                        checked={allSelectableRowsSelected}
-                        disabled={selectableRows.length === 0}
-                        onChange={handleSelectAllToggle}
-                    />
-                }
-                body={(rowData) => (
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        {isRowSelectable(rowData) && (
-                            <Checkbox
-                                checked={selected.some((n) => n.id === rowData.id)}
-                                onChange={(e) => toggleSelection(rowData, e.checked!)}
-                            />
-                        )}
-                    </div>
-                )}
-                style={{ width: "5px", textAlign: "center" }}
-            />
+                <Column
+                    headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8', width: "10px", maxWidth: "15px", }}
+                    header={
+                        <Checkbox
+                            checked={allSelectableRowsSelected}
+                            disabled={selectableRows.length === 0}
+                            onChange={handleSelectAllToggle}
+                        />
+                    }
+                    body={(rowData) => (
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            {isRowSelectable(rowData) && (
+                                <Checkbox
+                                    checked={selected.some((n) => n.id === rowData.id)}
+                                    onChange={(e) => toggleSelection(rowData, e.checked!)}
+                                />
+                            )}
+                        </div>
+                    )}
+                    style={{ width: "5px", textAlign: "center" }}
+                />
             )}
 
             {columns.map((col) => (
@@ -151,8 +171,10 @@ export function DataTableSelectable<T extends NfsEntity>({
                     field={String(col.field)}
                     header={col.header}
                     body={col.body}
-                    headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8',  
-                        ...col.headerStyle }}
+                    headerStyle={{
+                        background: isDarkMode ? '#162A41' : '#EFF3F8',
+                        ...col.headerStyle
+                    }}
                     style={col.style}
                     className={col.className}
                 />
@@ -162,7 +184,7 @@ export function DataTableSelectable<T extends NfsEntity>({
                 <Column
                     header="Ações"
                     body={(rowData) => extraActionsTemplate(rowData)}
-                    style={{ textAlign: "center", width: "10rem" }}
+                    style={{ textAlign: "center" }}
                     headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }}
                 />
             )}
