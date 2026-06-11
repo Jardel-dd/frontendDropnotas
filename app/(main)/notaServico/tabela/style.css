@@ -155,12 +155,14 @@
     gap: 0.35rem;
 }
 
+.nota-servico-btn-actions {
+    justify-content: space-between;
+    display: flex;
+}
 .nota-servico-mobile-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.45rem;
     align-items: center;
-    min-height: 2rem;
     margin-top: 1rem;
 }
 

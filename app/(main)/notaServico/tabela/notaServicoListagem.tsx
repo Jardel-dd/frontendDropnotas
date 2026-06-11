@@ -346,9 +346,8 @@ export function ListarNotaServico({
                                                     </span>
                                                 </div>
                                             </div>
-
-                                            <div className="nota-servico-mobile-card-footer">
-                                                <div className="nota-servico-mobile-actions">
+                                            <div >
+                                                <div className="nota-servico-btn-actions ">
                                                     {renderExtraActions(nota, true)}
                                                 </div>
                                             </div>

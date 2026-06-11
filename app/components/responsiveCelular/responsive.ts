@@ -2,14 +2,10 @@
 'user client'
 import { useMediaQuery } from 'react-responsive';
 
-export const useIsMobileOrTablet = () => {
-    return useMediaQuery({ query: '(max-width: 768px)' });
-};
-
 export const useIsMobile = () => {
-    return useMediaQuery({ query: '(max-width: 768px)' });
+    return useMediaQuery({ query: '(max-width: 868px)' });
 };
 
 export const useIsDesktop = () => {
-    return useMediaQuery({ query: '(min-width: 769px)' });
+    return useMediaQuery({ query: '(min-width: 869px)' });
 };

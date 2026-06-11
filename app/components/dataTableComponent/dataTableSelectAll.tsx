@@ -1,13 +1,13 @@
 import React from "react";
+import LoadingScreen from "@/app/loading";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Messages } from "primereact/messages";
 import { Checkbox } from "primereact/checkbox";
-import { DataTable, DataTableRowToggleEvent } from "primereact/datatable";
 import { NfsEntity } from "@/app/entity/NfsEntity";
-import { downloadPdfNota, downloadXmlNota, visualizarPdfNota } from "@/app/(main)/notaServico/controller/controller";
-import LoadingScreen from "@/app/loading";
+import { DataTable, DataTableRowToggleEvent } from "primereact/datatable";
 import { useIsDesktop, useIsMobile } from "../responsiveCelular/responsive";
+import { downloadPdfNota, downloadXmlNota, visualizarPdfNota } from "@/app/(main)/notaServico/controller/controller";
 
 export interface GenericColumn<T> {
     field: keyof T;
