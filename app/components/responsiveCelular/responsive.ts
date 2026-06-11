@@ -7,5 +7,6 @@ export const useIsMobile = () => {
 };
 
 export const useIsDesktop = () => {
-    return useMediaQuery({ query: '(min-width: 869px)' });
+    return useMediaQuery({ query: '(min-width: 969px)' });
 };
+

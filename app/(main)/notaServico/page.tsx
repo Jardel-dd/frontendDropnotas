@@ -18,7 +18,7 @@ import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import type { PessoaFormRef, PreloadedPessoaData } from '../cadastro/pessoas/types/pessoa';
 import { validateFieldsPrepararNfs } from './controller/validation';
@@ -113,6 +113,7 @@ const NotaServico: React.FC = () => {
     const msgs = useRef<Messages | null>(null);
     const formRef = useRef<PessoaFormRef>(null);
     const mobileListWrapperRef = useRef<HTMLDivElement | null>(null);
+    const hasLoadedNotaServicoRef = useRef(false);
     const [loading, setLoading] = useState(true);
     const [mobilePageSize, setMobilePageSize] = useState(() => Math.max(pageSize, 1));
     const [mobilePageSizeReady, setMobilePageSizeReady] = useState(() => !isMobile);
@@ -248,10 +249,10 @@ const NotaServico: React.FC = () => {
         })
     );
     const resolvedPageSize = isMobile ? mobilePageSize : pageSize;
-    const clearNotaServicoResults = (pageNumber = 0) => {
+    const clearNotaServicoResults = useCallback((pageNumber = 0) => {
         setSelectedNotas([]);
         setListPaginationNotaServico(buildEmptyNotaServicoPagination(resolvedPageSize, pageNumber));
-    };
+    }, [resolvedPageSize]);
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setGerarNfse,
         field: ['razao_social_cliente'],
@@ -263,7 +264,14 @@ const NotaServico: React.FC = () => {
             handleListNotaServico(0, value);
         }
     });
-    const handleListNotaServico = async (
+    const getActiveFilters = useCallback(() => ({
+        dateRange,
+        selectedEmpresa,
+        selectedPessoa,
+        selectedVendedor,
+        selectedStatusNotaServico
+    }), [dateRange, selectedEmpresa, selectedPessoa, selectedVendedor, selectedStatusNotaServico]);
+    const handleListNotaServico = useCallback(async (
         pageNumber = 0,
         termo = searchTerm,
         filters?: {
@@ -306,7 +314,7 @@ const NotaServico: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [canSearchNotaServico, clearNotaServicoResults, dateRange, resolvedPageSize, searchTerm, selectedEmpresa, selectedPessoa, selectedStatusNotaServico, selectedVendedor]);
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (!canSearchNotaServico) {
             return;
@@ -387,13 +395,6 @@ const NotaServico: React.FC = () => {
 
         setSelectedNotas(notas.filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE'));
     };
-    const getActiveFilters = () => ({
-        dateRange,
-        selectedEmpresa,
-        selectedPessoa,
-        selectedVendedor,
-        selectedStatusNotaServico
-    });
     const formatExportDate = (value: unknown) => {
         if (!value) {
             return '-';
@@ -813,7 +814,7 @@ const NotaServico: React.FC = () => {
             window.removeEventListener('resize', handleWindowResize);
             resizeObserver?.disconnect();
         };
-    }, [isMobile, pageSize, listPaginationNotaServico?.content?.length, selectedNotas.length]);
+    }, [isMobile, pageSize, listPaginationNotaServico?.content?.length]);
     useEffect(() => {
         if (isMobile && !mobilePageSizeReady) {
             return;
@@ -826,29 +827,21 @@ const NotaServico: React.FC = () => {
             return;
         }
 
-        const loadInitialNotaServico = async () => {
-            setLoading(true);
+        const activeFilters = hasLoadedNotaServicoRef.current
+            ? getActiveFilters()
+            : {
+                  dateRange: [null, null] as DateRangeValue,
+                  selectedEmpresa: null,
+                  selectedPessoa: null,
+                  selectedVendedor: null,
+                  selectedStatusNotaServico: ''
+              };
+        const termo = hasLoadedNotaServicoRef.current ? searchTerm : '';
 
-            try {
-                const data = await listNotaServico(
-                    {
-                        page: 0,
-                        size: resolvedPageSize,
-                        termo: '',
-                        status: '',
-                        dateRange: [null, null]
-                    },
-                    msgs
-                );
-
-                setListPaginationNotaServico(data);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadInitialNotaServico();
-    }, [canSearchNotaServico, isMobile, mobilePageSizeReady, resolvedPageSize]);
+        handleListNotaServico(0, termo, activeFilters).finally(() => {
+            hasLoadedNotaServicoRef.current = true;
+        });
+    }, [canSearchNotaServico, getActiveFilters, handleListNotaServico, isMobile, mobilePageSizeReady, resolvedPageSize, searchTerm]);
     useEffect(() => {
         const feedback = consumeNotaServicoFeedback();
         if (!feedback) {
@@ -885,7 +878,7 @@ const NotaServico: React.FC = () => {
                             <div style={{ marginTop: '8px', marginLeft: '8px', width: '100%' }}>
                                 <div className="grid formgrid w-full" style={{ maxHeight: '74px' }}>
                                     {canSearchNotaServico && (
-                                        <div className="col-7 mb-0 lg:col-3  ">
+                                        <div className="col-7 mb-0 lg:col-4  ">
                                             <Input
                                                 label="Digite o nome Cliente"
                                                 outlined={true}
@@ -901,7 +894,7 @@ const NotaServico: React.FC = () => {
                                             />
                                         </div>
                                     )}
-                                    <div className={`${canSearchNotaServico ? 'col-5' : 'col-12'} mb-0 lg:col-3 `}>
+                                    <div className={`${canSearchNotaServico } mb-0 lg:col-3 `}>
                                         <div className="nota-servico-mobile-buttons" style={{ position: 'relative' }}>
                                             {canUpdateNotaServico && selectedNotas.length > 0 && (
                                                 <Button
@@ -999,7 +992,6 @@ const NotaServico: React.FC = () => {
                                                         tooltip="Exportar PDF"
                                                         loading={loadingExportPdf}
                                                         disabled={loadingExportPdf}
-                                                        className="ml-1rem"
                                                         onClick={handleOpenExportPdfDialog}
                                                     />
                                                 )}
