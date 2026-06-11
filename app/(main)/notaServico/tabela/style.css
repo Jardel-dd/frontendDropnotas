@@ -5,6 +5,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 @media (max-width: 768px) {
     .truncate-text {
         max-width: 120px;
@@ -31,4 +32,148 @@
     padding: 0.35rem 0.65rem;
     font-size: 0.75rem;
     white-space: nowrap;
+}
+
+.nota-servico-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.nota-servico-mobile-select-all {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.2rem 0.25rem;
+    font-size: 0.85rem;
+}
+
+.nota-servico-mobile-empty {
+    padding: 1rem;
+    border-radius: 0.85rem;
+    text-align: center;
+    background: var(--surface-ground);
+    border: 1px solid var(--surface-border);
+}
+
+.nota-servico-mobile-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.8rem 0.9rem;
+    min-height: 11.5rem;
+    overflow: hidden;
+    border-radius: 1rem;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.nota-servico-mobile-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.nota-servico-mobile-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.nota-servico-mobile-card-summary-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.35fr) auto;
+    gap: 0.75rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.nota-servico-mobile-card-select {
+    flex-shrink: 0;
+
+    padding-top: 0.1rem;
+
+}
+
+.nota-servico-mobile-card-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    opacity: 0.7;
+}
+
+.nota-servico-mobile-card-value {
+    font-size: 1rem;
+
+    font-weight: 700;
+}
+
+.nota-servico-mobile-card-detail {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.nota-servico-mobile-card-status-detail {
+    align-items: flex-end;
+}
+
+.nota-servico-mobile-card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    overflow: hidden;
+
+    word-break: break-word;
+}
+
+.nota-servico-mobile-card-meta-value {
+    font-size: 0.82rem;
+
+    line-height: 1.3;
+}
+
+.nota-servico-mobile-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.nota-servico-mobile-card-footer {
+    margin-top: auto;
+    padding-top: 0.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+.nota-servico-btn-actions {
+    justify-content: space-between;
+    display: flex;
+}
+.nota-servico-mobile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 1rem;
+
+}
+.nota-servico-mobile-action-btn {
+    width: 2rem;
+    height: 2rem;
+    box-shadow: none;
+
 }
