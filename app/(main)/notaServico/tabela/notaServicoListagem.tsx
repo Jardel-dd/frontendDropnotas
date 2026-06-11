@@ -124,13 +124,11 @@ export function ListarNotaServico({
             ...selectableNotas
         ]);
     };
-
     const renderExtraActions = (rowData: NfsEntity, compact = false) => {
         if (rowData.status_nota === 'REJEITADA') {
             if (!canCorrectRejectedNota) {
                 return null;
             }
-
             return (
                 <Button
                     label="CORRECAO"
@@ -183,7 +181,7 @@ export function ListarNotaServico({
                                         ) : (
                                             <span>
                                                 {highlightSearchTerm(
-                                                    limitarText(data.numero_rps, 10),
+                                                    limitarText(data.numero_rps, 3),
                                                     searchTerm
                                                 )}
                                             </span>
@@ -192,37 +190,48 @@ export function ListarNotaServico({
                                 {
                                     field: 'razao_social_cliente',
                                     header: 'Nome Cliente',
-                                    body: (data) => (
-                                        <span
-                                            className={isMobile ? 'line-clamp-mobile' : 'truncate-text'}
-                                            title={data.razao_social_cliente}
-                                        >
-                                            {highlightSearchTerm(
-                                                data.razao_social_cliente,
-                                                searchTerm
-                                            )}
-                                        </span>
-                                    )
+                                    body: (data) =>
+                                        loading ? (
+                                            <Skeleton />
+                                        ) : (
+                                            <span>
+                                                {highlightSearchTerm(
+                                                    limitarText(data.razao_social_cliente, 25),
+                                                    searchTerm
+                                                )}
+                                            </span>
+                                        )
                                 },
                                 {
                                     field: 'razao_social_empresa',
                                     header: 'Nome Empresa',
-                                    body: (data) => (
-                                        <span
-                                            className={isMobile ? 'line-clamp-mobile' : 'truncate-text'}
-                                            title={data.razao_social_empresa}
-                                        >
-                                            {highlightSearchTerm(
-                                                data.razao_social_empresa,
-                                                searchTerm
-                                            )}
-                                        </span>
-                                    )
+                                    body: (data) =>
+                                        loading ? (
+                                            <Skeleton />
+                                        ) : (
+                                            <span>
+                                                {highlightSearchTerm(
+                                                    limitarText(data.razao_social_empresa, 25),
+                                                    searchTerm
+                                                )}
+                                            </span>
+                                        )
                                 },
                                 {
                                     field: 'data_emissao',
                                     header: 'Data de Emissao',
-                                    body: (data) => <span>{formatarDataEmissao(data.data_emissao)}</span>
+                                    body: (data) => {
+                                        const dataEmissao = formatarDataEmissao(data.data_emissao);
+
+                                        return (
+                                            <span title={dataEmissao}>
+                                                {highlightSearchTerm(
+                                                    limitarText(dataEmissao, 10),
+                                                    searchTerm
+                                                )}
+                                            </span>
+                                        );
+                                    }
                                 },
                                 {
                                     field: 'total_valor_servico',
@@ -346,9 +355,8 @@ export function ListarNotaServico({
                                                     </span>
                                                 </div>
                                             </div>
-
-                                            <div className="nota-servico-mobile-card-footer">
-                                                <div className="nota-servico-mobile-actions">
+                                            <div >
+                                                <div className="nota-servico-btn-actions ">
                                                     {renderExtraActions(nota, true)}
                                                 </div>
                                             </div>
