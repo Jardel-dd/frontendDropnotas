@@ -121,7 +121,7 @@ const AppMenuitem = (props: AppMenuItemProps) => {
 
     const subMenu =
         item?.items && item?.visible !== false ? (
-            <ul ref={submenuRef} className={classNames({ 'layout-root-submenulist': props.root })}>
+            <ul ref={submenuRef} className={classNames('layout-submenu-list', { 'layout-root-submenulist': props.root })}>
                 {item?.items
                     .filter(Boolean)
                     .map((child: any, i: number) => (
@@ -135,7 +135,9 @@ const AppMenuitem = (props: AppMenuItemProps) => {
             ref={menuitemRef}
             className={classNames({
                 'layout-root-menuitem': props.root,
-                'active-menuitem': active
+                'active-menuitem': active,
+                'layout-menuitem-has-children': !!item?.items,
+                'layout-menuitem-leaf': !item?.items
             })}
         >
             {props.root && item?.visible !== false && (
@@ -143,32 +145,34 @@ const AppMenuitem = (props: AppMenuItemProps) => {
                     <a
                         href={item?.url}
                         onClick={(e) => itemClick(e)}
-                        className={classNames(item?.class, 'p-ripple tooltip-target', {
+                        className={classNames(item?.class, 'p-ripple tooltip-target layout-root-menu-link', {
                             'active-menuitem': isActiveRoute
                         })}
                         target={item?.target}
                         data-pr-tooltip={item?.label}
                         data-pr-disabled={!(props.root && !layoutState.menuHoverActive)}
+                        aria-expanded={item?.items ? active : undefined}
+                        aria-current={isActiveRoute ? 'page' : undefined}
                         tabIndex={0}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                     >
-                        {item?.root && <i className="pi pi-fw pi-angle-down layout-menuitem-root-text" />}
                         <i
                             className={classNames('layout-menuitem-icon', item?.icon)}
                             style={{
-                                color: isActiveRoute || isHovered ? 'var(--primary-color)' : 'inherit'
+                                color: isActiveRoute || isHovered ? 'var(--primary-color)' : undefined
                             }}
                         />
                         <span
                             className="layout-menuitem-text"
                             style={{
-                                marginLeft: '0.5rem',
-                                color: isActiveRoute || isHovered ? 'var(--primary-color)' : 'inherit'
+                                marginLeft: 0,
+                                color: isActiveRoute || isHovered ? 'var(--primary-color)' : undefined
                             }}
                         >
                             {item?.label}
                         </span>
+                        {item?.items && <i className="pi pi-angle-down layout-root-submenu-indicator"></i>}
                     </a>
                 </div>
             )}
@@ -193,13 +197,13 @@ const AppMenuitem = (props: AppMenuItemProps) => {
                     <i
                         className={classNames('layout-menuitem-icon', item?.icon)}
                         style={{
-                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : 'inherit'
+                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : undefined
                         }}
                     ></i>
                     <span
                         className="layout-menuitem-text"
                         style={{
-                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : 'inherit'
+                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : undefined
                         }}
                     >
                         {item?.label}
@@ -224,13 +228,13 @@ const AppMenuitem = (props: AppMenuItemProps) => {
                     <i
                         className={classNames('layout-menuitem-icon', item?.icon)}
                         style={{
-                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : 'inherit'
+                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : undefined
                         }}
                     ></i>
                     <span
                         className="layout-menuitem-text"
                         style={{
-                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : 'inherit'
+                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : undefined
                         }}
                     >
                         {item?.label}

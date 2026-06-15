@@ -4080,9 +4080,10 @@
     border-bottom: 0 none;
     background: #ffffff;
     color: #343a40;
-    padding: 1.5rem;
     border-top-right-radius: 6px;
     border-top-left-radius: 6px;
+    background-color: red;
+    padding: 0.5rem;
   }
   .p-dialog .p-dialog-header .p-dialog-title {
     font-weight: 700;

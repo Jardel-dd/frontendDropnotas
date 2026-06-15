@@ -7,6 +7,7 @@ import { Mandatory } from '../../mandatory/InputMandatory';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import LoadingScreenComponent from '@/app/loading/loadingComponent';
+import { useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import React, { useState, useEffect, useContext, useRef, ChangeEvent, ReactNode } from 'react';
 interface SearchDropdownProps<T> {
     selectedItem: T | null;
@@ -91,6 +92,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
     const [hasLoadedAllItems, setHasLoadedAllItems] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
+    const isMobile = useIsMobile();
     const [filterValue, setFilterValue] = useState<string>('');
     const wrapperRef = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<Dropdown>(null);
@@ -423,8 +425,22 @@ export const DropdownSearch = <T extends Record<string, any>>({
         };
     }, [debouncedFilter]);
 
+    const bringFieldIntoView = () => {
+        if (!isMobile || !wrapperRef.current) {
+            return;
+        }
+
+        requestAnimationFrame(() => {
+            wrapperRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+                inline: 'nearest'
+            });
+        });
+    };
+
     return (
-        <div ref={wrapperRef} className="p-field" style={{ width: '100%', height: '85px', maxHeight: "85px" }}>
+        <div ref={wrapperRef} className="p-field" style={{ width: '100%', height: '85px', maxHeight: "85px", scrollMarginTop: isMobile ? '1rem' : undefined }}>
             {showTopLabel && topLabel && (
                 <div style={{ height: 'var(--form-label-height)', display: "flex", alignItems: "center" }}>
                     <label className="filter-label">
@@ -439,7 +455,10 @@ export const DropdownSearch = <T extends Record<string, any>>({
                     ref={dropdownRef}
                     id={id}
                     onFocus={handleFocus}
-                    onShow={handleShow}
+                    onShow={() => {
+                        bringFieldIntoView();
+                        void handleShow();
+                    }}
                     emptyMessage={
                         loading ? (
                             <div style={{ padding: '0.5rem 0' }}>
@@ -466,7 +485,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
                     disabled={disabled}
                     filter
                     autoFocus={autoFocus}
-                    panelStyle={{ maxWidth: '350px', width: '100%' }}
+                    panelStyle={{ maxWidth: '350px', width: '100%', maxHeight: isMobile ? '40dvh' : undefined }}
                     className={hasError ? 'p-invalid' : ''}
                     style={{
                         boxShadow: 'none',
@@ -484,8 +503,11 @@ export const DropdownSearch = <T extends Record<string, any>>({
                                 type="text"
                                 value={filterValue}
                                 onChange={handleFilterChange}
+                                onFocus={() => {
+                                    setTimeout(bringFieldIntoView, 120);
+                                }}
                                 placeholder="Digite para filtrar..."
-                                className="p-inputtext-sm flex-1"
+                                className="flex-1"
                                 style={{
                                     background: isDarkMode ? '#293B51' : '#FFFFFF',
                                     boxShadow: 'none'
