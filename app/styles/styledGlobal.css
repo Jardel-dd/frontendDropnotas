@@ -20,6 +20,23 @@ textarea.p-inputtextarea {
     min-height: unset !important;
     box-sizing: border-box;
 }
+
+@media (max-width: 768px) {
+    input.p-inputtext,
+    textarea.p-inputtext,
+    textarea.p-inputtextarea,
+    .p-inputnumber-input,
+    .p-inputmask,
+    .p-dropdown .p-dropdown-label,
+    .p-multiselect .p-multiselect-label,
+    .p-dropdown-panel .p-dropdown-filter,
+    .p-multiselect-panel .p-multiselect-header .p-multiselect-filter-container .p-inputtext,
+    .custom-multiselect-filter-input,
+    .p-inputtext.p-inputtext-sm,
+    .p-inputtext-sm .p-inputtext {
+        font-size: 16px !important;
+    }
+}
 /* .p-invalid .p-inputtext {
     border: 1px solid #fca5a5;
 } */
@@ -394,7 +411,7 @@ height: 66px;
 }
 
 .p-dialog-content {
-    padding: 12px;
+    padding: 0 12px 12px 12px;
 }
 
 .scrollable-container {

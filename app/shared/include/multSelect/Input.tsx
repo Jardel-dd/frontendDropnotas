@@ -372,7 +372,7 @@ function CustomMultiSelect({
                                         debouncedFilter(value);
                                     }}
                                     placeholder="Digite para filtrar..."
-                                    className="p-inputtext-sm custom-multiselect-filter-input"
+                                    className="custom-multiselect-filter-input"
                                     style={{ boxShadow: 'none', display: "flex", background: "transparent" }}
                                 />
                                 {showHeaderButtons && (

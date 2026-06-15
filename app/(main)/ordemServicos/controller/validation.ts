@@ -23,19 +23,19 @@ export const validateFieldsOrdemServico = (
         newErrors.descricao = 'A descrição deve ter pelo menos 2 caracteres.';
         valid = false;
     } else if (!selectedEmpresa || Object.keys(selectedEmpresa).length === 0) {
-        newErrors.selectedEmpresa = 'Este Campo deve ser selecionado.';
+        newErrors.selectedEmpresa = 'Selecione a Empresa.';
         valid = false;
     } else if (!selectedCliente || Object.keys(selectedCliente).length === 0) {
-        newErrors.selectedCliente = 'Este Campo deve ser selecionado.';
+        newErrors.selectedCliente = 'Selecione o Cliente ou Fornecedor..';
         valid = false;
     } else if (!selectedService || Object.keys(selectedService).length === 0) {
-        newErrors.selectedService = 'Este Campo deve ser selecionado.';
+        newErrors.selectedService = 'Selecione o Serviço.';
         valid = false;
     } else if (!selectedVendedor || Object.keys(selectedVendedor).length === 0) {
-        newErrors.selectedVendedor = 'Este Campo deve ser selecionado.';
+        newErrors.selectedVendedor = 'Selecione o Vendedor.';
         valid = false;
     } else if (!selectedFormaPagamento || Object.keys(selectedFormaPagamento).length === 0) {
-        newErrors.selectedFormaPagamento = 'Este Campo deve ser selecionado.';
+        newErrors.selectedFormaPagamento = 'Selecione a Forma de Pagamento.';
         valid = false;
     } else if ((emitirOS.servicos?.quantidade ?? 0) < 1) {
         newErrors['servicos.quantidade'] = 'Quantidade mínima do serviço deve ser 1.';

@@ -32,7 +32,7 @@ export const validateFieldsEmpresas = (
         newErrors.inscricao_municipal = 'Campo deve ter no minimo 2 caracteres.';
         valid = false;
     } else if (!empresa.codigo_regime_tributario) {
-        newErrors.selectedRegime = 'Este campo deve ser selecionado.';
+        newErrors.selectedRegime = 'Selecione o Regime Tributário.';
         valid = false;
     } else if (!empresa.endereco?.cep || empresa.endereco.cep.replace(/\D/g, '').length < 8) {
         newErrors.cep = 'Campo deve ter no minimo 8 digitos.';
@@ -74,7 +74,7 @@ export const validateFieldsEmpresas = (
         newErrors.proximo_numero_lote = 'Campo deve ter no minimo 1 caractere.';
         valid = false;
     } else if (!empresa.tipo_rps) {
-        newErrors.tipo_rps = 'Este campo deve ser selecionado.';
+        newErrors.tipo_rps = 'Selecione o Tipo RPS.';
         valid = false;
     } else if (empresa.aliquota_iss === null || empresa.aliquota_iss === undefined || String(empresa.aliquota_iss).trim() === '') {
         newErrors.aliquota_iss = 'A aliquota ISS e obrigatoria.';
@@ -135,16 +135,16 @@ export const validateFieldsEmpresas = (
         newErrors.percentual_desconto_condicionado = 'Desconto condicionado e obrigatorio.';
         valid = false;
     } else if (!empresa.cnae_fiscal) {
-        newErrors.cnae_fiscal = 'Este campo deve ser selecionado.';
+        newErrors.cnae_fiscal = 'Selecione o CNAE Fiscal.';
         valid = false;
     } else if (empresa.prestacao_sus === null || empresa.prestacao_sus === undefined) {
-        newErrors.prestacao_sus = 'Este campo deve ser selecionado.';
+        newErrors.prestacao_sus = 'Este campo deve ser preenchido.';
         valid = false;
     } else if (!empresa.regime_especial_tributacao) {
-        newErrors.regime_especial_tributacao = 'Este campo deve ser selecionado.';
+        newErrors.regime_especial_tributacao = 'Selecione o Regime Especial Tributário.';
         valid = false;
     } else if (empresa.incentivo_fiscal === null || empresa.incentivo_fiscal === undefined) {
-        newErrors.incentivo_fiscal = 'Este campo deve ser selecionado.';
+        newErrors.incentivo_fiscal = 'Selecione o Incentivo Fiscal.';
         valid = false;
     } else if (!empresa.certificado_digital && !empresa.nome_certificado_digital) {
         newErrors.certificado_digital = 'O certificado digital e obrigatorio.';

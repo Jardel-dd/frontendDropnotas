@@ -48,10 +48,10 @@ const validateCamposComunsPessoa = (
     selectedContrato: ContratoEntity | null,
 ): ErrorsMap => {
     if (pessoa.tipo_pessoa !== 'PESSOA_FISICA' && !pessoa.codigo_regime_tributario) {
-        return { selectedRegime: 'Este Campo deve ser selecionado.' };
+        return { selectedRegime: 'Selecione um Regime Tributário.' };
     }
     if (!pessoa.contribuinte) {
-        return { contribuinte: 'Este Campo deve ser selecionado.' };
+        return { contribuinte: 'Selecione um Contribuinte.' };
     }
     if (!hasMinLengthWhenFilled(pessoa.inscricao_estadual, 6)) {
         return { inscricao_estadual: 'Campo deve ter no minimo 6 caracteres.' };
@@ -60,7 +60,7 @@ const validateCamposComunsPessoa = (
         return { inscricao_municipal: 'Campo deve ter no minimo 6 caracteres.' };
     }
     if (!pessoa.pessoa_cliente && !pessoa.pessoa_fornecedor) {
-        return { selectedContato: 'Este Campo deve ser selecionado.' };
+        return { selectedContato: 'Selecione um Cliente ou Fornecedor.' };
     }
     if (!hasValidEmail(pessoa.email)) {
         return { email: 'Email invalido. Por favor, digite um email valido.' };

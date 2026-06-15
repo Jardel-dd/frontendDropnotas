@@ -49,7 +49,8 @@ import { consumeNotaServicoFeedback, exportarPdfNotasServico, listNotaServico } 
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { fetchFilteredPessoas, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { fetchServiceFormDataByID, fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
+import { fetchFilteredService, fetchServiceFormDataByID, fetchServicesByID, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
+import MobileSearchPicker from '@/app/shared/mobile/MobileSearchPicker';
 
 const buildEmptyNotaServicoPagination = (pageSize: number, pageNumber = 0) => ({
     content: [],
@@ -79,6 +80,18 @@ const buildEmptyNotaServicoPagination = (pageSize: number, pageNumber = 0) => ({
     first: pageNumber === 0,
     empty: true
 });
+const buildMobilePickerPageResult = <T,>(data: any) => {
+    const items = Array.isArray(data?.content) ? (data.content as T[]) : Array.isArray(data) ? (data as T[]) : [];
+    const currentPage = Number(data?.number ?? data?.pageable?.pageNumber ?? 0);
+    const totalPages = Number(data?.totalPages ?? 0);
+    const hasMoreFromLastFlag = typeof data?.last === 'boolean' ? !data.last : null;
+    const hasMoreFromTotalPages = totalPages > currentPage + 1;
+
+    return {
+        items,
+        hasMore: hasMoreFromLastFlag ?? hasMoreFromTotalPages
+    };
+};
 const formatAuthorizedNotaDateTime = (value?: string) => {
     if (!value) {
         return '-';
@@ -139,6 +152,7 @@ const NotaServico: React.FC = () => {
     const [authorizedNota, setAuthorizedNota] = useState<Partial<NfsEntity> | null>(null);
     const [pessoa, setPessoa] = useState<PessoaEntity>(createEmptyPessoa());
     const [showDialogPreparaNfs, setShowDialogPreparaNfs] = useState(false);
+    const [isMobileKeyboardOpen, setIsMobileKeyboardOpen] = useState(false);
     const [dateRange, setDateRange] = useState<DateRangeValue>([null, null]);
     const [empresa, setEmpresa] = useState<CompanyEntity>(createEmptyEmpresa());
     const [servico, setServico] = useState<ServiceEntity>(createEmptyServico());
@@ -342,6 +356,39 @@ const NotaServico: React.FC = () => {
             })
         );
     };
+    const fetchEmpresaMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
+        const response = await api.get('/empresa', {
+            params: {
+                page,
+                size,
+                termo: termo || undefined
+            }
+        });
+
+        return buildMobilePickerPageResult<CompanyEntity>(response.data);
+    }, []);
+    const fetchPessoaMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
+        const response = await api.get('/pessoa', {
+            params: {
+                page,
+                size,
+                termo: termo || undefined
+            }
+        });
+
+        return buildMobilePickerPageResult<PessoaEntity>(response.data);
+    }, []);
+    const fetchServicoMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
+        const response = await api.get('/servico', {
+            params: {
+                page,
+                size,
+                termo: termo || undefined
+            }
+        });
+
+        return buildMobilePickerPageResult<ServiceEntity>(response.data);
+    }, []);
     const clearPreparaNfsDialog = () => {
         setSelectedEmpresaDialog(null);
         setSelectedPessoaDialog(null);
@@ -742,6 +789,32 @@ const NotaServico: React.FC = () => {
         validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs);
     }, [prepararNfs, selectedEmpresaDialog, selectedPessoaDialog, selectedServicoDialog, showDialogPreparaNfs]);
     useEffect(() => {
+        if (!showDialogPreparaNfs || !isMobile) {
+            setIsMobileKeyboardOpen(false);
+            return;
+        }
+
+        const updateKeyboardState = () => {
+            const viewportHeight = window.visualViewport?.height;
+
+            if (!viewportHeight) {
+                setIsMobileKeyboardOpen(false);
+                return;
+            }
+
+            setIsMobileKeyboardOpen(window.innerHeight - viewportHeight > 120);
+        };
+
+        updateKeyboardState();
+        window.visualViewport?.addEventListener('resize', updateKeyboardState);
+        window.visualViewport?.addEventListener('scroll', updateKeyboardState);
+
+        return () => {
+            window.visualViewport?.removeEventListener('resize', updateKeyboardState);
+            window.visualViewport?.removeEventListener('scroll', updateKeyboardState);
+        };
+    }, [isMobile, showDialogPreparaNfs]);
+    useEffect(() => {
         if (!isMobile) {
             setMobilePageSizeReady(true);
             return;
@@ -782,9 +855,9 @@ const NotaServico: React.FC = () => {
                 availableHeight <= measuredCardHeight
                     ? 1
                     : Math.max(
-                          1,
-                          1 + Math.floor((availableHeight - measuredCardHeight) / measuredStride)
-                      );
+                        1,
+                        1 + Math.floor((availableHeight - measuredCardHeight) / measuredStride)
+                    );
 
             setMobilePageSize((current) => (current === nextPageSize ? current : nextPageSize));
             setMobilePageSizeReady(true);
@@ -796,8 +869,8 @@ const NotaServico: React.FC = () => {
         const resizeObserver =
             wrapper && typeof ResizeObserver !== 'undefined'
                 ? new ResizeObserver(() => {
-                      calculateMobilePageSize();
-                  })
+                    calculateMobilePageSize();
+                })
                 : null;
 
         if (wrapper && resizeObserver) {
@@ -830,12 +903,12 @@ const NotaServico: React.FC = () => {
         const activeFilters = hasLoadedNotaServicoRef.current
             ? getActiveFilters()
             : {
-                  dateRange: [null, null] as DateRangeValue,
-                  selectedEmpresa: null,
-                  selectedPessoa: null,
-                  selectedVendedor: null,
-                  selectedStatusNotaServico: ''
-              };
+                dateRange: [null, null] as DateRangeValue,
+                selectedEmpresa: null,
+                selectedPessoa: null,
+                selectedVendedor: null,
+                selectedStatusNotaServico: ''
+            };
         const termo = hasLoadedNotaServicoRef.current ? searchTerm : '';
 
         handleListNotaServico(0, termo, activeFilters).finally(() => {
@@ -894,7 +967,7 @@ const NotaServico: React.FC = () => {
                                             />
                                         </div>
                                     )}
-                                    <div className={`${canSearchNotaServico } mb-0 lg:col-3 `}>
+                                    <div className={`${canSearchNotaServico} mb-0 lg:col-3 `}>
                                         <div className="nota-servico-mobile-buttons" style={{ position: 'relative' }}>
                                             {canUpdateNotaServico && selectedNotas.length > 0 && (
                                                 <Button
@@ -1203,7 +1276,7 @@ const NotaServico: React.FC = () => {
                     style={{ width: isMobile ? '95vw' : '40rem' }}
                     footer={
                         <div className="flex justify-content-between align-items-center gap-3 flex-wrap w-full">
-                             <div className="flex align-items-center gap-3 flex-wrap">
+                            <div className="flex align-items-center gap-3 flex-wrap">
                                 {canDownloadAuthorizedNota ? (
                                     <>
                                         {downloadXmlButton(authorizedNota as NfsEntity, msgs, {
@@ -1239,7 +1312,7 @@ const NotaServico: React.FC = () => {
                                     setAuthorizedNota(null);
                                 }}
                             />
-                           
+
                         </div>
                     }
                 >
@@ -1288,7 +1361,11 @@ const NotaServico: React.FC = () => {
                 <Dialog
                     header="Preparar NFS-e"
                     visible={showDialogPreparaNfs}
-                    style={{ width: '500px' }}
+                    className={`nota-servico-preparar-dialog${isMobileKeyboardOpen ? ' nota-servico-preparar-dialog--keyboard-open' : ''}`}
+                    contentClassName="nota-servico-preparar-dialog-content"
+                    breakpoints={{ '960px': '95vw' }}
+                    style={{ width: isMobile ? '95vw' : '500px', maxWidth: '95vw' }}
+                    position={isMobileKeyboardOpen ? 'top' : undefined}
                     draggable={false}
                     onHide={() => {
                         clearPreparaNfsDialog();
@@ -1310,44 +1387,111 @@ const NotaServico: React.FC = () => {
                         </div>
                     }
                 >
-                    <div className="col-12 lg:col-12 ">
-                        <EmpresaDropdownField
-                            id="selectedEmpresa"
-                            reloadKey={reloadKeyEmpresa}
-                            selectedEmpresa={selectedEmpresaDialog}
-                            onEmpresaChange={handleEmpresaChangeDialog}
-                            showAddButton
-                            onAddClick={openCreateEmpresaDialog}
-                            onEditClick={openEditEmpresaDialog}
-                            hasError={!!errors.selectedEmpresa}
-                            errorMessage={errors.selectedEmpresa}
-                        />
-                    </div>
-                    <div className="col-12 lg:col-12 ">
-                        <PessoaDropdownField
-                            id="selectedCliente"
-                            reloadKey={reloadKeyPessoa}
-                            selectedPessoa={selectedPessoaDialog}
-                            onPessoaChange={handlePessoaChangeDialog}
-                            showAddButton
-                            onAddClick={openCreatePessoaDialog}
-                            onEditClick={openEditPessoaDialog}
-                            hasError={!!errors.selectedCliente}
-                            errorMessage={errors.selectedCliente}
-                        />
-                    </div>
-                    <div className="col-12 lg:col-12">
-                        <ServicoDropdownField
-                            id="selectedServico"
-                            reloadKey={reloadKeyServico}
-                            selectedService={selectedServicoDialog}
-                            onServiceChange={handleServicoChangeDialog}
-                            showAddButton
-                            onAddClick={openCreateServicoDialog}
-                            onEditClick={openEditServicoDialog}
-                            hasError={!!errors.selectedServico}
-                            errorMessage={errors.selectedServico}
-                        />
+                    <div className="nota-servico-preparar-dialog-body">
+                        {isDesktop &&
+                            <>
+                                <div className="col-12 lg:col-12">
+                                    <EmpresaDropdownField
+                                        id="selectedEmpresa"
+                                        reloadKey={reloadKeyEmpresa}
+                                        selectedEmpresa={selectedEmpresaDialog}
+                                        onEmpresaChange={handleEmpresaChangeDialog}
+                                        showAddButton
+                                        onAddClick={openCreateEmpresaDialog}
+                                        onEditClick={openEditEmpresaDialog}
+                                        hasError={!!errors.selectedEmpresa}
+                                        errorMessage={errors.selectedEmpresa}
+                                    />
+                                </div>
+                                <div className="col-12 lg:col-12">
+                                    <PessoaDropdownField
+                                        id="selectedCliente"
+                                        reloadKey={reloadKeyPessoa}
+                                        selectedPessoa={selectedPessoaDialog}
+                                        onPessoaChange={handlePessoaChangeDialog}
+                                        showAddButton
+                                        onAddClick={openCreatePessoaDialog}
+                                        onEditClick={openEditPessoaDialog}
+                                        hasError={!!errors.selectedCliente}
+                                        errorMessage={errors.selectedCliente}
+                                    />
+                                </div>
+                                <div className="col-12 lg:col-12">
+                                    <ServicoDropdownField
+                                        id="selectedServico"
+                                        reloadKey={reloadKeyServico}
+                                        selectedService={selectedServicoDialog}
+                                        onServiceChange={handleServicoChangeDialog}
+                                        showAddButton
+                                        onAddClick={openCreateServicoDialog}
+                                        onEditClick={openEditServicoDialog}
+                                        hasError={!!errors.selectedServico}
+                                        errorMessage={errors.selectedServico}
+                                    />
+                                </div>
+                            </>
+                        }
+                        {isMobile &&
+                            <>
+                                <div>
+                                    <MobileSearchPicker<CompanyEntity>
+                                        selectedItem={selectedEmpresaDialog}
+                                        onItemChange={handleEmpresaChangeDialog}
+                                        fetchAllItems={listTheCompany}
+                                        fetchFilteredItems={fetchFilteredCompany}
+                                        fetchItemsPage={fetchEmpresaMobilePage}
+                                        optionValue="id"
+                                        topLabel="Empresa:"
+                                        placeholder="Selecione a Empresa"
+                                        dialogTitle="Selecionar a Empresa"
+                                        hasError={!!errors.selectedEmpresa}
+                                        errorMessage={errors.selectedEmpresa}
+                                        onAddClick={openCreateEmpresaDialog}
+                                        onEditClick={openEditEmpresaDialog}
+                                        dialogPosition={isMobileKeyboardOpen ? 'top' : undefined}
+                                        optionLabel={'razao_social'}
+                                    />
+                                </div>
+                                <div>
+                                    <MobileSearchPicker<PessoaEntity>
+                                        selectedItem={selectedPessoaDialog}
+                                        onItemChange={handlePessoaChangeDialog}
+                                        fetchAllItems={listThePessoas}
+                                        fetchFilteredItems={fetchFilteredPessoas}
+                                        fetchItemsPage={fetchPessoaMobilePage}
+                                        optionLabel="razao_social"
+                                        optionValue="id"
+                                        topLabel="Cliente ou Fornecedor:"
+                                        placeholder="Selecione o Cliente ou Fornecedor"
+                                        dialogTitle="Selecionar Cliente ou Fornecedor"
+                                        hasError={!!errors.selectedCliente}
+                                        errorMessage={errors.selectedCliente}
+                                        onAddClick={openCreatePessoaDialog}
+                                        onEditClick={openEditPessoaDialog}
+                                        dialogPosition={isMobileKeyboardOpen ? 'top' : undefined}
+                                    />
+                                </div>
+                                <div>
+                                    <MobileSearchPicker<ServiceEntity>
+                                        selectedItem={selectedServicoDialog}
+                                        onItemChange={handleServicoChangeDialog}
+                                        fetchAllItems={listTheService}
+                                        fetchFilteredItems={fetchFilteredService}
+                                        fetchItemsPage={fetchServicoMobilePage}
+                                        optionValue="id"
+                                        topLabel="Cliente ou Fornecedor:"
+                                        placeholder="Selecione o Serviço"
+                                        dialogTitle="Selecionar o Serviço"
+                                        hasError={!!errors.selectedServico}
+                                        errorMessage={errors.selectedServico}
+                                        onAddClick={openCreateServicoDialog}
+                                        onEditClick={openEditServicoDialog}
+                                        dialogPosition={isMobileKeyboardOpen ? 'top' : undefined}
+                                        optionLabel={'descricao'}
+                                    />
+                                </div>
+                            </>
+                        }
                     </div>
                 </Dialog>
                 <DialogFilter
@@ -1427,7 +1571,7 @@ const NotaServico: React.FC = () => {
                         preloadedPessoa={preloadedPessoa}
                         setPessoa={setPessoa}
                         onPessoaChange={handlePessoaContrato}
-                        onErrorsChange={() => {}}
+                        onErrorsChange={() => { }}
                         redirectAfterSave={false}
                         onSaved={handlePessoaSaved}
                         onLoadingChange={setIsPessoaDialogLoading}

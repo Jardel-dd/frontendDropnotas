@@ -250,3 +250,89 @@
   height: 38px;
 }
 
+.nota-servico-preparar-dialog {
+  max-width: 95vw;
+}
+
+.nota-servico-preparar-dialog .p-dialog-header,
+.nota-servico-preparar-dialog .p-dialog-footer {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.nota-servico-preparar-dialog-content {
+  padding: 0.75rem 1rem 1rem !important;
+  overflow-x: hidden;
+}
+
+.nota-servico-preparar-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.nota-servico-preparar-dialog-body > div {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+
+.nota-servico-preparar-dialog-body .p-field,
+.nota-servico-preparar-dialog-body .p-inputgroup,
+.nota-servico-preparar-dialog-body .w-full,
+.nota-servico-preparar-dialog-body .p-dropdown,
+.nota-servico-preparar-dialog-body .p-inputtext,
+.nota-servico-preparar-dialog-body .p-dropdown-label {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.nota-servico-preparar-dialog-body .p-dropdown-label,
+.nota-servico-preparar-dialog-body .p-multiselect-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .nota-servico-preparar-dialog {
+    width: 95vw !important;
+    max-width: 95vw !important;
+
+  }
+
+  .nota-servico-preparar-dialog.nota-servico-preparar-dialog--keyboard-open {
+    margin-top: 0.75rem !important;
+
+  }
+
+  .nota-servico-preparar-dialog .p-dialog-content {
+    max-height: calc(100dvh - 13rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-top: 1rem;
+    scroll-padding-bottom: 7rem;
+
+  }
+
+  .nota-servico-preparar-dialog.nota-servico-preparar-dialog--keyboard-open .p-dialog-content {
+    max-height: calc(100dvh - 9.5rem);
+  }
+
+  .nota-servico-preparar-dialog .p-dialog-header {
+    padding: 0.9rem 1rem 0.75rem;
+  }
+
+  .nota-servico-preparar-dialog .p-dialog-footer {
+    padding: 0.75rem 1rem 1rem;
+
+  }
+
+  .nota-servico-preparar-dialog-content {
+    padding: 0.5rem 1rem 0.75rem !important;
+
+  }
+}
+
