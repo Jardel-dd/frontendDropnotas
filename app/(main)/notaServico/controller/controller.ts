@@ -5,24 +5,14 @@ import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
+import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DetalPrestadorValoresEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams } from '../types/notaServico';
+import { CreatedNotaServicoResult, ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams, NotaServicoFeedback } from '../types/notaServico';
 
 const NOTA_SERVICO_FEEDBACK_KEY = 'notaServicoFeedback';
 const inflightNotaServicoRequests = new Map<string, Promise<any>>();
 
-type NotaServicoFeedback = {
-    severity: 'success' | 'warn' | 'error';
-    summary: string;
-    detail: string;
-    notaAutorizada?: Partial<NfsEntity> | null;
-};
-
-type CreatedNotaServicoResult = {
-    wasCreated: boolean;
-    redirected: boolean;
-};
 
 const extractBackendErrorMessage = (data: any, fallback: string): string => {
     if (!data) {
@@ -50,7 +40,6 @@ const extractBackendErrorMessage = (data: any, fallback: string): string => {
 
     return fallback;
 };
-
 const normalizeOptionalNumberToZero = (value: unknown): number => {
     if (value === null || value === undefined || value === '') {
         return 0;
@@ -61,6 +50,17 @@ const normalizeOptionalNumberToZero = (value: unknown): number => {
     }
     const normalized = Number(value);
     return Number.isFinite(normalized) ? normalized : 0;
+};
+const sanitizeDownloadFileNamePart = (value?: string | null): string => {
+    const normalizedValue = (value ?? '')
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\\/:*?"<>|]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    return normalizedValue;
 };
 const extractNotaServicoStatus = (data: any): string => {
     const status = data?.status_nota ?? data?.nfse?.status_nota ?? data?.dados_emissao?.status_nota ?? data?.dados_emissao?.nfse?.status_nota;
@@ -78,6 +78,9 @@ const extractNotaServicoPayload = (data: any): Partial<NfsEntity> | null => {
         return null;
     }
 
+    const empresaResumo = payload.empresa ?? data?.empresa ?? {};
+    const clienteResumo = payload.cliente ?? data?.cliente ?? {};
+    const prestador = payload.prestador ?? data?.prestador ?? {};
     const tomador = payload.tomador ?? data?.tomador ?? {};
     const contato = tomador?.contato ?? {};
 
@@ -86,14 +89,48 @@ const extractNotaServicoPayload = (data: any): Partial<NfsEntity> | null => {
         id: payload.id ?? payload.id_nfse ?? data?.id ?? data?.id_nfse,
         status_nota: payload.status_nota ?? data?.status_nota ?? data?.dados_emissao?.status_nota,
         data_emissao: payload.data_emissao ?? data?.data_emissao ?? data?.dados_emissao?.data_emissao,
-        razao_social_empresa: payload.razao_social_empresa ?? payload.prestador?.razao_social ?? data?.razao_social_empresa,
-        razao_social_cliente: payload.razao_social_cliente ?? tomador?.razao_social ?? data?.razao_social_cliente,
+        razao_social_empresa:
+            payload.razao_social_empresa ??
+            empresaResumo?.razao_social ??
+            empresaResumo?.nome_fantasia ??
+            prestador?.razao_social ??
+            data?.razao_social_empresa,
+        razao_social_cliente:
+            payload.razao_social_cliente ??
+            clienteResumo?.razao_social ??
+            clienteResumo?.nome_fantasia ??
+            tomador?.razao_social ??
+            data?.razao_social_cliente,
         total_valor_servico: payload.total_valor_servico ?? payload.servico?.valores?.valor_servico ?? data?.total_valor_servico,
+        prestador: {
+            ...prestador,
+            razao_social:
+                prestador?.razao_social ??
+                empresaResumo?.razao_social ??
+                empresaResumo?.nome_fantasia ??
+                '',
+            nome_fantasia:
+                prestador?.nome_fantasia ??
+                empresaResumo?.nome_fantasia ??
+                empresaResumo?.razao_social ??
+                ''
+        },
         tomador: {
             ...tomador,
+            razao_social:
+                tomador?.razao_social ??
+                clienteResumo?.razao_social ??
+                clienteResumo?.nome_fantasia ??
+                '',
             contato: {
                 ...contato,
-                email: contato?.email ?? tomador?.email ?? data?.tomador?.contato?.email ?? data?.tomador?.email ?? ''
+                email:
+                    contato?.email ??
+                    tomador?.email ??
+                    clienteResumo?.email ??
+                    data?.tomador?.contato?.email ??
+                    data?.tomador?.email ??
+                    ''
             }
         }
     };
@@ -109,14 +146,11 @@ export const consumeNotaServicoFeedback = (): NotaServicoFeedback | null => {
     if (typeof window === 'undefined') {
         return null;
     }
-
     const rawFeedback = window.sessionStorage.getItem(NOTA_SERVICO_FEEDBACK_KEY);
     if (!rawFeedback) {
         return null;
     }
-
     window.sessionStorage.removeItem(NOTA_SERVICO_FEEDBACK_KEY);
-
     try {
         return JSON.parse(rawFeedback) as NotaServicoFeedback;
     } catch (error) {
@@ -138,7 +172,7 @@ export const normalizeNfseServiceValores = (valores?: Partial<DetalPrestadorValo
         aliquota_outras_retencoes: normalizeOptionalNumberToZero(valores?.aliquota_outras_retencoes),
         percentual_desconto_incondicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_incondicionado),
         percentual_desconto_condicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_condicionado)
-    });
+});
 export const fetchNotaServico = async (params: NotaFiscalParams, msgs?: any) => {
     try {
         const searchParams = new URLSearchParams();
@@ -497,6 +531,34 @@ export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
             severity: 'error',
             summary: 'Atenção:',
             detail: 'Erro ao baixar XML da Nota Fiscal. Tente novamente em instantes. Caso o problema persista, entre em contato com o suporte.',
+            life: 5000
+        });
+    }
+};
+export const downloadArquivosNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+    try {
+        const response = await api.get(`/nfse/${nota.id}/arquivos`, {
+            responseType: 'blob'
+        });
+        const blob = new Blob([response.data], { type: 'application/zip' });
+        const fileURL = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const clientName = sanitizeDownloadFileNamePart(
+            nota.razao_social_cliente ?? (nota.tomador as any)?.razao_social ?? null
+        );
+
+        link.href = fileURL;
+        link.download = `PDFeXML-${clientName || `nfse-${nota.id}`}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(fileURL);
+    } catch (error) {
+        console.error('Erro ao baixar ZIP da NFS-e:', error);
+        msgs.current?.show({
+            severity: 'error',
+            summary: 'AtenÃ§Ã£o:',
+            detail: 'Erro ao baixar os arquivos PDF e XML da Nota Fiscal. Tente novamente em instantes.',
             life: 5000
         });
     }

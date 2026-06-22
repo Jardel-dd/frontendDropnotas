@@ -3,12 +3,12 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Skeleton } from 'primereact/skeleton';
 import { usePermissions } from '@/app/routes/permissoes';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { handleActiveOrInativeFormaPagamento, } from '../controller/controller';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
@@ -22,7 +22,10 @@ export function ListarFormaPagamento(
         setListPaginationFormaPagamento,
         setLoading,
         listarInativos,
-        tipo_forma_pagamento
+        tipo_forma_pagamento,
+        mobileLoadMoreVisible,
+        mobileLoadMoreLoading,
+        onMobileLoadMore
     }: {
         listPaginationFormaPagamento: Record<string, any>
         loading: boolean
@@ -33,6 +36,9 @@ export function ListarFormaPagamento(
         setLoading: (state: boolean) => void;
         listarInativos: boolean;
         tipo_forma_pagamento: string
+        mobileLoadMoreVisible?: boolean;
+        mobileLoadMoreLoading?: boolean;
+        onMobileLoadMore?: () => void | Promise<void>;
     }
 ) {
     const router = useRouter();
@@ -101,8 +107,11 @@ export function ListarFormaPagamento(
                                                 );
                                             },
                                         },
-                                    ]}
+                                    ]} 
                                     listarInativos={listarInativos}
+                                    mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                    mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                    onMobileLoadMore={onMobileLoadMore}
                                 />
                             </div>
                         }

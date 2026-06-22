@@ -1,8 +1,10 @@
 'use client'
 import axios from "axios";
+import { useCallback } from "react";
 import api from "@/app/services/api";
 import { FormaPagamentoEntity } from "@/app/entity/FormaPagamento";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
+import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
 
 export const listFormaPagamento = async (
     listPaginationFormaPagamento: Record<string, any>,
@@ -230,4 +232,23 @@ export const fetchFormaPagamentoByID  = async (formaPagamentoId: string) => {
         console.error("Erro ao buscar Forma dePagamento:", error);
         throw error;
     }
+};
+export const fetchFormaPagamentoMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/forma-pagamento', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<FormaPagamentoEntity>(response.data);
 };

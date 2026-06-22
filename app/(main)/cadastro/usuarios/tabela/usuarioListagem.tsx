@@ -22,7 +22,10 @@ export function ListarUserConta(
         loading,
         setLoading,
         searchTerm,
-        listarInativos
+        listarInativos,
+        mobileLoadMoreVisible,
+        mobileLoadMoreLoading,
+        onMobileLoadMore
     }: {
         listPaginationUserConta: Record<string, any>
         loading: boolean
@@ -32,6 +35,9 @@ export function ListarUserConta(
         setListPaginationUserConta: Dispatch<SetStateAction<any>>;
         setLoading: (state: boolean) => void;
         listarInativos: boolean;
+        mobileLoadMoreVisible?: boolean;
+        mobileLoadMoreLoading?: boolean;
+        onMobileLoadMore?: () => void | Promise<void>;
     }
 ) {
     const router = useRouter();
@@ -95,7 +101,10 @@ export function ListarUserConta(
                                             },
                                         },
                                     ]} 
-                                    listarInativos={listarInativos}        
+                                    listarInativos={listarInativos}
+                                    mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                    mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                    onMobileLoadMore={onMobileLoadMore}
                              />
                             </div>
                         }

@@ -18,7 +18,8 @@ export default function PessoaDropdownField({
     required = false,
     autoSelectSingle = false,
     showAddButton = false,
-    onAddClick
+    onAddClick,
+    autoLoadAndSelectSingle = true
 }: PessoaDropdownFieldProps & { required?: boolean }) {
 
     return (
@@ -46,7 +47,7 @@ export default function PessoaDropdownField({
             showTopLabel={showTopLabel}
             required={required}
             topLabel={topLabel}
-            autoLoadAndSelectSingle
+            autoLoadAndSelectSingle={autoLoadAndSelectSingle}
         />
     );
 }

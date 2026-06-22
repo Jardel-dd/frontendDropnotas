@@ -5,8 +5,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
-import { useDebouncedCallback } from 'use-debounce';
 import { useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 
 type MobileSearchPickerProps<T extends Record<string, any>> = {
     selectedItem: T | null;
@@ -29,6 +29,7 @@ type MobileSearchPickerProps<T extends Record<string, any>> = {
     hasError?: boolean;
     errorMessage?: string;
     rows?: number;
+    loadMoreRows?: number;
     minSearchChars?: number;
     loadingMessage?: string;
     emptyMessage?: string;
@@ -38,6 +39,7 @@ type MobileSearchPickerProps<T extends Record<string, any>> = {
     onEditClick?: (item: T) => void;
     dialogPosition?: string;
     getOptionSubtitle?: (item: T) => string | null | undefined;
+    autoLoadAndSelectSingle?: boolean;
 };
 
 const normalize = (v: any) => (v === null || v === undefined ? null : String(v));
@@ -71,6 +73,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
     hasError = false,
     errorMessage,
     rows = 8,
+    loadMoreRows = rows,
     minSearchChars = 2,
     loadingMessage = 'Carregando itens...',
     emptyMessage = 'Nenhum item encontrado.',
@@ -79,7 +82,8 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
     onAddClick,
     onEditClick,
     dialogPosition,
-    getOptionSubtitle
+    getOptionSubtitle,
+    autoLoadAndSelectSingle = false
 }: MobileSearchPickerProps<T>) {
     const isMobile = useIsMobile();
     const [visible, setVisible] = useState(false);
@@ -94,11 +98,79 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
     const [showLoadMoreButton, setShowLoadMoreButton] = useState(false);
     const resultsRef = useRef<HTMLDivElement | null>(null);
     const requestSequenceRef = useRef(0);
+    const fetchAllItemsRef = useRef(fetchAllItems);
+    const onItemChangeRef = useRef(onItemChange);
+    const selectedItemRef = useRef<T | null>(selectedItem);
+    const onEditClickRef = useRef(onEditClick);
     const selectedValue = selectedItem && optionValue ? normalize(selectedItem[optionValue]) : null;
     const isPaginatedMode = Boolean(fetchItemsPage);
-    const debouncedSearch = useDebouncedCallback((value: string) => {
-        setAppliedSearchTerm(value);
-    }, 300);
+    const pageSize = Math.max(rows, loadMoreRows);
+    const [, setDebouncedSearchState] = useState({ value: '' });
+    const { debouncedSearch, searchNow } = useGenericSearch({
+        setter: setDebouncedSearchState,
+        field: 'value',
+        onSearch: (value) => {
+            const normalizedValue = value.trim();
+
+            if (normalizedValue.length === 0) {
+                setAppliedSearchTerm('');
+                return;
+            }
+
+            if (normalizedValue.length < minSearchChars) {
+                return;
+            }
+
+            setAppliedSearchTerm(value);
+        }
+    });
+
+    useEffect(() => {
+        fetchAllItemsRef.current = fetchAllItems;
+    }, [fetchAllItems]);
+
+    useEffect(() => {
+        onItemChangeRef.current = onItemChange;
+    }, [onItemChange]);
+
+    useEffect(() => {
+        selectedItemRef.current = selectedItem;
+    }, [selectedItem]);
+
+    useEffect(() => {
+        onEditClickRef.current = onEditClick;
+    }, [onEditClick]);
+
+    useEffect(() => {
+        if (!autoLoadAndSelectSingle || selectedItem) {
+            return;
+        }
+
+        let isMounted = true;
+
+        const loadSingleItemIfExists = async () => {
+            try {
+                const data = await fetchAllItemsRef.current();
+
+                if (!isMounted || !Array.isArray(data)) {
+                    return;
+                }
+
+                if (data.length === 1) {
+                    onItemChangeRef.current(data[0]);
+                    setOptions(data);
+                }
+            } catch (error) {
+                console.error('Erro ao verificar selecao automatica no seletor mobile:', error);
+            }
+        };
+
+        void loadSingleItemIfExists();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [autoLoadAndSelectSingle, selectedItem]);
 
     useEffect(() => {
         if (!visible) {
@@ -121,7 +193,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
                     const results = await fetchItemsPage({
                         searchTerm: effectiveSearchTerm,
                         page: 0,
-                        size: rows
+                        size: pageSize
                     });
 
                     if (requestId !== requestSequenceRef.current) {
@@ -129,6 +201,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
                     }
 
                     setOptions(Array.isArray(results.items) ? results.items : []);
+                    setVisibleCount(rows);
                     setCurrentPage(0);
                     setHasMore(Boolean(results.hasMore));
                 } else {
@@ -167,18 +240,18 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
         };
 
         void loadOptions();
-    }, [appliedSearchTerm, fetchAllItems, fetchFilteredItems, fetchItemsPage, isPaginatedMode, minSearchChars, rows, visible]);
+    }, [appliedSearchTerm, fetchAllItems, fetchFilteredItems, fetchItemsPage, isPaginatedMode, minSearchChars, pageSize, rows, visible]);
 
     const visibleOptions = useMemo(
-        () => (isPaginatedMode ? options : options.slice(0, visibleCount)),
-        [isPaginatedMode, options, visibleCount]
+        () => options.slice(0, visibleCount),
+        [options, visibleCount]
     );
-    const hasAdditionalResults = isPaginatedMode ? hasMore : options.length > visibleCount;
+    const hasAdditionalResults = isPaginatedMode ? options.length > visibleCount || hasMore : options.length > visibleCount;
 
     const handleOpen = () => {
         debouncedSearch.cancel();
         setSearchTerm('');
-        setAppliedSearchTerm('');
+        searchNow('');
         setVisibleCount(rows);
         setCurrentPage(0);
         setHasMore(false);
@@ -192,7 +265,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
         debouncedSearch.cancel();
         setVisible(false);
         setSearchTerm('');
-        setAppliedSearchTerm('');
+        searchNow('');
         setVisibleCount(rows);
         setCurrentPage(0);
         setHasMore(false);
@@ -235,6 +308,14 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
         }
 
         if (isPaginatedMode && fetchItemsPage) {
+            const nextVisibleCount = visibleCount + loadMoreRows;
+
+            setVisibleCount(nextVisibleCount);
+
+            if (options.length >= nextVisibleCount || !hasMore) {
+                return;
+            }
+
             const requestId = ++requestSequenceRef.current;
 
             setLoadingMore(true);
@@ -242,7 +323,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
                 const results = await fetchItemsPage({
                     searchTerm: appliedSearchTerm.trim().length >= minSearchChars ? appliedSearchTerm.trim() : '',
                     page: currentPage + 1,
-                    size: rows
+                    size: pageSize
                 });
 
                 if (requestId !== requestSequenceRef.current) {
@@ -274,7 +355,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
             return;
         }
 
-        setVisibleCount((current) => current + rows);
+        setVisibleCount((current) => current + loadMoreRows);
     };
 
     useEffect(() => {
@@ -291,7 +372,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
                 </div>
                 <div className={`mobile-search-picker-trigger ${hasError ? 'mobile-search-picker-trigger--error' : ''}`}>
                     <button type="button" className="mobile-search-picker-trigger-button" onClick={handleOpen}>
-                        <span className={`mobile-search-picker-trigger-text${selectedItem ? '' : ' mobile-search-picker-trigger-text--placeholder'}`}>
+                        <span  className={`mobile-search-picker-trigger-text${selectedItem ? '' : ' mobile-search-picker-trigger-text--placeholder'}`}>
                             {selectedItem ? String(selectedItem[optionLabel] ?? placeholder) : placeholder}
                         </span>
                         <i className="pi pi-search" />
@@ -302,7 +383,11 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
                                 type="button"
                                 icon="pi pi-plus"
                                 aria-label="Adicionar"
-                                onClick={onAddClick}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    onAddClick();
+                                }}
                                 style={{ height: '20px', width: '30px', boxShadow: 'none' }}
                             />
                         )}
@@ -314,7 +399,15 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
                                 severity="info"
                                 outlined
                                 disabled={!selectedItem}
-                                onClick={() => selectedItem && onEditClick(selectedItem)}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    const currentSelectedItem = selectedItemRef.current;
+
+                                    if (currentSelectedItem) {
+                                        onEditClickRef.current?.(currentSelectedItem);
+                                    }
+                                }}
                                 style={{ height: '20px', width: '30px', boxShadow: 'none' }}
                             />
                         )}
@@ -346,11 +439,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
                                 setSearchTerm(nextValue);
                                 if (normalizedValue.length === 0) {
                                     debouncedSearch.cancel();
-                                    setAppliedSearchTerm('');
-                                    return;
-                                }
-                                if (normalizedValue.length < minSearchChars) {
-                                    debouncedSearch.cancel();
+                                    searchNow('');
                                     return;
                                 }
 
@@ -379,7 +468,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
                                         type="button"
                                         className={`mobile-search-picker-option${isActive ? ' mobile-search-picker-option--active' : ''}`}
                                         onClick={() => {
-                                            onItemChange(option);
+                                            onItemChangeRef.current(option);
                                             handleHide();
                                         }}
                                     >

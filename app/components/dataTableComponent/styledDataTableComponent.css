@@ -16,6 +16,36 @@
     white-space: nowrap;
 }
 
+.datatable-mobile-load-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.75rem;
+    flex-shrink: 0;
+}
+
+.datatable-mobile-load-more-button {
+    min-width: 12rem;
+}
+
+.datatable-mobile-fixed-layout {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.datatable-mobile-fixed-header.p-datatable {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.datatable-mobile-fixed-header .p-datatable-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
 @media (max-width: 768px) {
     .table-cell-truncate {
         max-width: min(44vw, 220px);

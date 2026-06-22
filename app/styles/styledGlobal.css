@@ -415,6 +415,8 @@ height: 66px;
 }
 
 .scrollable-container {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0.5rem;

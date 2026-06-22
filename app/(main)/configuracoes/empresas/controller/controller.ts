@@ -6,6 +6,8 @@ import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/l
 import { getToken } from '@/app/services/token';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import type { PreloadedEmpresaData } from '../types/empresa';
+import { useCallback } from 'react';
+import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
 
 const BASE64_IMAGE_DATA_URL_REGEX = /^data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/i;
 const IMAGE_URL_REGEX = /^(https?:\/\/|blob:|\/)/i;
@@ -546,11 +548,31 @@ export const fetchCompanyByID = async (empresaId: string) => {
             },
         });
         const data = response.data;
+        const usuariosAcesso = Array.isArray(data?.usuarios_acesso) ? data.usuarios_acesso : [];
+        const selectedUserConta = usuariosAcesso
+            .filter((usuario: any) => usuario?.id)
+            .map(
+                (usuario: any) =>
+                    new UsuarioContaEntity({
+                        id: usuario.id,
+                        nome: usuario.nome ?? '',
+                        email: usuario.email ?? '',
+                        senha: '',
+                        ativo: usuario.ativo,
+                        foto_perfil: usuario.foto_perfil,
+                        id_empresas_acesso: usuario.id_empresas_acesso,
+                        is_usuario_principal: usuario.is_usuario_principal,
+                        perfil_usuario: usuario.perfil_usuario,
+                        tema_componente: usuario.tema_componente,
+                        esquema_cor: usuario.esquema_cor,
+                    })
+            );
+
         console.log("empresa", data)
         return {
             empresa: data,
             userConta: [],
-            selectedUserConta: [],
+            selectedUserConta,
         };
     } catch (error) {
         console.error("Erro ao buscar empresa:", error);
@@ -611,4 +633,23 @@ export const fetchAllCompany = async (): Promise<CompanyEntity[]> => {
         console.error("Erro ao buscar todas as vendedor:", error);
         return [];
     }
+};
+export const fetchCompanyMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/empresa', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<CompanyEntity>(response.data);
 };

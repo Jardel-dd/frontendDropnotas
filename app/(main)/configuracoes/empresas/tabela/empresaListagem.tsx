@@ -2,18 +2,18 @@
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
+import { useOnboardingStyles } from './style';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { handleActiveOrInativeEmpresa } from '../controller/controller';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
-import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
-import { useOnboardingStyles } from './style';
 
 export function ListarEmpresas({
     listPaginationEmpresa,
@@ -23,7 +23,10 @@ export function ListarEmpresas({
     searchTerm,
     listarInativos,
     showOnboardingHint = false,
-    onboardingCnpj = ''
+    onboardingCnpj = '',
+    mobileLoadMoreVisible,
+    mobileLoadMoreLoading,
+    onMobileLoadMore
 }: {
     listPaginationEmpresa: Record<string, any>;
     loading: boolean;
@@ -37,6 +40,9 @@ export function ListarEmpresas({
     listarInativos: boolean;
     showOnboardingHint?: boolean;
     onboardingCnpj?: string;
+    mobileLoadMoreVisible?: boolean;
+    mobileLoadMoreLoading?: boolean;
+    onMobileLoadMore?: () => void | Promise<void>;
 }) {
     const {
    onboardingWrapperStyle,
@@ -212,6 +218,9 @@ export function ListarEmpresas({
                                     }
                                 ]}
                                 listarInativos={listarInativos}
+                                mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                onMobileLoadMore={onMobileLoadMore}
                             />
                         </div>
                     )}
@@ -275,4 +284,3 @@ export function ListarEmpresas({
     );
 }
 export default ListarEmpresas;
-

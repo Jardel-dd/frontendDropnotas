@@ -1,16 +1,18 @@
 import axios from 'axios';
+import { useCallback } from 'react';
 import api from '@/app/services/api';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
+import type { PreloadedServicoData } from '../types/servico';
 import { TableService } from '@/app/entity/TableServiceEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
-import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
+import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
 import { fetchAllTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
-import { fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
 import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
+import { fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
 import { fetchFilteredClassificacaoTributaria, findClassificacaoTributariaByCodigo } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
-import type { PreloadedServicoData } from '../types/servico';
 
 const normalizeEmptyValuesToNull = <T,>(value: T): T => {
     if (Array.isArray(value)) {
@@ -32,7 +34,6 @@ const normalizeEmptyValuesToNull = <T,>(value: T): T => {
 
     return value;
 };
-
 export const listServico = async (
     listPaginationServicos: Record<string, any>,
     listarInativos: boolean,
@@ -174,7 +175,7 @@ export const updateServico = async (
             ...service,
             aliquota_deducoes: service.aliquota_deducoes ?? 0,
         });
-        console.log('[Cadastro/Servicos] Payload enviado ao atualizar servico:', dataServiceUpdate);
+        console.log('Payload enviado ao atualizar servico:', dataServiceUpdate);
         const response = await api.put(`/servico`, dataServiceUpdate);
         const responseData = response?.data;
         const responseServico =
@@ -354,4 +355,23 @@ export const fetchAllService = async (): Promise<ServiceEntity[]> => {
         console.error("Erro ao buscar todas as vendedor:", error);
         return [];
     }
+};
+export const fetchServiceMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/servico', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<ServiceEntity>(response.data);
 };

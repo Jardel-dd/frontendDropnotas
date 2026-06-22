@@ -242,12 +242,11 @@
 
 .nota-servico-return-message-row {
     display: flex;
-    height: 38px;
-    margin-top: 25px;
+    align-items: flex-start;
 }
 
 .nota-servico-return-message {
-  height: 38px;
+  width: 100%;
 }
 
 .nota-servico-preparar-dialog {
@@ -296,7 +295,63 @@
   white-space: nowrap;
 }
 
+.nota-servico-authorized-dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.nota-servico-authorized-dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.nota-servico-authorized-dialog-button {
+  box-shadow: none !important;
+}
+
 @media (max-width: 768px) {
+  .nota-servico-authorized-dialog-footer {
+    gap: 0.5rem;
+  }
+
+  .nota-servico-authorized-dialog-actions,
+  .nota-servico-authorized-dialog-footer {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .nota-servico-authorized-dialog-actions {
+    gap: 0.5rem;
+    flex: 1 1 auto;
+  }
+
+  .nota-servico-authorized-dialog-footer > .p-button,
+  .nota-servico-authorized-dialog-actions > .p-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .nota-servico-authorized-dialog-button {
+    height: 2.2rem !important;
+    min-width: 0 !important;
+    padding: 0.45rem 0.5rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .nota-servico-authorized-dialog-button .p-button-icon {
+    font-size: 0.78rem;
+  }
+
+  .nota-servico-authorized-dialog-button .p-button-label {
+    white-space: nowrap;
+  }
+
   .nota-servico-preparar-dialog {
     width: 95vw !important;
     max-width: 95vw !important;

@@ -7,31 +7,23 @@ import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import {contribuinteOptions, DropDownTipoPessoa, OptionsTipoContrato,regimeTributarioPessoaOptions} from '@/app/shared/optionsDropDown/options';
-import ContratoDropdownField from '../../../contrato/dropDown/contrato';
 export function PessoaFields({
     pessoa,
     errors,
     selectedContato,
-    selectedContrato,
     selectedCNAE,
     loadingCnpj,
     hasFocused,
-    reloadKeyContrato,
-    onAddContato,
     onFocusFirstField,
     onChange,
     onDropdownChange,
     onContatoChange,
-    onAddContrato,
-    onEditContrato,
-    onContratoChange,
     onCNAEChange,
     onSearchCnpj,
     onValidateCnpj,
     fetchAllCnae,
     fetchFilteredCnae
 }: PessoaFieldsProps) {
-    const reloadKeyCNAE = 0;
     return (
         <div className="grid formgrid">
             <div className="col-12 lg:col-3">
@@ -330,7 +322,6 @@ export function PessoaFields({
                 <DropdownSearch<TableCNAEEntity>
                     id="cnae_fiscal"
                     selectedItem={selectedCNAE}
-                    key={reloadKeyCNAE}
                     onItemChange={onCNAEChange}
                     fetchAllItems={fetchAllCnae}
                     fetchFilteredItems={fetchFilteredCnae}
@@ -344,7 +335,7 @@ export function PessoaFields({
                     required={pessoa.tipo_pessoa !== 'PESSOA_FISICA'}
                 />
             </div>
-            <div className="col-12 lg:col-3 ">
+            <div className="col-12 lg:col-4 ">
                 <Dropdown
                     id="selectedContato"
                     value={selectedContato}
@@ -361,21 +352,7 @@ export function PessoaFields({
                     topLabel="Tipo de contato:"
                 />
             </div>
-             <div className="col-12 lg:col-3">
-                                     <ContratoDropdownField
-                                            selectedContrato={selectedContrato}
-                                            selectedContratoId={pessoa.id_contrato ?? null}
-                                            onContratoChange={onContratoChange}
-                                            reloadKey={reloadKeyContrato}
-                                            hasError={!!errors.selectedContrato}
-                                            errorMessage={errors.selectedContrato}
-                                            showAddButton
-                                            onAddClick={onAddContrato}
-                                            onEditClick={onEditContrato}
-                                            autoSelectSingle={false}
-                                        />
-                                    </div>
-            <div className="col-12 lg:col-6">
+            <div className="col-12 lg:col-8">
                 <Input
                     value={pessoa?.email || ''}
                     onChange={onChange}

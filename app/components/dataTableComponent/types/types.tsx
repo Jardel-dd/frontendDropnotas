@@ -31,6 +31,11 @@ export interface DataTableComponentProps<T> {
     selectionMode?: 'multiple' | 'checkbox';
     rowClick?: boolean;
     extraActionsTemplate?: (rowData: T) => React.ReactNode;
+    mobileLoadMoreVisible?: boolean;
+    mobileLoadMoreLoading?: boolean;
+    onMobileLoadMore?: () => void | Promise<void>;
+    mobileLoadMoreLabel?: string;
+    mobileBodyScroll?: boolean;
 }
 export interface Identifiable {
     id: number | string;

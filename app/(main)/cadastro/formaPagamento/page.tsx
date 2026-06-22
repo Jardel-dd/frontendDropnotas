@@ -3,7 +3,6 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import { CheckboxChangeEvent } from 'primereact/checkbox';
@@ -13,6 +12,7 @@ import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import ListarFormaPagamento from './tabela/formaPagamentoListagem';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { tipo_forma_pagamento } from '@/app/shared/optionsDropDown/options';
@@ -21,7 +21,6 @@ import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPaga
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { ativarFormaPagamento, deletarFormaPagamento, listFormaPagamento } from './controller/controller';
-
 const CategoriaContrato: React.FC = () => {
     const router = useRouter();
     const isMobile = useIsMobile();
@@ -317,6 +316,5 @@ const CategoriaContrato: React.FC = () => {
         </div>
     );
 };
-
 export default CategoriaContrato;
 
