@@ -3,33 +3,31 @@ import { Toast } from 'primereact/toast';
 import { EmpresaFields } from './empresa';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { handleSearchCep } from '@/app/components/seachs/searchCep/controller';
 import { handleSearchCNPJ } from '@/app/components/seachs/searchCnpj/controller';
+import { createEmptyUserConta } from '@/app/(main)/cadastro/usuarios/types/usuario';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import type {  EmpresaFormProps, EmpresaFormRef, FormEmpresaCreatedProps } from '../types/empresa';
 import { validateFieldsEmpresas } from '@/app/(main)/configuracoes/empresas/controller/validation';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
+import { FormCreatedUsuario, UsuarioFormRef } from '@/app/(main)/cadastro/usuarios/form/controller';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyFormDataByID, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
-import { FormCreatedUsuario, UsuarioFormRef } from '@/app/(main)/cadastro/usuarios/form/controller';
-import { createEmptyUserConta } from '@/app/(main)/cadastro/usuarios/types/usuario';
-
 export type { EmpresaFieldsProps, EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
 
 const TELEFONE_OBRIGATORIO = true;
-
 const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
     (
         {

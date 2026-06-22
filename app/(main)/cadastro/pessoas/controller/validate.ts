@@ -1,6 +1,4 @@
 import { PessoaEntity } from "@/app/entity/PessoaEntity";
-import { VendedorEntity } from "@/app/entity/VendedorEntity";
-import { ContratoEntity } from "@/app/entity/ContratoEntity";
 
 type ErrorsMap = Record<string, string>;
 
@@ -43,9 +41,7 @@ const validateEnderecoPessoa = (pessoa: PessoaEntity): ErrorsMap => {
     return {};
 };
 const validateCamposComunsPessoa = (
-    pessoa: PessoaEntity,
-    selectedVendedor: VendedorEntity | null,
-    selectedContrato: ContratoEntity | null,
+    pessoa: PessoaEntity
 ): ErrorsMap => {
     if (pessoa.tipo_pessoa !== 'PESSOA_FISICA' && !pessoa.codigo_regime_tributario) {
         return { selectedRegime: 'Selecione um Regime Tributário.' };
@@ -70,9 +66,7 @@ const validateCamposComunsPessoa = (
 export const validateFieldsPessoa = (
     pessoa: PessoaEntity,
     setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
-    msgs: React.RefObject<any>,
-    selectedVendedor: VendedorEntity | null,
-    selectedContrato: ContratoEntity | null,
+    msgs: React.RefObject<any>
 ) => {
     let newErrors: ErrorsMap = {};
     msgs.current?.clear();
@@ -85,7 +79,7 @@ export const validateFieldsPessoa = (
         } else if (!pessoa.nome_fantasia || pessoa.nome_fantasia.trim().length < 2) {
             newErrors = { nome_fantasia: 'Campo deve ter no minimo 2 caracteres.' };
         } else {
-            newErrors = validateCamposComunsPessoa(pessoa, selectedVendedor, selectedContrato);
+            newErrors = validateCamposComunsPessoa(pessoa);
         }
     } else if (pessoa.tipo_pessoa === 'PESSOA_FISICA') {
         if (!pessoa.cpf || pessoa.cpf.replace(/\D/g, '').length < 11) {
@@ -95,7 +89,7 @@ export const validateFieldsPessoa = (
         } else if (!pessoa.razao_social || pessoa.razao_social.trim().length < 2) {
             newErrors = { razao_social: 'Campo deve ter no minimo 2 caracteres.' };
         } else {
-            newErrors = validateCamposComunsPessoa(pessoa, selectedVendedor, selectedContrato);
+            newErrors = validateCamposComunsPessoa(pessoa);
         }
     } else if (pessoa.tipo_pessoa === 'ESTRANGEIRO_NO_BRASIL') {
         if (!pessoa.documento_estrangeiro || pessoa.documento_estrangeiro.trim().length < 9) {

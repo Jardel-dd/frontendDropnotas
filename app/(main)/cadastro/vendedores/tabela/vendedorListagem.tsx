@@ -22,7 +22,9 @@ export function ListarVendedores(
         setLoading,
         searchTerm,
         listarInativos,
-
+        mobileLoadMoreVisible,
+        mobileLoadMoreLoading,
+        onMobileLoadMore
     }: {
         listPaginationVendedores: Record<string, any>
         loading: boolean
@@ -32,6 +34,9 @@ export function ListarVendedores(
         setListPaginationVendedores: Dispatch<SetStateAction<any>>;
         setLoading: (state: boolean) => void;
         listarInativos: boolean;
+        mobileLoadMoreVisible?: boolean;
+        mobileLoadMoreLoading?: boolean;
+        onMobileLoadMore?: () => void | Promise<void>;
     }
 ) {
     const router = useRouter();
@@ -95,8 +100,11 @@ export function ListarVendedores(
                                                 );
                                             },
                                         },
-                                    ]}
+                                    ]} 
                                     listarInativos={listarInativos}
+                                    mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                    mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                    onMobileLoadMore={onMobileLoadMore}
                                 />
                             </div>
                         }

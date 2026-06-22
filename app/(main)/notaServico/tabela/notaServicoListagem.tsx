@@ -15,6 +15,7 @@ import { Dispatch, SetStateAction, useContext, useRef } from 'react';
 import { CancelarNfs } from '@/app/components/dataTableComponent/DataTableComponent';
 import {
     DataTableSelectable,
+    downloadArquivosButton,
     downloadPdfButton,
     downloadXmlButton,
     visualiarButton
@@ -150,6 +151,7 @@ export function ListarNotaServico({
                 {visualiarButton(rowData, msgs)}
                 {downloadXmlButton(rowData, msgs)}
                 {downloadPdfButton(rowData, msgs)}
+                {downloadArquivosButton(rowData, msgs)}
                 {canCancelNota && <CancelarNfs nota={rowData} msgs={msgs} />}
             </>
         );

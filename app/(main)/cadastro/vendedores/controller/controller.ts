@@ -1,8 +1,10 @@
 'use client'
 import axios from "axios";
+import { useCallback } from "react";
 import api from "@/app/services/api";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
+import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
 
 export const listVendedor = async (
     listPaginationVendedoresId: Record<string, any>,
@@ -263,4 +265,23 @@ export const listTheVendedor = async () => {
         console.error("Erro ao buscar Vendedor contrato:", error);
         return [];
     }
+};
+export const fetchVendedorMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/vendedor', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<VendedorEntity>(response.data);
 };

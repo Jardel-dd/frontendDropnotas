@@ -4,9 +4,9 @@ import '@/app/styles/styledGlobal.css';
 import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';
 import { useSearchParams } from 'next/navigation';
-import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { ServiceFormRef } from '../types/servico';
 import { FormCreatedServico } from '../form/controller';
+import { ServiceEntity } from '@/app/entity/ServiceEntity';
 
 export default function CriarServicos() {
     const searchParams = useSearchParams();

@@ -7,7 +7,7 @@ import { Checkbox } from "primereact/checkbox";
 import { NfsEntity } from "@/app/entity/NfsEntity";
 import { DataTable, DataTableRowToggleEvent } from "primereact/datatable";
 import { useIsDesktop, useIsMobile } from "../responsiveCelular/responsive";
-import { downloadPdfNota, downloadXmlNota, visualizarPdfNota } from "@/app/(main)/notaServico/controller/controller";
+import { downloadArquivosNota, downloadPdfNota, downloadXmlNota, visualizarPdfNota } from "@/app/(main)/notaServico/controller/controller";
 
 export interface GenericColumn<T> {
     field: keyof T;
@@ -263,6 +263,33 @@ export const visualiarButton = (
 
             }}
             onClick={() => visualizarPdfNota(nota, msgs)}
+        />
+    );
+};
+export const downloadArquivosButton = (
+    nota: NfsEntity,
+    msgs: React.RefObject<Messages | null>,
+    options?: {
+        label?: string;
+        className?: string;
+        style?: React.CSSProperties;
+    }
+) => {
+    return (
+        <Button
+            icon="pi pi-download"
+            label={options?.label}
+            tooltip="Baixar PDF e XML"
+            className={options?.className ?? "p-button-text bottom-All-plus-datatableDetails"}
+            style={{
+                fontSize: '1rem',
+                width: '2rem',
+                height: '2rem',
+                color: '#2E7D32',
+                boxShadow: "none",
+                ...options?.style
+            }}
+            onClick={() => downloadArquivosNota(nota, msgs)}
         />
     );
 };

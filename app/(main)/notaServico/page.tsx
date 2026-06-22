@@ -9,7 +9,7 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from '@/app/components/messages/GlobalMessages';
-import { createEmptyPessoa } from './types/notaServico';
+import { buildEmptyNotaServicoPagination, createEmptyPessoa, formatAuthorizedNotaDateTime, formatAuthorizedNotaValue } from './types/notaServico';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import ListarNotaServico from './tabela/notaServicoListagem';
@@ -45,71 +45,20 @@ import { createEmptyEmpresa, createEmptyServico } from '../ordemServicos/types/o
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { downloadPdfButton, downloadXmlButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { consumeNotaServicoFeedback, exportarPdfNotasServico, listNotaServico } from './controller/controller';
+import { consumeNotaServicoFeedback, downloadArquivosNota, exportarPdfNotasServico, listNotaServico } from './controller/controller';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
-import { fetchFilteredPessoas, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { fetchFilteredPessoas, fetchPessoaMobilePage, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { fetchFilteredService, fetchServiceFormDataByID, fetchServicesByID, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
 import MobileSearchPicker from '@/app/shared/mobile/MobileSearchPicker';
+import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
 
-const buildEmptyNotaServicoPagination = (pageSize: number, pageNumber = 0) => ({
-    content: [],
-    pageable: {
-        pageNumber,
-        pageSize,
-        sort: {
-            empty: true,
-            sorted: false,
-            unsorted: true
-        },
-        offset: pageNumber * pageSize,
-        paged: true,
-        unpaged: false
-    },
-    totalPages: 0,
-    totalElements: 0,
-    last: true,
-    size: pageSize,
-    number: pageNumber,
-    sort: {
-        empty: true,
-        sorted: false,
-        unsorted: true
-    },
-    numberOfElements: 0,
-    first: pageNumber === 0,
-    empty: true
-});
-const buildMobilePickerPageResult = <T,>(data: any) => {
-    const items = Array.isArray(data?.content) ? (data.content as T[]) : Array.isArray(data) ? (data as T[]) : [];
-    const currentPage = Number(data?.number ?? data?.pageable?.pageNumber ?? 0);
-    const totalPages = Number(data?.totalPages ?? 0);
-    const hasMoreFromLastFlag = typeof data?.last === 'boolean' ? !data.last : null;
-    const hasMoreFromTotalPages = totalPages > currentPage + 1;
 
-    return {
-        items,
-        hasMore: hasMoreFromLastFlag ?? hasMoreFromTotalPages
-    };
-};
-const formatAuthorizedNotaDateTime = (value?: string) => {
-    if (!value) {
-        return '-';
-    }
-
-    const parsedDate = dayjs(value);
-
-    return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY [às] HH:mm') : '-';
-};
-const formatAuthorizedNotaValue = (value?: string | number) => {
-    const parsedValue = typeof value === 'string' ? Number(value.includes(',') ? value.replace(/\./g, '').replace(',', '.') : value) : Number(value);
-
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(Number.isFinite(parsedValue) ? parsedValue : 0);
-};
-const getAuthorizedNotaEmail = (nota: Partial<NfsEntity> | null) => nota?.tomador?.contato?.email || (nota?.tomador as any)?.email || '-';
+const getAuthorizedNotaEmail = (nota: Partial<NfsEntity> | null) =>
+    nota?.tomador?.contato?.email ||
+    (nota?.tomador as any)?.email ||
+    (nota as any)?.cliente?.email ||
+    '-';
 const NOTA_SERVICO_MOBILE_CARD_FALLBACK_HEIGHT = 224;
 const NOTA_SERVICO_MOBILE_CARD_GAP = 12;
 
@@ -367,17 +316,7 @@ const NotaServico: React.FC = () => {
 
         return buildMobilePickerPageResult<CompanyEntity>(response.data);
     }, []);
-    const fetchPessoaMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
-        const response = await api.get('/pessoa', {
-            params: {
-                page,
-                size,
-                termo: termo || undefined
-            }
-        });
-
-        return buildMobilePickerPageResult<PessoaEntity>(response.data);
-    }, []);
+ 
     const fetchServicoMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
         const response = await api.get('/servico', {
             params: {
@@ -401,6 +340,10 @@ const NotaServico: React.FC = () => {
             })
         );
         setErrors({});
+    };
+    const handleClosePreparaNfsDialog = () => {
+        setShowDialogPreparaNfs(false);
+        setIsMobileKeyboardOpen(false);
     };
     const handleNavigate = () => {
         if (!canCreateNotaServico) {
@@ -560,7 +503,8 @@ const NotaServico: React.FC = () => {
             const pessoaPrecarregada = await fetchPessoasById(pessoaId);
             setPreloadedPessoa({
                 dataPessoa: pessoaPrecarregada.dataPessoa,
-                selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null
+                selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null,
+                selectedContrato: pessoaPrecarregada.selectedContrato ?? null
             });
             setEditingPessoaId(pessoaId);
             setPessoaDialogKey((current) => current + 1);
@@ -937,8 +881,18 @@ const NotaServico: React.FC = () => {
         return <LoadingScreen loadingText={'Preparando NFS-E...'} />;
     }
     const disableConfirmarPrepararNfs = stateDisableBtnPrepararNfse || Object.keys(errors).length > 0 || !selectedEmpresaDialog || !selectedPessoaDialog || !selectedServicoDialog;
-    const authorizedNotaEmpresa = authorizedNota?.razao_social_empresa || authorizedNota?.prestador?.razao_social || '-';
-    const authorizedNotaCliente = authorizedNota?.razao_social_cliente || authorizedNota?.tomador?.razao_social || '-';
+    const authorizedNotaEmpresa =
+        authorizedNota?.razao_social_empresa ||
+        (authorizedNota as any)?.empresa?.razao_social ||
+        (authorizedNota as any)?.empresa?.nome_fantasia ||
+        authorizedNota?.prestador?.razao_social ||
+        '-';
+    const authorizedNotaCliente =
+        authorizedNota?.razao_social_cliente ||
+        (authorizedNota as any)?.cliente?.razao_social ||
+        (authorizedNota as any)?.cliente?.nome_fantasia ||
+        authorizedNota?.tomador?.razao_social ||
+        '-';
     const canDownloadAuthorizedNota = Boolean(authorizedNota?.id);
     return (
         <div className="w-full">
@@ -1275,13 +1229,13 @@ const NotaServico: React.FC = () => {
                     breakpoints={{ '960px': '92vw' }}
                     style={{ width: isMobile ? '95vw' : '40rem' }}
                     footer={
-                        <div className="flex justify-content-between align-items-center gap-3 flex-wrap w-full">
-                            <div className="flex align-items-center gap-3 flex-wrap">
+                        <div className="nota-servico-authorized-dialog-footer">
+                            <div className="nota-servico-authorized-dialog-actions">
                                 {canDownloadAuthorizedNota ? (
                                     <>
                                         {downloadXmlButton(authorizedNota as NfsEntity, msgs, {
-                                            label: 'Baixar XML',
-                                            className: 'p-button-outlined p-button-info',
+                                            label: 'XML',
+                                            className: 'p-button-outlined p-button-info nota-servico-authorized-dialog-button',
                                             style: {
                                                 width: 'auto',
                                                 height: 'auto',
@@ -1289,14 +1243,25 @@ const NotaServico: React.FC = () => {
                                             }
                                         })}
                                         {downloadPdfButton(authorizedNota as NfsEntity, msgs, {
-                                            label: 'Baixar PDF',
-                                            className: 'p-button-outlined',
+                                            label: 'PDF',
+                                            className: 'p-button-outlined nota-servico-authorized-dialog-button',
                                             style: {
                                                 width: 'auto',
                                                 height: 'auto',
                                                 boxShadow: 'none'
                                             }
                                         })}
+                                        <Button
+                                            icon="pi pi-download"
+                                            label="PDF e XML"
+                                            className="p-button-outlined p-button-success nota-servico-authorized-dialog-button"
+                                            style={{
+                                                width: 'auto',
+                                                height: 'auto',
+                                                boxShadow: 'none'
+                                            }}
+                                            onClick={() => downloadArquivosNota(authorizedNota as NfsEntity, msgs)}
+                                        />
                                     </>
                                 ) : (
                                     <span className="text-sm text-600">Arquivos ainda indisponíveis para download.</span>
@@ -1306,6 +1271,7 @@ const NotaServico: React.FC = () => {
                                 label="Fechar"
                                 outlined
                                 severity="secondary"
+                                className="nota-servico-authorized-dialog-button"
                                 style={{ boxShadow: 'none' }}
                                 onClick={() => {
                                     setShowAuthorizedNotaDialog(false);
@@ -1367,19 +1333,13 @@ const NotaServico: React.FC = () => {
                     style={{ width: isMobile ? '95vw' : '500px', maxWidth: '95vw' }}
                     position={isMobileKeyboardOpen ? 'top' : undefined}
                     draggable={false}
-                    onHide={() => {
-                        clearPreparaNfsDialog();
-                        setShowDialogPreparaNfs(false);
-                    }}
+                    onHide={handleClosePreparaNfsDialog}
                     footer={
                         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0.5rem' }}>
                             <Button label="Preparar" style={{ boxShadow: 'none' }} disabled={disableConfirmarPrepararNfs} onClick={handleConfirmPreparaNfs} />
                             <Button
                                 label="Cancelar"
-                                onClick={() => {
-                                    clearPreparaNfsDialog();
-                                    setShowDialogPreparaNfs(false);
-                                }}
+                                onClick={handleClosePreparaNfsDialog}
                                 outlined
                                 severity="secondary"
                                 style={{ boxShadow: 'none' }}
@@ -1401,6 +1361,7 @@ const NotaServico: React.FC = () => {
                                         onEditClick={openEditEmpresaDialog}
                                         hasError={!!errors.selectedEmpresa}
                                         errorMessage={errors.selectedEmpresa}
+                                        autoLoadAndSelectSingle={showDialogPreparaNfs}
                                     />
                                 </div>
                                 <div className="col-12 lg:col-12">
@@ -1414,6 +1375,7 @@ const NotaServico: React.FC = () => {
                                         onEditClick={openEditPessoaDialog}
                                         hasError={!!errors.selectedCliente}
                                         errorMessage={errors.selectedCliente}
+                                        autoLoadAndSelectSingle={showDialogPreparaNfs}
                                     />
                                 </div>
                                 <div className="col-12 lg:col-12">
@@ -1427,6 +1389,7 @@ const NotaServico: React.FC = () => {
                                         onEditClick={openEditServicoDialog}
                                         hasError={!!errors.selectedServico}
                                         errorMessage={errors.selectedServico}
+                                        autoLoadAndSelectSingle={showDialogPreparaNfs}
                                     />
                                 </div>
                             </>
@@ -1442,6 +1405,7 @@ const NotaServico: React.FC = () => {
                                         fetchItemsPage={fetchEmpresaMobilePage}
                                         optionValue="id"
                                         topLabel="Empresa:"
+                                        loadMoreRows={20}
                                         placeholder="Selecione a Empresa"
                                         dialogTitle="Selecionar a Empresa"
                                         hasError={!!errors.selectedEmpresa}
@@ -1449,6 +1413,7 @@ const NotaServico: React.FC = () => {
                                         onAddClick={openCreateEmpresaDialog}
                                         onEditClick={openEditEmpresaDialog}
                                         dialogPosition={isMobileKeyboardOpen ? 'top' : undefined}
+                                        autoLoadAndSelectSingle
                                         optionLabel={'razao_social'}
                                     />
                                 </div>
@@ -1459,6 +1424,7 @@ const NotaServico: React.FC = () => {
                                         fetchAllItems={listThePessoas}
                                         fetchFilteredItems={fetchFilteredPessoas}
                                         fetchItemsPage={fetchPessoaMobilePage}
+                                        loadMoreRows={20}
                                         optionLabel="razao_social"
                                         optionValue="id"
                                         topLabel="Cliente ou Fornecedor:"
@@ -1469,6 +1435,7 @@ const NotaServico: React.FC = () => {
                                         onAddClick={openCreatePessoaDialog}
                                         onEditClick={openEditPessoaDialog}
                                         dialogPosition={isMobileKeyboardOpen ? 'top' : undefined}
+                                        autoLoadAndSelectSingle
                                     />
                                 </div>
                                 <div>
@@ -1479,6 +1446,7 @@ const NotaServico: React.FC = () => {
                                         fetchFilteredItems={fetchFilteredService}
                                         fetchItemsPage={fetchServicoMobilePage}
                                         optionValue="id"
+                                        loadMoreRows={20}
                                         topLabel="Cliente ou Fornecedor:"
                                         placeholder="Selecione o Serviço"
                                         dialogTitle="Selecionar o Serviço"
@@ -1487,6 +1455,7 @@ const NotaServico: React.FC = () => {
                                         onAddClick={openCreateServicoDialog}
                                         onEditClick={openEditServicoDialog}
                                         dialogPosition={isMobileKeyboardOpen ? 'top' : undefined}
+                                        autoLoadAndSelectSingle
                                         optionLabel={'descricao'}
                                     />
                                 </div>
@@ -1535,7 +1504,7 @@ const NotaServico: React.FC = () => {
                     visible={showModalEmpresa}
                     onHide={closeEmpresaDialog}
                     loading={isEmpresaDialogLoading}
-                    loadingText={editingEmpresaId ? 'Carregando informaÃ§Ãµes da Empresa...' : 'Abrindo cadastro de Empresa...'}
+                    loadingText={editingEmpresaId ? 'Carregando informações da Empresa...' : 'Abrindo cadastro de Empresa...'}
                 >
                     <FormEmpresaCreated
                         key={`${editingEmpresaId ?? 'novo'}-${empresaDialogKey}`}
@@ -1560,7 +1529,7 @@ const NotaServico: React.FC = () => {
                     visible={showModalPessoa}
                     onHide={closePessoaDialog}
                     loading={isPessoaDialogLoading}
-                    loadingText={editingPessoaId ? 'Carregando informaÃ§Ãµes do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
+                    loadingText={editingPessoaId ? 'Carregando informações do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
                 >
                     <FormCreatedPessoa
                         key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
@@ -1585,7 +1554,7 @@ const NotaServico: React.FC = () => {
                     visible={showModalServico}
                     onHide={closeServicoDialog}
                     loading={isServicoDialogLoading}
-                    loadingText={editingServicoId ? 'Carregando informaÃ§Ãµes do Serviço...' : 'Abrindo cadastro de Serviço...'}
+                    loadingText={editingServicoId ? 'Carregando informações do Serviço...' : 'Abrindo cadastro de Serviço...'}
                 >
                     <FormCreatedServico
                         key={`${editingServicoId ?? 'novo'}-${servicoDialogKey}`}

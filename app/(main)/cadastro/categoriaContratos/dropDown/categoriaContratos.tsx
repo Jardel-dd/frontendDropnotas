@@ -1,10 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CategoryContratosEntity } from "@/app/entity/CategoryContratEntity";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
-import { CategoriaContratoDropdownFieldProps } from "../types/categoriaContratos";
+import { CATEGORIA_CONTRATO_DROPDOWN_CACHE_TIME_MS, CategoriaContratoDropdownFieldProps } from "../types/categoriaContratos";
 import { fetchCategoriaContratoByID, fetchFilteredCategoriaContrato, listTheCategoriaContrato } from "../controller/controller";
-
-const CATEGORIA_CONTRATO_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;
 
 export default function CategoriaContratoDropdownField({
     selectedCategoriaContrato,

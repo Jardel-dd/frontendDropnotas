@@ -1,12 +1,23 @@
+import dayjs from 'dayjs';
 import { RefObject } from 'react';
 import { Messages } from 'primereact/messages';
 import { NfsEntity } from '@/app/entity/NfsEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
-import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import { DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
-import { DetalPrestadorValoresEntity, DetalServiceEntity } from '@/app/entity/ServiceEntity';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
+import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
+import { DetalPrestadorValoresEntity, DetalServiceEntity } from '@/app/entity/ServiceEntity';
 
+export type NotaServicoFeedback = {
+    severity: 'success' | 'warn' | 'error';
+    summary: string;
+    detail: string;
+    notaAutorizada?: Partial<NfsEntity> | null;
+};
+export type CreatedNotaServicoResult = {
+    wasCreated: boolean;
+    redirected: boolean;
+};
 export interface NotaServicoFormRef {
     handleSave: () => Promise<void>;
 }
@@ -99,7 +110,7 @@ export const createEmptyPessoa = () =>
         id_vendedor_padrao: null,
         ativo: true,
         pais: ''
-    });
+});
 export const createEmptyNfse = () =>
     new NfsEntity({
         referencia: '',
@@ -179,4 +190,47 @@ export const createEmptyNfse = () =>
                 telefone: ''
             })
         })
-    });
+});
+export const buildEmptyNotaServicoPagination = (pageSize: number, pageNumber = 0) => ({
+    content: [],
+    pageable: {
+        pageNumber,
+        pageSize,
+        sort: {
+            empty: true,
+            sorted: false,
+            unsorted: true
+        },
+        offset: pageNumber * pageSize,
+        paged: true,
+        unpaged: false
+    },
+    totalPages: 0,
+    totalElements: 0,
+    last: true,
+    size: pageSize,
+    number: pageNumber,
+    sort: {
+        empty: true,
+        sorted: false,
+        unsorted: true
+    },
+    numberOfElements: 0,
+    first: pageNumber === 0,
+    empty: true
+});
+export const formatAuthorizedNotaDateTime = (value?: string) => {
+    if (!value) {
+        return '-';
+    }
+    const parsedDate = dayjs(value);
+    return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY [às] HH:mm') : '-';
+};
+export const formatAuthorizedNotaValue = (value?: string | number) => {
+    const parsedValue = typeof value === 'string' ? Number(value.includes(',') ? value.replace(/\./g, '').replace(',', '.') : value) : Number(value);
+
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(Number.isFinite(parsedValue) ? parsedValue : 0);
+};

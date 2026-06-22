@@ -3,11 +3,11 @@ import '@/app/styles/styledGlobal.css'
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { handleActiveOrInativePerfilUsuario } from '../controller/controller';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
@@ -23,6 +23,9 @@ export function ListarPerfilUsers(
         setListPaginationPerfilUser,
         setLoading,
         listarInativos,
+        mobileLoadMoreVisible,
+        mobileLoadMoreLoading,
+        onMobileLoadMore
     }: {
         listPaginationPerfilUser: Record<string, any>
         loading: boolean
@@ -34,6 +37,9 @@ export function ListarPerfilUsers(
         selectedPerfil: PerfilUser | null
         setLoading: (state: boolean) => void;
         listarInativos: boolean;
+        mobileLoadMoreVisible?: boolean;
+        mobileLoadMoreLoading?: boolean;
+        onMobileLoadMore?: () => void | Promise<void>;
 
     }
 ) {
@@ -104,8 +110,11 @@ export function ListarPerfilUsers(
                                                 );
                                             },
                                         },
-                                    ]}
+                                    ]} 
                                     listarInativos={listarInativos}
+                                    mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                    mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                    onMobileLoadMore={onMobileLoadMore}
                                 />
                             </div>
                         }

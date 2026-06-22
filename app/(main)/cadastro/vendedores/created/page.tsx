@@ -5,11 +5,11 @@ import '@/app/styles/styledGlobal.css';
 import { Messages } from 'primereact/messages';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { VendedorFormRef } from '../types/vendedor';
+import { FormCreatedVendedor } from '../form/controller';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { validateFieldsVendedor } from '../controller/validate';
-import { VendedorFormRef } from '../types/vendedor';
-import { FormCreatedVendedor } from '../form/controller';
 export default function Vendedores() {
     const searchParams = useSearchParams();
     const vendedorId = searchParams.get('id');

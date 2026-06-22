@@ -159,7 +159,7 @@ const ComponentDashboard: React.FC = () => {
                         <div className="card styled-container-main-all-routes">
                             <div className="scrollable-container">
                                 <div className="grid formgrid flex justify-content-between w-full" style={{ maxHeight: '74px' }}>
-                                    <div className="ml-4">
+                                    <div className="col-10 mb-0 lg:col-10">
                                         <DateRangePicker
                                             showTopLabel
                                             topLabel="Filtar por Data:"
@@ -168,7 +168,7 @@ const ComponentDashboard: React.FC = () => {
                                             }}
                                         />
                                     </div>
-                                    <div className="col-3 mb-0 lg:col-3"  >
+                                    <div className="col-2 mb-0 lg:col-2"  >
                                         <div className="container-BTN-Filter-Created">
                                             <FilterOverlay
                                                 onApply={search}

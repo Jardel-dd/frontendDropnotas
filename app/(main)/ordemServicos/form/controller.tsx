@@ -326,7 +326,8 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                 const pessoaPrecarregada = await fetchPessoasById(pessoaId);
                 setPreloadedPessoa({
                     dataPessoa: pessoaPrecarregada.dataPessoa,
-                    selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null
+                    selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null,
+                    selectedContrato: pessoaPrecarregada.selectedContrato ?? null
                 });
                 setEditingPessoaId(pessoaId);
                 setPessoaDialogKey((current) => current + 1);
@@ -693,7 +694,7 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                         key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
                         msgs={msgs}
                         ref={formRef}
-                        pessoa={pessoa}
+                        pessoa={pessoa[0]}
                         initialId={editingPessoaId}
                         preloadedPessoa={preloadedPessoa}
                         setPessoa={setPessoa}
@@ -772,4 +773,3 @@ export const FormOrdemServicoCreated = forwardRef<OrdemServicoFormRef, FormCreat
     return <OrdemServicoFields {...props} />;
 });
 FormOrdemServicoCreated.displayName = 'FormOrdemServicoCreated';
-

@@ -28,7 +28,7 @@ export default function EmpresaDropdownField({
     showAddButton = false,
     autoLoadAndSelectSingle = true,
     onAddClick
-}: EmpresaDropdownFieldProps & { required?: boolean,  autoLoadAndSelectSingle?: boolean; }) {
+}: EmpresaDropdownFieldProps & { required?: boolean; }) {
     const queryClient = useQueryClient();
     const companyDropdownQueryKey = ["dropdown", "empresa", "all", reloadKey] as const;
 

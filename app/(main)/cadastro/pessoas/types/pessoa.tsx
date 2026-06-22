@@ -7,7 +7,7 @@ import { RefObject } from "react";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
 
 export interface PessoaFormProps {
-    pessoa: any;
+    pessoa?: PessoaEntity;
     initialId?: string | null;
     preloadedPessoa?: PreloadedPessoaData | null;
     onSuccess?: () => void;
@@ -35,19 +35,13 @@ export interface PessoaFieldsProps {
     pessoa: PessoaEntity;
     errors: Record<string, string>;
     selectedContato: string | null;
-    selectedContrato: ContratoEntity | null;
     selectedCNAE: TableCNAEEntity | null;
     loadingCnpj: boolean;
     hasFocused: boolean;
-    reloadKeyContrato: number;
-    onAddContato: () => void;
     onFocusFirstField: () => void;
     onChange: (event: any) => void;
     onDropdownChange: (event: DropdownChangeEvent) => void;
     onContatoChange: (event: DropdownChangeEvent) => void;
-    onAddContrato: () => void;
-    onEditContrato?: (contrato: ContratoEntity) => void;
-    onContratoChange: (contrato: ContratoEntity | null) => void;
     onCNAEChange: (cnae: TableCNAEEntity | null) => void;
     onSearchCnpj: () => Promise<void>;
     onValidateCnpj: () => void;
@@ -70,8 +64,27 @@ export interface PessoaDropdownFieldProps {
     onAddClick?: () => void;
     autoSelectSingle?: boolean;
     showAddButton?: boolean;
+    autoLoadAndSelectSingle?: boolean;
 }
 export interface PreloadedPessoaData {
     dataPessoa: PessoaEntity;
     selectedVendedor: VendedorEntity | null;
+    selectedContrato: ContratoEntity | null;
 }
+export const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string | null => {
+    if (pessoa.pessoa_cliente && pessoa.pessoa_fornecedor) return 'AMBOS';
+    if (pessoa.pessoa_cliente) return 'pessoa_cliente';
+    if (pessoa.pessoa_fornecedor) return 'pessoa_fornecedor';
+    return null;
+};
+// export const buildMobilePickerPageResult = <T,>(data: any) => {
+//     const items = Array.isArray(data?.content) ? (data.content as T[]) : Array.isArray(data) ? (data as T[]) : [];
+//     const currentPage = Number(data?.number ?? data?.pageable?.pageNumber ?? 0);
+//     const totalPages = Number(data?.totalPages ?? 0);
+//     const hasMoreFromLastFlag = typeof data?.last === 'boolean' ? !data.last : null;
+//     const hasMoreFromTotalPages = totalPages > currentPage + 1;
+//     return {
+//         items,
+//         hasMore: hasMoreFromLastFlag ?? hasMoreFromTotalPages
+//     };
+// };

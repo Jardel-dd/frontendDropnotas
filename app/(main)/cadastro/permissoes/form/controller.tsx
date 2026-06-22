@@ -3,34 +3,19 @@ import './style.css';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { PermissoesFields } from './permissoes';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { TreeCheckboxSelectionKeys } from 'primereact/tree';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import '@/app/(main)/cadastro/permissoes/created/TreeStyles.css';
 import { permissoes } from '@/app/shared/optionsDropDown/options';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import { validateFieldsPerfilUser } from '@/app/(main)/cadastro/permissoes/controller/validate';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdPerfilUser, fetchPerfilUserByID, updatePerfilUser } from '@/app/(main)/cadastro/permissoes/controller/controller';
-import { createEmptyPerfilUser, type FormCreatedPermissoesProps, type PermissoesFormProps, type PermissoesFormRef } from '../types/perfilUsuario';
-
-const permissionNodeKeys = permissoes.flatMap((permission) => permission.children?.map((child) => child.key).filter((key): key is string => Boolean(key)) ?? []);
-const parentNodeKeys = permissoes.map((permission) => permission.key).filter((key): key is string => Boolean(key));
-const buildAllSelectedKeys = (): TreeCheckboxSelectionKeys => {
-    const allSelected = permissionNodeKeys.reduce<TreeCheckboxSelectionKeys>((acc, key) => {
-        acc[key] = { checked: true };
-        return acc;
-    }, {});
-
-    parentNodeKeys.forEach((key) => {
-        allSelected[key] = { checked: true };
-    });
-
-    return allSelected;
-};
+import { buildAllSelectedKeys, createEmptyPerfilUser, permissionNodeKeys, type FormCreatedPermissoesProps, type PermissoesFormProps, type PermissoesFormRef } from '../types/perfilUsuario';
 
 export const PermissoesFormContainer = forwardRef<PermissoesFormRef, PermissoesFormProps>(({ initialId, msgs, onPerfilUserChange, onErrorsChange, redirectAfterSave, onSaved, onClose, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
     const router = useRouter();
@@ -68,20 +53,16 @@ export const PermissoesFormContainer = forwardRef<PermissoesFormRef, PermissoesF
             })
         );
     };
-
     const handleSelectionChange = (nextSelectedKeys: TreeCheckboxSelectionKeys) => {
         setSelectedKeys(nextSelectedKeys);
         validateFieldsPerfilUser(perfilUser, null, nextSelectedKeys, setErrors, msgs);
     };
-
     const allPermissionsSelected = permissionNodeKeys.length > 0 && permissionNodeKeys.every((key) => selectedKeys[key]?.checked);
-
     const handleToggleAllPermissions = () => {
         const nextSelectedKeys = allPermissionsSelected ? {} : buildAllSelectedKeys();
         setSelectedKeys(nextSelectedKeys);
         validateFieldsPerfilUser(perfilUser, null, nextSelectedKeys, setErrors, msgs);
     };
-
     const handleValidateNome = () => {
         setTouchedFields((prev) => ({
             ...prev,
@@ -89,7 +70,6 @@ export const PermissoesFormContainer = forwardRef<PermissoesFormRef, PermissoesF
         }));
         validatePermissoesForm();
     };
-
     const handleSubmit = async (event?: React.FormEvent) => {
         if (event) {
             event.preventDefault();
@@ -131,11 +111,9 @@ export const PermissoesFormContainer = forwardRef<PermissoesFormRef, PermissoesF
             setStateDisableBtnCreatedPerfilUser(false);
         }
     };
-
     useImperativeHandle(ref, () => ({
         handleSave: handleSubmit
     }));
-
     useEffect(() => {
         onPerfilUserChangeRef.current = onPerfilUserChange;
     }, [onPerfilUserChange]);

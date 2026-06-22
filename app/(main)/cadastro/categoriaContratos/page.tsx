@@ -344,7 +344,6 @@ const CategoriaContrato: React.FC = () => {
         </div>
     );
 };
-
 export default CategoriaContrato;
 
 
