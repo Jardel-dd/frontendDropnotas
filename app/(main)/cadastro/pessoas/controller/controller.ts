@@ -88,14 +88,14 @@ export const updatePessoa = async (
             console.error("Erro de API:", status, data);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'AtenÃ§Ã£o:',
+                summary: 'Atenção:',
                 detail: String(errorMessage),
             });
         } else {
             console.error("Erro inesperado:", error);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'AtenÃ§Ã£o:',
+                summary: 'Atenção:',
                 detail: 'Erro inesperado ao atualizar Pessoa.',
             });
         }
@@ -132,7 +132,7 @@ export const ativarPessoa = async (
             {
                 className: 'messages-center',
                 severity: 'error',
-                summary: 'AtenÃ§Ã£o:',
+                summary: 'Atenção:',
                 detail: `Houve um erro ao tentar ativar este Cliente ou Fornecedor , tente novamente.`,
             },
         ]);
@@ -166,7 +166,7 @@ export const deletarPessoa = async (
         msgs.current?.show([
             {
                 severity: 'error',
-                summary: 'AtenÃ§Ã£o:',
+                summary: 'Atenção:',
                 detail: 'Houve um erro ao tentar excluir o Cliente ou Fornecedor, tente novamente.'
             },
         ]);
@@ -202,14 +202,14 @@ export const createdPessoa = async (
             const errorMessage = data.message || 'Erro ao cadastrar Pessoa.';
             msgs.current?.show({
                 severity: 'error',
-                summary: 'AtenÃ§Ã£o:',
+                summary: 'Atenção:',
                 detail: String(errorMessage),
             });
         } else {
             console.error("Erro inesperado:", error);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'AtenÃ§Ã£o:',
+                summary: 'Atenção:',
                 detail: 'Erro inesperado ao cadastrar Pessoa.',
             });
         }
@@ -249,7 +249,7 @@ export const handleSearchCepPessoa = async (
         if (msgs.current) {
             msgs.current.show({
                 severity: 'error',
-                summary: 'AtenÃ§Ã£o:',
+                summary: 'Atenção:',
                 detail: 'CEP nÃ£o encontrado, verifique ou inclua o endereÃ§o manualmente!',
             });
         }

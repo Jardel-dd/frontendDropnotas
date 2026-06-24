@@ -12,6 +12,7 @@ import { CreatedNotaServicoResult, ExportarPdfNfsePayload, ListNotaServicoParams
 
 const NOTA_SERVICO_FEEDBACK_KEY = 'notaServicoFeedback';
 const inflightNotaServicoRequests = new Map<string, Promise<any>>();
+const MOBILE_DOWNLOAD_USER_AGENT_REGEX = /Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini/i;
 
 
 const extractBackendErrorMessage = (data: any, fallback: string): string => {
@@ -40,6 +41,33 @@ const extractBackendErrorMessage = (data: any, fallback: string): string => {
 
     return fallback;
 };
+const extractAxiosBlobErrorMessage = async (error: unknown, fallback: string): Promise<string> => {
+    if (!axios.isAxiosError(error)) {
+        return fallback;
+    }
+
+    const responseData = error.response?.data;
+
+    if (responseData instanceof Blob) {
+        try {
+            const rawText = await responseData.text();
+
+            if (!rawText.trim()) {
+                return fallback;
+            }
+
+            try {
+                return extractBackendErrorMessage(JSON.parse(rawText), fallback);
+            } catch {
+                return extractBackendErrorMessage(rawText, fallback);
+            }
+        } catch {
+            return fallback;
+        }
+    }
+
+    return extractBackendErrorMessage(responseData, fallback);
+};
 const normalizeOptionalNumberToZero = (value: unknown): number => {
     if (value === null || value === undefined || value === '') {
         return 0;
@@ -61,6 +89,62 @@ const sanitizeDownloadFileNamePart = (value?: string | null): string => {
         .trim();
 
     return normalizedValue;
+};
+const isMobileDownloadBrowser = (): boolean => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+        return false;
+    }
+
+    return MOBILE_DOWNLOAD_USER_AGENT_REGEX.test(navigator.userAgent);
+};
+const openPendingDownloadWindow = (): Window | null => {
+    if (!isMobileDownloadBrowser()) {
+        return null;
+    }
+
+    try {
+        return window.open('', '_blank', 'noopener,noreferrer');
+    } catch (error) {
+        console.warn('Nao foi possivel abrir a janela temporaria de download no mobile.', error);
+        return null;
+    }
+};
+const releaseObjectUrl = (objectUrl: string, delay = 60_000) => {
+    window.setTimeout(() => {
+        window.URL.revokeObjectURL(objectUrl);
+    }, delay);
+};
+const triggerBlobDownload = (
+    blob: Blob,
+    fileName: string,
+    pendingWindow?: Window | null
+) => {
+    const fileUrl = window.URL.createObjectURL(blob);
+
+    if (pendingWindow && !pendingWindow.closed) {
+        try {
+            pendingWindow.location.href = fileUrl;
+            releaseObjectUrl(fileUrl);
+            return;
+        } catch (error) {
+            console.warn('Falha ao redirecionar a janela temporaria de download.', error);
+            pendingWindow.close();
+        }
+    }
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.setAttribute('download', fileName);
+    link.rel = 'noopener noreferrer';
+
+    if (isMobileDownloadBrowser()) {
+        link.target = '_blank';
+    }
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    releaseObjectUrl(fileUrl);
 };
 const extractNotaServicoStatus = (data: any): string => {
     const status = data?.status_nota ?? data?.nfse?.status_nota ?? data?.dados_emissao?.status_nota ?? data?.dados_emissao?.nfse?.status_nota;
@@ -487,20 +571,17 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
     }
 };
 export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+    const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.pdf`;
+
+    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/pdf`, {
             responseType: 'blob'
         });
-        const fileURL = window.URL.createObjectURL(new Blob([response.data]));
-        const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.pdf`;
-        const link = document.createElement('a');
-        link.href = fileURL;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(fileURL);
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        triggerBlobDownload(blob, fileName, pendingWindow);
     } catch (error) {
+        pendingWindow?.close();
         console.log('Erro ao baixar PDF:', error);
         msgs.current?.show({
             severity: 'error',
@@ -511,21 +592,18 @@ export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
     }
 };
 export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+    const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.xml`;
+
+    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/xml`, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.xml`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        triggerBlobDownload(blob, fileName, pendingWindow);
 
-        window.URL.revokeObjectURL(url);
     } catch (error) {
+        pendingWindow?.close();
         console.error(' Erro ao baixar XML:', error);
         msgs.current?.show({
             severity: 'error',
@@ -536,28 +614,24 @@ export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
     }
 };
 export const downloadArquivosNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+    const clientName = sanitizeDownloadFileNamePart(
+        nota.razao_social_cliente ?? (nota.tomador as any)?.razao_social ?? null
+    );
+    const fileName = `PDFeXML-${clientName || `nfse-${nota.id}`}.zip`;
+
+    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/arquivos`, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/zip' });
-        const fileURL = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        const clientName = sanitizeDownloadFileNamePart(
-            nota.razao_social_cliente ?? (nota.tomador as any)?.razao_social ?? null
-        );
-
-        link.href = fileURL;
-        link.download = `PDFeXML-${clientName || `nfse-${nota.id}`}.zip`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(fileURL);
+        triggerBlobDownload(blob, fileName, pendingWindow);
     } catch (error) {
+        pendingWindow?.close();
         console.error('Erro ao baixar ZIP da NFS-e:', error);
         msgs.current?.show({
             severity: 'error',
-            summary: 'AtenÃ§Ã£o:',
+            summary: '',
             detail: 'Erro ao baixar os arquivos PDF e XML da Nota Fiscal. Tente novamente em instantes.',
             life: 5000
         });
@@ -589,6 +663,7 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
     }
 };
 export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, msgs: React.RefObject<Messages | null>) => {
+    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.post('/nfse/exportar-pdf', payload, {
             responseType: 'blob'
@@ -596,15 +671,9 @@ export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, m
         const blob = new Blob([response.data], {
             type: 'application/pdf'
         });
-        const fileURL = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = fileURL;
-        link.setAttribute('download', 'notas-servico.pdf');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(fileURL);
+        triggerBlobDownload(blob, 'notas-servico.pdf', pendingWindow);
     } catch (error) {
+        pendingWindow?.close();
         console.error('Erro ao exportar PDF das notas:', error);
         if (axios.isAxiosError(error) && error.response?.status === 404) {
             msgs.current?.show({
@@ -615,6 +684,18 @@ export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, m
             return;
         }
         if (axios.isAxiosError(error) && error.response?.status === 400) {
+            const detailMessage = await extractAxiosBlobErrorMessage(
+                error,
+                'Nao foi possivel exportar o PDF com os filtros informados.'
+            );
+            msgs.current?.show({
+                severity: 'warn',
+                summary: 'Exportacao invalida',
+                detail: detailMessage,
+                life: 5000
+            });
+
+            return;
             msgs.current?.show({
                 severity: 'warn',
                 summary: 'Período não informado',

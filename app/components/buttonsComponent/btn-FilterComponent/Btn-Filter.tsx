@@ -35,6 +35,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                 <>
                 <div >
                     <Button
+                        type="button"
                         label={isMobile ? undefined : buttonLabel}
                         icon={buttonIcon}
                         outlined
@@ -47,8 +48,31 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                     contentStyle={{ paddingBottom: '1rem' }}>
                     <div className="flex flex-column">{children}</div>
                     <div className="flex gap-2 mt-1 p-2">
-                        <Button label="Aplicar Filtro" icon="pi pi-search" outlined className="btn-filter-Component-Mobile" onClick={handleApply} />
-                        <Button label="Limpar Filtro" icon="pi pi-search-minus" severity="secondary"  outlined className="btn-filter-Component-Mobile" onClick={handleClear} />
+                        <Button
+                            type="button"
+                            label="Aplicar Filtro"
+                            icon="pi pi-search"
+                            outlined
+                            className="btn-filter-Component-Mobile"
+                            onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                handleApply();
+                            }}
+                        />
+                        <Button
+                            type="button"
+                            label="Limpar Filtro"
+                            icon="pi pi-search-minus"
+                            severity="secondary"
+                            outlined
+                            className="btn-filter-Component-Mobile"
+                            onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                handleClear();
+                            }}
+                        />
                     </div>
                 </Dialog>
                 </>
@@ -57,6 +81,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                 <>
                 <div style={{ height: "38px"}}>
                     <Button
+                        type="button"
                         label={isMobile ? undefined : buttonLabel}
                         icon={buttonIcon}
                         outlined
@@ -68,8 +93,31 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                         <div className="flex flex-column">
                             {children}
                             <div className="flex justify-content-between  p-2 gap-3">
-                                <Button label="Aplicar Filtro" icon="pi pi-search" outlined onClick={handleApply} className="btn-filter-Component-Desktop" />
-                                <Button label="Limpar Filtro" icon="pi pi-search-minus" severity="secondary" outlined onClick={handleClear} className="btn-filter-Component-Desktop" />
+                                <Button
+                                    type="button"
+                                    label="Aplicar Filtro"
+                                    icon="pi pi-search"
+                                    outlined
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        handleApply();
+                                    }}
+                                    className="btn-filter-Component-Desktop"
+                                />
+                                <Button
+                                    type="button"
+                                    label="Limpar Filtro"
+                                    icon="pi pi-search-minus"
+                                    severity="secondary"
+                                    outlined
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        handleClear();
+                                    }}
+                                    className="btn-filter-Component-Desktop"
+                                />
                             </div>
                         </div>
                     </OverlayPanel>
