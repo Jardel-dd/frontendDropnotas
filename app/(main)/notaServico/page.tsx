@@ -10,6 +10,7 @@ import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { buildEmptyNotaServicoPagination, createEmptyPessoa, formatAuthorizedNotaDateTime, formatAuthorizedNotaValue } from './types/notaServico';
+import type { ExportarPdfNfsePayload } from './types/notaServico';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import ListarNotaServico from './tabela/notaServicoListagem';
@@ -25,6 +26,7 @@ import { validateFieldsPrepararNfs } from './controller/validation';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import { FormCreatedPessoa } from '../cadastro/pessoas/form/controller';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
 import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
 import { FormCreatedServico } from '../cadastro/servicos/form/controller';
 import type { PreloadedServicoData } from '../cadastro/servicos/types/servico';
@@ -94,6 +96,7 @@ const NotaServico: React.FC = () => {
     const [isEmpresaDialogLoading, setIsEmpresaDialogLoading] = useState(false);
     const [isServicoDialogLoading, setIsServicoDialogLoading] = useState(false);
     const [loadingExportPdf, setLoadingExportPdf] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showExportPdfDialog, setShowExportPdfDialog] = useState(false);
@@ -126,7 +129,7 @@ const NotaServico: React.FC = () => {
     const [draftSelectedVendedor, setDraftSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [draftSelectedStatusNotaServico, setDraftSelectedStatusNotaServico] = useState<string>('');
     const [listPaginationNotaServico, setListPaginationNotaServico] = useState<Record<string, any>>(() =>
-        buildEmptyNotaServicoPagination(Math.max(pageSize, 1))
+        buildEmptyNotaServicoPagination(isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : Math.max(pageSize, 1))
     );
     const [loadingPrepararNfs, setLoadingPrepararNfs] = useState(false);
     const [prepararNfs, setPrepararNfs] = useState<PrepararNfs>(
@@ -211,7 +214,9 @@ const NotaServico: React.FC = () => {
             })
         })
     );
-    const resolvedPageSize = isMobile ? mobilePageSize : pageSize;
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
+    const safeNotaPagination = listPaginationNotaServico ?? buildEmptyNotaServicoPagination(resolvedPageSize);
+    const safeNotaPageable = safeNotaPagination.pageable ?? buildEmptyNotaServicoPagination(resolvedPageSize).pageable;
     const clearNotaServicoResults = useCallback((pageNumber = 0) => {
         setSelectedNotas([]);
         setListPaginationNotaServico(buildEmptyNotaServicoPagination(resolvedPageSize, pageNumber));
@@ -234,7 +239,7 @@ const NotaServico: React.FC = () => {
         selectedVendedor,
         selectedStatusNotaServico
     }), [dateRange, selectedEmpresa, selectedPessoa, selectedVendedor, selectedStatusNotaServico]);
-    const handleListNotaServico = useCallback(async (
+    const fetchNotaServicoPage = useCallback(async (
         pageNumber = 0,
         termo = searchTerm,
         filters?: {
@@ -246,38 +251,68 @@ const NotaServico: React.FC = () => {
         }
     ) => {
         if (!canSearchNotaServico) {
+            return buildEmptyNotaServicoPagination(resolvedPageSize, pageNumber);
+        }
+        const appliedFilters = filters ?? {
+            dateRange,
+            selectedEmpresa,
+            selectedPessoa,
+            selectedVendedor,
+            selectedStatusNotaServico
+        };
+
+        return await listNotaServico(
+            {
+                page: pageNumber,
+                size: resolvedPageSize,
+                termo,
+                status: appliedFilters.selectedStatusNotaServico,
+                dateRange: appliedFilters.dateRange,
+                id_empresa: appliedFilters.selectedEmpresa?.id,
+                id_cliente: appliedFilters.selectedPessoa?.id,
+                id_vendedor: appliedFilters.selectedVendedor?.id
+            },
+            msgs
+        );
+    }, [canSearchNotaServico, dateRange, resolvedPageSize, searchTerm, selectedEmpresa, selectedPessoa, selectedStatusNotaServico, selectedVendedor]);
+    const handleListNotaServico = useCallback(async (
+        pageNumber = 0,
+        termo = searchTerm,
+        filters?: {
+            dateRange: DateRangeValue;
+            selectedEmpresa: CompanyEntity | null;
+            selectedPessoa: PessoaEntity | null;
+            selectedVendedor: VendedorEntity | null;
+            selectedStatusNotaServico: string;
+        },
+        append = false
+    ) => {
+        if (!canSearchNotaServico) {
             clearNotaServicoResults(pageNumber);
             setLoading(false);
             return;
         }
-        setLoading(true);
-        try {
-            const appliedFilters = filters ?? {
-                dateRange,
-                selectedEmpresa,
-                selectedPessoa,
-                selectedVendedor,
-                selectedStatusNotaServico
-            };
-            const data = await listNotaServico(
-                {
-                    page: pageNumber,
-                    size: resolvedPageSize,
-                    termo,
-                    status: appliedFilters.selectedStatusNotaServico,
-                    dateRange: appliedFilters.dateRange,
-                    id_empresa: appliedFilters.selectedEmpresa?.id,
-                    id_cliente: appliedFilters.selectedPessoa?.id,
-                    id_vendedor: appliedFilters.selectedVendedor?.id
-                },
-                msgs
-            );
 
-            setListPaginationNotaServico(data);
-        } finally {
-            setLoading(false);
+        if (!append) {
+            setLoading(true);
         }
-    }, [canSearchNotaServico, clearNotaServicoResults, dateRange, resolvedPageSize, searchTerm, selectedEmpresa, selectedPessoa, selectedStatusNotaServico, selectedVendedor]);
+
+        try {
+            const data = await fetchNotaServicoPage(pageNumber, termo, filters);
+
+            setListPaginationNotaServico((current) => {
+                if (isMobile && append) {
+                    return mergePaginatedContent(current, data, pageNumber) ?? buildEmptyNotaServicoPagination(resolvedPageSize, pageNumber);
+                }
+
+                return data ?? buildEmptyNotaServicoPagination(resolvedPageSize, pageNumber);
+            });
+        } finally {
+            if (!append) {
+                setLoading(false);
+            }
+        }
+    }, [canSearchNotaServico, clearNotaServicoResults, fetchNotaServicoPage, isMobile, resolvedPageSize, searchTerm]);
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (!canSearchNotaServico) {
             return;
@@ -293,6 +328,23 @@ const NotaServico: React.FC = () => {
         }
 
         handleListNotaServico(event.page);
+    };
+    const handleLoadMoreNotaServico = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationNotaServico)) {
+            return;
+        }
+
+        setLoadingMore(true);
+        try {
+            await handleListNotaServico(
+                (safeNotaPageable.pageNumber ?? 0) + 1,
+                searchTerm,
+                getActiveFilters(),
+                true
+            );
+        } finally {
+            setLoadingMore(false);
+        }
     };
     const handleVendedorChange = (vendedor: VendedorEntity | null) => {
         setDraftSelectedVendedor(vendedor);
@@ -421,11 +473,41 @@ const NotaServico: React.FC = () => {
             );
             const referencias = (response?.content ?? []).map((nota: NfsEntity) => nota.referencia?.trim()).filter((referencia: string | undefined): referencia is string => Boolean(referencia));
             const dateParams = mapDateRangeToParams(activeFilters.dateRange);
+            const exportPayload: ExportarPdfNfsePayload = {};
+
+            if (dateParams.data_hora_inicio && dateParams.data_hora_fim) {
+                exportPayload.data_hora_inicio = dateParams.data_hora_inicio;
+                exportPayload.data_hora_fim = dateParams.data_hora_fim;
+            }
+
+            if (referencias.length > 0) {
+                exportPayload.referencias = referencias;
+            }
+
+            if (activeFilters.selectedStatusNotaServico) {
+                exportPayload.status = [activeFilters.selectedStatusNotaServico];
+            }
+
+            if (activeFilters.selectedEmpresa?.id) {
+                exportPayload.id_empresa = activeFilters.selectedEmpresa.id;
+            }
+
+            if (activeFilters.selectedPessoa?.id) {
+                exportPayload.id_cliente = activeFilters.selectedPessoa.id;
+            }
+
+            if (!exportPayload.data_hora_inicio && !exportPayload.referencias?.length) {
+                msgs.current?.show({
+                    severity: 'warn',
+                    summary: 'Filtros insuficientes',
+                    detail: 'Informe um periodo ou mantenha notas filtradas para montar o PDF.',
+                    life: 5000
+                });
+                return;
+            }
+
             await exportarPdfNotasServico(
-                {
-                    data_hora_inicio: dateParams.data_hora_inicio ?? '',
-                    data_hora_fim: dateParams.data_hora_fim ?? ''
-                },
+                exportPayload,
                 msgs
             );
             setShowExportPdfDialog(false);
@@ -439,6 +521,7 @@ const NotaServico: React.FC = () => {
         }
 
         const clearedDateRange: DateRangeValue = [null, null];
+        setSelectedNotas([]);
         setSelectedEmpresa(null);
         setDraftSelectedEmpresa(null);
         setSelectedPessoa(null);
@@ -1039,24 +1122,14 @@ const NotaServico: React.FC = () => {
                                         selectedNotas={selectedNotas}
                                         setSelectedNotas={handleSelectedNotasChange}
                                         listarInativos={false}
+                                        mobileLoadMoreVisible={hasMoreMobileContent(listPaginationNotaServico)}
+                                        mobileLoadMoreLoading={loadingMore}
+                                        onMobileLoadMore={handleLoadMoreNotaServico}
                                     />
                                 ) : (
                                     <div className="p-3">Sem permissao para pesquisar notas fiscais.</div>
                                 )}
                             </div>
-                            {canSearchNotaServico && (
-                                <div className="nota-servico-mobile-paginator">
-                                    <div className="custom-paginator">
-                                        <CustomPaginator
-                                            first={listPaginationNotaServico.pageable.pageNumber * listPaginationNotaServico.pageable.pageSize}
-                                            rows={listPaginationNotaServico.pageable.pageSize}
-                                            totalRecords={listPaginationNotaServico.totalElements}
-                                            onPageChange={onPageChange}
-                                            isMobile
-                                        />
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </>
                 )}
@@ -1207,9 +1280,9 @@ const NotaServico: React.FC = () => {
                             {canSearchNotaServico && (
                                 <div style={{ marginTop: 'auto' }}>
                                     <CustomPaginator
-                                        first={listPaginationNotaServico.pageable.pageNumber * listPaginationNotaServico.pageable.pageSize}
-                                        rows={listPaginationNotaServico.pageable.pageSize}
-                                        totalRecords={listPaginationNotaServico.totalElements}
+                                        first={safeNotaPageable.pageNumber * safeNotaPageable.pageSize}
+                                        rows={safeNotaPageable.pageSize}
+                                        totalRecords={safeNotaPagination.totalElements}
                                         onPageChange={onPageChange}
                                     />
                                 </div>

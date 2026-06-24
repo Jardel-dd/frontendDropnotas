@@ -22,8 +22,12 @@ export interface NotaServicoFormRef {
     handleSave: () => Promise<void>;
 }
 export type ExportarPdfNfsePayload = {
-    data_hora_inicio: string;
-    data_hora_fim: string;
+    data_hora_inicio?: string;
+    data_hora_fim?: string;
+    referencias?: string[];
+    status?: string[];
+    id_empresa?: number;
+    id_cliente?: number;
 };
 export interface NotaServicoFormProps {
     notaServico: NfsEntity;

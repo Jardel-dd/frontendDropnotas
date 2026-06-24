@@ -32,7 +32,10 @@ export function ListarNotaServico({
     searchTerm,
     listarInativos,
     selectedNotas,
-    setSelectedNotas
+    setSelectedNotas,
+    mobileLoadMoreVisible = false,
+    mobileLoadMoreLoading = false,
+    onMobileLoadMore
 }: {
     listPaginationNotaServico: Record<string, any>;
     setListPaginationNotaServico: Dispatch<SetStateAction<any>>;
@@ -42,6 +45,9 @@ export function ListarNotaServico({
     listarInativos: boolean;
     selectedNotas: NfsEntity[];
     setSelectedNotas: (selected: NfsEntity[]) => void;
+    mobileLoadMoreVisible?: boolean;
+    mobileLoadMoreLoading?: boolean;
+    onMobileLoadMore?: () => void | Promise<void>;
 }) {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -365,6 +371,20 @@ export function ListarNotaServico({
                                         </div>
                                     );
                                 })
+                            )}
+                            {mobileLoadMoreVisible && onMobileLoadMore && (
+                                <div className="nota-servico-mobile-load-more">
+                                    <Button
+                                        type="button"
+                                        outlined
+                                        label={mobileLoadMoreLoading ? 'Carregando...' : 'Carregar mais'}
+                                        loading={mobileLoadMoreLoading}
+                                        disabled={mobileLoadMoreLoading || loading}
+                                        onClick={() => {
+                                            void onMobileLoadMore();
+                                        }}
+                                    />
+                                </div>
                             )}
                         </div>
                     )}
