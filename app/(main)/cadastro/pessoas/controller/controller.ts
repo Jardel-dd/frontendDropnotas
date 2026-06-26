@@ -1,27 +1,15 @@
 'use client'
 import axios from "axios";
-import { useCallback } from "react";
 import api from "@/app/services/api";
+import { buildPessoaPayload } from "../types/pessoa";
 import { PessoaEntity } from "@/app/entity/PessoaEntity";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
 import { ContratoEntity } from "@/app/entity/ContratoEntity";
 import { searchByCep } from "@/app/utils/searchCEP/controller";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
+import { remocaoCaractereFiltro } from "@/app/shared/removeCaracter/controller";
 import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
 
-const nullableString = (value?: string | null) => {
-    if (value === undefined || value === null) return null;
-    return value.trim().length > 0 ? value : null;
-};
-const buildPessoaPayload = (pessoa: PessoaEntity) => ({
-    ...pessoa,
-    cnpj: pessoa.cnpj && pessoa.cnpj.replace(/\D/g, '').length > 0 ? pessoa.cnpj : null,
-    cpf: pessoa.cpf && pessoa.cpf.replace(/\D/g, '').length > 0 ? pessoa.cpf : null,
-    email: (pessoa.email ?? '').trim(),
-    cnae_fiscal: nullableString(pessoa.cnae_fiscal),
-    inscricao_estadual: nullableString(pessoa.inscricao_estadual),
-    inscricao_municipal: nullableString(pessoa.inscricao_municipal),
-});
 export const listPessoa = async (
     listPaginationClientesFornecedores: Record<string, any>,
     listarInativos: boolean,
@@ -31,11 +19,21 @@ export const listPessoa = async (
     searchTerm: string
 ) => {
     setLoading(true);
+
     try {
-        const response = await api.get(
-            `/pessoa?page=${listPaginationClientesFornecedores.pageable.pageNumber}&size=${listPaginationClientesFornecedores.pageable.pageSize}&listarInativos=${listarInativos}&cliente=${cliente}&fornecedor=${fornecedor}&termo=${searchTerm}`
-        );
+        const response = await api.get('/pessoa', {
+            params: {
+                page: listPaginationClientesFornecedores.pageable.pageNumber,
+                size: listPaginationClientesFornecedores.pageable.pageSize,
+                listarInativos,
+                cliente,
+                fornecedor,
+                termo: searchTerm ? remocaoCaractereFiltro(searchTerm) : undefined
+            }
+        });
+
         return response.data;
+
     } catch (error) {
         console.error('Erro ao buscar Cliente ou Fornecedor:', error);
         throw error;
@@ -282,24 +280,24 @@ const handleActiveOrInativePessoa = async (
         console.error("Erro ao ativar/desativar Cliente ou fornecedor:", error);
     }
 };
-export const fetchFilteredPessoas = async (termo: string) => {
+export const fetchFilteredPessoa = async (filtro: string) => {
     try {
-        const response = await api.get(`/pessoa`, {
+        const response = await api.get('/pessoa', {
             params: {
-                termo
+                termo: remocaoCaractereFiltro(filtro)
             }
         });
-
+    console.log("Pessoas:", response.data);
         if (response.data && Array.isArray(response.data.content)) {
             return response.data.content.map((user: any) => ({
                 id: user.id,
-                razao_social: user.razao_social || 'Nome nÃ£o disponÃ­vel',
+                razao_social: user.razao_social || 'Nome não disponível',
             }));
         }
 
         return [];
     } catch (error) {
-        console.error("Erro ao filtrar clientes:", error);
+        console.error('Erro ao filtrar clientes:', error);
         return [];
     }
 };
@@ -355,7 +353,6 @@ export const listThePessoas = async () => {
         return [];
     }
 };
-export const handleActiveOrInativeClientesFornecedores = handleActiveOrInativePessoa;
 export const fetchPessoaMobilePage = async ({
     searchTerm: termo,
     page,
@@ -375,3 +372,4 @@ export const fetchPessoaMobilePage = async ({
 
     return buildMobilePickerPageResult<PessoaEntity>(response.data);
 };
+export const handleActiveOrInativeClientesFornecedores = handleActiveOrInativePessoa;

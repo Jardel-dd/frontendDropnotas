@@ -1,10 +1,10 @@
-import { ContratoEntity } from "@/app/entity/ContratoEntity";
-import { PessoaEntity } from "@/app/entity/PessoaEntity";
-import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
-import { DropdownChangeEvent } from "primereact/dropdown";
-import { Messages } from "primereact/messages";
 import { RefObject } from "react";
+import { Messages } from "primereact/messages";
+import { PessoaEntity } from "@/app/entity/PessoaEntity";
+import { DropdownChangeEvent } from "primereact/dropdown";
+import { ContratoEntity } from "@/app/entity/ContratoEntity";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
+import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
 
 export interface PessoaFormProps {
     pessoa?: PessoaEntity;
@@ -30,7 +30,7 @@ export type FormPessoaCreatedProps = PessoaFieldsProps | PessoaFormProps;
 export type ClienteFornecedorFilter = {
         cliente: boolean;
         fornecedor: boolean;
-    };
+};
 export interface PessoaFieldsProps {
     pessoa: PessoaEntity;
     errors: Record<string, string>;
@@ -77,14 +77,16 @@ export const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_c
     if (pessoa.pessoa_fornecedor) return 'pessoa_fornecedor';
     return null;
 };
-// export const buildMobilePickerPageResult = <T,>(data: any) => {
-//     const items = Array.isArray(data?.content) ? (data.content as T[]) : Array.isArray(data) ? (data as T[]) : [];
-//     const currentPage = Number(data?.number ?? data?.pageable?.pageNumber ?? 0);
-//     const totalPages = Number(data?.totalPages ?? 0);
-//     const hasMoreFromLastFlag = typeof data?.last === 'boolean' ? !data.last : null;
-//     const hasMoreFromTotalPages = totalPages > currentPage + 1;
-//     return {
-//         items,
-//         hasMore: hasMoreFromLastFlag ?? hasMoreFromTotalPages
-//     };
-// };
+export const nullableString = (value?: string | null) => {
+    if (value === undefined || value === null) return null;
+    return value.trim().length > 0 ? value : null;
+};
+export const buildPessoaPayload = (pessoa: PessoaEntity) => ({
+    ...pessoa,
+    cnpj: pessoa.cnpj && pessoa.cnpj.replace(/\D/g, '').length > 0 ? pessoa.cnpj : null,
+    cpf: pessoa.cpf && pessoa.cpf.replace(/\D/g, '').length > 0 ? pessoa.cpf : null,
+    email: (pessoa.email ?? '').trim(),
+    cnae_fiscal: nullableString(pessoa.cnae_fiscal),
+    inscricao_estadual: nullableString(pessoa.inscricao_estadual),
+    inscricao_municipal: nullableString(pessoa.inscricao_municipal),
+});

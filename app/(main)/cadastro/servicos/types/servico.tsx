@@ -117,5 +117,25 @@ export interface PreloadedServicoData {
     selectedCodigoServico: TableService | null;
     selectedClassificacaoTributaria: TableClassificacaoTributariaEntity | null;
 }
+export const normalizeEmptyValuesToNull = <T,>(value: T): T => {
+    if (Array.isArray(value)) {
+        return value.map((item) => normalizeEmptyValuesToNull(item)) as T;
+    }
+
+    if (value && typeof value === 'object') {
+        const normalizedEntries = Object.entries(value as Record<string, unknown>).map(([key, entryValue]) => [
+            key,
+            normalizeEmptyValuesToNull(entryValue)
+        ]);
+
+        return Object.fromEntries(normalizedEntries) as T;
+    }
+
+    if (typeof value === 'string') {
+        return (value.trim() === '' ? null : value) as T;
+    }
+
+    return value;
+};
 export type FormCreatedServicoProps = ServicoFieldsProps | ServiceFormProps;
 export const SERVICE_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;

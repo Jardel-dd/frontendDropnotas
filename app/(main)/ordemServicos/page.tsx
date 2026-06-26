@@ -28,9 +28,9 @@ import { DropDownFilterOrdemOrdemServico } from '@/app/shared/optionsDropDown/op
 import { fetchOrdemServico, listOrdemServico, preparar } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
-import { fetchFilteredPessoas, listThePessoas } from '../cadastro/pessoas/controller/controller';
+import { fetchFilteredPessoa, listThePessoas } from '../cadastro/pessoas/controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
+import { fetchFilteredEmpresa, listTheEmpresa } from '../configuracoes/empresas/controller/controller';
 const OrdemServicos: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
@@ -311,8 +311,8 @@ const OrdemServicos: React.FC = () => {
                                                         id="selectedEmpresa"
                                                         selectedItem={draftSelectedEmpresa}
                                                         onItemChange={handleCompanyChange}
-                                                        fetchAllItems={listTheCompany}
-                                                        fetchFilteredItems={fetchFilteredCompany}
+                                                        fetchAllItems={listTheEmpresa}
+                                                        fetchFilteredItems={fetchFilteredEmpresa}
                                                         optionLabel="razao_social"
                                                         placeholder="Selecione a Empresa"
                                                         topLabel="Empresa:"
@@ -327,7 +327,7 @@ const OrdemServicos: React.FC = () => {
                                                         selectedItem={draftSelectedPessoa}
                                                         onItemChange={handlePessoaChange}
                                                         fetchAllItems={listThePessoas}
-                                                        fetchFilteredItems={fetchFilteredPessoas}
+                                                        fetchFilteredItems={fetchFilteredPessoa}
                                                         optionLabel="razao_social"
                                                         placeholder="Selecione um cliente ou Fornecedor"
                                                         topLabel="Cliente ou fornecedor:"
@@ -434,8 +434,8 @@ const OrdemServicos: React.FC = () => {
                                                             id="selectedEmpresa"
                                                             selectedItem={draftSelectedEmpresa}
                                                             onItemChange={handleCompanyChange}
-                                                            fetchAllItems={listTheCompany}
-                                                            fetchFilteredItems={fetchFilteredCompany}
+                                                            fetchAllItems={listTheEmpresa}
+                                                            fetchFilteredItems={fetchFilteredEmpresa}
                                                             optionLabel="razao_social"
                                                             placeholder="Selecione a Empresa"
                                                             topLabel="Empresa:"
@@ -449,7 +449,7 @@ const OrdemServicos: React.FC = () => {
                                                             selectedItem={draftSelectedPessoa}
                                                             onItemChange={handlePessoaChange}
                                                             fetchAllItems={listThePessoas}
-                                                            fetchFilteredItems={fetchFilteredPessoas}
+                                                            fetchFilteredItems={fetchFilteredPessoa}
                                                             optionLabel="razao_social"
                                                             placeholder="Selecione um cliente ou Fornecedor"
                                                             topLabel="Cliente ou fornecedor:"

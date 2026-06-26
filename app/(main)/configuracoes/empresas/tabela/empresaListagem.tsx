@@ -270,7 +270,7 @@ export function ListarEmpresas({
                                         header: 'CNPJ',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
-                                            return loading ? <Skeleton /> : <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>{limitarText(data.cnpj, 20)}</span>;
+                                            return loading ? <Skeleton /> : <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>{highlightSearchTerm(limitarText(data.cnpj, 20), searchTerm)}</span>;
                                         }
                                     }
                                 ]}

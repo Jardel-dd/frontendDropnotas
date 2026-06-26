@@ -1,33 +1,33 @@
 'use client';
 import 'primeicons/primeicons.css';
-import '@/app/styles/styledGlobal.css';
-import api from '@/app/services/api';
 import { useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import api from '@/app/services/api';
+import '@/app/styles/styledGlobal.css';
 import { IconReal } from '@/app/utils/icons/icons';
 import { InputSwitch } from 'primereact/inputswitch';
+import { useQueryClient } from '@tanstack/react-query';
 import Input from '@/app/shared/include/input/input-all';
-import type { ContratoFieldsProps, } from '../types/contratos';
-import Dropdown from '@/app/shared/include/dropdown/dropdown';
-import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
-import MobileSearchPicker from '@/app/shared/mobile/MobileSearchPicker';
-import { OptionsPeriodicidade } from '@/app/shared/optionsDropDown/options';
-import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
+import Dropdown from '@/app/shared/include/dropdown/dropdown';
+import type { ContratoFieldsProps, } from '../types/contratos';
+import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
+import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
+import MobileSearchPicker from '@/app/shared/mobile/MobileSearchPicker';
+import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
+import { OptionsPeriodicidade } from '@/app/shared/optionsDropDown/options';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import EmpresaDropdownField from '@/app/(main)/configuracoes/empresas/dropDown/empresa';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dropDown/formaPagamento';
+import { fetchFilteredEmpresa, listTheEmpresa } from '../../configuracoes/empresas/controller/controller';
+import { fetchFilteredPessoa, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import CategoriaContratoDropdownField from '@/app/(main)/cadastro/categoriaContratos/dropDown/categoriaContratos';
-import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
-import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
-import { fetchFilteredFormaPagamento, fetchFormaPagamentoMobilePage, listTheFormaPagamento } from '../../cadastro/formaPagamento/controller/controller';
-import { fetchFilteredCompany, listTheCompany } from '../../configuracoes/empresas/controller/controller';
+export type { ContratoFieldsProps, ContratoFormProps, ContratoFormRef, FormContratoCreatedProps } from '../types/contratos';
 import { fetchFilteredService, fetchServiceMobilePage, listTheService } from '../../cadastro/servicos/controller/controller';
 import { fetchFilteredCategoriaContrato, listTheCategoriaContrato } from '../../cadastro/categoriaContratos/controller/controller';
-export type { ContratoFieldsProps, ContratoFormProps, ContratoFormRef, FormContratoCreatedProps } from '../types/contratos';
+import { fetchFilteredFormaPagamento, fetchFormaPagamentoMobilePage, listTheFormaPagamento } from '../../cadastro/formaPagamento/controller/controller';
 
 const PESSOA_CONTRATO_MULTISELECT_CACHE_TIME_MS = 5 * 60 * 1000;
 const buildMobilePickerPageResult = <T,>(data: any) => {
@@ -221,8 +221,8 @@ export function ContratoFields({
                                     <MobileSearchPicker<CompanyEntity>
                                         selectedItem={selectedCompany}
                                         onItemChange={onCompanyChange}
-                                        fetchAllItems={listTheCompany}
-                                        fetchFilteredItems={fetchFilteredCompany}
+                                        fetchAllItems={listTheEmpresa}
+                                        fetchFilteredItems={fetchFilteredEmpresa}
                                         fetchItemsPage={fetchCompanyMobilePage}
                                         optionLabel="razao_social"
                                         optionValue="id"
@@ -326,7 +326,7 @@ export function ContratoFields({
                                 optionLabel="razao_social"
                                 dataKey="id"
                                 fetchAllItems={fetchAllPessoasWithCache}
-                                fetchFilteredItems={fetchFilteredPessoas}
+                                fetchFilteredItems={fetchFilteredPessoa}
                                 reloadAllOnShow
                                 initialSelectedValues={contrato.id_clientes_contrato ?? []}
                                 showAddButton

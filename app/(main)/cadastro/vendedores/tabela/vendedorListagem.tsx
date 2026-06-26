@@ -4,11 +4,11 @@ import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { usePermissions } from '@/app/routes/permissoes';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { handleActiveOrInativeVendedor } from '../controller/controller';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
@@ -137,7 +137,21 @@ export function ListarVendedores(
                                                     <Skeleton />
                                                 ) : (
                                                     <span className={isStatusInactive ? 'text-red-custom' : ''}>
-                                                        {highlightSearchTerm(limitarText(data.razao_social, 25), searchTerm)}
+                                                        {highlightSearchTerm(limitarText(data.razao_social, 80), searchTerm)}
+                                                    </span>
+                                                );
+                                            },
+                                        },
+                                         {
+                                            field: "cpf",
+                                            header: "CPF/CNPJ",
+                                            body: (data) => {
+                                                const isStatusInactive = data.ativo === false;
+                                                return loading ? (
+                                                    <Skeleton />
+                                                ) : (
+                                                    <span className={isStatusInactive ? 'text-red-custom' : ''}>
+                                                        {highlightSearchTerm(limitarText(data.cpf, 80), searchTerm)}
                                                     </span>
                                                 );
                                             },

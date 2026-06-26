@@ -8,9 +8,6 @@ import LoadingScreen from '@/app/loading';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
-import { buildEmptyNotaServicoPagination, createEmptyPessoa, formatAuthorizedNotaDateTime, formatAuthorizedNotaValue } from './types/notaServico';
-import type { ExportarPdfNfsePayload } from './types/notaServico';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
 import ListarNotaServico from './tabela/notaServicoListagem';
@@ -19,41 +16,44 @@ import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import type { PessoaFormRef, PreloadedPessoaData } from '../cadastro/pessoas/types/pessoa';
+import type { ExportarPdfNfsePayload } from './types/notaServico';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { validateFieldsPrepararNfs } from './controller/validation';
 import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
 import { FormCreatedPessoa } from '../cadastro/pessoas/form/controller';
+import MobileSearchPicker from '@/app/shared/mobile/MobileSearchPicker';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
-import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
 import ServicoDropdownField from '../cadastro/servicos/dropdown/servico';
 import { FormCreatedServico } from '../cadastro/servicos/form/controller';
-import type { PreloadedServicoData } from '../cadastro/servicos/types/servico';
 import FormEmpresaCreated from '../configuracoes/empresas/form/controller';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import type { PreloadedServicoData } from '../cadastro/servicos/types/servico';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { DropDownFilterNotaServico } from '@/app/shared/optionsDropDown/options';
 import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
-import type { PreloadedEmpresaData } from '../configuracoes/empresas/types/empresa';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
+import type { PreloadedEmpresaData } from '../configuracoes/empresas/types/empresa';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import type { PessoaFormRef, PreloadedPessoaData } from '../cadastro/pessoas/types/pessoa';
 import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import { createEmptyEmpresa, createEmptyServico } from '../ordemServicos/types/ordemServico';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { downloadPdfButton, downloadXmlButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { consumeNotaServicoFeedback, downloadArquivosNota, exportarPdfNotasServico, listNotaServico } from './controller/controller';
+import { downloadPdfButton, downloadXmlButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
-import { fetchFilteredPessoas, fetchPessoaMobilePage, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { consumeNotaServicoFeedback, downloadArquivosNota, exportarPdfNotasServico, listNotaServico } from './controller/controller';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
+import { buildEmptyNotaServicoPagination, createEmptyPessoa, formatAuthorizedNotaDateTime, formatAuthorizedNotaValue } from './types/notaServico';
+import { fetchFilteredPessoa, fetchPessoaMobilePage, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { fetchFilteredService, fetchServiceFormDataByID, fetchServicesByID, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
-import MobileSearchPicker from '@/app/shared/mobile/MobileSearchPicker';
-import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
+import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 
 
 const getAuthorizedNotaEmail = (nota: Partial<NfsEntity> | null) =>
@@ -78,6 +78,20 @@ const NotaServico: React.FC = () => {
     const formRef = useRef<PessoaFormRef>(null);
     const mobileListWrapperRef = useRef<HTMLDivElement | null>(null);
     const hasLoadedNotaServicoRef = useRef(false);
+    const searchTermRef = useRef('');
+    const activeFiltersRef = useRef<{
+        dateRange: DateRangeValue;
+        selectedEmpresa: CompanyEntity | null;
+        selectedPessoa: PessoaEntity | null;
+        selectedVendedor: VendedorEntity | null;
+        selectedStatusNotaServico: string;
+    }>({
+        dateRange: [null, null],
+        selectedEmpresa: null,
+        selectedPessoa: null,
+        selectedVendedor: null,
+        selectedStatusNotaServico: ''
+    });
     const [loading, setLoading] = useState(true);
     const [mobilePageSize, setMobilePageSize] = useState(() => Math.max(pageSize, 1));
     const [mobilePageSizeReady, setMobilePageSizeReady] = useState(() => !isMobile);
@@ -224,13 +238,7 @@ const NotaServico: React.FC = () => {
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setGerarNfse,
         field: ['razao_social_cliente'],
-        onSearch: (value) => {
-            if (!canSearchNotaServico) {
-                return;
-            }
-
-            handleListNotaServico(0, value);
-        }
+        onSearch: (value) => handleListNotaServico(0, value, ),
     });
     const getActiveFilters = useCallback(() => ({
         dateRange,
@@ -241,50 +249,31 @@ const NotaServico: React.FC = () => {
     }), [dateRange, selectedEmpresa, selectedPessoa, selectedVendedor, selectedStatusNotaServico]);
     const fetchNotaServicoPage = useCallback(async (
         pageNumber = 0,
-        termo = searchTerm,
-        filters?: {
-            dateRange: DateRangeValue;
-            selectedEmpresa: CompanyEntity | null;
-            selectedPessoa: PessoaEntity | null;
-            selectedVendedor: VendedorEntity | null;
-            selectedStatusNotaServico: string;
-        }
+        termo = searchTermRef.current,
+        filters = activeFiltersRef.current
     ) => {
         if (!canSearchNotaServico) {
             return buildEmptyNotaServicoPagination(resolvedPageSize, pageNumber);
         }
-        const appliedFilters = filters ?? {
-            dateRange,
-            selectedEmpresa,
-            selectedPessoa,
-            selectedVendedor,
-            selectedStatusNotaServico
-        };
 
         return await listNotaServico(
             {
                 page: pageNumber,
                 size: resolvedPageSize,
                 termo,
-                status: appliedFilters.selectedStatusNotaServico,
-                dateRange: appliedFilters.dateRange,
-                id_empresa: appliedFilters.selectedEmpresa?.id,
-                id_cliente: appliedFilters.selectedPessoa?.id,
-                id_vendedor: appliedFilters.selectedVendedor?.id
+                status: filters.selectedStatusNotaServico,
+                dateRange: filters.dateRange,
+                id_empresa: filters.selectedEmpresa?.id,
+                id_cliente: filters.selectedPessoa?.id,
+                id_vendedor: filters.selectedVendedor?.id
             },
             msgs
         );
-    }, [canSearchNotaServico, dateRange, resolvedPageSize, searchTerm, selectedEmpresa, selectedPessoa, selectedStatusNotaServico, selectedVendedor]);
+    }, [canSearchNotaServico, resolvedPageSize]);
     const handleListNotaServico = useCallback(async (
         pageNumber = 0,
-        termo = searchTerm,
-        filters?: {
-            dateRange: DateRangeValue;
-            selectedEmpresa: CompanyEntity | null;
-            selectedPessoa: PessoaEntity | null;
-            selectedVendedor: VendedorEntity | null;
-            selectedStatusNotaServico: string;
-        },
+        termo = searchTermRef.current,
+        filters = activeFiltersRef.current,
         append = false
     ) => {
         if (!canSearchNotaServico) {
@@ -312,7 +301,7 @@ const NotaServico: React.FC = () => {
                 setLoading(false);
             }
         }
-    }, [canSearchNotaServico, clearNotaServicoResults, fetchNotaServicoPage, isMobile, resolvedPageSize, searchTerm]);
+    }, [canSearchNotaServico, clearNotaServicoResults, fetchNotaServicoPage, isMobile, resolvedPageSize]);
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (!canSearchNotaServico) {
             return;
@@ -811,6 +800,18 @@ const NotaServico: React.FC = () => {
         }
     };
     useEffect(() => {
+        searchTermRef.current = searchTerm;
+    }, [searchTerm]);
+    useEffect(() => {
+        activeFiltersRef.current = {
+            dateRange,
+            selectedEmpresa,
+            selectedPessoa,
+            selectedVendedor,
+            selectedStatusNotaServico
+        };
+    }, [dateRange, selectedEmpresa, selectedPessoa, selectedStatusNotaServico, selectedVendedor]);
+    useEffect(() => {
         if (!showDialogPreparaNfs) return;
 
         validateFieldsPrepararNfs(prepararNfs, selectedEmpresaDialog, selectedServicoDialog, selectedPessoaDialog, setErrors, msgs);
@@ -928,7 +929,7 @@ const NotaServico: React.FC = () => {
         }
 
         const activeFilters = hasLoadedNotaServicoRef.current
-            ? getActiveFilters()
+            ? activeFiltersRef.current
             : {
                 dateRange: [null, null] as DateRangeValue,
                 selectedEmpresa: null,
@@ -936,12 +937,12 @@ const NotaServico: React.FC = () => {
                 selectedVendedor: null,
                 selectedStatusNotaServico: ''
             };
-        const termo = hasLoadedNotaServicoRef.current ? searchTerm : '';
+        const termo = hasLoadedNotaServicoRef.current ? searchTermRef.current : '';
 
         handleListNotaServico(0, termo, activeFilters).finally(() => {
             hasLoadedNotaServicoRef.current = true;
         });
-    }, [canSearchNotaServico, getActiveFilters, handleListNotaServico, isMobile, mobilePageSizeReady, resolvedPageSize, searchTerm]);
+    }, [canSearchNotaServico, handleListNotaServico, isMobile, mobilePageSizeReady, resolvedPageSize]);
     useEffect(() => {
         const feedback = consumeNotaServicoFeedback();
         if (!feedback) {
@@ -990,7 +991,7 @@ const NotaServico: React.FC = () => {
                                     {canSearchNotaServico && (
                                         <div className="col-7 mb-0 lg:col-4  ">
                                             <Input
-                                                label="Digite o nome Cliente"
+                                                label="Digite o nome Cliente / N° da NFS-e"
                                                 outlined={true}
                                                 id="razao_social_cliente"
                                                 useRightButton={true}
@@ -1042,8 +1043,8 @@ const NotaServico: React.FC = () => {
                                                             id="selectedEmpresa"
                                                             selectedItem={draftSelectedEmpresa}
                                                             onItemChange={handleEmpresaChange}
-                                                            fetchAllItems={listTheCompany}
-                                                            fetchFilteredItems={fetchFilteredCompany}
+                                                            fetchAllItems={listTheEmpresa}
+                                                            fetchFilteredItems={fetchFilteredEmpresa}
                                                             optionLabel="razao_social"
                                                             placeholder="Selecione a Empresa"
                                                             topLabel="Empresa:"
@@ -1141,7 +1142,7 @@ const NotaServico: React.FC = () => {
                                     {canSearchNotaServico && (
                                         <div className="col-12 lg:col-3 container-input-search-all">
                                             <Input
-                                                label="Digite nome do Cliente"
+                                                label="Digite nome do Cliente N° da NFS-e"
                                                 outlined={true}
                                                 id="razao_social_cliente"
                                                 useRightButton={true}
@@ -1176,8 +1177,8 @@ const NotaServico: React.FC = () => {
                                                             id="selectedEmpresa"
                                                             selectedItem={draftSelectedEmpresa}
                                                             onItemChange={handleEmpresaChange}
-                                                            fetchAllItems={listTheCompany}
-                                                            fetchFilteredItems={fetchFilteredCompany}
+                                                            fetchAllItems={listTheEmpresa}
+                                                            fetchFilteredItems={fetchFilteredEmpresa}
                                                             optionLabel="razao_social"
                                                             placeholder="Selecione a Empresa"
                                                             topLabel="Empresa:"
@@ -1191,7 +1192,7 @@ const NotaServico: React.FC = () => {
                                                             selectedItem={draftSelectedPessoa}
                                                             onItemChange={handlePessoaChange}
                                                             fetchAllItems={listThePessoas}
-                                                            fetchFilteredItems={fetchFilteredPessoas}
+                                                            fetchFilteredItems={fetchFilteredPessoa}
                                                             optionLabel="razao_social"
                                                             placeholder="Selecione um cliente ou Fornecedor"
                                                             topLabel="Cliente ou fornecedor:"
@@ -1473,8 +1474,8 @@ const NotaServico: React.FC = () => {
                                     <MobileSearchPicker<CompanyEntity>
                                         selectedItem={selectedEmpresaDialog}
                                         onItemChange={handleEmpresaChangeDialog}
-                                        fetchAllItems={listTheCompany}
-                                        fetchFilteredItems={fetchFilteredCompany}
+                                        fetchAllItems={listTheEmpresa}
+                                        fetchFilteredItems={fetchFilteredEmpresa}
                                         fetchItemsPage={fetchEmpresaMobilePage}
                                         optionValue="id"
                                         topLabel="Empresa:"
@@ -1495,7 +1496,7 @@ const NotaServico: React.FC = () => {
                                         selectedItem={selectedPessoaDialog}
                                         onItemChange={handlePessoaChangeDialog}
                                         fetchAllItems={listThePessoas}
-                                        fetchFilteredItems={fetchFilteredPessoas}
+                                        fetchFilteredItems={fetchFilteredPessoa}
                                         fetchItemsPage={fetchPessoaMobilePage}
                                         loadMoreRows={20}
                                         optionLabel="razao_social"

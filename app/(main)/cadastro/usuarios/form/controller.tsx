@@ -5,21 +5,23 @@ import { Toast } from 'primereact/toast';
 import { UsuarioFields } from './usuario';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
+import Input from '@/app/shared/include/input/input-all';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
+import { validateEmail } from '@/app/utils/validateForms/validateEmail';
 import { validateFieldsUserConta } from '../controller/validation';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { EmpresaFormRef } from '@/app/(main)/configuracoes/empresas/types/empresa';
 import FormPermissoesCreated from '@/app/(main)/cadastro/permissoes/form/controller';
 import FormEmpresaCreated from '@/app/(main)/configuracoes/empresas/form/controller';
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { ChangeEvent, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { PermissoesFormRef } from '@/app/(main)/cadastro/permissoes/types/perfilUsuario';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { convertProfileUserToBase64, createUsuario, fetchUserContaCreated, updateUsuario } from '../controller/controller';
+import { alterarEmailUsuario, convertProfileUserToBase64, createUsuario, fetchUserContaCreated, updateUsuario } from '../controller/controller';
 import {createEmptyEmpresaUsuario,createEmptyPerfilUsuario,createEmptyUserConta,FormCreatedUsuarioProps,UsuarioFormProps,UsuarioFormRef} from '../types/usuario';
 export type { UsuarioFieldsProps, UsuarioFormProps, UsuarioFormRef } from '../types/usuario';
 
@@ -53,6 +55,10 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [selectedPerfilUser, setSelectedPerfilUser] = useState<PerfilUser | null>(null);
         const [stateDisableBtnCreatedUserConta, setStateDisableBtnCreatedUserConta] = useState(false);
+        const [showChangeEmailDialog, setShowChangeEmailDialog] = useState(false);
+        const [newEmail, setNewEmail] = useState('');
+        const [changeEmailError, setChangeEmailError] = useState('');
+        const [isChangingEmail, setIsChangingEmail] = useState(false);
 
         const validateUsuarioForm = (
             nextUserConta = userConta,
@@ -161,6 +167,72 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
             });
             setEmpresasOptions((prev) => [...prev, created]);
             clearError('selectedEmpresa');
+        };
+
+        const handleOpenChangeEmailDialog = () => {
+            if (!userContaID) {
+                return;
+            }
+
+            setNewEmail(userConta.email || '');
+            setChangeEmailError('');
+            setShowChangeEmailDialog(true);
+        };
+
+        const handleCloseChangeEmailDialog = (force = false) => {
+            if (isChangingEmail && !force) {
+                return;
+            }
+
+            setShowChangeEmailDialog(false);
+            setNewEmail('');
+            setChangeEmailError('');
+        };
+
+        const handleChangeEmailInput = (event: ChangeEvent<HTMLInputElement>) => {
+            setNewEmail(event.target.value);
+
+            if (changeEmailError) {
+                setChangeEmailError('');
+            }
+        };
+
+        const handleChangeEmailSubmit = async () => {
+            if (!userContaID) {
+                return;
+            }
+
+            const normalizedEmail = newEmail.trim();
+
+            if (!normalizedEmail) {
+                setChangeEmailError('Informe o novo e-mail.');
+                return;
+            }
+
+            if (!validateEmail(normalizedEmail)) {
+                setChangeEmailError('Email inválido. Por favor, digite um email válido.');
+                return;
+            }
+
+            if (normalizedEmail === (userConta.email || '').trim()) {
+                setChangeEmailError('Informe um e-mail diferente do atual.');
+                return;
+            }
+
+            setIsChangingEmail(true);
+
+            try {
+                const changed = await alterarEmailUsuario(userContaID, normalizedEmail, msgs);
+
+                if (!changed) {
+                    return;
+                }
+
+                setUserConta((prev) => prev.copyWith({ email: normalizedEmail }));
+                handleCloseChangeEmailDialog(true);
+            } finally {
+                setIsChangingEmail(false);
+            }
         };
 
         const handleSubmit = async (event?: React.FormEvent) => {
@@ -278,6 +350,7 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
                             onTriggerProfileImageUpload={handleTriggerProfileImageUpload}
                             onOpenPerfilUserModal={() => setShowModalPerfilUser(true)}
                             onOpenEmpresaModal={() => setShowModalEmpresa(true)}
+                            onOpenChangeEmailModal={handleOpenChangeEmailDialog}
                         />
                     </div>
                 </div>
@@ -285,6 +358,43 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
                     {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Salvar" icon="pi pi-save" disabled={false}/>}
                     {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Salvar" onBackClick={onBackClick} onClose={onClose} icon="pi pi-save" disabled={false}/>}
                 </div>
+
+                <DialogFilter
+                    header="Alterar E-mail"
+                    visible={showChangeEmailDialog}
+                    onHide={() => handleCloseChangeEmailDialog()}
+                    onSave={handleChangeEmailSubmit}
+                    onCancel={() => handleCloseChangeEmailDialog()}
+                    showSaveButton
+                    showCancelButton
+                    saveLabel="Alterar"
+                    cancelLabel="Cancelar"
+                    saveDisabled={isChangingEmail || !newEmail.trim()}
+                    cancelDisabled={isChangingEmail}
+                    loading={isChangingEmail}
+                    loadingText="Alterando e-mail..."
+                    width="32rem"
+                    breakpoints={{ '960px': '90vw', '640px': '95vw' }}
+                >
+                    <div className="grid formgrid">
+                        <div className="col-12">
+                            <Input
+                                id="novo_email"
+                                value={newEmail}
+                                onChange={handleChangeEmailInput}
+                                label="Digite o novo E-mail"
+                                type="email"
+                                hasError={!!changeEmailError}
+                                errorMessage={changeEmailError}
+                                iconLeft="pi pi-at"
+                                topLabel="Novo E-mail:"
+                                showTopLabel
+                                autoFocus
+                                required
+                            />
+                        </div>
+                    </div>
+                </DialogFilter>
 
                 <DialogFilter header="Adicionar Perfil deste Usuário" visible={showModalPerfilUser} onHide={() => setShowModalPerfilUser(false)}>
                     <FormPermissoesCreated
@@ -335,5 +445,3 @@ export const FormCreatedUsuario = forwardRef<UsuarioFormRef, FormCreatedUsuarioP
     return <UsuarioFields {...props} />;
 });
 FormCreatedUsuario.displayName = 'FormCreatedUsuario';
-
-
