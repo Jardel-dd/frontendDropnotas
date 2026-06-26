@@ -17,12 +17,12 @@ import EmpresaDropdownField from '@/app/(main)/configuracoes/empresas/dropDown/e
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import VendedorDropdownField from '@/app/(main)/cadastro/vendedores/dropDown/DropdownVendedor';
 import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dropDown/formaPagamento';
-import {  fetchCompanyMobilePage, fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
-import { fetchFilteredPessoas, fetchPessoaMobilePage, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { fetchFilteredPessoa, fetchPessoaMobilePage, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { fetchFilteredService, fetchServiceMobilePage, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { fetchFilteredVendedor, fetchVendedorMobilePage, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import { fetchFilteredFormaPagamento,  fetchFormaPagamentoMobilePage,  listTheFormaPagamento } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
+import {  fetchCompanyMobilePage, fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 export type { FormCreatedOrdemServicoProps, OrdemServicoFieldsProps, OrdemServicoFormProps, OrdemServicoFormRef } from '../types/ordemServico';
+import { fetchFilteredFormaPagamento,  fetchFormaPagamentoMobilePage,  listTheFormaPagamento } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
 
 export function OrdemServicoFields({
     emitirOS,
@@ -174,8 +174,8 @@ export function OrdemServicoFields({
                             <MobileSearchPicker<CompanyEntity>
                                 selectedItem={selectedEmpresa}
                                 onItemChange={onEmpresaChange}
-                                fetchAllItems={listTheCompany}
-                                fetchFilteredItems={fetchFilteredCompany}
+                                fetchAllItems={listTheEmpresa}
+                                fetchFilteredItems={fetchFilteredEmpresa}
                                 fetchItemsPage={fetchCompanyMobilePage}
                                 optionLabel="razao_social"
                                 optionValue="id"
@@ -215,7 +215,7 @@ export function OrdemServicoFields({
                                 selectedItem={selectedCliente}
                                 onItemChange={onPessoaChange}
                                 fetchAllItems={listThePessoas}
-                                fetchFilteredItems={fetchFilteredPessoas}
+                                fetchFilteredItems={fetchFilteredPessoa}
                                 fetchItemsPage={fetchPessoaMobilePage}
                                 optionLabel="razao_social"
                                 optionValue="id"

@@ -1,12 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CompanyEntity } from "@/app/entity/CompanyEntity";
 import { EmpresaDropdownFieldProps } from "../types/empresa";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
-import {
-    fetchCompanyDropdownByID,
-    fetchFilteredCompany,
-    listTheCompany
-} from "../controller/controller";
+import {fetchCompanyDropdownByID, fetchFilteredEmpresa, listTheEmpresa} from "../controller/controller";
 
 const COMPANY_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;
 
@@ -34,7 +30,7 @@ export default function EmpresaDropdownField({
 
     useQuery({
         queryKey: companyDropdownQueryKey,
-        queryFn: listTheCompany,
+        queryFn: listTheEmpresa,
         enabled: loadOnMount,
         staleTime: COMPANY_DROPDOWN_CACHE_TIME_MS,
         gcTime: COMPANY_DROPDOWN_CACHE_TIME_MS
@@ -49,12 +45,12 @@ export default function EmpresaDropdownField({
             fetchAllItems={() =>
                 queryClient.fetchQuery({
                     queryKey: companyDropdownQueryKey,
-                    queryFn: listTheCompany,
+                    queryFn: listTheEmpresa,
                     staleTime: COMPANY_DROPDOWN_CACHE_TIME_MS,
                     gcTime: COMPANY_DROPDOWN_CACHE_TIME_MS
                 })
             }
-            fetchFilteredItems={fetchFilteredCompany}
+            fetchFilteredItems={fetchFilteredEmpresa}
             fetchItemByValue={async (value) => {
                 const response = await fetchCompanyDropdownByID(String(value));
                 return response ?? null;

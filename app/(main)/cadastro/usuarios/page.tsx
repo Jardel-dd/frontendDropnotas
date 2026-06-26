@@ -3,21 +3,21 @@ import '@/app/styles/styledGlobal.css'
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
-import { usePermissions } from '@/app/routes/permissoes';
 import ListarUserConta from './tabela/usuarioListagem';
 import Input from '@/app/shared/include/input/input-all';
+import { usePermissions } from '@/app/routes/permissoes';
+import {  CheckboxChangeEvent } from 'primereact/checkbox';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import {  CheckboxChangeEvent } from 'primereact/checkbox';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
+import CustomPaginator from '@/app/components/paginator/customPaginator';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarUsuario, deletarUsuario, listUsuario } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import CustomPaginator from '@/app/components/paginator/customPaginator';
-import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const Usuarios: React.FC = () => {
     const router = useRouter();

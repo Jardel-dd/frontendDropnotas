@@ -1,9 +1,9 @@
 'use client'
 import axios from "axios";
-import { useCallback } from "react";
 import api from "@/app/services/api";
 import { FormaPagamentoEntity } from "@/app/entity/FormaPagamento";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
+import { remocaoCaractereFiltro } from "@/app/shared/removeCaracter/controller";
 import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
 
 export const listFormaPagamento = async (
@@ -86,35 +86,35 @@ export const deletarFormaPagamento = async (
     }
 };
 export const createdFormaPagamento = async (
-  formaPagamento: Partial<FormaPagamentoEntity>,
-  msgs: any,
-  router: AppRouterInstance,
-  setFormaPagamento: React.Dispatch<React.SetStateAction<FormaPagamentoEntity>>,
-  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
-  setLoading: (state: boolean) => void,
-  redirectAfterSave: boolean,
+    formaPagamento: Partial<FormaPagamentoEntity>,
+    msgs: any,
+    router: AppRouterInstance,
+    setFormaPagamento: React.Dispatch<React.SetStateAction<FormaPagamentoEntity>>,
+    setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
+    setLoading: (state: boolean) => void,
+    redirectAfterSave: boolean,
 ) => {
-  try {
-    const data = { ...formaPagamento };
-    const resp = await api.post('/forma-pagamento', data);
-    const payload = resp?.data;
-    const created = new FormaPagamentoEntity(payload);
+    try {
+        const data = { ...formaPagamento };
+        const resp = await api.post('/forma-pagamento', data);
+        const payload = resp?.data;
+        const created = new FormaPagamentoEntity(payload);
 
-    msgs.current?.show({
-      severity: 'success',
-      summary: 'Sucesso:',
-      detail: 'Forma de Pagamento criada com sucesso!',
-    });
+        msgs.current?.show({
+            severity: 'success',
+            summary: 'Sucesso:',
+            detail: 'Forma de Pagamento criada com sucesso!',
+        });
 
-    if (redirectAfterSave) {
-      router.push('/cadastro/formaPagamento');
+        if (redirectAfterSave) {
+            router.push('/cadastro/formaPagamento');
+        }
+        setFormaPagamento(created);
+        console.log('[createdFormaPagamento] payload:', payload);
+        return created;
+    } finally {
+        setLoading(false);
     }
-    setFormaPagamento(created);
-    console.log('[createdFormaPagamento] payload:', payload);
-    return created; 
-  } finally {
-    setLoading(false);
-  }
 };
 export const updateFormaPagamento = async (
     formaPagamentoId: string,
@@ -130,8 +130,8 @@ export const updateFormaPagamento = async (
         const responseData = response?.data;
         const responseFormaPagamento =
             responseData &&
-            typeof responseData === 'object' &&
-            'formaPagamento' in responseData
+                typeof responseData === 'object' &&
+                'formaPagamento' in responseData
                 ? (responseData as { formaPagamento?: FormaPagamentoEntity | Record<string, unknown> }).formaPagamento
                 : null;
         const updated =
@@ -159,6 +159,47 @@ export const updateFormaPagamento = async (
         }
     }
 };
+export const listTheFormaPagamento = async () => {
+    try {
+        const response = await api.get('/forma-pagamento');
+        if (response.data && Array.isArray(response.data.content)) {
+            return response.data.content;
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error("Erro ao buscar forma de pagamento:", error);
+        return [];
+    }
+};
+export const fetchAllFormaPagamento = async () => {
+    try {
+        const response = await api.get('/forma-pagamento');
+        return response.data.content || [];
+    } catch (error) {
+        console.error("Erro ao buscar todas as vendedor:", error);
+        return [];
+    }
+};
+export const fetchFormaPagamentoMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/forma-pagamento', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<FormaPagamentoEntity>(response.data);
+};
 export const handleActiveOrInativeFormaPagamento = async (
     rowData: FormaPagamentoEntity,
     msgs: any,
@@ -181,33 +222,11 @@ export const handleActiveOrInativeFormaPagamento = async (
         console.error("Erro ao ativar/desativar Forma de Pagamento:", error);
     }
 };
-export const listTheFormaPagamento = async () => {
-    try {
-        const response = await api.get('/forma-pagamento');
-        if (response.data && Array.isArray(response.data.content)) {
-            return response.data.content;
-        } else {
-            return [];
-        }
-    } catch (error) {
-        console.error("Erro ao buscar forma de pagamento:", error);
-        return [];
-    }
-};
-export const fetchAllFormaPagamento = async () => {
-       try {
-        const response = await api.get('/forma-pagamento');
-        return response.data.content || [];
-    } catch (error) {
-        console.error("Erro ao buscar todas as vendedor:", error);
-        return [];
-    }
-};
 export const fetchFilteredFormaPagamento = async (filtro: string) => {
     try {
         const response = await api.get(`/forma-pagamento`, {
             params: {
-                termo: filtro
+                termo: remocaoCaractereFiltro(filtro)
             }
         });
         console.log(" Categoria Contrato filtrados:", response.data);
@@ -221,7 +240,7 @@ export const fetchFilteredFormaPagamento = async (filtro: string) => {
         return [];
     }
 };
-export const fetchFormaPagamentoByID  = async (formaPagamentoId: string) => {
+export const fetchFormaPagamentoByID = async (formaPagamentoId: string) => {
     try {
         const response = await api.get(`/forma-pagamento/${formaPagamentoId}`);
         const data = response.data;
@@ -232,23 +251,4 @@ export const fetchFormaPagamentoByID  = async (formaPagamentoId: string) => {
         console.error("Erro ao buscar Forma dePagamento:", error);
         throw error;
     }
-};
-export const fetchFormaPagamentoMobilePage = async ({
-    searchTerm: termo,
-    page,
-    size
-}: {
-    searchTerm: string;
-    page: number;
-    size: number;
-}) => {
-    const response = await api.get('/forma-pagamento', {
-        params: {
-            page,
-            size,
-            termo: termo || undefined
-        }
-    });
-
-    return buildMobilePickerPageResult<FormaPagamentoEntity>(response.data);
 };

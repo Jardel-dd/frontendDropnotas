@@ -2,12 +2,12 @@
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Skeleton } from 'primereact/skeleton';
 import { usePermissions } from '@/app/routes/permissoes';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
@@ -50,7 +50,6 @@ export function ListarClientesFornecedores(
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
-
     const changeStatusActivateandDelete = async (rowData: PessoaEntity) => {
         if (rowData.ativo) {
             await deletar(rowData.id!);
@@ -59,7 +58,6 @@ export function ListarClientesFornecedores(
 
         await ativar(rowData.id!);
     };
-
     return (
         <div style={{ marginTop: '0', display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
             <Messages ref={msgs} className="custom-messages" />
@@ -74,7 +72,7 @@ export function ListarClientesFornecedores(
                                 loading={loading}
                                 totalRecords={listPaginationClientesFornecedores?.totalElements ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                 isDarkMode={isDarkMode}
@@ -85,11 +83,11 @@ export function ListarClientesFornecedores(
                                 toggleStatusOrDeleteButtonTemplate={
                                     permissaoPessoa.delete
                                         ? (rowData) =>
-                                              toggleStatusOrDeleteButton({
-                                                  entity: rowData,
-                                                  onToggle: changeStatusActivateandDelete,
-                                                  entityType: ''
-                                              })
+                                            toggleStatusOrDeleteButton({
+                                                entity: rowData,
+                                                onToggle: changeStatusActivateandDelete,
+                                                entityType: ''
+                                            })
                                         : undefined
                                 }
                                 showExpandButton={false}
@@ -126,7 +124,7 @@ export function ListarClientesFornecedores(
                                 loading={loading}
                                 totalRecords={listPaginationClientesFornecedores?.totalElements ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
                                 isDarkMode={isDarkMode}
@@ -137,11 +135,11 @@ export function ListarClientesFornecedores(
                                 toggleStatusOrDeleteButtonTemplate={
                                     permissaoPessoa.delete
                                         ? (rowData) =>
-                                              toggleStatusOrDeleteButton({
-                                                  entity: rowData,
-                                                  onToggle: changeStatusActivateandDelete,
-                                                  entityType: ''
-                                              })
+                                            toggleStatusOrDeleteButton({
+                                                entity: rowData,
+                                                onToggle: changeStatusActivateandDelete,
+                                                entityType: ''
+                                            })
                                         : undefined
                                 }
                                 showExpandButton={false}
@@ -155,7 +153,7 @@ export function ListarClientesFornecedores(
                                                 <Skeleton />
                                             ) : (
                                                 <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
-                                                    {highlightSearchTerm(limitarText(data.razao_social, 25), searchTerm)}
+                                                    {highlightSearchTerm(limitarText(data.razao_social, 80), searchTerm)}
                                                 </span>
                                             );
                                         }

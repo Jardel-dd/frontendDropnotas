@@ -3,24 +3,22 @@ import './styled.css';
 import dayjs from 'dayjs';
 import '@/app/styles/styledGlobal.css';
 import { fetchDashboard } from './controller';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { RelatorioDashboardParams } from './types';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import React, { useEffect, useRef, useState } from 'react';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import PieChart from '@/app/components/chartsComponent/charts';
-import PessoaDropdownField from '../cadastro/pessoas/dropDown/pessoa';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
-import EmpresaDropdownField from '../configuracoes/empresas/dropDown/empresa';
+import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
+import { fetchFilteredPessoa, listThePessoas } from '../cadastro/pessoas/controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { fetchFilteredCompany, listTheCompany } from '../configuracoes/empresas/controller/controller';
-import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { fetchFilteredPessoas, listThePessoas } from '../cadastro/pessoas/controller/controller';
+import { fetchFilteredEmpresa, listTheEmpresa } from '../configuracoes/empresas/controller/controller';
 const ComponentDashboard: React.FC = () => {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -178,8 +176,8 @@ const ComponentDashboard: React.FC = () => {
                                                         id="selectedEmpresa"
                                                         selectedItem={selectedCompany}
                                                         onItemChange={handleCompanyChange}
-                                                        fetchAllItems={listTheCompany}
-                                                        fetchFilteredItems={fetchFilteredCompany}
+                                                        fetchAllItems={listTheEmpresa}
+                                                        fetchFilteredItems={fetchFilteredEmpresa}
                                                         optionLabel="razao_social"
                                                         placeholder="Selecione a Empresa"
                                                         topLabel="Empresa:"
@@ -193,7 +191,7 @@ const ComponentDashboard: React.FC = () => {
                                                         selectedItem={selectedPessoa}
                                                         onItemChange={handlePessoaChange}
                                                         fetchAllItems={listThePessoas}
-                                                        fetchFilteredItems={fetchFilteredPessoas}
+                                                        fetchFilteredItems={fetchFilteredPessoa}
                                                         optionLabel="razao_social"
                                                         placeholder="Selecione um cliente ou Fornecedor"
                                                         topLabel="Cliente ou fornecedor:"
@@ -261,8 +259,8 @@ const ComponentDashboard: React.FC = () => {
                                                         id="selectedEmpresa"
                                                         selectedItem={selectedCompany}
                                                         onItemChange={handleCompanyChange}
-                                                        fetchAllItems={listTheCompany}
-                                                        fetchFilteredItems={fetchFilteredCompany}
+                                                        fetchAllItems={listTheEmpresa}
+                                                        fetchFilteredItems={fetchFilteredEmpresa}
                                                         optionLabel="razao_social"
                                                         placeholder="Selecione a Empresa"
                                                         topLabel="Empresa:"
@@ -276,7 +274,7 @@ const ComponentDashboard: React.FC = () => {
                                                         selectedItem={selectedPessoa}
                                                         onItemChange={handlePessoaChange}
                                                         fetchAllItems={listThePessoas}
-                                                        fetchFilteredItems={fetchFilteredPessoas}
+                                                        fetchFilteredItems={fetchFilteredPessoa}
                                                         optionLabel="razao_social"
                                                         placeholder="Selecione um cliente ou Fornecedor"
                                                         topLabel="Cliente ou fornecedor:"

@@ -60,3 +60,36 @@ export interface FormaPagamentoDropdownFieldProps {
     onAddClick?: () => void;
     autoSelectSingle?: boolean;
 }
+export const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
+
+export const createEmptyContasReceber = () =>
+    new ContasReceberEntity({
+        ativo: true,
+        id: 0,
+        descricao: '',
+        id_forma_pagamento: 0,
+        id_vendedor: 0,
+        id_cliente: 0,
+        valor_original: 0,
+        data_vencimento: getTodayDate(),
+        observacao: ''
+    });
+
+export const toContasReceberEntity = (contasReceber?: Partial<ContasReceberEntity> | null) =>
+    new ContasReceberEntity({
+        ...createEmptyContasReceber(),
+        ...(contasReceber ?? {})
+    });
+
+export const getInitialContasReceber = (contasReceber?: Partial<ContasReceberEntity> | null) =>
+    toContasReceberEntity({
+        ...(contasReceber ?? {}),
+        data_vencimento: contasReceber?.data_vencimento || getTodayDate()
+    });

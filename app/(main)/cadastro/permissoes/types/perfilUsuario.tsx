@@ -124,5 +124,7 @@ export const buildAllSelectedKeys = (): TreeCheckboxSelectionKeys => {
 
     return allSelected;
 };
+export type SetErrorsFn = React.Dispatch<React.SetStateAction<{ [key: string]: string }>>;
+
 export const permissionNodeKeys = permissoes.flatMap((permission) => permission.children?.map((child) => child.key).filter((key): key is string => Boolean(key)) ?? []);
 export const parentNodeKeys = permissoes.map((permission) => permission.key).filter((key): key is string => Boolean(key));

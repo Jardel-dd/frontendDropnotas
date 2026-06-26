@@ -3,18 +3,18 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
-import { usePermissions } from '@/app/routes/permissoes';
 import { Skeleton } from 'primereact/skeleton';
+import { usePermissions } from '@/app/routes/permissoes';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { handleActiveOrInativeUserConta } from '../controller/controller';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
+import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
-import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 export function ListarUserConta(
     {
         listPaginationUserConta,
@@ -86,20 +86,48 @@ export function ListarUserConta(
                                     }) : undefined}
                                     showExpandButton={false} 
                                     columns={[
-                                        {
-                                            field: "nome",
-                                            header: "Nome",
-                                            body: (data) => {
-                                                const isStatusInactive = data.ativo === false;
-                                                return loading ? (
-                                                    <Skeleton />
-                                                ) : (
+                                         {
+                                        field: "nome",
+                                        header: "Nome",
+                                        body: (data) => {
+                                            const isStatusInactive = data.ativo === false;
+                                            return loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                                    <div
+                                                        style={{
+                                                            width: "25px",
+                                                            height: "25px",
+                                                            borderRadius: "50%",
+                                                            overflow: "hidden",
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            justifyContent: "center",
+                                                            backgroundColor: "#f0f0f0", 
+                                                        }}
+                                                    >
+                                                        {(data.foto_perfil || data.fotoPerfil) ? (
+                                                            <img
+                                                                src={data.foto_perfil?.startsWith('data:image') ? data.foto_perfil : data.foto_perfil}
+                                                                alt="Foto de Perfil"
+                                                                style={{
+                                                                    width: "100%",
+                                                                    height: "100%",
+                                                                    objectFit: "cover",
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <i className="pi pi-user" style={{ fontSize: "1.5rem", color: "#aaa" }}></i>
+                                                        )}
+                                                    </div>
                                                     <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
-                                                        {highlightSearchTerm(limitarText(data.nome, 25), searchTerm)}
+                                                        {highlightSearchTerm(limitarText(data.nome, 30), searchTerm)}
                                                     </span>
-                                                );
-                                            },
+                                                </div>
+                                            );
                                         },
+                                    },
                                     ]} 
                                     listarInativos={listarInativos}
                                     mobileLoadMoreVisible={mobileLoadMoreVisible}
@@ -164,13 +192,12 @@ export function ListarUserConta(
                                                         )}
                                                     </div>
                                                     <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
-                                                        {highlightSearchTerm(limitarText(data.nome, 25), searchTerm)}
+                                                        {highlightSearchTerm(limitarText(data.nome, 30), searchTerm)}
                                                     </span>
                                                 </div>
                                             );
                                         },
                                     },
-                                    
                                     {
                                         field: "email",
                                         header: "E-mail",
@@ -180,7 +207,7 @@ export function ListarUserConta(
                                                 <Skeleton />
                                             ) : (
                                                 <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
-                                                    {highlightSearchTerm(limitarText(data.email, 25), searchTerm)}
+                                                    {highlightSearchTerm(limitarText(data.email, 80), searchTerm)}
                                                 </span>
                                             );
                                         },
@@ -209,6 +236,6 @@ export function ListarUserConta(
             }
         </div>
     );
-}
+};
 export default ListarUserConta;
 
