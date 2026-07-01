@@ -1,24 +1,47 @@
 'use client';
 import 'primeicons/primeicons.css';
-import '@/app/styles/styledGlobal.css';
 import { useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import api from '@/app/services/api';
+import '@/app/styles/styledGlobal.css';
 import { IconReal } from '@/app/utils/icons/icons';
 import { InputSwitch } from 'primereact/inputswitch';
+import { useQueryClient } from '@tanstack/react-query';
 import Input from '@/app/shared/include/input/input-all';
-import type {ContratoFieldsProps,} from '../types/contratos';
+import { CompanyEntity } from '@/app/entity/CompanyEntity';
+import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
+import type { ContratoFieldsProps, } from '../types/contratos';
+import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
+import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
+import MobileSearchPicker from '@/app/shared/mobile/MobileSearchPicker';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { OptionsPeriodicidade } from '@/app/shared/optionsDropDown/options';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import EmpresaDropdownField from '@/app/(main)/configuracoes/empresas/dropDown/empresa';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dropDown/formaPagamento';
+import { fetchFilteredEmpresa, listTheEmpresa } from '../../configuracoes/empresas/controller/controller';
+import { fetchFilteredPessoa, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import CategoriaContratoDropdownField from '@/app/(main)/cadastro/categoriaContratos/dropDown/categoriaContratos';
-import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
-export type {ContratoFieldsProps, ContratoFormProps, ContratoFormRef,FormContratoCreatedProps} from '../types/contratos';
+export type { ContratoFieldsProps, ContratoFormProps, ContratoFormRef, FormContratoCreatedProps } from '../types/contratos';
+import { fetchFilteredService, fetchServiceMobilePage, listTheService } from '../../cadastro/servicos/controller/controller';
+import { fetchFilteredCategoriaContrato, listTheCategoriaContrato } from '../../cadastro/categoriaContratos/controller/controller';
+import { fetchFilteredFormaPagamento, fetchFormaPagamentoMobilePage, listTheFormaPagamento } from '../../cadastro/formaPagamento/controller/controller';
 
 const PESSOA_CONTRATO_MULTISELECT_CACHE_TIME_MS = 5 * 60 * 1000;
+const buildMobilePickerPageResult = <T,>(data: any) => {
+    const items = Array.isArray(data?.content) ? (data.content as T[]) : Array.isArray(data) ? (data as T[]) : [];
+    const currentPage = Number(data?.number ?? data?.pageable?.pageNumber ?? 0);
+    const totalPages = Number(data?.totalPages ?? 0);
+    const hasMoreFromLastFlag = typeof data?.last === 'boolean' ? !data.last : null;
+    const hasMoreFromTotalPages = totalPages > currentPage + 1;
+
+    return {
+        items,
+        hasMore: hasMoreFromLastFlag ?? hasMoreFromTotalPages
+    };
+};
 
 export function ContratoFields({
     contrato,
@@ -54,6 +77,8 @@ export function ContratoFields({
     onEditPessoa,
     onValidateDescricao
 }: ContratoFieldsProps) {
+    const isMobile = useIsMobile();
+    const isDesktop = useIsDesktop();
     const queryClient = useQueryClient();
     const fetchAllPessoasWithCache = useCallback(
         () =>
@@ -65,7 +90,28 @@ export function ContratoFields({
             }),
         [queryClient, reloadKeyPessoa]
     );
+    const fetchCompanyMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
+        const response = await api.get('/empresa', {
+            params: {
+                page,
+                size,
+                termo: termo || undefined
+            }
+        });
 
+        return buildMobilePickerPageResult<CompanyEntity>(response.data);
+    }, []);
+    const fetchCategoriaContratoMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
+        const response = await api.get('/categoria-contrato', {
+            params: {
+                page,
+                size,
+                termo: termo || undefined
+            }
+        });
+
+        return buildMobilePickerPageResult<CategoryContratosEntity>(response.data);
+    }, []);
     return (
         <div className="scrollable-container">
             <div className="custom-flex-row">
@@ -102,6 +148,159 @@ export function ContratoFields({
                                 required
                             />
                         </div>
+                        {isDesktop && (
+                            <>
+                                <div className="col-12 lg:col-4">
+                                    <EmpresaDropdownField
+                                        selectedEmpresa={selectedCompany}
+                                        selectedEmpresaId={contrato.id_empresa ?? null}
+                                        onEmpresaChange={onCompanyChange}
+                                        reloadKey={reloadKeyEmpresa}
+                                        hasError={!!errors.selectedCompany}
+                                        errorMessage={errors.selectedCompany}
+                                        showAddButton
+                                        onAddClick={onAddEmpresa}
+                                        onEditClick={onEditEmpresa}
+                                        autoSelectSingle
+                                        required
+                                    />
+                                </div>
+                                <div className="col-12 lg:col-4">
+                                    <ServicoDropdownField
+                                        selectedService={selectedService}
+                                        selectedServiceId={contrato.id_servico ?? null}
+                                        onServiceChange={onServiceChange}
+                                        reloadKey={reloadKeyServico}
+                                        hasError={!!errors.selectedService}
+                                        errorMessage={errors.selectedService}
+                                        showAddButton
+                                        onAddClick={onAddServico}
+                                        onEditClick={onEditServico}
+                                        autoSelectSingle
+                                        useCachedAllItems
+                                        required
+                                    />
+                                </div>
+                                <div className="col-12 lg:col-4">
+                                    <CategoriaContratoDropdownField
+                                        selectedCategoriaContrato={selectedCategoriaContrato}
+                                        selectedCategoriaContratoId={contrato.id_categoria_contrato ?? null}
+                                        onCategoriaContratoChange={onCategoriaContratoChange}
+                                        reloadKey={reloadKeyCategoriaContrato}
+                                        hasError={!!errors.selectedCategoriaContrato}
+                                        errorMessage={errors.selectedCategoriaContrato}
+                                        showAddButton
+                                        onAddClick={onAddCategoriaContrato}
+                                        onEditClick={onEditCategoriaContrato}
+                                        autoSelectSingle
+                                        useCachedAllItems
+                                        required
+                                    />
+                                </div>
+                                <div className="col-12 lg:col-4">
+                                    <FormaPagamentoDropdownField
+                                        selectedFormaPagamento={selectedFormaPagamento}
+                                        selectedFormaPagamentoId={contrato.id_forma_pagamento ?? null}
+                                        onFormaPagamentoChange={onFormaPagamentoChange}
+                                        reloadKey={reloadKeyFormaPagamento}
+                                        hasError={!!errors.selectedFormadePagamento}
+                                        errorMessage={errors.selectedFormadePagamento}
+                                        showAddButton
+                                        onAddClick={onAddFormaPagamento}
+                                        onEditClick={onEditFormaPagamento}
+                                        autoSelectSingle={false}
+                                        useCachedAllItems
+                                        required
+                                    />
+                                </div>
+                            </>
+                        )}
+                        {isMobile && (
+                            <>
+                                <div className="col-12 lg:col-4">
+                                    <MobileSearchPicker<CompanyEntity>
+                                        selectedItem={selectedCompany}
+                                        onItemChange={onCompanyChange}
+                                        fetchAllItems={listTheEmpresa}
+                                        fetchFilteredItems={fetchFilteredEmpresa}
+                                        fetchItemsPage={fetchCompanyMobilePage}
+                                        optionLabel="razao_social"
+                                        optionValue="id"
+                                        topLabel="Empresa:"
+                                        loadMoreRows={20}
+                                        placeholder="Selecione a Empresa"
+                                        dialogTitle="Selecionar a Empresa"
+                                        hasError={!!errors.selectedCompany}
+                                        errorMessage={errors.selectedCompany}
+                                        onAddClick={onAddEmpresa}
+                                        onEditClick={onEditEmpresa}
+                                        autoLoadAndSelectSingle
+                                    />
+                                </div>
+                                <div className="col-12 lg:col-4">
+                                    <MobileSearchPicker<ServiceEntity>
+                                        selectedItem={selectedService}
+                                        onItemChange={onServiceChange}
+                                        fetchAllItems={listTheService}
+                                        fetchFilteredItems={fetchFilteredService}
+                                        fetchItemsPage={fetchServiceMobilePage}
+                                        optionLabel="descricao"
+                                        optionValue="id"
+                                        topLabel="Serviço:"
+                                        loadMoreRows={20}
+                                        placeholder="Selecione o Serviço"
+                                        dialogTitle="Selecionar o Serviço"
+                                        hasError={!!errors.selectedService}
+                                        errorMessage={errors.selectedService}
+                                        onAddClick={onAddServico}
+                                        onEditClick={onEditServico}
+                                        autoLoadAndSelectSingle
+                                    />
+                                </div>
+
+                                <div className="col-12 lg:col-4">
+                                    <MobileSearchPicker<CategoryContratosEntity>
+                                        selectedItem={selectedCategoriaContrato}
+                                        onItemChange={onCategoriaContratoChange}
+                                        fetchAllItems={listTheCategoriaContrato}
+                                        fetchFilteredItems={fetchFilteredCategoriaContrato}
+                                        fetchItemsPage={fetchCategoriaContratoMobilePage}
+                                        optionLabel="descricao"
+                                        optionValue="id"
+                                        topLabel="Categoria de Contrato:"
+                                        loadMoreRows={20}
+                                        placeholder="Selecione a Categoria de Contrato"
+                                        dialogTitle="Selecionar a Categoria de Contrato"
+                                        hasError={!!errors.selectedCategoriaContrato}
+                                        errorMessage={errors.selectedCategoriaContrato}
+                                        onAddClick={onAddCategoriaContrato}
+                                        onEditClick={onEditCategoriaContrato}
+                                        autoLoadAndSelectSingle
+                                    />
+                                </div>
+                                <div className="col-12 lg:col-4">
+                                    <MobileSearchPicker<FormaPagamentoEntity>
+                                        selectedItem={selectedFormaPagamento}
+                                        onItemChange={onFormaPagamentoChange}
+                                        fetchAllItems={listTheFormaPagamento}
+                                        fetchFilteredItems={fetchFilteredFormaPagamento}
+                                        fetchItemsPage={fetchFormaPagamentoMobilePage}
+                                        optionLabel="descricao"
+                                        optionValue="id"
+                                        topLabel="Forma de Pagamento:"
+                                        loadMoreRows={20}
+                                        placeholder="Selecione a Forma de Pagamento"
+                                        dialogTitle="Selecionar a Forma de Pagamento"
+                                        hasError={!!errors.selectedFormadePagamento}
+                                        errorMessage={errors.selectedFormadePagamento}
+                                        onAddClick={onAddFormaPagamento}
+                                        onEditClick={onEditFormaPagamento}
+                                        autoLoadAndSelectSingle
+                                    />
+
+                                </div>
+                            </>
+                        )}
                         <div className="col-12 lg:col-4">
                             <Dropdown
                                 id="periodicidade"
@@ -117,69 +316,6 @@ export function ContratoFields({
                             />
                         </div>
                         <div className="col-12 lg:col-4">
-                            <EmpresaDropdownField
-                                selectedEmpresa={selectedCompany}
-                                selectedEmpresaId={contrato.id_empresa ?? null}
-                                onEmpresaChange={onCompanyChange}
-                                reloadKey={reloadKeyEmpresa}
-                                hasError={!!errors.selectedCompany}
-                                errorMessage={errors.selectedCompany}
-                                showAddButton
-                                onAddClick={onAddEmpresa}
-                                onEditClick={onEditEmpresa}
-                                autoSelectSingle
-                                required
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <ServicoDropdownField
-                                selectedService={selectedService}
-                                selectedServiceId={contrato.id_servico ?? null}
-                                onServiceChange={onServiceChange}
-                                reloadKey={reloadKeyServico}
-                                hasError={!!errors.selectedService}
-                                errorMessage={errors.selectedService}
-                                showAddButton
-                                onAddClick={onAddServico}
-                                onEditClick={onEditServico}
-                                autoSelectSingle
-                                useCachedAllItems
-                                required
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <CategoriaContratoDropdownField
-                                selectedCategoriaContrato={selectedCategoriaContrato}
-                                selectedCategoriaContratoId={contrato.id_categoria_contrato ?? null}
-                                onCategoriaContratoChange={onCategoriaContratoChange}
-                                reloadKey={reloadKeyCategoriaContrato}
-                                hasError={!!errors.selectedCategoriaContrato}
-                                errorMessage={errors.selectedCategoriaContrato}
-                                showAddButton
-                                onAddClick={onAddCategoriaContrato}
-                                onEditClick={onEditCategoriaContrato}
-                                autoSelectSingle
-                                useCachedAllItems
-                                required
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <FormaPagamentoDropdownField
-                                selectedFormaPagamento={selectedFormaPagamento}
-                                selectedFormaPagamentoId={contrato.id_forma_pagamento ?? null}
-                                onFormaPagamentoChange={onFormaPagamentoChange}
-                                reloadKey={reloadKeyFormaPagamento}
-                                hasError={!!errors.selectedFormadePagamento}
-                                errorMessage={errors.selectedFormadePagamento}
-                                showAddButton
-                                onAddClick={onAddFormaPagamento}
-                                onEditClick={onEditFormaPagamento}
-                                autoSelectSingle={false}
-                                useCachedAllItems
-                                required
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
                             <CustomMultiSelect
                                 hasError={!!errors.selectedPessoa}
                                 errorMessage={errors.selectedPessoa}
@@ -190,7 +326,7 @@ export function ContratoFields({
                                 optionLabel="razao_social"
                                 dataKey="id"
                                 fetchAllItems={fetchAllPessoasWithCache}
-                                fetchFilteredItems={fetchFilteredPessoas}
+                                fetchFilteredItems={fetchFilteredPessoa}
                                 reloadAllOnShow
                                 initialSelectedValues={contrato.id_clientes_contrato ?? []}
                                 showAddButton
@@ -199,8 +335,8 @@ export function ContratoFields({
                                 placeholder="Selecione Cliente ou Fornecedor"
                                 topLabel="Cliente ou Fornecedor:"
                                 showTopLabel
-                                required 
-                                showChips={false}                            />
+                                required
+                                showChips={false} />
                         </div>
                     </div>
                     <div className="grid formgrid contrato-switch-group w-full">

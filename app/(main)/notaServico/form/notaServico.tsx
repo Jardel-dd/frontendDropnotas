@@ -155,15 +155,15 @@ export function NotaServicoFields({
                         topLabel="Regime Especial Tributário:"
                     />
                 </div>
-                <div className="col-12 lg:col-6 nota-servico-return-message-row" >
                 {mensagemRetornoCorrecao && (
+                    <div className="col-12 lg:col-6 nota-servico-return-message-row">
                         <Message
                             severity="error"
                             text={mensagemRetornoCorrecao}
                             className="nota-servico-return-message"
                         />
-                )}
                     </div>
+                )}
 
             </div>
             <div className="shared-form-tabbed-body">

@@ -1,4 +1,5 @@
 import { EnderecoEntity } from "./enderecoEntity";
+import { UsuarioContaEntity } from "./UsuarioContaEntity";
 
 
 export class CompanyEntity {
@@ -44,6 +45,7 @@ export class CompanyEntity {
     webservice_usuario?: string;
     webservice_senha?: string;
     webservice_chaveacesso?: string;
+    usuarios_acesso?: UsuarioContaEntity[];
 
     constructor({
         id,
@@ -87,7 +89,8 @@ export class CompanyEntity {
         percentual_desconto_condicionado,
         webservice_usuario,
         webservice_senha,
-        webservice_chaveacesso
+        webservice_chaveacesso,
+        usuarios_acesso
     }: {
         id?: number;
         id_usuarios_acesso?: number[];
@@ -130,6 +133,7 @@ export class CompanyEntity {
         aliquota_deducoes?: number | null;
         percentual_desconto_incondicionado?: number | null;
         percentual_desconto_condicionado?: number | null;
+        usuarios_acesso?: UsuarioContaEntity[];
     }) {
         Object.assign(this, {
             id,
@@ -172,7 +176,8 @@ export class CompanyEntity {
             percentual_desconto_condicionado,
             webservice_usuario,
             webservice_senha,
-            webservice_chaveacesso
+            webservice_chaveacesso,
+            usuarios_acesso
         });
     }
 
@@ -217,7 +222,8 @@ export class CompanyEntity {
         percentual_desconto_condicionado,
         webservice_usuario,
         webservice_senha,
-        webservice_chaveacesso
+        webservice_chaveacesso,
+        usuarios_acesso
     }: {
         id?: number;
         id_usuarios_acesso?: number[];
@@ -261,6 +267,7 @@ export class CompanyEntity {
         aliquota_deducoes?: number | null;
         percentual_desconto_incondicionado?: number | null;
         percentual_desconto_condicionado?: number | null;
+        usuarios_acesso?: UsuarioContaEntity[];
     }): CompanyEntity {
         return new CompanyEntity({
             id: id ?? this.id,
@@ -304,6 +311,7 @@ export class CompanyEntity {
             aliquota_deducoes: aliquota_deducoes ?? this.aliquota_deducoes,
             percentual_desconto_incondicionado: percentual_desconto_incondicionado ?? this.percentual_desconto_incondicionado,
             percentual_desconto_condicionado: percentual_desconto_condicionado ?? this.percentual_desconto_condicionado,
+            usuarios_acesso: usuarios_acesso ?? this.usuarios_acesso,
         });
     }
 };

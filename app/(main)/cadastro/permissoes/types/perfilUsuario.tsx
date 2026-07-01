@@ -1,12 +1,12 @@
-import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
+import { RefObject } from 'react';
 import { Messages } from 'primereact/messages';
 import { TreeCheckboxSelectionKeys } from 'primereact/tree';
-import { RefObject } from 'react';
+import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
+import { permissoes } from '@/app/shared/optionsDropDown/options';
 
 export interface PermissoesFormRef {
     handleSave: () => Promise<void>;
 }
-
 export interface PermissoesFormProps {
     perfilUser: PerfilUser;
     initialId?: string | null;
@@ -22,7 +22,6 @@ export interface PermissoesFormProps {
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
 }
-
 export interface PermissoesFieldsProps {
     perfilUser: PerfilUser;
     errors: Record<string, string>;
@@ -35,9 +34,6 @@ export interface PermissoesFieldsProps {
     onToggleAllPermissions: () => void;
     onValidateNome: () => void;
 }
-
-export type FormCreatedPermissoesProps = PermissoesFieldsProps | PermissoesFormProps;
-
 export interface PerfilUserDropdownFieldProps {
     selectedPerfilUser: PerfilUser | null;
     onPerfilUserChange: (perfilUser: PerfilUser | null) => void;
@@ -114,4 +110,21 @@ export const createEmptyPerfilUser = () =>
         integracaoDesativar: false,
         integracaoPesquisar: false,
         nfseTipoVisualizacao: ''
+});
+export type FormCreatedPermissoesProps = PermissoesFieldsProps | PermissoesFormProps;
+export const buildAllSelectedKeys = (): TreeCheckboxSelectionKeys => {
+    const allSelected = permissionNodeKeys.reduce<TreeCheckboxSelectionKeys>((acc, key) => {
+        acc[key] = { checked: true };
+        return acc;
+    }, {});
+
+    parentNodeKeys.forEach((key) => {
+        allSelected[key] = { checked: true };
     });
+
+    return allSelected;
+};
+export type SetErrorsFn = React.Dispatch<React.SetStateAction<{ [key: string]: string }>>;
+
+export const permissionNodeKeys = permissoes.flatMap((permission) => permission.children?.map((child) => child.key).filter((key): key is string => Boolean(key)) ?? []);
+export const parentNodeKeys = permissoes.map((permission) => permission.key).filter((key): key is string => Boolean(key));

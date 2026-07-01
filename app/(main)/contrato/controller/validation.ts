@@ -38,23 +38,24 @@ export const validateFieldsContrato = (
     } else if (!contrato.valor_servico || String(contrato.valor_servico).trim().length < 1) {
         newErrors.valor_servico = 'Digite um valor valído.';
         valid = false;
+ 
+    } else if (!hasSelectedCompany && !hasSavedCompanyId) {
+        newErrors.selectedCompany = 'Selecione a Empresa.';
+        valid = false;
+    } else if (!hasSelectedService && !hasSavedServiceId) {
+        newErrors.selectedService = 'Selecione o Serviço.';
+        valid = false;
+    } else if (!hasSelectedCategoriaContrato && !hasSavedCategoriaContratoId) {
+        newErrors.selectedCategoriaContrato = 'Selecione a Categoria de Contrato.';
+        valid = false;
+    } else if (!hasSelectedFormaPagamento && !hasSavedFormaPagamentoId) {
+        newErrors.selectedFormadePagamento = 'Selecione a forma de pagamento.';
+        valid = false;
     } else if (!contrato.periodicidade) {
         newErrors.periodicidade = 'Selecione o periodo .';
         valid = false;
-    } else if (!hasSelectedCompany && !hasSavedCompanyId) {
-        newErrors.selectedCompany = 'Este Campo deve ser selecionado.';
-        valid = false;
-    } else if (!hasSelectedService && !hasSavedServiceId) {
-        newErrors.selectedService = 'Este Campo deve ser selecionado.';
-        valid = false;
-    } else if (!hasSelectedCategoriaContrato && !hasSavedCategoriaContratoId) {
-        newErrors.selectedCategoriaContrato = 'Este Campo deve ser selecionado.';
-        valid = false;
-    } else if (!hasSelectedFormaPagamento && !hasSavedFormaPagamentoId) {
-        newErrors.selectedFormadePagamento = 'Este Campo deve ser selecionado.';
-        valid = false;
     } else if (!hasSelectedPessoa && !hasSavedPessoaIds) {
-        newErrors.selectedPessoa = 'Este Campo deve ser selecionado.';
+        newErrors.selectedPessoa = 'Selecione Cliente ou Fornecedor.';
         valid = false;
     } else {
         valid = true;

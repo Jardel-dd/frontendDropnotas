@@ -1,24 +1,15 @@
 'use client'
 import axios from "axios";
 import api from "@/app/services/api";
+import { buildPessoaPayload } from "../types/pessoa";
 import { PessoaEntity } from "@/app/entity/PessoaEntity";
+import { VendedorEntity } from "@/app/entity/VendedorEntity";
+import { ContratoEntity } from "@/app/entity/ContratoEntity";
 import { searchByCep } from "@/app/utils/searchCEP/controller";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
-import { VendedorEntity } from "@/app/entity/VendedorEntity";
+import { remocaoCaractereFiltro } from "@/app/shared/removeCaracter/controller";
+import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
 
-const nullableString = (value?: string | null) => {
-    if (value === undefined || value === null) return null;
-    return value.trim().length > 0 ? value : null;
-};
-const buildPessoaPayload = (pessoa: PessoaEntity) => ({
-    ...pessoa,
-    cnpj: pessoa.cnpj && pessoa.cnpj.replace(/\D/g, '').length > 0 ? pessoa.cnpj : null,
-    cpf: pessoa.cpf && pessoa.cpf.replace(/\D/g, '').length > 0 ? pessoa.cpf : null,
-    email: (pessoa.email ?? '').trim(),
-    cnae_fiscal: nullableString(pessoa.cnae_fiscal),
-    inscricao_estadual: nullableString(pessoa.inscricao_estadual),
-    inscricao_municipal: nullableString(pessoa.inscricao_municipal),
-});
 export const listPessoa = async (
     listPaginationClientesFornecedores: Record<string, any>,
     listarInativos: boolean,
@@ -28,19 +19,26 @@ export const listPessoa = async (
     searchTerm: string
 ) => {
     setLoading(true);
+
     try {
-        const response = await api.get(
-            `/pessoa?page=${listPaginationClientesFornecedores.pageable.pageNumber}&size=${listPaginationClientesFornecedores.pageable.pageSize}&listarInativos=${listarInativos}&cliente=${cliente}&fornecedor=${fornecedor}&termo=${searchTerm}`
-        );
-        console.log('status', listarInativos);
-        console.log('Dados retornados da API list:', response.data);
+        const response = await api.get('/pessoa', {
+            params: {
+                page: listPaginationClientesFornecedores.pageable.pageNumber,
+                size: listPaginationClientesFornecedores.pageable.pageSize,
+                listarInativos,
+                cliente,
+                fornecedor,
+                termo: searchTerm ? remocaoCaractereFiltro(searchTerm) : undefined
+            }
+        });
+
         return response.data;
+
     } catch (error) {
         console.error('Erro ao buscar Cliente ou Fornecedor:', error);
         throw error;
     } finally {
         setLoading(false);
-        console.log('loading.....');
     }
 };
 export const updatePessoa = async (
@@ -54,7 +52,6 @@ export const updatePessoa = async (
 ) => {
     try {
         const pessoaDataToUpdate = buildPessoaPayload(pessoa);
-        console.log('Dados pessoa):', pessoaDataToUpdate);
         const response = await api.put(`/pessoa`, pessoaDataToUpdate);
         const responseData = response?.data;
         const responsePessoa =
@@ -69,15 +66,18 @@ export const updatePessoa = async (
                 ...pessoaDataToUpdate,
                 id: Number(pessoaId)
             };
+
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso:',
             detail: 'Pessoa atualizado com sucesso!',
         });
         setPessoa(new PessoaEntity(updated));
+
         if (redirectAfterSave) {
             router.push('/cadastro/pessoas');
         }
+
         return updated;
     } catch (error: any) {
         if (axios.isAxiosError(error) && error.response) {
@@ -156,7 +156,7 @@ export const deletarPessoa = async (
                 life: 3000,
                 severity: 'success',
                 summary: 'Sucesso:',
-                detail: 'Cliente ou Fornecedor excluído com sucesso.'
+                detail: 'Cliente ou Fornecedor excluÃ­do com sucesso.'
             },
         ]);
     } catch (error) {
@@ -180,23 +180,23 @@ export const createdPessoa = async (
 ) => {
     try {
         const pessoaData = buildPessoaPayload(pessoa);
-        console.log('Dados pessoa):', pessoaData);
         const response = await api.post('/pessoa', pessoaData);
         const created = new PessoaEntity(response.data?.pessoa ?? response.data);
-        console.log(response);
+
         msgs.current?.show({
             severity: 'success',
             detail: 'Cliente ou Fornecedor criado com sucesso!',
         });
+
         if (redirectAfterSave) {
-        router.push('/cadastro/pessoas');
+            router.push('/cadastro/pessoas');
         }
+
         setPessoa(created);
         return created;
     } catch (error: any) {
         if (axios.isAxiosError(error) && error.response) {
             const { data } = error.response;
-            console.log(" resposta:", data);
             const errorMessage = data.message || 'Erro ao cadastrar Pessoa.';
             msgs.current?.show({
                 severity: 'error',
@@ -239,9 +239,8 @@ export const handleSearchCepPessoa = async (
                     }
                 })
             );
-
         } else {
-            setError('CEP não encontrado. Tente novamente.');
+            setError('CEP nÃ£o encontrado. Tente novamente.');
         }
     } catch (error) {
         console.error('Erro ao buscar CEP:', error);
@@ -249,7 +248,7 @@ export const handleSearchCepPessoa = async (
             msgs.current.show({
                 severity: 'error',
                 summary: 'Atenção:',
-                detail: 'CEP não encontrado, verifique ou inclua o endereço manualmente!',
+                detail: 'CEP nÃ£o encontrado, verifique ou inclua o endereÃ§o manualmente!',
             });
         }
         setError('Erro ao buscar CEP. Por favor, tente novamente.');
@@ -257,7 +256,7 @@ export const handleSearchCepPessoa = async (
         setLoading(false);
     }
 };
-export const handleActiveOrInativePessoa = async (
+const handleActiveOrInativePessoa = async (
     rowData: PessoaEntity,
     msgs: any,
     listPaginationPessoaId: Record<string, any>,
@@ -274,68 +273,68 @@ export const handleActiveOrInativePessoa = async (
         } else {
             await ativarPessoa(rowData.id!, msgs, listPaginationPessoaId, listarInativos, cliente, fornecedor, setLoading, searchTerm);
         }
+
         const refreshList = await listPessoa(listPaginationPessoaId, listarInativos, cliente, fornecedor, setLoading, searchTerm);
         setListPaginationClientesFornecedores(refreshList);
     } catch (error) {
         console.error("Erro ao ativar/desativar Cliente ou fornecedor:", error);
     }
 };
-export const fetchAllPessoas = async (): Promise<PessoaEntity[]> => {
+export const fetchFilteredPessoa = async (filtro: string) => {
     try {
-        const idsResponse = await api.get('/pessoa');
-                console.log('[fetchAllPessoas] response.data:', idsResponse.data);
-        let pessoas = [];
-        if (Array.isArray(idsResponse.data)) {
-            pessoas = idsResponse.data;
-        } else if (idsResponse.data && Array.isArray(idsResponse.data.content)) {
-            pessoas = idsResponse.data.content;
-        } else {
-            throw new Error("Dados recebidos");
-        }
-        return pessoas.map((user: any) => ({
-            id: user.id,
-            razao_social: user.razao_social || 'Nome não disponível',
-        }));
-    } catch (error) {
-        console.error('Erro ao buscar pessoas do endpoint /pessoas:', error);
-        return [];
-    }
-};
-export const fetchFilteredPessoas = async (termo: string) => {
-    try {
-        const response = await api.get(`/pessoa`, {
+        const response = await api.get('/pessoa', {
             params: {
-                termo: termo
+                termo: remocaoCaractereFiltro(filtro)
             }
         });
+    console.log("Pessoas:", response.data);
         if (response.data && Array.isArray(response.data.content)) {
             return response.data.content.map((user: any) => ({
                 id: user.id,
                 razao_social: user.razao_social || 'Nome não disponível',
             }));
-        } else {
-            return [];
         }
+
+        return [];
     } catch (error) {
-        console.error("Erro ao filtrar clientes:", error);
+        console.error('Erro ao filtrar clientes:', error);
         return [];
     }
 };
 export const fetchPessoasById = async (pessoaId: string) => {
     try {
         const { data: dataPessoa } = await api.get(`/pessoa/${pessoaId}`);
-        console.log("Pessoa selecionada:", dataPessoa);
+        console.log('APIeditar pessoa:', dataPessoa);
         const pessoaInstanciada = new PessoaEntity(dataPessoa);
         const vendedorResumo = dataPessoa?.vendedor_padrao ?? dataPessoa?.vendedor ?? null;
+        const contratoResumo = dataPessoa?.contrato ?? null;
         const selectedVendedor: VendedorEntity | null = vendedorResumo
             ? ({
                 id: vendedorResumo.id ?? dataPessoa.id_vendedor_padrao,
-                razao_social: vendedorResumo.razao_social ?? vendedorResumo.nome ?? 'Nome não disponível'
+                razao_social: vendedorResumo.razao_social ?? vendedorResumo.nome ?? 'Nome nÃ£o disponÃ­vel'
             } as VendedorEntity)
             : null;
+        const selectedContrato: ContratoEntity | null = contratoResumo
+            ? new ContratoEntity({
+                id: contratoResumo.id ?? dataPessoa.id_contrato ?? 0,
+                descricao: contratoResumo.descricao ?? '',
+                valor_servico: contratoResumo.valor_servico ?? null,
+                periodicidade: contratoResumo.periodicidade ?? '',
+                emitir_boleto: contratoResumo.emitir_boleto ?? false,
+                enviar_email: contratoResumo.enviar_email ?? false,
+                enviar_whatsapp: contratoResumo.enviar_whatsapp ?? false,
+                id_servico: contratoResumo.id_servico ?? null,
+                id_empresa: contratoResumo.id_empresa ?? null,
+                id_categoria_contrato: contratoResumo.id_categoria_contrato ?? null,
+                id_forma_pagamento: contratoResumo.id_forma_pagamento ?? null,
+                id_clientes_contrato: contratoResumo.id_clientes_contrato ?? [0]
+            })
+            : null;
+
         return {
             dataPessoa: pessoaInstanciada,
             selectedVendedor,
+            selectedContrato,
         };
     } catch (error) {
         console.error(" Erro ao buscar cliente/fornecedor:", error);
@@ -347,12 +346,30 @@ export const listThePessoas = async () => {
         const response = await api.get("/pessoa");
         if (response.data && Array.isArray(response.data.content)) {
             return response.data.content;
-        } else {
-            return [];
         }
+        return [];
     } catch (error) {
-        console.error("Erro ao buscar serviços:", error);
+        console.error("Erro ao buscar serviÃ§os:", error);
         return [];
     }
+};
+export const fetchPessoaMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/pessoa', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<PessoaEntity>(response.data);
 };
 export const handleActiveOrInativeClientesFornecedores = handleActiveOrInativePessoa;

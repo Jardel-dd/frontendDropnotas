@@ -1,10 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormaPagamentoEntity } from "@/app/entity/FormaPagamento";
-import { FormaPagamentoDropdownFieldProps } from "../types/formaPagamento";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
+import { FORMA_PAGAMENTO_DROPDOWN_CACHE_TIME_MS, FormaPagamentoDropdownFieldProps } from "../types/formaPagamento";
 import { fetchFilteredFormaPagamento, fetchFormaPagamentoByID, listTheFormaPagamento } from "../controller/controller";
-
-const FORMA_PAGAMENTO_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;
 
 export default function FormaPagamentoDropdownField({
     selectedFormaPagamento,

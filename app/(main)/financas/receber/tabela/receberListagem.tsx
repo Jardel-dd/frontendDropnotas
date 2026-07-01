@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Skeleton } from 'primereact/skeleton';
 import { Dispatch, SetStateAction, useContext } from 'react';
-import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { ContasReceberEntity } from '@/app/entity/contasReceberEntity';
 import { StatusNota } from '@/app/(main)/notaServico/types/statusClassNfs';
@@ -56,9 +55,10 @@ export function ListarContasReceber({
     listPaginationContasReceber,
     loading,
     searchTerm,
-    setListPaginationContasReceber,
-    setLoading,
-    listarInativos
+    listarInativos,
+    mobileLoadMoreVisible,
+    mobileLoadMoreLoading,
+    onMobileLoadMore
 }: {
     listPaginationContasReceber: Record<string, any>;
     loading: boolean;
@@ -66,6 +66,9 @@ export function ListarContasReceber({
     setListPaginationContasReceber: Dispatch<SetStateAction<any>>;
     setLoading: (state: boolean) => void;
     listarInativos: boolean;
+    mobileLoadMoreVisible?: boolean;
+    mobileLoadMoreLoading?: boolean;
+    onMobileLoadMore?: () => void | Promise<void>;
 }) {
     const router = useRouter();
     const isMobile = useIsMobile();
@@ -101,7 +104,9 @@ export function ListarContasReceber({
                                             loading ? (
                                                 <Skeleton />
                                             ) : (
-                                                <span>{highlightSearchTerm(limitarText(data.descricao, 25), searchTerm)}</span>
+                                                <span className="table-cell-truncate" title={data.descricao}>
+                                                    {highlightSearchTerm(data.descricao, searchTerm)}
+                                                </span>
                                             )
                                     },
                                     {
@@ -111,7 +116,9 @@ export function ListarContasReceber({
                                             loading ? (
                                                 <Skeleton />
                                             ) : (
-                                                <span>{highlightSearchTerm(limitarText(data.nome_cliente, 25), searchTerm)}</span>
+                                                <span className="table-cell-truncate" title={data.nome_cliente}>
+                                                    {highlightSearchTerm(data.nome_cliente, searchTerm)}
+                                                </span>
                                             )
                                     },
                                     {
@@ -121,7 +128,9 @@ export function ListarContasReceber({
                                             loading ? (
                                                 <Skeleton />
                                             ) : (
-                                                <span>{highlightSearchTerm(limitarText(data.nome_vendedor, 25), searchTerm)}</span>
+                                                <span className="table-cell-truncate" title={data.nome_vendedor}>
+                                                    {highlightSearchTerm(data.nome_vendedor, searchTerm)}
+                                                </span>
                                             )
                                     },
                                     {
@@ -140,6 +149,9 @@ export function ListarContasReceber({
                                     }
                                 ]}
                                 listarInativos={listarInativos}
+                                mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                onMobileLoadMore={onMobileLoadMore}
                             />
                         </div>
                     )}
@@ -164,7 +176,9 @@ export function ListarContasReceber({
                                             loading ? (
                                                 <Skeleton />
                                             ) : (
-                                                <span>{highlightSearchTerm(limitarText(data.descricao, 40), searchTerm)}</span>
+                                                <span className="table-cell-truncate" title={data.descricao}>
+                                                    {highlightSearchTerm(data.descricao, searchTerm)}
+                                                </span>
                                             )
                                     },
                                      {
@@ -174,7 +188,9 @@ export function ListarContasReceber({
                                             loading ? (
                                                 <Skeleton />
                                             ) : (
-                                                <span>{highlightSearchTerm(limitarText(data.nome_cliente, 25), searchTerm)}</span>
+                                                <span className="table-cell-truncate" title={data.nome_cliente}>
+                                                    {highlightSearchTerm(data.nome_cliente, searchTerm)}
+                                                </span>
                                             )
                                     },
                                     {
@@ -184,7 +200,9 @@ export function ListarContasReceber({
                                             loading ? (
                                                 <Skeleton />
                                             ) : (
-                                                <span>{highlightSearchTerm(limitarText(data.nome_vendedor, 25), searchTerm)}</span>
+                                                <span className="table-cell-truncate" title={data.nome_vendedor}>
+                                                    {highlightSearchTerm(data.nome_vendedor, searchTerm)}
+                                                </span>
                                             )
                                     },
                                     {
@@ -210,7 +228,11 @@ export function ListarContasReceber({
                                      {
                                         field: 'valor_juros',
                                         header: 'Juros',
-                                        body: (data) => <span>{highlightSearchTerm(limitarText(data.valor_juros, 40), searchTerm)}</span>
+                                        body: (data) => (
+                                            <span className="table-cell-truncate" title={String(data.valor_juros ?? '')}>
+                                                {highlightSearchTerm(data.valor_juros, searchTerm)}
+                                            </span>
+                                        )
                                     },
                                     {
                                         field: 'valor_original',

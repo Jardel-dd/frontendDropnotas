@@ -22,7 +22,10 @@ export function ListarCategoriaContrato({
     setLoading,
     searchTerm,
     listarInativos,
-    onCategoriaClick
+    onCategoriaClick,
+    mobileLoadMoreVisible,
+    mobileLoadMoreLoading,
+    onMobileLoadMore
 }: {
     listPaginationCategoriaContrato: Record<string, any>;
     loading: boolean;
@@ -33,6 +36,9 @@ export function ListarCategoriaContrato({
     setLoading: (state: boolean) => void;
     listarInativos: boolean;
     onCategoriaClick?: (categoria: CategoryContratosEntity) => void;
+    mobileLoadMoreVisible?: boolean;
+    mobileLoadMoreLoading?: boolean;
+    onMobileLoadMore?: () => void | Promise<void>;
 }) {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -99,6 +105,9 @@ export function ListarCategoriaContrato({
                                     }
                                 ]}
                                 listarInativos={listarInativos}
+                                mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                onMobileLoadMore={onMobileLoadMore}
                             />
                         </div>
                     )}

@@ -1,12 +1,13 @@
 import api from '@/app/services/api';
 import '@/app/styles/styledGlobal.css';
+import { getToken } from '@/app/services/token';
+import type { PreloadedEmpresaData } from '../types/empresa';
 import { CompanyEntity } from '../../../../entity/CompanyEntity';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
-import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
-import { getToken } from '@/app/services/token';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
-import type { PreloadedEmpresaData } from '../types/empresa';
-
+import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
+import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
+import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 const BASE64_IMAGE_DATA_URL_REGEX = /^data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/i;
 const IMAGE_URL_REGEX = /^(https?:\/\/|blob:|\/)/i;
 const RAW_BASE64_REGEX = /^[A-Za-z0-9+/=\s]+$/;
@@ -145,10 +146,15 @@ export const listEmpresa = async (
 ) => {
     setLoading(true);
     try {
-        const response = await api.get(
-            `/empresa?page=${listPaginationEmpresa.pageable.pageNumber}&size=${listPaginationEmpresa.pageable.pageSize}&listarInativos=${listarInativos}&termo=${searchTerm}`
-        );
-        console.log('Dados retornados da API list:', response.data);
+        const response = await api.get('/empresa', {
+            params: {
+                page: listPaginationEmpresa.pageable.pageNumber,
+                size: listPaginationEmpresa.pageable.pageSize,
+                listarInativos,
+                termo: searchTerm ? remocaoCaractereFiltro(searchTerm) : undefined
+            }
+        });
+        console.log('Listagem empresas:', response.data);
         return response.data;
     } finally {
         setLoading(false);
@@ -205,8 +211,8 @@ export const updateEmpresa = async (
         const responseData = response?.data;
         const responseEmpresa =
             responseData &&
-            typeof responseData === 'object' &&
-            'empresa' in responseData
+                typeof responseData === 'object' &&
+                'empresa' in responseData
                 ? (responseData as { empresa?: CompanyEntity | Record<string, unknown> }).empresa
                 : null;
         const created =
@@ -245,7 +251,7 @@ export const updateEmpresa = async (
         }
     }
 };
-export const ativarEmpresa = async (
+export const activateEmpresa = async (
     empresaId: number,
     msgs: any,
     listPaginationEmpresa: Record<string, any>,
@@ -345,54 +351,54 @@ export const createdEmpresa = async (
             router.push('/configuracoes/empresas');
         }
         return created;
-   } catch (error: any) {
-    let detailMessage = 'Não foi possível concluir o cadastro da empresa.';
-    if (error.response) {
-        const statusCode = error.response.status;
-        const backendMessage =
-            error.response.data?.message ||
-            error.response.data?.error ||
-            error.response.data?.mensagem ||
-            error.response.data?.detail;
-        if (statusCode === 400) {
-            if (
-                backendMessage?.toLowerCase().includes('cnpj')
-            ) {
-                detailMessage =
-                    'Já existe uma empresa cadastrada com este CNPJ, por favor verifique.';
+    } catch (error: any) {
+        let detailMessage = 'Não foi possível concluir o cadastro da empresa.';
+        if (error.response) {
+            const statusCode = error.response.status;
+            const backendMessage =
+                error.response.data?.message ||
+                error.response.data?.error ||
+                error.response.data?.mensagem ||
+                error.response.data?.detail;
+            if (statusCode === 400) {
+                if (
+                    backendMessage?.toLowerCase().includes('cnpj')
+                ) {
+                    detailMessage =
+                        'Já existe uma empresa cadastrada com este CNPJ, por favor verifique.';
+                }
+                else if (
+                    backendMessage?.toLowerCase().includes('cpf')
+                ) {
+                    detailMessage =
+                        'Já existe um cadastro utilizando este CPF. Confira os dados informados.';
+                }
+                else if (
+                    backendMessage?.toLowerCase().includes('senha do certificado')
+                ) {
+                    detailMessage =
+                        'A senha do certificado digital está incorreta. Verifique e tente novamente.';
+                }
+                else if (backendMessage) {
+                    detailMessage = backendMessage;
+                }
             }
-            else if (
-                backendMessage?.toLowerCase().includes('cpf')
-            ) {
-                detailMessage =
-                    'Já existe um cadastro utilizando este CPF. Confira os dados informados.';
-            }
-            else if (
-                backendMessage?.toLowerCase().includes('senha do certificado')
-            ) {
-                detailMessage =
-                    'A senha do certificado digital está incorreta. Verifique e tente novamente.';
-            }
-            else if (backendMessage) {
-                detailMessage = backendMessage;
-            }
+        } else if (error.request) {
+
+            detailMessage =
+                'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
+        } else {
+
+            detailMessage =
+                error.message || 'Ocorreu um erro inesperado.';
         }
-    } else if (error.request) {
-
-        detailMessage =
-            'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
-    } else {
-
-        detailMessage =
-            error.message || 'Ocorreu um erro inesperado.';
+        msgs.current?.show({
+            severity: 'error',
+            summary: 'Atenção:',
+            detail: detailMessage,
+            life: 5000,
+        });
     }
-    msgs.current?.show({
-        severity: 'error',
-       summary: 'Atenção:',
-        detail: detailMessage,
-        life: 5000,
-    });
-}
 };
 export const convertLogoToBase64 = (
     files: File[],
@@ -515,7 +521,7 @@ export const handleActiveOrInativeEmpresa = async (
         if (rowData.ativo) {
             await deletarEmpresa(rowData.id!, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm);
         } else {
-            await ativarEmpresa(rowData.id!, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm);
+            await activateEmpresa(rowData.id!, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm);
 
         }
         const refreshList = await listEmpresa(listPaginationEmpresa, listarInativos, setLoading, searchTerm);
@@ -524,7 +530,7 @@ export const handleActiveOrInativeEmpresa = async (
         console.error("Erro ao ativar/desativar empresa:", error);
     }
 };
-export const listTheCompany = async () => {
+export const listTheEmpresa = async () => {
     try {
         const response = await api.get('/empresa');
         if (response.data && Array.isArray(response.data.content)) {
@@ -546,11 +552,31 @@ export const fetchCompanyByID = async (empresaId: string) => {
             },
         });
         const data = response.data;
+        const usuariosAcesso = Array.isArray(data?.usuarios_acesso) ? data.usuarios_acesso : [];
+        const selectedUserConta = usuariosAcesso
+            .filter((usuario: any) => usuario?.id)
+            .map(
+                (usuario: any) =>
+                    new UsuarioContaEntity({
+                        id: usuario.id,
+                        nome: usuario.nome ?? '',
+                        email: usuario.email ?? '',
+                        senha: '',
+                        ativo: usuario.ativo,
+                        foto_perfil: usuario.foto_perfil,
+                        id_empresas_acesso: usuario.id_empresas_acesso,
+                        is_usuario_principal: usuario.is_usuario_principal,
+                        perfil_usuario: usuario.perfil_usuario,
+                        tema_componente: usuario.tema_componente,
+                        esquema_cor: usuario.esquema_cor,
+                    })
+            );
+
         console.log("empresa", data)
         return {
             empresa: data,
             userConta: [],
-            selectedUserConta: [],
+            selectedUserConta,
         };
     } catch (error) {
         console.error("Erro ao buscar empresa:", error);
@@ -586,11 +612,11 @@ export const fetchCompanyDropdownByID = async (empresaId: string): Promise<Compa
         return null;
     }
 };
-export const fetchFilteredCompany = async (filtro: string) => {
+export const fetchFilteredEmpresa = async (filtro: string) => {
     try {
         const response = await api.get(`/empresa`, {
             params: {
-                termo: filtro
+                termo: remocaoCaractereFiltro(filtro)
             }
         });
         console.log(" Empresa filtradas:", response.data);
@@ -611,4 +637,23 @@ export const fetchAllCompany = async (): Promise<CompanyEntity[]> => {
         console.error("Erro ao buscar todas as vendedor:", error);
         return [];
     }
+};
+export const fetchCompanyMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/empresa', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<CompanyEntity>(response.data);
 };

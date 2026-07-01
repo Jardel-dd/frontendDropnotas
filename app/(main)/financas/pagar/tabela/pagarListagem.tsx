@@ -28,17 +28,17 @@ const formatDate = (value?: string | null, includeTime = false) => {
         'pt-BR',
         includeTime
             ? {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-              }
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }
             : {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric'
-              }
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }
     ).format(dateObj);
 };
 const formatCurrency = (value?: number | null) =>
@@ -51,9 +51,10 @@ export function ListarContasPagar({
     listPaginationContasPagar,
     loading,
     searchTerm,
-    setListPaginationContasPagar,
-    setLoading,
-    listarInativos
+    listarInativos,
+    mobileLoadMoreVisible,
+    mobileLoadMoreLoading,
+    onMobileLoadMore
 }: {
     listPaginationContasPagar: Record<string, any>;
     loading: boolean;
@@ -61,6 +62,9 @@ export function ListarContasPagar({
     setListPaginationContasPagar: Dispatch<SetStateAction<any>>;
     setLoading: (state: boolean) => void;
     listarInativos: boolean;
+    mobileLoadMoreVisible?: boolean;
+    mobileLoadMoreLoading?: boolean;
+    onMobileLoadMore?: () => void | Promise<void>;
 }) {
     const router = useRouter();
     const isMobile = useIsMobile();
@@ -82,7 +86,7 @@ export function ListarContasPagar({
                                 loading={loading}
                                 totalRecords={listPaginationContasPagar?.totalElements ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={() => null}
                                 isDarkMode={isDarkMode}
@@ -99,7 +103,7 @@ export function ListarContasPagar({
                                                 <span>{highlightSearchTerm(limitarText(data.descricao, 25), searchTerm)}</span>
                                             )
                                     },
-                                      {
+                                    {
                                         field: 'nome_fornecedor',
                                         header: 'Nome',
                                         body: (data) =>
@@ -125,6 +129,9 @@ export function ListarContasPagar({
                                     }
                                 ]}
                                 listarInativos={listarInativos}
+                                mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                onMobileLoadMore={onMobileLoadMore}
                             />
                         </div>
                     )}
@@ -135,7 +142,7 @@ export function ListarContasPagar({
                                 loading={loading}
                                 totalRecords={listPaginationContasPagar?.totalElements ?? 0}
                                 expandedRows={false}
-                                setExpandedRows={() => {}}
+                                setExpandedRows={() => { }}
                                 rowExpansionTemplate={() => null}
                                 expandButtonTemplate={() => null}
                                 isDarkMode={isDarkMode}
@@ -155,17 +162,29 @@ export function ListarContasPagar({
                                     {
                                         field: 'origem_tipo',
                                         header: 'Origem',
-                                        body: (data) => <span>{data.origem_tipo ? highlightSearchTerm(data.origem_tipo, searchTerm) : '-'}</span>
+                                        body: (data) =>
+                                            <span>{data.origem_tipo ? highlightSearchTerm(data.origem_tipo, searchTerm) : '-'}</span>
                                     },
                                     {
                                         field: 'data_emissao',
                                         header: 'Data de Emissao',
-                                        body: (data) => <span>{formatDate(data.data_emissao)}</span>
+                                        body: (data) => <span>
+                                            {highlightSearchTerm(
+                                                limitarText(formatDate(data.data_emissao), 5),
+                                                searchTerm
+                                            )}
+                                        </span>
                                     },
                                     {
                                         field: 'data_vencimento',
                                         header: 'Data de Vencimento',
-                                        body: (data) => <span>{formatDate(data.data_vencimento)}</span>
+                                        body: (data) =>
+                                            <span>
+                                                {highlightSearchTerm(
+                                                    limitarText(formatDate(data.data_vencimento), 10),
+                                                    searchTerm
+                                                )}
+                                            </span>
                                     },
                                     {
                                         field: 'data_hora_pagamento',
@@ -210,4 +229,3 @@ export function ListarContasPagar({
     );
 }
 export default ListarContasPagar;
-

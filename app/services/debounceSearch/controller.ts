@@ -1,11 +1,6 @@
+import { UseSearchOptions } from './type';
 import { useDebouncedCallback } from 'use-debounce';
 
-type UseSearchOptions<T> = {
-  setter: React.Dispatch<React.SetStateAction<T>>;
-  field: keyof T | (keyof T)[];  
-  onSearch: (value: string) => void;
-  delay?: number;
-};
 export function useGenericSearch<T>({
   setter,
   field,
@@ -25,7 +20,6 @@ export function useGenericSearch<T>({
           return (prevState as any).copyWith({ [field]: value });
         }
       }
-
       if (Array.isArray(field)) {
         const updates: Partial<T> = {};
         field.forEach((f) => {
@@ -41,6 +35,5 @@ export function useGenericSearch<T>({
 
   const debouncedSearch = useDebouncedCallback(updateState, delay);
   const searchNow = updateState;
-
   return { debouncedSearch, searchNow };
 }

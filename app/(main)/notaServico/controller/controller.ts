@@ -5,23 +5,15 @@ import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
+import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DetalPrestadorValoresEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams } from '../types/notaServico';
+import { CreatedNotaServicoResult, ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams, NotaServicoFeedback } from '../types/notaServico';
 
 const NOTA_SERVICO_FEEDBACK_KEY = 'notaServicoFeedback';
+const inflightNotaServicoRequests = new Map<string, Promise<any>>();
+const MOBILE_DOWNLOAD_USER_AGENT_REGEX = /Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini/i;
 
-type NotaServicoFeedback = {
-    severity: 'success' | 'warn' | 'error';
-    summary: string;
-    detail: string;
-    notaAutorizada?: Partial<NfsEntity> | null;
-};
-
-type CreatedNotaServicoResult = {
-    wasCreated: boolean;
-    redirected: boolean;
-};
 
 const extractBackendErrorMessage = (data: any, fallback: string): string => {
     if (!data) {
@@ -49,7 +41,33 @@ const extractBackendErrorMessage = (data: any, fallback: string): string => {
 
     return fallback;
 };
+const extractAxiosBlobErrorMessage = async (error: unknown, fallback: string): Promise<string> => {
+    if (!axios.isAxiosError(error)) {
+        return fallback;
+    }
 
+    const responseData = error.response?.data;
+
+    if (responseData instanceof Blob) {
+        try {
+            const rawText = await responseData.text();
+
+            if (!rawText.trim()) {
+                return fallback;
+            }
+
+            try {
+                return extractBackendErrorMessage(JSON.parse(rawText), fallback);
+            } catch {
+                return extractBackendErrorMessage(rawText, fallback);
+            }
+        } catch {
+            return fallback;
+        }
+    }
+
+    return extractBackendErrorMessage(responseData, fallback);
+};
 const normalizeOptionalNumberToZero = (value: unknown): number => {
     if (value === null || value === undefined || value === '') {
         return 0;
@@ -60,6 +78,73 @@ const normalizeOptionalNumberToZero = (value: unknown): number => {
     }
     const normalized = Number(value);
     return Number.isFinite(normalized) ? normalized : 0;
+};
+const sanitizeDownloadFileNamePart = (value?: string | null): string => {
+    const normalizedValue = (value ?? '')
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\\/:*?"<>|]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    return normalizedValue;
+};
+const isMobileDownloadBrowser = (): boolean => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+        return false;
+    }
+
+    return MOBILE_DOWNLOAD_USER_AGENT_REGEX.test(navigator.userAgent);
+};
+const openPendingDownloadWindow = (): Window | null => {
+    if (!isMobileDownloadBrowser()) {
+        return null;
+    }
+
+    try {
+        return window.open('', '_blank', 'noopener,noreferrer');
+    } catch (error) {
+        console.warn('Nao foi possivel abrir a janela temporaria de download no mobile.', error);
+        return null;
+    }
+};
+const releaseObjectUrl = (objectUrl: string, delay = 60_000) => {
+    window.setTimeout(() => {
+        window.URL.revokeObjectURL(objectUrl);
+    }, delay);
+};
+const triggerBlobDownload = (
+    blob: Blob,
+    fileName: string,
+    pendingWindow?: Window | null
+) => {
+    const fileUrl = window.URL.createObjectURL(blob);
+
+    if (pendingWindow && !pendingWindow.closed) {
+        try {
+            pendingWindow.location.href = fileUrl;
+            releaseObjectUrl(fileUrl);
+            return;
+        } catch (error) {
+            console.warn('Falha ao redirecionar a janela temporaria de download.', error);
+            pendingWindow.close();
+        }
+    }
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.setAttribute('download', fileName);
+    link.rel = 'noopener noreferrer';
+
+    if (isMobileDownloadBrowser()) {
+        link.target = '_blank';
+    }
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    releaseObjectUrl(fileUrl);
 };
 const extractNotaServicoStatus = (data: any): string => {
     const status = data?.status_nota ?? data?.nfse?.status_nota ?? data?.dados_emissao?.status_nota ?? data?.dados_emissao?.nfse?.status_nota;
@@ -77,6 +162,9 @@ const extractNotaServicoPayload = (data: any): Partial<NfsEntity> | null => {
         return null;
     }
 
+    const empresaResumo = payload.empresa ?? data?.empresa ?? {};
+    const clienteResumo = payload.cliente ?? data?.cliente ?? {};
+    const prestador = payload.prestador ?? data?.prestador ?? {};
     const tomador = payload.tomador ?? data?.tomador ?? {};
     const contato = tomador?.contato ?? {};
 
@@ -85,14 +173,48 @@ const extractNotaServicoPayload = (data: any): Partial<NfsEntity> | null => {
         id: payload.id ?? payload.id_nfse ?? data?.id ?? data?.id_nfse,
         status_nota: payload.status_nota ?? data?.status_nota ?? data?.dados_emissao?.status_nota,
         data_emissao: payload.data_emissao ?? data?.data_emissao ?? data?.dados_emissao?.data_emissao,
-        razao_social_empresa: payload.razao_social_empresa ?? payload.prestador?.razao_social ?? data?.razao_social_empresa,
-        razao_social_cliente: payload.razao_social_cliente ?? tomador?.razao_social ?? data?.razao_social_cliente,
+        razao_social_empresa:
+            payload.razao_social_empresa ??
+            empresaResumo?.razao_social ??
+            empresaResumo?.nome_fantasia ??
+            prestador?.razao_social ??
+            data?.razao_social_empresa,
+        razao_social_cliente:
+            payload.razao_social_cliente ??
+            clienteResumo?.razao_social ??
+            clienteResumo?.nome_fantasia ??
+            tomador?.razao_social ??
+            data?.razao_social_cliente,
         total_valor_servico: payload.total_valor_servico ?? payload.servico?.valores?.valor_servico ?? data?.total_valor_servico,
+        prestador: {
+            ...prestador,
+            razao_social:
+                prestador?.razao_social ??
+                empresaResumo?.razao_social ??
+                empresaResumo?.nome_fantasia ??
+                '',
+            nome_fantasia:
+                prestador?.nome_fantasia ??
+                empresaResumo?.nome_fantasia ??
+                empresaResumo?.razao_social ??
+                ''
+        },
         tomador: {
             ...tomador,
+            razao_social:
+                tomador?.razao_social ??
+                clienteResumo?.razao_social ??
+                clienteResumo?.nome_fantasia ??
+                '',
             contato: {
                 ...contato,
-                email: contato?.email ?? tomador?.email ?? data?.tomador?.contato?.email ?? data?.tomador?.email ?? ''
+                email:
+                    contato?.email ??
+                    tomador?.email ??
+                    clienteResumo?.email ??
+                    data?.tomador?.contato?.email ??
+                    data?.tomador?.email ??
+                    ''
             }
         }
     };
@@ -108,14 +230,11 @@ export const consumeNotaServicoFeedback = (): NotaServicoFeedback | null => {
     if (typeof window === 'undefined') {
         return null;
     }
-
     const rawFeedback = window.sessionStorage.getItem(NOTA_SERVICO_FEEDBACK_KEY);
     if (!rawFeedback) {
         return null;
     }
-
     window.sessionStorage.removeItem(NOTA_SERVICO_FEEDBACK_KEY);
-
     try {
         return JSON.parse(rawFeedback) as NotaServicoFeedback;
     } catch (error) {
@@ -137,7 +256,7 @@ export const normalizeNfseServiceValores = (valores?: Partial<DetalPrestadorValo
         aliquota_outras_retencoes: normalizeOptionalNumberToZero(valores?.aliquota_outras_retencoes),
         percentual_desconto_incondicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_incondicionado),
         percentual_desconto_condicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_condicionado)
-    });
+});
 export const fetchNotaServico = async (params: NotaFiscalParams, msgs?: any) => {
     try {
         const searchParams = new URLSearchParams();
@@ -148,10 +267,24 @@ export const fetchNotaServico = async (params: NotaFiscalParams, msgs?: any) => 
             }
         });
 
-        const response = await api.get(`/nfse?${searchParams.toString()}`);
+        const requestKey = searchParams.toString();
+        const existingRequest = inflightNotaServicoRequests.get(requestKey);
+        if (existingRequest) {
+            return await existingRequest;
+        }
 
-        console.log('resposta', response.data);
-        return response.data;
+        const requestPromise = api
+            .get(`/nfse?${requestKey}`)
+            .then((response) => {
+                console.log('resposta', response.data);
+                return response.data;
+            })
+            .finally(() => {
+                inflightNotaServicoRequests.delete(requestKey);
+            });
+
+        inflightNotaServicoRequests.set(requestKey, requestPromise);
+        return await requestPromise;
     } catch (error: any) {
         console.error('Erro ao buscar notas fiscais:', error);
         if (error.response?.status === 403) {
@@ -438,20 +571,17 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
     }
 };
 export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+    const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.pdf`;
+
+    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/pdf`, {
             responseType: 'blob'
         });
-        const fileURL = window.URL.createObjectURL(new Blob([response.data]));
-        const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.pdf`;
-        const link = document.createElement('a');
-        link.href = fileURL;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(fileURL);
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        triggerBlobDownload(blob, fileName, pendingWindow);
     } catch (error) {
+        pendingWindow?.close();
         console.log('Erro ao baixar PDF:', error);
         msgs.current?.show({
             severity: 'error',
@@ -462,26 +592,47 @@ export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
     }
 };
 export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+    const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.xml`;
+
+    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/xml`, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.xml`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        triggerBlobDownload(blob, fileName, pendingWindow);
 
-        window.URL.revokeObjectURL(url);
     } catch (error) {
+        pendingWindow?.close();
         console.error(' Erro ao baixar XML:', error);
         msgs.current?.show({
             severity: 'error',
             summary: 'Atenção:',
             detail: 'Erro ao baixar XML da Nota Fiscal. Tente novamente em instantes. Caso o problema persista, entre em contato com o suporte.',
+            life: 5000
+        });
+    }
+};
+export const downloadArquivosNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+    const clientName = sanitizeDownloadFileNamePart(
+        nota.razao_social_cliente ?? (nota.tomador as any)?.razao_social ?? null
+    );
+    const fileName = `PDFeXML-${clientName || `nfse-${nota.id}`}.zip`;
+
+    const pendingWindow = openPendingDownloadWindow();
+    try {
+        const response = await api.get(`/nfse/${nota.id}/arquivos`, {
+            responseType: 'blob'
+        });
+        const blob = new Blob([response.data], { type: 'application/zip' });
+        triggerBlobDownload(blob, fileName, pendingWindow);
+    } catch (error) {
+        pendingWindow?.close();
+        console.error('Erro ao baixar ZIP da NFS-e:', error);
+        msgs.current?.show({
+            severity: 'error',
+            summary: '',
+            detail: 'Erro ao baixar os arquivos PDF e XML da Nota Fiscal. Tente novamente em instantes.',
             life: 5000
         });
     }
@@ -512,6 +663,7 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
     }
 };
 export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, msgs: React.RefObject<Messages | null>) => {
+    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.post('/nfse/exportar-pdf', payload, {
             responseType: 'blob'
@@ -519,15 +671,9 @@ export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, m
         const blob = new Blob([response.data], {
             type: 'application/pdf'
         });
-        const fileURL = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = fileURL;
-        link.setAttribute('download', 'notas-servico.pdf');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(fileURL);
+        triggerBlobDownload(blob, 'notas-servico.pdf', pendingWindow);
     } catch (error) {
+        pendingWindow?.close();
         console.error('Erro ao exportar PDF das notas:', error);
         if (axios.isAxiosError(error) && error.response?.status === 404) {
             msgs.current?.show({
@@ -538,6 +684,18 @@ export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, m
             return;
         }
         if (axios.isAxiosError(error) && error.response?.status === 400) {
+            const detailMessage = await extractAxiosBlobErrorMessage(
+                error,
+                'Nao foi possivel exportar o PDF com os filtros informados.'
+            );
+            msgs.current?.show({
+                severity: 'warn',
+                summary: 'Exportacao invalida',
+                detail: detailMessage,
+                life: 5000
+            });
+
+            return;
             msgs.current?.show({
                 severity: 'warn',
                 summary: 'Período não informado',

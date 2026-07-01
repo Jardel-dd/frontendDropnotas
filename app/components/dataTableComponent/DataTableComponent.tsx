@@ -11,12 +11,13 @@ import { Divider } from 'primereact/divider';
 import { Skeleton } from 'primereact/skeleton';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { IconReal } from '@/app/utils/icons/icons';
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { confirmDialog } from 'primereact/confirmdialog';
 import Input from '@/app/shared/include/input/input-all';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { DataTable, DataTableRowToggleEvent } from 'primereact/datatable';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
+import { useIsMobile } from '../responsiveCelular/responsive';
 import { CancelarNfsActionProps, DataTableComponentProps, Identifiable, ToggleButtonProps } from './types/types';
 export const DataTableComponent = <T extends Identifiable>({
     value,
@@ -38,17 +39,83 @@ export const DataTableComponent = <T extends Identifiable>({
     showActionsColumn,
     rowClick = false,
     selectionMode = 'multiple',
-    extraActionsTemplate
+    extraActionsTemplate,
+    mobileLoadMoreVisible = false,
+    mobileLoadMoreLoading = false,
+    onMobileLoadMore,
+    mobileLoadMoreLabel = 'Carregar mais',
+    mobileBodyScroll = false
 }: DataTableComponentProps<T>) => {
     const msgs = useRef<Messages>(null);
+    const tableContainerRef = useRef<HTMLDivElement | null>(null);
+    const pendingScrollRestoreRef = useRef<number | null>(null);
+    const isMobile = useIsMobile();
+    const [showMobileLoadMoreButton, setShowMobileLoadMoreButton] = useState(false);
     const shouldShowActionsColumn =
         showActionsColumn ?? Boolean(editButtonTemplate || toggleStatusOrDeleteButtonTemplate || extraActionsTemplate);
+    const useMobileBodyScroll = isMobile && mobileBodyScroll;
+    const rowCount = Array.isArray(value) ? value.length : 0;
+
+    useEffect(() => {
+        const tableContainer = tableContainerRef.current;
+        const scrollContainer = tableContainer?.querySelector('.p-datatable-wrapper') as HTMLDivElement | null;
+
+        if (!useMobileBodyScroll || pendingScrollRestoreRef.current === null || !scrollContainer) {
+            return;
+        }
+
+        const savedScrollTop = pendingScrollRestoreRef.current;
+        scrollContainer.scrollTop = savedScrollTop;
+
+        if (!mobileLoadMoreLoading) {
+            requestAnimationFrame(() => {
+                const nextScrollContainer = tableContainerRef.current?.querySelector('.p-datatable-wrapper') as HTMLDivElement | null;
+
+                if (nextScrollContainer) {
+                    nextScrollContainer.scrollTop = savedScrollTop;
+                }
+            });
+
+            pendingScrollRestoreRef.current = null;
+        }
+    }, [mobileLoadMoreLoading, rowCount, useMobileBodyScroll]);
+
+    useEffect(() => {
+        const tableContainer = tableContainerRef.current;
+        const scrollContainer = tableContainer?.querySelector('.p-datatable-wrapper') as HTMLDivElement | null;
+
+        if (!isMobile || !mobileLoadMoreVisible || !onMobileLoadMore || loading || !scrollContainer) {
+            setShowMobileLoadMoreButton(false);
+            return;
+        }
+
+        const updateButtonVisibility = () => {
+            const canScroll = scrollContainer.scrollHeight > scrollContainer.clientHeight + 4;
+
+            if (!canScroll) {
+                setShowMobileLoadMoreButton(true);
+                return;
+            }
+
+            const distanceToBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight;
+            setShowMobileLoadMoreButton(distanceToBottom <= 24);
+        };
+
+        updateButtonVisibility();
+        scrollContainer.addEventListener('scroll', updateButtonVisibility);
+
+        return () => {
+            scrollContainer.removeEventListener('scroll', updateButtonVisibility);
+        };
+    }, [isMobile, loading, mobileLoadMoreVisible, mobileLoadMoreLoading, onMobileLoadMore, rowCount]);
+
     return (
-        <div className='mt-1'>
+        <div ref={tableContainerRef} className={`mt-1${useMobileBodyScroll ? ' datatable-mobile-fixed-layout' : ''}`}>
             <Messages ref={msgs} className="custom-messages" />
             <DataTable
                 value={value}
                 scrollable
+                scrollHeight={useMobileBodyScroll ? 'flex' : undefined}
                 expandedRows={expandedRows === false ? undefined : expandedRows}
                 onRowToggle={(e: DataTableRowToggleEvent) => {
                     if (Array.isArray(e.data)) {
@@ -58,7 +125,8 @@ export const DataTableComponent = <T extends Identifiable>({
                     }
                 }}
                 rowExpansionTemplate={rowExpansionTemplate}
-                className="p-datatable-row-expansion"
+                className={`p-datatable-row-expansion${useMobileBodyScroll ? ' datatable-mobile-fixed-header' : ''}`}
+                style={useMobileBodyScroll ? { height: '100%' } : undefined}
                 emptyMessage={loading ? <LoadingScreen loadingText={''} /> : 'Nenhum resultado encontrado na pesquisa'}
                 totalRecords={totalRecords}
             >
@@ -91,6 +159,27 @@ export const DataTableComponent = <T extends Identifiable>({
                     />
                 )}
             </DataTable>
+            {isMobile && mobileLoadMoreVisible && onMobileLoadMore && showMobileLoadMoreButton && (
+                <div className="datatable-mobile-load-more-container">
+                    <Button
+                        type="button"
+                        outlined
+                        className="datatable-mobile-load-more-button"
+                        label={mobileLoadMoreLoading ? 'Carregando...' : mobileLoadMoreLabel}
+                        loading={mobileLoadMoreLoading}
+                        disabled={mobileLoadMoreLoading || loading}
+                        onClick={() => {
+                            const scrollContainer = tableContainerRef.current?.querySelector('.p-datatable-wrapper') as HTMLDivElement | null;
+
+                            if (scrollContainer) {
+                                pendingScrollRestoreRef.current = scrollContainer.scrollTop;
+                            }
+
+                            void onMobileLoadMore();
+                        }}
+                    />
+                </div>
+            )}
         </div>
     );
 };

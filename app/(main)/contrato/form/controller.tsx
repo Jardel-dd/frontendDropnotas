@@ -58,11 +58,11 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
     ) => {
         const router = useRouter();
         const contratoId = initialId;
-        const onContratoChangeRef = useRef(onContratoChange);
-        const onErrorsChangeRef = useRef(onErrorsChange);
         const formRef = useRef<VendedorFormRef>(null);
         const [isLoading, setIsLoading] = useState(true);
+        const onErrorsChangeRef = useRef(onErrorsChange);
         const [isEditMode, setIsEditMode] = useState(false);
+        const onContratoChangeRef = useRef(onContratoChange);
         const [servico, setServico] = useState<ServiceEntity>(
             new ServiceEntity({
                 ativo: true,
@@ -171,20 +171,17 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         const [pessoaDialogKey, setPessoaDialogKey] = useState(0);
         const [empresaDialogKey, setEmpresaDialogKey] = useState(0);
         const [servicoDialogKey, setServicoDialogKey] = useState(0);
-        const [formaPagamentoDialogKey, setFormaPagamentoDialogKey] = useState(0);
-        const [categoriaContratoDialogKey, setCategoriaContratoDialogKey] = useState(0);
         const [showModalPessoa, setShowModalPessoa] = useState(false);
         const [showModalServico, setShowModalServico] = useState(false);
         const [showModalEmpresa, setShowModalEmpresa] = useState(false);
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
+        const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity[]>([]);
+        const [formaPagamentoDialogKey, setFormaPagamentoDialogKey] = useState(0);
         const [isPessoaDialogLoading, setIsPessoaDialogLoading] = useState(false);
+        const [reloadKeyFormaPagamento, setReloadKeyFormaPagamento] = useState(0);
         const [isEmpresaDialogLoading, setIsEmpresaDialogLoading] = useState(false);
         const [isServicoDialogLoading, setIsServicoDialogLoading] = useState(false);
-        const [isFormaPagamentoDialogLoading, setIsFormaPagamentoDialogLoading] = useState(false);
-        const [isCategoriaContratoDialogLoading, setIsCategoriaContratoDialogLoading] = useState(false);
-        const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity[]>([]);
-        const [reloadKeyFormaPagamento, setReloadKeyFormaPagamento] = useState(0);
         const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoEntity>(
             new FormaPagamentoEntity({
                 ativo: true,
@@ -197,7 +194,11 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                 valor_taxa: 0
             })
         );
+        const [editingPessoaId, setEditingPessoaId] = useState<string | null>(null);
+        const [editingServicoId, setEditingServicoId] = useState<string | null>(null);
         const [showModalFormaPagamento, setShowModalFormaPagamento] = useState(false);
+        const [editingEmpresaId, setEditingEmpresaId] = useState<string | null>(null);
+        const [categoriaContratoDialogKey, setCategoriaContratoDialogKey] = useState(0);
         const [reloadKeyCategoriaContrato, setReloadKeyCategoriaContrato] = useState(0);
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [selectedCompany, setSelectedCompany] = useState<CompanyEntity | null>(null);
@@ -211,18 +212,17 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                 ativo: true
             })
         );
+        const [isFormaPagamentoDialogLoading, setIsFormaPagamentoDialogLoading] = useState(false);
+        const [preloadedPessoa, setPreloadedPessoa] = useState<PreloadedPessoaData | null>(null);
+        const [preloadedEmpresa, setPreloadedEmpresa] = useState<PreloadedEmpresaData | null>(null);
+        const [preloadedServico, setPreloadedServico] = useState<PreloadedServicoData | null>(null);
+        const [editingFormaPagamentoId, setEditingFormaPagamentoId] = useState<string | null>(null);
+        const [isCategoriaContratoDialogLoading, setIsCategoriaContratoDialogLoading] = useState(false);
+        const [editingCategoriaContratoId, setEditingCategoriaContratoId] = useState<string | null>(null);
+        const [preloadedFormaPagamento, setPreloadedFormaPagamento] = useState<FormaPagamentoEntity | null>(null);
         const [selectedFormadePagamento, setSelectedFormadePagamento] = useState<FormaPagamentoEntity | null>(null);
         const [selectedCategoriaContrato, setSelectedCategoriaContrato] = useState<CategoryContratosEntity | null>(null);
-        const [preloadedPessoa, setPreloadedPessoa] = useState<PreloadedPessoaData | null>(null);
-        const [editingPessoaId, setEditingPessoaId] = useState<string | null>(null);
-        const [preloadedEmpresa, setPreloadedEmpresa] = useState<PreloadedEmpresaData | null>(null);
-        const [editingEmpresaId, setEditingEmpresaId] = useState<string | null>(null);
-        const [preloadedServico, setPreloadedServico] = useState<PreloadedServicoData | null>(null);
-        const [editingServicoId, setEditingServicoId] = useState<string | null>(null);
-        const [preloadedFormaPagamento, setPreloadedFormaPagamento] = useState<FormaPagamentoEntity | null>(null);
-        const [editingFormaPagamentoId, setEditingFormaPagamentoId] = useState<string | null>(null);
         const [preloadedCategoriaContrato, setPreloadedCategoriaContrato] = useState<CategoryContratosEntity | null>(null);
-        const [editingCategoriaContratoId, setEditingCategoriaContratoId] = useState<string | null>(null);
         const clearErrors = (...keys: string[]) => {
             setErrors((prevErrors) => {
                 const newErrors = { ...prevErrors };
@@ -501,7 +501,8 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                 const pessoaPrecarregada = await fetchPessoasById(pessoaId);
                 setPreloadedPessoa({
                     dataPessoa: pessoaPrecarregada.dataPessoa,
-                    selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null
+                    selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null,
+                    selectedContrato: pessoaPrecarregada.selectedContrato ?? null
                 });
                 setEditingPessoaId(pessoaId);
                 setPessoaDialogKey((current) => current + 1);
@@ -840,6 +841,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                                 validateContratoForm();
                             }}
                         />
+                        
                     </div>
 
 
@@ -950,7 +952,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                         key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
                         msgs={msgs}
                         ref={formRef}
-                        pessoa={pessoa}
+                        pessoa={pessoa[0]}
                         initialId={editingPessoaId}
                         preloadedPessoa={preloadedPessoa}
                         setPessoa={setPessoa}

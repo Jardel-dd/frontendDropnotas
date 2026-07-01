@@ -11,9 +11,10 @@ import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
+import { CheckboxChangeEvent } from 'primereact/checkbox';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarServico, deletarServico, listServico } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
@@ -52,9 +53,11 @@ function Servicos() {
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const { permissaoServico } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [service, setService] = useState<ServiceEntity>(
@@ -91,215 +94,277 @@ function Servicos() {
             valor_desconto: 0
         })
     );
-    const [visible, setVisible] = useState<boolean>(false);
-    const [isServicosCreated, setIsServicosCreated] = useState(false);
     const [listarInativos, setListarInativos] = useState<boolean>(false);
-    const [listPaginationServicos, setListPaginationServicos] = useState<Record<string, any>>(createInitialPagination(pageSize));
-    const safePagination = listPaginationServicos ?? createInitialPagination(pageSize);
-    const safePageable = safePagination.pageable ?? createInitialPagination(pageSize).pageable;
+    const [listPaginationServicos, setListPaginationServicos] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
+    const safePagination = listPaginationServicos ?? createInitialPagination(resolvedPageSize);
+    const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
+
+    const fetchServicosPage = async (pageNumber = 0, term = searchTerm, inactive = listarInativos) => {
+        const servicos = await listServico(
+            {
+                ...safePagination,
+                pageable: {
+                    ...safePageable,
+                    pageNumber,
+                    pageSize: resolvedPageSize
+                }
+            },
+            inactive,
+            () => {},
+            term
+        );
+
+        return servicos ?? createInitialPagination(resolvedPageSize);
+    };
+
     const handleNavigate = () => {
         router.push('/cadastro/servicos/created');
-        setIsServicosCreated(true);
     };
-    const handleListServicos = async (pageNumber?: number, _searchTerm?: string, listarInativos = false) => {
-        setLoading(true);
+
+    const handleListServicos = async (pageNumber = 0, term = searchTerm, inactive = listarInativos, append = false) => {
+        if (!append) {
+            setLoading(true);
+        }
+
         try {
-            const Servicos = await listServico(
-                {
-                    ...safePagination,
-                    pageable: {
-                        ...safePageable,
-                        pageNumber: pageNumber ?? safePageable.pageNumber,
-                        pageSize: pageSize
-                    }
-                },
-                listarInativos,
-                setLoading,
-                _searchTerm ?? searchTerm
-            );
-            setListPaginationServicos(Servicos ?? createInitialPagination(pageSize));
+            const servicos = await fetchServicosPage(pageNumber, term, inactive);
+            setListPaginationServicos((current) => {
+                if (isMobile && append) {
+                    return mergePaginatedContent(current, servicos, pageNumber) ?? createInitialPagination(resolvedPageSize);
+                }
+
+                return servicos ?? createInitialPagination(resolvedPageSize);
+            });
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Atenção:',
+                summary: 'Atencao:',
                 detail: 'Falha ao buscar Servicos',
+                life: 3000
+            });
+        } finally {
+            if (!append) {
+                setLoading(false);
+            }
+        }
+    };
+
+    const refreshVisibleServicos = async (term = searchTerm, inactive = listarInativos) => {
+        setLoading(true);
+        try {
+            const currentPage = safePageable.pageNumber ?? 0;
+
+            if (isMobile && currentPage > 0) {
+                const rebuilt = await rebuildLoadedMobilePages({
+                    lastLoadedPage: currentPage,
+                    fetchPage: (page) => fetchServicosPage(page, term, inactive)
+                });
+
+                setListPaginationServicos(rebuilt ?? createInitialPagination(resolvedPageSize));
+                return;
+            }
+
+            const servicos = await fetchServicosPage(isMobile ? 0 : currentPage, term, inactive);
+            setListPaginationServicos(servicos ?? createInitialPagination(resolvedPageSize));
+        } catch (error) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Atencao:',
+                detail: 'Falha ao atualizar Servicos',
                 life: 3000
             });
         } finally {
             setLoading(false);
         }
     };
+
+    const handleDeleteServico = async (id: number) => {
+        await deletarServico(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleServicos(searchTerm, listarInativos);
+    };
+
+    const handleAtivarServico = async (id: number) => {
+        await ativarServico(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleServicos(searchTerm, listarInativos);
+    };
+
+    const handleLoadMoreServicos = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationServicos)) {
+            return;
+        }
+
+        setLoadingMore(true);
+        try {
+            await handleListServicos((safePageable.pageNumber ?? 0) + 1, searchTerm, listarInativos, true);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setService,
         field: 'descricao',
         onSearch: (value) => handleListServicos(0, value, listarInativos)
     });
+
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationServicos((prev) => ({
-            ...(prev ?? createInitialPagination(pageSize)),
+            ...(prev ?? createInitialPagination(resolvedPageSize)),
             pageable: {
-                ...(prev?.pageable ?? createInitialPagination(pageSize).pageable),
+                ...(prev?.pageable ?? createInitialPagination(resolvedPageSize).pageable),
                 pageNumber: selectedPage
             }
         }));
         handleListServicos(selectedPage, searchTerm, listarInativos);
     };
+
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
         debouncedSearch(value);
     };
+
     const handleSalvarFiltro = () => {
         handleListServicos(0, searchTerm, listarInativos);
-        setVisible(false);
     };
+
     const handleClearFilters = () => {
         setListarInativos(false);
-        handleListServicos(0,' ', false);
-        setVisible(false);
+        handleListServicos(0, ' ', false);
     };
+
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
+
     useEffect(() => {
         handleListServicos();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
-                <>
-                    <div className="card styled-container-main-all-routes p-2">
-                        <div className="grid formgrid p-2">
-                            <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
-                                <Input
-                                    label="Pesquisar Descrição"
-                                    outlined={true}
-                                    useRightButton={true}
-                                    iconRight={'pi pi-search'}
-                                    id="descricao"
-                                    onChange={handleSearchChange}
-                                    value={searchTerm}
-                                    loading={loading}
-                                    onClickSearch={() => searchNow(searchTerm)}
-                                    topLabel="Pesquisar:"
-                                    showTopLabel
-                                />
+                <div className="card styled-container-main-all-routes p-2">
+                    <div className="grid formgrid p-2">
+                        <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
+                            <Input
+                                label="Pesquisar Descricao"
+                                outlined={true}
+                                useRightButton={true}
+                                iconRight={'pi pi-search'}
+                                id="descricao"
+                                onChange={handleSearchChange}
+                                value={searchTerm}
+                                loading={loading}
+                                onClickSearch={() => searchNow(searchTerm)}
+                                topLabel="Pesquisar:"
+                                showTopLabel
+                            />
+                        </div>
+                        <div className="col-4 mb-0 lg:col-3 lg:mb-0 ">
+                            <div className="container-BTN-Filter-Created">
+                                <FilterOverlay
+                                    onApply={handleSalvarFiltro}
+                                    onClear={handleClearFilters}
+                                    buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                    <CheckBoxField
+                                        inputId="listarInativos"
+                                        label="Listar Desativadas"
+                                        checked={listarInativos}
+                                        onChange={handleCheckboxChange}
+                                    />
+                                </FilterOverlay>
+                                {permissaoServico.create && (
+                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                )}
                             </div>
-                            <div className="col-4 mb-0 lg:col-3 lg:mb-0 ">
-                                <div className="container-BTN-Filter-Created">
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
+                        <ListarServicos
+                            loading={loading}
+                            setLoading={setLoading}
+                            searchTerm={searchTerm}
+                            listarInativos={listarInativos}
+                            listPaginationServicos={listPaginationServicos}
+                            setListPaginationServicos={setListPaginationServicos}
+                            deletar={handleDeleteServico}
+                            ativar={handleAtivarServico}
+                            mobileLoadMoreVisible={hasMoreMobileContent(listPaginationServicos)}
+                            mobileLoadMoreLoading={loadingMore}
+                            onMobileLoadMore={handleLoadMoreServicos}
+                        />
+                    </div>
+                </div>
+            )}
+            {isDesktop && (
+                <div className="card styled-container-main-all-routes p-2">
+                    <div className="scrollable-container">
+                        <div className="p-0">
+                            <div className="grid formgrid">
+                                <div className="col-12 lg:col-12 container-input-search-all">
+                                    <Input
+                                        label="Pesquisar Descricao"
+                                        outlined={true}
+                                        useRightButton={true}
+                                        iconRight={'pi pi-search'}
+                                        id="descricao"
+                                        value={searchTerm}
+                                        loading={loading}
+                                        onChange={handleSearchChange}
+                                        onClickSearch={() => searchNow(searchTerm)}
+                                        topLabel="Pesquisar:"
+                                        showTopLabel
+                                    />
+                                </div>
+                                <div className="Container-Btn-Filter-Desktop">
                                     <FilterOverlay
                                         onApply={handleSalvarFiltro}
                                         onClear={handleClearFilters}
-                                        buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                        buttonClassName="Btn-Filter-Desktop">
                                         <CheckBoxField
                                             inputId="listarInativos"
                                             label="Listar Desativadas"
                                             checked={listarInativos}
                                             onChange={handleCheckboxChange}
                                         />
-
                                     </FilterOverlay>
-                                    {permissaoServico.create && (
-                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                    )}
                                 </div>
+                                {permissaoServico.create && (
+                                    <div className="container-button-primary-novo">
+                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                        <div>
-                            <ListarServicos
-                                loading={loading}
-                                setLoading={setLoading}
-                                searchTerm={searchTerm}
-                                listarInativos={listarInativos}
-                                listPaginationServicos={listPaginationServicos}
-                                setListPaginationServicos={setListPaginationServicos}
-                                deletar={(id) => deletarServico(id, msgs, listPaginationServicos, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => ativarServico(id, msgs, listPaginationServicos, listarInativos, setLoading, searchTerm)}
-                            />
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <div className="custom-paginator">
-                                <CustomPaginator
-                                    first={safePageable.pageNumber * safePageable.pageSize}
-                                    rows={pageSize}
-                                    totalRecords={safePagination.totalElements ?? 0}
-                                    onPageChange={onPageChange}
-                                    isMobile
+                            <div className="mt-3">
+                                <ListarServicos
+                                    loading={loading}
+                                    setLoading={setLoading}
+                                    searchTerm={searchTerm}
+                                    listarInativos={listarInativos}
+                                    listPaginationServicos={listPaginationServicos}
+                                    setListPaginationServicos={setListPaginationServicos}
+                                    deletar={handleDeleteServico}
+                                    ativar={handleAtivarServico}
                                 />
                             </div>
                         </div>
                     </div>
-                </>
-            )}
-            {isDesktop && (
-                <>
-                    <div className="card styled-container-main-all-routes p-2">
-                        <div className="scrollable-container">
-                            <div className="p-0">
-                                <div className="grid formgrid">
-                                    <div className="col-12 lg:col-12 container-input-search-all">
-                                        <Input
-                                            label="Pesquisar Descrição"
-                                            outlined={true}
-                                            useRightButton={true}
-                                            iconRight={'pi pi-search'}
-                                            id="descricao"
-                                            value={searchTerm}
-                                            loading={loading}
-                                            onChange={handleSearchChange}
-                                            onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Pesquisar:"
-                                            showTopLabel
-                                        />
-                                    </div>
-                                    <div className="Container-Btn-Filter-Desktop">
-                                        <FilterOverlay
-                                            onApply={handleSalvarFiltro}
-                                            onClear={handleClearFilters}
-                                            buttonClassName="Btn-Filter-Desktop">
-                                            <CheckBoxField
-                                                inputId="listarInativos"
-                                                label="Listar Desativadas"
-                                                checked={listarInativos}
-                                                onChange={handleCheckboxChange}
-                                            />
-                                        </FilterOverlay>
-                                    </div>
-                                    {permissaoServico.create && (
-                                        <div className="container-button-primary-novo">
-                                            <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
-                                        </div>
-                                    )}
-
-                                </div>
-                                <div className="mt-3">
-                                    <ListarServicos
-                                        loading={loading}
-                                        setLoading={setLoading}
-                                        searchTerm={searchTerm}
-                                        listarInativos={listarInativos}
-                                        listPaginationServicos={listPaginationServicos}
-                                        setListPaginationServicos={setListPaginationServicos}
-                                        deletar={(id) => deletarServico(id, msgs, listPaginationServicos, listarInativos, setLoading, searchTerm)}
-                                        ativar={(id) => ativarServico(id, msgs, listPaginationServicos, listarInativos, setLoading, searchTerm)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <CustomPaginator
-                                first={safePageable.pageNumber * safePageable.pageSize}
-                                rows={pageSize}
-                                totalRecords={safePagination.totalElements ?? 0}
-                                onPageChange={onPageChange} />
-                        </div>
+                    <div style={{ marginTop: 'auto' }}>
+                        <CustomPaginator
+                            first={safePageable.pageNumber * safePageable.pageSize}
+                            rows={resolvedPageSize}
+                            totalRecords={safePagination.totalElements ?? 0}
+                            onPageChange={onPageChange}
+                        />
                     </div>
-                </>
+                </div>
             )}
         </div>
     );
 }
-export default Servicos;
 
+export default Servicos;

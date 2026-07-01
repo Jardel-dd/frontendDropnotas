@@ -3,7 +3,64 @@ import axios from "axios";
 import api from "@/app/services/api";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
+import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
+import { remocaoCaractereFiltro } from "@/app/shared/removeCaracter/controller";
+export const updateVendedor = async (
+    vendedorId: string,
+    vendedor: VendedorEntity,
+    setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
+    msgs: any,
+    router: AppRouterInstance,
+    setVendedor: React.Dispatch<React.SetStateAction<VendedorEntity>>,
+    redirectAfterSave: boolean,
+) => {
+    try {
+        const response = await api.put(`/vendedor`, vendedor);
+        const updated = new VendedorEntity(response.data?.vendedor ?? vendedor);
+        msgs.current?.show({
+            severity: 'success',
+            summary: 'Sucesso:',
+            detail: 'Vendedor atualizado com sucesso!',
+        });
+        setVendedor(updated);
+        if (redirectAfterSave) {
+            router.push('/cadastro/vendedores');
+        }
+        return updated;
+    } catch (error: any) {
+        if (axios.isAxiosError(error) && error.response?.status === 409) {
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Atenção:',
+                detail:
+                    'Já existe um vendedor cadastrado com este CPF ou CNPJ.',
+            });
+            return null;
+        }
+        if (axios.isAxiosError(error) && error.response) {
+            const { status, data } = error.response;
 
+            console.error('Erro de API:', status, data);
+
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Atenção:',
+                detail:
+                    data.message ||
+                    'Não foi possível atualizar o vendedor.',
+            });
+
+        } else {
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Atenção:',
+                detail:
+                    'Ocorreu um erro inesperado ao atualizar o vendedor.',
+            });
+        }
+        return null;
+    }
+};
 export const listVendedor = async (
     listPaginationVendedoresId: Record<string, any>,
     listarInativos: boolean,
@@ -12,21 +69,28 @@ export const listVendedor = async (
 ) => {
     setLoading(true);
     try {
-        const response = await api.get(
-            `/vendedor?page=${listPaginationVendedoresId.pageable.pageNumber}&size=${listPaginationVendedoresId.pageable.pageSize}&listarInativos=${listarInativos}&termo=${searchTerm}`
-        );
+        const response = await api.get('/vendedor', {
+            params: {
+                page: listPaginationVendedoresId.pageable.pageNumber,
+                size: listPaginationVendedoresId.pageable.pageSize,
+                listarInativos,
+                termo: searchTerm ? remocaoCaractereFiltro(searchTerm) : undefined
+            }
+        });
         console.log('status', listarInativos);
-        console.log('Dados retornados da API list:', response.data);
+        console.log('Vendedores:', response.data);
         return response.data;
+
     } catch (error) {
         console.error('Erro ao buscar Vendedores:', error);
         throw error;
+
     } finally {
         setLoading(false);
         console.log('loading.....');
     }
 };
-export const ativarVendedor = async (
+export const activateVendedor = async (
     vendedoresId: number,
     msgs: any,
     listPaginationVendedoresId: Record<string, any>,
@@ -95,102 +159,78 @@ export const deletarVendedor = async (
     }
 };
 export const createdVendedor = async (
-  vendedor: VendedorEntity,
-  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
-  msgs: React.MutableRefObject<any>,
-  router: AppRouterInstance,
-  redirectAfterSave: boolean,
-  setVendedor: React.Dispatch<React.SetStateAction<VendedorEntity>>,
-): Promise<VendedorEntity> => {
-  try {
-    const vendedorDataToSend = {
-      ...vendedor,
-      cnpj: vendedor.cnpj && vendedor.cnpj.replace(/\D/g, '').length > 0 ? vendedor.cnpj : null,
-      cpf: vendedor.cpf && vendedor.cpf.replace(/\D/g, '').length > 0 ? vendedor.cpf : null,
-      documento_estrangeiro:
-        vendedor.documento_estrangeiro &&
-        vendedor.documento_estrangeiro.replace(/\D/g, '').length > 0
-          ? vendedor.documento_estrangeiro
-          : null,
-    };
-    const resp = await api.post('/vendedor', vendedorDataToSend);
-    const created = new VendedorEntity(resp.data?.vendedor ?? resp.data);
-    msgs.current?.show({
-      severity: 'success',
-      detail: 'Vendedor criado com sucesso!',
-    });
-    if (redirectAfterSave) {
-      router.push('/cadastro/vendedores');
-    }
-    setVendedor(created);
-    return created;
-  } catch (error: any) {
-    if (error.response?.status === 409) {
-      msgs.current?.show({
-        severity: 'error',
-        summary: 'Atenção:',
-        detail:
-          'Já existe cadastrado com este CPF ou CNPJ. Verifique os dados informados.',
-      });
-    }
-    throw null;
-  }
-};
-export const updateVendedor = async (
-    vendedorId: string,
     vendedor: VendedorEntity,
     setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
-    msgs: any,
+    msgs: React.MutableRefObject<any>,
     router: AppRouterInstance,
-    setVendedor: React.Dispatch<React.SetStateAction<VendedorEntity>>,
     redirectAfterSave: boolean,
-) => {
+    setVendedor: React.Dispatch<React.SetStateAction<VendedorEntity>>,
+): Promise<VendedorEntity> => {
     try {
-        const response = await api.put(`/vendedor`, vendedor);
-        const updated = new VendedorEntity(response.data?.vendedor ?? vendedor);
+        const vendedorDataToSend = {
+            ...vendedor,
+            cnpj: vendedor.cnpj && vendedor.cnpj.replace(/\D/g, '').length > 0 ? vendedor.cnpj : null,
+            cpf: vendedor.cpf && vendedor.cpf.replace(/\D/g, '').length > 0 ? vendedor.cpf : null,
+            documento_estrangeiro:
+                vendedor.documento_estrangeiro &&
+                    vendedor.documento_estrangeiro.replace(/\D/g, '').length > 0
+                    ? vendedor.documento_estrangeiro
+                    : null,
+        };
+        const resp = await api.post('/vendedor', vendedorDataToSend);
+        const created = new VendedorEntity(resp.data?.vendedor ?? resp.data);
         msgs.current?.show({
             severity: 'success',
-            summary: 'Sucesso:',
-            detail: 'Vendedor atualizado com sucesso!',
+            detail: 'Vendedor criado com sucesso!',
         });
-        setVendedor(updated);
         if (redirectAfterSave) {
             router.push('/cadastro/vendedores');
         }
-        return updated;
+        setVendedor(created);
+        return created;
     } catch (error: any) {
-        if (axios.isAxiosError(error) && error.response?.status === 409) {
+        if (error.response?.status === 409) {
             msgs.current?.show({
                 severity: 'error',
                 summary: 'Atenção:',
                 detail:
-                    'Já existe um vendedor cadastrado com este CPF ou CNPJ.',
-            });
-            return null;
-        }
-        if (axios.isAxiosError(error) && error.response) {
-            const { status, data } = error.response;
-
-            console.error('Erro de API:', status, data);
-
-            msgs.current?.show({
-                severity: 'error',
-                summary: 'Atenção:',
-                detail:
-                    data.message ||
-                    'Não foi possível atualizar o vendedor.',
-            });
-
-        } else {
-            msgs.current?.show({
-                severity: 'error',
-                summary: 'Atenção:',
-                detail:
-                    'Ocorreu um erro inesperado ao atualizar o vendedor.',
+                    'Já existe cadastrado com este CPF ou CNPJ. Verifique os dados informados.',
             });
         }
-        return null;
+        throw null;
     }
+};
+export const listTheVendedor = async () => {
+    try {
+        const response = await api.get('/vendedor');
+        if (response.data && Array.isArray(response.data.content)) {
+            return response.data.content;
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error("Erro ao buscar Vendedor contrato:", error);
+        return [];
+    }
+};
+export const fetchVendedorMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/vendedor', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<VendedorEntity>(response.data);
 };
 export const handleActiveOrInativeVendedor = async (
     rowData: VendedorEntity,
@@ -205,7 +245,7 @@ export const handleActiveOrInativeVendedor = async (
         if (rowData.ativo) {
             await deletarVendedor(rowData.id!, msgs, listPaginationVendedoresId, listarInativos, setLoading, searchTerm);
         } else {
-            await ativarVendedor(rowData.id!, msgs, listPaginationVendedoresId, listarInativos, setLoading, searchTerm);
+            await activateVendedor(rowData.id!, msgs, listPaginationVendedoresId, listarInativos, setLoading, searchTerm);
         }
         const refreshList = await listVendedor(listPaginationVendedoresId, listarInativos, setLoading, searchTerm);
         setListPaginationVendedores(refreshList);
@@ -213,21 +253,19 @@ export const handleActiveOrInativeVendedor = async (
         console.error("Erro ao ativar/desativar Cliente ou fornecedor:", error);
     }
 };
-export const fetchVendedor = async (vendedorId: string): Promise<{ dataVendedor: VendedorEntity }> => {
-  try {
-    const { data: dataVendedor } = await api.get(`/vendedor/${vendedorId}`);
-    const vendedorInstanciado = new VendedorEntity({
-      ...dataVendedor,
-      percentual_comissao: dataVendedor.percentual_comissao ?? 0 
-    });
-    console.log("vendedor selecionado", dataVendedor);
-    return {
-      dataVendedor: vendedorInstanciado,
-    };
-  } catch (error) {
-    console.error("Erro ao buscar vendedor :", error);
-    throw error;
-  }
+export const fetchFilteredVendedor = async (filtro: string) => {
+    try {
+        const response = await api.get('/vendedor', {
+            params: {
+                termo: remocaoCaractereFiltro(filtro)
+            }
+        });
+        console.log("Vendedor:", response.data);
+        return response.data.content || [];
+    } catch (error) {
+        console.error("Erro ao buscar vendedor filtradas:", error);
+        return [];
+    }
 };
 export const fetchAllVendedores = async (): Promise<VendedorEntity[]> => {
     try {
@@ -238,29 +276,19 @@ export const fetchAllVendedores = async (): Promise<VendedorEntity[]> => {
         return [];
     }
 };
-export const fetchFilteredVendedor = async (termo: string): Promise<VendedorEntity[]> => {
+export const fetchVendedor = async (vendedorId: string): Promise<{ dataVendedor: VendedorEntity }> => {
     try {
-        const response = await api.get('/vendedor', {
-            params: {
-                termo: termo 
-            }
+        const { data: dataVendedor } = await api.get(`/vendedor/${vendedorId}`);
+        const vendedorInstanciado = new VendedorEntity({
+            ...dataVendedor,
+            percentual_comissao: dataVendedor.percentual_comissao ?? 0
         });
-        return response.data.content || [];
+        console.log("vendedor selecionado", dataVendedor);
+        return {
+            dataVendedor: vendedorInstanciado,
+        };
     } catch (error) {
-        console.error("Erro ao buscar vendedor filtradas:", error);
-        return [];
-    }
-};
-export const listTheVendedor = async () => {
-    try {
-        const response = await api.get('/vendedor');
-        if (response.data && Array.isArray(response.data.content)) {
-            return response.data.content;
-        } else {
-            return [];
-        }
-    } catch (error) {
-        console.error("Erro ao buscar Vendedor contrato:", error);
-        return [];
+        console.error("Erro ao buscar vendedor :", error);
+        throw error;
     }
 };

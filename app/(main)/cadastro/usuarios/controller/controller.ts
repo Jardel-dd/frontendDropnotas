@@ -1,11 +1,11 @@
 import axios from 'axios';
 import api from '@/app/services/api';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
+import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
-import { EnderecoEntity } from '@/app/entity/enderecoEntity';
-
+import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
 export const listUsuario = async (
     listPaginationUserConta: Record<string, any>,
     listarInativos: boolean,
@@ -138,6 +138,42 @@ export const updateUsuario = async (
         msgs.current?.show({ severity: 'error', summary: 'Atenção:', detail: 'Não foi possível atualizar o Usuario Conta. Tente novamente.' });
     }
 };
+export const alterarEmailUsuario = async (
+    userContaId: string,
+    novoEmail: string,
+    msgs: any
+) => {
+    try {
+        const payload = {
+            email: novoEmail.trim()
+        };
+        const endpoint = `/usuario-conta/${Number(userContaId)}/alterar-email`;
+
+        await api.post(endpoint, payload);
+        msgs.current?.show({
+            severity: 'success',
+            summary: 'Sucesso:',
+            detail: `Foi enviado um e-mail para ${novoEmail.trim()} para Criação da senha de acesso.`
+        });
+        return true;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            const errorMessage = error.response.data?.message || 'Não foi possí­vel alterar o e-mail do usuário.';
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Atenção:',
+                detail: String(errorMessage)
+            });
+        } else {
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Atenção:',
+                detail: 'Não foi possí­vel alterar o e-mail do usuário.'
+            });
+        }
+        return false;
+    }
+};
 export const deletarUsuario = async (
     UserContaId: number,
     msgs: any,
@@ -148,7 +184,7 @@ export const deletarUsuario = async (
 ) => {
     try {
         await api.delete(`/usuario-conta/${String(UserContaId)}`);
-         msgs.current?.clear();
+        msgs.current?.clear();
         msgs.current?.show([
             {
                 severity: 'success',
@@ -214,6 +250,139 @@ export const handleActiveOrInativeUserConta = async (
         console.error("Erro ao ativar/desativar UserConta:", error);
     }
 };
+export const fetchUserContaCreated = async (userContaID: string) => {
+    try {
+        const { data: userConta } = await api.get(`/usuario-conta/${userContaID}`);
+        console.log("Dados do Usuário:", userConta);
+        const { data: perfilResponse } = await api.get("/perfil-usuario");
+        const perfisRaw = Array.isArray(perfilResponse?.content)
+            ? perfilResponse.content
+            : Array.isArray(perfilResponse)
+                ? perfilResponse
+                : [];
+        const perfilOptions = perfisRaw.map((p: any) => ({
+            id: p.id,
+            nome: p.nome || "Nome não disponível",
+        }));
+        const perfilIdDoUsuario = userConta?.id_perfil_usuario ?? userConta?.perfil_usuario?.id;
+        const perfilSelecionadoRaw =
+            perfisRaw.find((p: any) => p?.id === perfilIdDoUsuario) ?? null;
+        const perfilDefault = new PerfilUser({
+            ativo: true,
+            id: 0,
+            nome: '',
+            perfilUsuario: false,
+            perfilUsuarioCadastrar: false,
+            perfilUsuarioAlterar: false,
+            perfilUsuarioDesativar: false,
+            perfilUsuarioPesquisar: false,
+            usuarioConta: false,
+            usuarioContaCadastrar: false,
+            usuarioContaAlterar: false,
+            usuarioContaDesativar: false,
+            usuarioContaPesquisar: false,
+            empresa: false,
+            empresaCadastrar: false,
+            empresaAlterar: false,
+            empresaDesativar: false,
+            empresaPesquisar: false,
+            pessoa: false,
+            pessoaCadastrar: false,
+            pessoaAlterar: false,
+            pessoaDesativar: false,
+            pessoaPesquisar: false,
+            vendedor: false,
+            vendedorCadastrar: false,
+            vendedorAlterar: false,
+            vendedorDesativar: false,
+            vendedorPesquisar: false,
+            servico: false,
+            servicoCadastrar: false,
+            servicoAlterar: false,
+            servicoDesativar: false,
+            servicoPesquisar: false,
+            ordemServico: false,
+            ordemServicoCadastrar: false,
+            ordemServicoAlterar: false,
+            ordemServicoDesativar: false,
+            ordemServicoPesquisar: false,
+            ordemServicoTipoVisualizacao: '',
+            contrato: false,
+            contratoCadastrar: false,
+            contratoAlterar: false,
+            contratoDesativar: false,
+            contratoPesquisar: false,
+            contratoTipoVisualizacao: '',
+            categoriaContrato: false,
+            categoriaContratoCadastrar: false,
+            categoriaContratoAlterar: false,
+            categoriaContratoDesativar: false,
+            categoriaContratoPesquisar: false,
+            formaPagamento: false,
+            formaPagamentoCadastrar: false,
+            formaPagamentoAlterar: false,
+            formaPagamentoDesativar: false,
+            formaPagamentoPesquisar: false,
+            nfseTipoVisualizacao: ''
+        });
+        const perfilUser = perfilSelecionadoRaw
+            ? new PerfilUser({ ...perfilDefault, ...perfilSelecionadoRaw })
+            : perfilDefault;
+        const empresaListFormatada: CompanyEntity[] = [];
+        const selectedEmpresa: CompanyEntity[] = [];
+        const empresaDefault = new CompanyEntity({
+            id: 0,
+            id_usuarios_acesso: [0],
+            cnpj: '',
+            razao_social: '',
+            nome_fantasia: '',
+            logo_empresa: '',
+            atividade_principal: '',
+            inscricao_estadual: '',
+            inscricao_municipal: '',
+            codigo_regime_tributario: '',
+            tipo_rps: '',
+            endereco: {} as EnderecoEntity,
+            cnaes_secundarios: ['0'],
+            certificado_digital: '',
+            data_vencimento_certificado_digital: '',
+            senha_certificado_digital: '',
+            nome_certificado_digital: '',
+            serie_emissao_nfse: '',
+            proximo_numero_rps: null,
+            proximo_numero_lote: null,
+            aliquota_iss: null,
+            cnae_fiscal: '',
+            prestacao_sus: false,
+            regime_especial_tributacao: '',
+            incentivo_fiscal: false,
+            email: '',
+            telefone: '',
+            ativo: true,
+            aliquota_pis: 0,
+            aliquota_cofins: 0,
+            aliquota_inss: 0,
+            aliquota_ir: 0,
+            aliquota_csll: 0,
+            aliquota_outras_retencoes: 0,
+            aliquota_deducoes: 0,
+            percentual_desconto_incondicionado: 0,
+            percentual_desconto_condicionado: 0,
+        });
+        const empresa = empresaDefault;
+        return {
+            userConta,
+            perfilUser,
+            perfilOptions,
+            empresa,
+            empresaList: empresaListFormatada,
+            selectedEmpresa,
+        };
+    } catch (error) {
+        console.error("Erro ao buscar usuário, perfis ou empresas:", error);
+        throw error;
+    }
+};
 export const fetchUserConta = async (): Promise<UsuarioContaEntity[]> => {
     try {
         const idsResponse = await api.get('/usuario-conta');
@@ -234,144 +403,11 @@ export const fetchUserConta = async (): Promise<UsuarioContaEntity[]> => {
         return [];
     }
 };
-export const fetchUserContaCreated = async (userContaID: string) => {
-  try {
-    const { data: userConta } = await api.get(`/usuario-conta/${userContaID}`);
-    console.log("Dados do Usuário:", userConta);
-    const { data: perfilResponse } = await api.get("/perfil-usuario");
-    const perfisRaw = Array.isArray(perfilResponse?.content)
-      ? perfilResponse.content
-      : Array.isArray(perfilResponse)
-        ? perfilResponse
-        : [];
-    const perfilOptions = perfisRaw.map((p: any) => ({
-      id: p.id,
-      nome: p.nome || "Nome não disponível",
-    }));
-    const perfilIdDoUsuario = userConta?.id_perfil_usuario ?? userConta?.perfil_usuario?.id; 
-    const perfilSelecionadoRaw =
-      perfisRaw.find((p: any) => p?.id === perfilIdDoUsuario) ?? null;
-    const perfilDefault =  new PerfilUser({
-                   ativo: true,
-                   id: 0,
-                   nome: '',
-                   perfilUsuario: false,
-                   perfilUsuarioCadastrar: false,
-                   perfilUsuarioAlterar: false,
-                   perfilUsuarioDesativar: false,
-                   perfilUsuarioPesquisar: false,
-                   usuarioConta: false,
-                   usuarioContaCadastrar: false,
-                   usuarioContaAlterar: false,
-                   usuarioContaDesativar: false,
-                   usuarioContaPesquisar: false,
-                   empresa: false,
-                   empresaCadastrar: false,
-                   empresaAlterar: false,
-                   empresaDesativar: false,
-                   empresaPesquisar: false,
-                   pessoa: false,
-                   pessoaCadastrar: false,
-                   pessoaAlterar: false,
-                   pessoaDesativar: false,
-                   pessoaPesquisar: false,
-                   vendedor: false,
-                   vendedorCadastrar: false,
-                   vendedorAlterar: false,
-                   vendedorDesativar: false,
-                   vendedorPesquisar: false,
-                   servico: false,
-                   servicoCadastrar: false,
-                   servicoAlterar: false,
-                   servicoDesativar: false,
-                   servicoPesquisar: false,
-                   ordemServico: false,
-                   ordemServicoCadastrar: false,
-                   ordemServicoAlterar: false,
-                   ordemServicoDesativar: false,
-                   ordemServicoPesquisar: false,
-                   ordemServicoTipoVisualizacao: '',
-                   contrato: false,
-                   contratoCadastrar: false,
-                   contratoAlterar: false,
-                   contratoDesativar: false,
-                   contratoPesquisar: false,
-                   contratoTipoVisualizacao: '',
-                   categoriaContrato: false,
-                   categoriaContratoCadastrar: false,
-                   categoriaContratoAlterar: false,
-                   categoriaContratoDesativar: false,
-                   categoriaContratoPesquisar: false,
-                   formaPagamento: false,
-                   formaPagamentoCadastrar: false,
-                   formaPagamentoAlterar: false,
-                   formaPagamentoDesativar: false,
-                   formaPagamentoPesquisar: false,
-                   nfseTipoVisualizacao:''
-               });
-    const perfilUser = perfilSelecionadoRaw
-      ? new PerfilUser({ ...perfilDefault, ...perfilSelecionadoRaw })
-      : perfilDefault;
-    const empresaListFormatada: CompanyEntity[] = [];
-    const selectedEmpresa: CompanyEntity[] = [];
-    const empresaDefault = new CompanyEntity({
-      id: 0,
-      id_usuarios_acesso: [0],
-      cnpj: '',
-      razao_social: '',
-      nome_fantasia: '',
-      logo_empresa: '',
-      atividade_principal: '',
-      inscricao_estadual: '',
-      inscricao_municipal: '',
-      codigo_regime_tributario: '',
-      tipo_rps: '',
-      endereco: {} as EnderecoEntity,
-      cnaes_secundarios: ['0'],
-      certificado_digital: '',
-      data_vencimento_certificado_digital: '',
-      senha_certificado_digital: '',
-      nome_certificado_digital: '',
-      serie_emissao_nfse: '',
-      proximo_numero_rps: null,
-      proximo_numero_lote: null,
-      aliquota_iss: null,
-      cnae_fiscal: '',
-      prestacao_sus: false,
-      regime_especial_tributacao: '',
-      incentivo_fiscal: false,
-      email: '',
-      telefone: '',
-      ativo: true,
-      aliquota_pis: 0,
-      aliquota_cofins: 0,
-      aliquota_inss: 0,
-      aliquota_ir: 0,
-      aliquota_csll: 0,
-      aliquota_outras_retencoes: 0,
-      aliquota_deducoes: 0,
-      percentual_desconto_incondicionado: 0,
-      percentual_desconto_condicionado: 0,
-    });
-    const empresa = empresaDefault;
-    return {
-      userConta,
-      perfilUser,         
-      perfilOptions,      
-      empresa,             
-      empresaList: empresaListFormatada,
-      selectedEmpresa,
-    };
-  } catch (error) {
-    console.error("Erro ao buscar usuário, perfis ou empresas:", error);
-    throw error;
-  }
-};
-export const fetchFilteredUserConta = async (query: string): Promise<UsuarioContaEntity[]> => {
+export const fetchFilteredUserConta = async (filtro: string): Promise<UsuarioContaEntity[]> => {
     try {
         const response = await api.get('/usuario-conta', {
             params: {
-                termo: query 
+                termo: remocaoCaractereFiltro(filtro)
             }
         });
         return response.data.content || [];
