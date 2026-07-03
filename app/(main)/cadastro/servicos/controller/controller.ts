@@ -1,37 +1,19 @@
 import axios from 'axios';
 import api from '@/app/services/api';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { TableService } from '@/app/entity/TableServiceEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
-import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
+import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
+import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
+import { normalizeEmptyValuesToNull, type PreloadedServicoData } from '../types/servico';
 import { fetchAllTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
-import { fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
 import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
+import { fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
 import { fetchFilteredClassificacaoTributaria, findClassificacaoTributariaByCodigo } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
-import type { PreloadedServicoData } from '../types/servico';
 
-const normalizeEmptyValuesToNull = <T,>(value: T): T => {
-    if (Array.isArray(value)) {
-        return value.map((item) => normalizeEmptyValuesToNull(item)) as T;
-    }
-
-    if (value && typeof value === 'object') {
-        const normalizedEntries = Object.entries(value as Record<string, unknown>).map(([key, entryValue]) => [
-            key,
-            normalizeEmptyValuesToNull(entryValue)
-        ]);
-
-        return Object.fromEntries(normalizedEntries) as T;
-    }
-
-    if (typeof value === 'string') {
-        return (value.trim() === '' ? null : value) as T;
-    }
-
-    return value;
-};
 
 export const listServico = async (
     listPaginationServicos: Record<string, any>,
@@ -67,7 +49,7 @@ export const ativarServico = async (
                 detail: `Serviço ativado com sucesso.`,
             },
         ]);
-       
+
         await listServico(listPaginationServicos, listarInativos, setLoading, searchTerm);
         console.log(`User Conta com ID ${ServicosId} ativada com sucesso.`);
     } catch (error) {
@@ -174,13 +156,13 @@ export const updateServico = async (
             ...service,
             aliquota_deducoes: service.aliquota_deducoes ?? 0,
         });
-        console.log('[Cadastro/Servicos] Payload enviado ao atualizar servico:', dataServiceUpdate);
+        console.log('Payload enviado ao atualizar servico:', dataServiceUpdate);
         const response = await api.put(`/servico`, dataServiceUpdate);
         const responseData = response?.data;
         const responseServico =
             responseData &&
-            typeof responseData === 'object' &&
-            'servico' in responseData
+                typeof responseData === 'object' &&
+                'servico' in responseData
                 ? (responseData as { servico?: ServiceEntity | Record<string, unknown> }).servico
                 : null;
         const updated =
@@ -219,6 +201,38 @@ export const updateServico = async (
         }
     }
 };
+export const listTheService = async () => {
+    try {
+        const response = await api.get('/servico');
+        if (response.data && Array.isArray(response.data.content)) {
+            return response.data.content;
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error("Erro ao buscar Serviços contrato:", error);
+        return [];
+    }
+};
+export const fetchServiceMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/servico', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<ServiceEntity>(response.data);
+};
 export const handleActiveOrInativeServicos = async (
     rowData: ServiceEntity,
     msgs: any,
@@ -241,21 +255,30 @@ export const handleActiveOrInativeServicos = async (
         console.error("Erro ao ativar/desativar Servicos;:", error);
     }
 };
-export const fetchServicesByID = async (id: string): Promise<{ servico: ServiceEntity }> => {
+export const fetchFilteredService = async (filtro: string) => {
     try {
-        const response = await api.get(`/servico/${id}`);
-        const data = response.data;
-        console.log("Retorno service", data);
-        return {
-            servico: {
-                ...data,
-                aliquota_deducoes: data.aliquota_deducoes ?? 0,
-                item_lista_servico_display: `${data.codigo} - ${data.item_lista_servico}`,
-            },
-        };
+        const response = await api.get(`/servico`, {
+            params: {
+                termo: remocaoCaractereFiltro(filtro)
+            }
+        });
+        console.log(" Serviços filtradas:", response.data);
+        if (response.data && Array.isArray(response.data.content)) {
+            return response.data.content;
+        } else {
+            return [];
+        }
     } catch (error) {
-        console.error("Erro ao buscar serviço:", error);
-        throw error;
+        return [];
+    }
+};
+export const fetchAllService = async (): Promise<ServiceEntity[]> => {
+    try {
+        const response = await api.get('/servico');
+        return response.data.content || [];
+    } catch (error) {
+        console.error("Erro ao buscar todas as vendedor:", error);
+        return [];
     }
 };
 export const fetchServiceFormDataByID = async (id: string): Promise<PreloadedServicoData> => {
@@ -316,42 +339,20 @@ export const fetchServiceFormDataByID = async (id: string): Promise<PreloadedSer
                 : null)
     };
 };
-export const listTheService = async () => {
+export const fetchServicesByID = async (id: string): Promise<{ servico: ServiceEntity }> => {
     try {
-        const response = await api.get('/servico');
-        if (response.data && Array.isArray(response.data.content)) {
-            return response.data.content;
-        } else {
-            return [];
-        }
+        const response = await api.get(`/servico/${id}`);
+        const data = response.data;
+        console.log("Retorno service", data);
+        return {
+            servico: {
+                ...data,
+                aliquota_deducoes: data.aliquota_deducoes ?? 0,
+                item_lista_servico_display: `${data.codigo} - ${data.item_lista_servico}`,
+            },
+        };
     } catch (error) {
-        console.error("Erro ao buscar Serviços contrato:", error);
-        return [];
-    }
-};
-export const fetchFilteredService = async (filtro: string) => {
-    try {
-        const response = await api.get(`/servico`, {
-            params: {
-                termo: filtro
-            }
-        });
-        console.log(" Serviços filtradas:", response.data);
-        if (response.data && Array.isArray(response.data.content)) {
-            return response.data.content;
-        } else {
-            return [];
-        }
-    } catch (error) {
-        return [];
-    }
-};
-export const fetchAllService = async (): Promise<ServiceEntity[]> => {
-    try {
-        const response = await api.get('/servico');
-        return response.data.content || [];
-    } catch (error) {
-        console.error("Erro ao buscar todas as vendedor:", error);
-        return [];
+        console.error("Erro ao buscar serviço:", error);
+        throw error;
     }
 };

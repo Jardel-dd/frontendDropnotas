@@ -3,8 +3,6 @@ import '@/app/styles/styledGlobal.css';
 import { PessoaFields } from './pessoa';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Divider } from 'primereact/divider';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { getCitiesFromState } from '@/app/entity/maps';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { DropdownChangeEvent } from 'primereact/dropdown';
@@ -13,33 +11,54 @@ import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { VendedorFormRef } from '../../vendedores/types/vendedor';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { FormCreatedVendedor } from '../../vendedores/form/controller';
+import MobileSearchPicker from '@/app/shared/mobile/MobileSearchPicker';
+import ContratoDropdownField from '@/app/(main)/contrato/dropDown/contrato';
+import { useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { ContratoFormCreated } from '@/app/(main)/contrato/form/controller';
 import { handleSearchCep } from '@/app/components/seachs/searchCep/controller';
 import { handleSearchCNPJ } from '@/app/components/seachs/searchCnpj/controller';
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
 import { validateFieldsPessoa } from '@/app/(main)/cadastro/pessoas/controller/validate';
-import { FormPessoaCreatedProps, PessoaFormProps, PessoaFormRef } from '../types/pessoa';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import VendedorDropdownField from '@/app/(main)/cadastro/vendedores/dropDown/DropdownVendedor';
-import { ContratoFormCreated } from '@/app/(main)/contrato/form/controller';
 import { ContratoFormRef, PreloadedContratoData } from '@/app/(main)/contrato/types/contratos';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { fetchAllCnae, fetchFilteredCnae } from '@/app/components/fetchAll/listAllCnae/controller';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdPessoa, fetchPessoasById, updatePessoa } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { fetchVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import { fetchContratoByID, fetchContratosById } from '@/app/(main)/contrato/controller/controller';
-export const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string | null => {
-    if (pessoa.pessoa_cliente && pessoa.pessoa_fornecedor) return 'AMBOS';
-    if (pessoa.pessoa_cliente) return 'pessoa_cliente';
-    if (pessoa.pessoa_fornecedor) return 'pessoa_fornecedor';
-    return null;
-};
-export const mapContatoSelectionToFlags = (selectedContato: string | null) => ({
+import { FormPessoaCreatedProps, mapPessoaContatoToSelection, PessoaFormProps, PessoaFormRef } from '../types/pessoa';
+import { fetchFilteredVendedor, fetchVendedor, fetchVendedorMobilePage, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import { fetchContratoByID, fetchContratoMobilePage, fetchContratosById, fetchFilteredContrato, listTheContrato } from '@/app/(main)/contrato/controller/controller';
+
+const mapContatoSelectionToFlags = (selectedContato: string | null) => ({
     pessoa_cliente: selectedContato === 'AMBOS' || selectedContato === 'pessoa_cliente',
     pessoa_fornecedor: selectedContato === 'AMBOS' || selectedContato === 'pessoa_fornecedor'
 });
+const buildContratoSelectionFromResumo = (contratoResumo: Partial<ContratoEntity> | null | undefined, contratoId?: number | null) => {
+    const resolvedContratoId = contratoResumo?.id ?? contratoId ?? null;
+
+    if (!resolvedContratoId) {
+        return null;
+    }
+
+    return new ContratoEntity({
+        id: resolvedContratoId,
+        descricao: contratoResumo?.descricao ?? '',
+        valor_servico: contratoResumo?.valor_servico ?? null,
+        periodicidade: contratoResumo?.periodicidade ?? '',
+        emitir_boleto: contratoResumo?.emitir_boleto ?? false,
+        enviar_email: contratoResumo?.enviar_email ?? false,
+        enviar_whatsapp: contratoResumo?.enviar_whatsapp ?? false,
+        id_servico: contratoResumo?.id_servico ?? null,
+        id_empresa: contratoResumo?.id_empresa ?? null,
+        id_categoria_contrato: contratoResumo?.id_categoria_contrato ?? null,
+        id_forma_pagamento: contratoResumo?.id_forma_pagamento ?? null,
+        id_clientes_contrato: contratoResumo?.id_clientes_contrato ?? [0]
+    });
+};
 const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
     (
         {
@@ -59,14 +78,18 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         ref
     ) => {
         const router = useRouter();
+        const isMobile = useIsMobile();
         const pessoaId = initialId;
+        const [reloadKeyContrato] = useState(0);
         const formRef = useRef<VendedorFormRef>(null);
-        const formContratoRef = useRef<ContratoFormRef>(null);
         const onPessoaChangeRef = useRef(onPessoaChange);
         const onErrorsChangeRef = useRef(onErrorsChange);
         const [isLoading, setIsLoading] = useState(true);
         const [hasFocused, setHasFocused] = useState(false);
         const [isEditMode, setIsEditMode] = useState(false);
+        const [loadingCep, setLoadingCep] = useState(false);
+        const [loadingCnpj, setLoadingCnpj] = useState(false);
+        const formContratoRef = useRef<ContratoFormRef>(null);
         const [error, setError] = useState<string | null>(null);
         const [vendedor, setVendedor] = useState<VendedorEntity>(
             new VendedorEntity({
@@ -95,25 +118,22 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const [reloadKeyVendedor, setReloadKeyVendedor] = useState(0);
         const [vendedorDialogKey, setVendedorDialogKey] = useState(0);
         const [contratoDialogKey, setContratoDialogKey] = useState(0);
-        const [loadingCep, setLoadingCep] = useState(false);
-        const [loadingCnpj, setLoadingCnpj] = useState(false);
+        const [errors, setErrors] = useState<Record<string, string>>({});
         const [showModalVendedor, setShowModalVendedor] = useState(false);
-        const [editingVendedorId, setEditingVendedorId] = useState<string | null>(null);
         const [showModalContrato, setShowModalContrato] = useState(false);
-        const [editingContratoId, setEditingContratoId] = useState<string | null>(null);
+        const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
+        const [selectedContato, setSelectedContato] = useState<string | null>(null);
         const [isVendedorDialogLoading, setIsVendedorDialogLoading] = useState(true);
         const [isContratoDialogLoading, setIsContratoDialogLoading] = useState(true);
-        const [preloadedVendedor, setPreloadedVendedor] = useState<VendedorEntity | null>(null);
-        const [preloadedContrato, setPreloadedContrato] = useState<PreloadedContratoData | null>(null);
-        const [selectedContato, setSelectedContato] = useState<string | null>(null);
-        const [selectedContrato, setSelectedContrato] = useState<ContratoEntity | null>(null);
-        const [errors, setErrors] = useState<Record<string, string>>({});
-        const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
+        const [reloadKeyContratoDropdown, setReloadKeyContratoDropdown] = useState(0);
+        const [editingVendedorId, setEditingVendedorId] = useState<string | null>(null);
+        const [editingContratoId, setEditingContratoId] = useState<string | null>(null);
         const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+        const [selectedContrato, setSelectedContrato] = useState<ContratoEntity | null>(null);
         const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
-        const [reloadKeyContrato] = useState(0);
-        const [reloadKeyContratoDropdown, setReloadKeyContratoDropdown] = useState(0);
+        const [preloadedVendedor, setPreloadedVendedor] = useState<VendedorEntity | null>(null);
+        const [preloadedContrato, setPreloadedContrato] = useState<PreloadedContratoData | null>(null);
         const [stateDisableBtnCreatedClienteFornecedor, setStateDisableBtnCreatedClienteFornecedor] = useState(false);
         const [contrato, setContrato] = useState<ContratoEntity>(
             new ContratoEntity({
@@ -159,7 +179,50 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 pais: ''
             })
         );
-        const validatePessoaForm = () => validateFieldsPessoa(pessoa, setErrors, msgs, selectedVendedor, selectedContrato);
+        const validatePessoaForm = useCallback(
+            () => validateFieldsPessoa(pessoa, setErrors, msgs),
+            [msgs, pessoa]
+        );
+      
+        const resolveSelectedContrato = useCallback(async (
+            contratoId?: number | null,
+            contratoResumo?: Partial<ContratoEntity> | null,
+            shouldFetchFallback = true
+        ) => {
+            const contratoPreselecionado = buildContratoSelectionFromResumo(contratoResumo, contratoId);
+
+            if (contratoPreselecionado) {
+                setSelectedContrato(contratoPreselecionado);
+                return;
+            }
+
+            if (!contratoId || !shouldFetchFallback) {
+                setSelectedContrato(null);
+                return;
+            }
+
+            try {
+                const response = await fetchContratoByID(String(contratoId));
+                setSelectedContrato(response.contrato ? new ContratoEntity(response.contrato) : null);
+            } catch (error) {
+                console.error('Erro ao buscar contrato selecionado:', error);
+                setSelectedContrato(null);
+            }
+        }, []);
+        const resolveSelectedVendedor = useCallback(async (vendedorId?: number | null) => {
+            if (!vendedorId) {
+                setSelectedVendedor(null);
+                return;
+            }
+
+            try {
+                const { dataVendedor } = await fetchVendedor(String(vendedorId));
+                setSelectedVendedor(new VendedorEntity(dataVendedor));
+            } catch (error) {
+                console.error('Erro ao buscar vendedor selecionado:', error);
+                setSelectedVendedor(null);
+            }
+        }, []);
         const handleAllChanges = (event: any) => {
             const id = event?.target?.id;
             const type = event?.target?.type;
@@ -258,17 +321,23 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setVendedorDialogKey((current) => current + 1);
             setShowModalVendedor(true);
         };
-        const openEditVendedorDialog = async (vendedorSelecionado: VendedorEntity) => {
-            if (!vendedorSelecionado?.id) {
+        const openEditVendedorDialog = async (vendedorSelecionado: VendedorEntity | null) => {
+            const vendedorId =
+                vendedorSelecionado?.id ??
+                selectedVendedor?.id ??
+                pessoa.id_vendedor_padrao ??
+                null;
+
+            if (!vendedorId) {
                 return;
             }
 
             setIsVendedorDialogLoading(true);
             try {
-                const vendedorId = String(vendedorSelecionado.id);
-                const { dataVendedor } = await fetchVendedor(vendedorId);
+                const vendedorIdAsString = String(vendedorId);
+                const { dataVendedor } = await fetchVendedor(vendedorIdAsString);
                 setPreloadedVendedor(dataVendedor);
-                setEditingVendedorId(vendedorId);
+                setEditingVendedorId(vendedorIdAsString);
                 setVendedorDialogKey((current) => current + 1);
                 setShowModalVendedor(true);
             } catch (error) {
@@ -289,19 +358,25 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setContratoDialogKey((current) => current + 1);
             setShowModalContrato(true);
         };
-        const openEditContratoDialog = async (contratoSelecionado: ContratoEntity) => {
-            if (!contratoSelecionado?.id) {
+        const openEditContratoDialog = async (contratoSelecionado: ContratoEntity | null) => {
+            const contratoId =
+                contratoSelecionado?.id ??
+                selectedContrato?.id ??
+                pessoa.id_contrato ??
+                null;
+
+            if (!contratoId) {
                 return;
             }
 
             setIsContratoDialogLoading(true);
             try {
-                const contratoId = String(contratoSelecionado.id);
-                console.log('[PessoaForm] abrindo edicao de contrato', { contratoId, contratoSelecionado });
-                const contratoPrecarregado = await fetchContratosById(contratoId);
+                const contratoIdAsString = String(contratoId);
+                console.log('[PessoaForm] abrindo edicao de contrato', { contratoId: contratoIdAsString, contratoSelecionado });
+                const contratoPrecarregado = await fetchContratosById(contratoIdAsString);
                 console.log('[PessoaForm] preload do contrato concluido', contratoPrecarregado);
                 setPreloadedContrato(contratoPrecarregado);
-                setEditingContratoId(contratoId);
+                setEditingContratoId(contratoIdAsString);
                 setContratoDialogKey((current) => current + 1);
                 setShowModalContrato(true);
             } catch (error) {
@@ -394,7 +469,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setSelectedContato(selected);
             const updatedPessoa = pessoa.copyWith(mapContatoSelectionToFlags(selected));
             setPessoa(updatedPessoa);
-            validateFieldsPessoa(updatedPessoa, setErrors, msgs, selectedVendedor, selectedContrato);
+            validateFieldsPessoa(updatedPessoa, setErrors, msgs);
         };
         const handleCNAEChange = (cnae: TableCNAEEntity | null) => {
             setSelectedCNAE(cnae);
@@ -416,9 +491,9 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setPessoa(updatedPessoa);
             setErrors((prevErrors) => {
                 const newErrors = { ...prevErrors };
-            delete newErrors.selectedContrato;
-            return newErrors;
-        });
+                delete newErrors.selectedContrato;
+                return newErrors;
+            });
         };
         const handleErrorsChange = (updatedErrors: Record<string, string>) => {
             setErrors(updatedErrors);
@@ -433,14 +508,18 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setLoadingCnpj(false);
             setTouchedFields((prev) => ({ ...prev, cnpj: true }));
         };
-        const listagemPessoaID = async (currentPessoaId: string) => {
+        const listagemPessoaID = useCallback(async (currentPessoaId: string) => {
             try {
                 setIsLoading(true);
-                const { dataPessoa } = await fetchPessoasById(currentPessoaId);
+                const { dataPessoa, selectedContrato: selectedContratoPrecarregado } = await fetchPessoasById(currentPessoaId);
                 const pessoaEntity = new PessoaEntity(dataPessoa);
                 setPessoa(pessoaEntity);
                 setSelectedContato(mapPessoaContatoToSelection(dataPessoa));
-                setSelectedContrato(null);
+                await resolveSelectedContrato(
+                    dataPessoa.id_contrato ?? null,
+                    selectedContratoPrecarregado ?? (dataPessoa as PessoaEntity & { contrato?: Partial<ContratoEntity> }).contrato ?? null,
+                    false
+                );
                 setSelectedCNAE(
                     dataPessoa.cnae_fiscal
                         ? new TableCNAEEntity({
@@ -450,11 +529,11 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                         })
                         : null
                 );
-                setSelectedVendedor(null);
+                await resolveSelectedVendedor(dataPessoa.id_vendedor_padrao ?? null);
             } finally {
                 setIsLoading(false);
             }
-        };
+        }, [resolveSelectedContrato, resolveSelectedVendedor]);
         useImperativeHandle(ref, () => ({
             handleSave: handleSubmit
         }));
@@ -469,9 +548,17 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 setIsEditMode(true);
 
                 if (preloadedPessoa?.dataPessoa?.id && String(preloadedPessoa.dataPessoa.id) === String(pessoaId)) {
-                    setPessoa(preloadedPessoa.dataPessoa);
+                    const pessoaPrecarregada = new PessoaEntity(preloadedPessoa.dataPessoa);
+                    const contratoPrecarregado =
+                        preloadedPessoa.selectedContrato ??
+                        buildContratoSelectionFromResumo(
+                            (preloadedPessoa.dataPessoa as PessoaEntity & { contrato?: Partial<ContratoEntity> }).contrato ?? null,
+                            preloadedPessoa.dataPessoa.id_contrato ?? null
+                        );
+
+                    setPessoa(pessoaPrecarregada);
                     setSelectedContato(mapPessoaContatoToSelection(preloadedPessoa.dataPessoa));
-                    setSelectedContrato(null);
+                    setSelectedContrato(contratoPrecarregado);
                     setSelectedCNAE(
                         preloadedPessoa.dataPessoa.cnae_fiscal
                             ? new TableCNAEEntity({
@@ -483,6 +570,15 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                     );
                     setSelectedVendedor(preloadedPessoa.selectedVendedor ?? null);
                     setIsLoading(false);
+
+                    if (!contratoPrecarregado && preloadedPessoa.dataPessoa.id_contrato) {
+                        void resolveSelectedContrato(preloadedPessoa.dataPessoa.id_contrato, null, true);
+                    }
+
+                    if (!preloadedPessoa.selectedVendedor && preloadedPessoa.dataPessoa.id_vendedor_padrao) {
+                        void resolveSelectedVendedor(preloadedPessoa.dataPessoa.id_vendedor_padrao ?? null);
+                    }
+
                     return;
                 }
 
@@ -492,12 +588,12 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
 
             setIsEditMode(false);
             setIsLoading(false);
-        }, [pessoaId, preloadedPessoa]);
+        }, [listagemPessoaID, pessoaId, preloadedPessoa, resolveSelectedContrato, resolveSelectedVendedor]);
         useEffect(() => {
             if (Object.values(touchedFields).some((touched) => touched)) {
                 validatePessoaForm();
             }
-        }, [pessoa, selectedVendedor]);
+        }, [touchedFields, validatePessoaForm]);
         useEffect(() => {
             onPessoaChangeRef.current?.(pessoa);
         }, [pessoa]);
@@ -515,7 +611,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             });
         }, [showModalContrato, editingContratoId, isContratoDialogLoading]);
         if (isLoading && pessoaId) {
-            return <LoadingScreen  loadingText="Carregando informacoes do Cliente ou Fornecedor selecionado..." />;
+            return <LoadingScreen loadingText="Carregando informacoes do Cliente ou Fornecedor selecionado..." />;
         }
         const isSubmitDisabled =
             stateDisableBtnCreatedClienteFornecedor ||
@@ -540,39 +636,93 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                 pessoa={pessoa}
                                 errors={errors}
                                 selectedContato={selectedContato}
-                                selectedContrato={selectedContrato}
                                 selectedCNAE={selectedCNAE}
                                 loadingCnpj={loadingCnpj}
                                 hasFocused={hasFocused}
-                                reloadKeyContrato={reloadKeyContrato + reloadKeyContratoDropdown}
-                                onAddContato={() => {}}
                                 onFocusFirstField={() => setHasFocused(true)}
                                 onChange={handleAllChanges}
                                 onDropdownChange={handleDropdownChange}
                                 onContatoChange={handleContatoChange}
-                                onAddContrato={openCreateContratoDialog}
-                                onEditContrato={openEditContratoDialog}
-                                onContratoChange={handleContratoChange}
                                 onCNAEChange={handleCNAEChange}
                                 onSearchCnpj={handleSearchPessoaCnpj}
                                 onValidateCnpj={handleValidateCnpj}
                                 fetchAllCnae={fetchAllCnae}
                                 fetchFilteredCnae={fetchFilteredCnae}
                             />
-                            <Divider align="center" className="form-divider">
-                                <span>Vendedor</span>
-                            </Divider>
-                            <div className="col-12 lg:col-3">
-                                <VendedorDropdownField
-                                    selectedVendedor={selectedVendedor}
-                                    selectedVendedorId={pessoa.id_vendedor_padrao ?? null}
-                                    reloadKey={reloadKeyVendedor}
-                                    onVendedorChange={handleVendedorChange}
-                                    onAddClick={openCreateVendedorDialog}
-                                    onEditClick={openEditVendedorDialog}
-                                    hasError={!!errors.selectedVendedor}
-                                    errorMessage={errors.selectedVendedor}
-                                />
+                            <div className='grid formgrid p-0'>
+                                {isMobile ? (
+                                    <>
+                                      <div className="col-4 lg:col-4 w-full">
+                                        <MobileSearchPicker<ContratoEntity>
+                                            selectedItem={selectedContrato}
+                                            onItemChange={handleContratoChange}
+                                            fetchAllItems={listTheContrato}
+                                            fetchFilteredItems={fetchFilteredContrato}
+                                            fetchItemsPage={fetchContratoMobilePage}
+                                            optionLabel="descricao"
+                                            optionValue="id"
+                                            topLabel="Contrato:"
+                                            loadMoreRows={20}
+                                            placeholder="Selecione o Contrato"
+                                            dialogTitle="Selecionar o Contrato"
+                                            hasError={!!errors.selectedContrato}
+                                            errorMessage={errors.selectedContrato}
+                                            onAddClick={openCreateContratoDialog}
+                                            onEditClick={openEditContratoDialog}
+                                            autoLoadAndSelectSingle
+                                        />
+                                    </div>
+                                    <div className="col-4 lg:col-4 w-full">
+                                        <MobileSearchPicker<VendedorEntity>
+                                            selectedItem={selectedVendedor}
+                                            onItemChange={handleVendedorChange}
+                                            fetchAllItems={listTheVendedor}
+                                            fetchFilteredItems={fetchFilteredVendedor}
+                                            fetchItemsPage={fetchVendedorMobilePage}
+                                            optionLabel="razao_social"
+                                            optionValue="id"
+                                            topLabel="Vendedor:"
+                                            loadMoreRows={20}
+                                            placeholder="Selecione o Vendedor"
+                                            dialogTitle="Selecionar o Vendedor"
+                                            hasError={!!errors.selectedVendedor}
+                                            errorMessage={errors.selectedVendedor}
+                                            onAddClick={openCreateVendedorDialog}
+                                            onEditClick={openEditVendedorDialog}
+                                            autoLoadAndSelectSingle
+                                        />
+                                    </div>
+                                    </>
+                                ) : (
+                                    <>
+                                    <div className="col-4 lg:col-4">
+                                        <ContratoDropdownField
+                                            selectedContrato={selectedContrato}
+                                            selectedContratoId={pessoa.id_contrato ?? null}
+                                            onContratoChange={handleContratoChange}
+                                            reloadKey={reloadKeyContrato + reloadKeyContratoDropdown}
+                                            hasError={!!errors.selectedContrato}
+                                            errorMessage={errors.selectedContrato}
+                                            showAddButton
+                                            onAddClick={openCreateContratoDialog}
+                                            onEditClick={openEditContratoDialog}
+                                            autoSelectSingle={false}
+                                        />
+                                    </div>
+                                    <div className="col-4 lg:col-4">
+                                        <VendedorDropdownField
+                                            selectedVendedor={selectedVendedor}
+                                            selectedVendedorId={pessoa.id_vendedor_padrao ?? null}
+                                            reloadKey={reloadKeyVendedor}
+                                            onVendedorChange={handleVendedorChange}
+                                            onAddClick={openCreateVendedorDialog}
+                                            onEditClick={openEditVendedorDialog}
+                                            hasError={!!errors.selectedVendedor}
+                                            errorMessage={errors.selectedVendedor}
+                                        />
+                                    </div>
+                                    </>
+                                )}
                             </div>
                             <EnderecoForm
                                 endereco={pessoa?.endereco}
@@ -584,6 +734,9 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                 onDropdownChangeEndereco={handleDropdownChangeEndereco}
                                 getCitiesFromState={getCitiesFromState}
                                 loadingCep={loadingCep}
+                                 nomePaisObrigatorio
+    codigoPaisObrigatorio
+    codigoMunicipioObrigatorio
                             />
                         </div>
                     </div>
@@ -673,4 +826,3 @@ export const FormCreatedPessoa = forwardRef<PessoaFormRef, FormPessoaCreatedProp
     return <PessoaFields {...props} />;
 });
 FormCreatedPessoa.displayName = 'FormCreatedPessoa';
-

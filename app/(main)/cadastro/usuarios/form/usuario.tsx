@@ -1,14 +1,13 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
 import { Button } from 'primereact/button';
-import Input from '@/app/shared/include/input/input-all';
 import IconVisible from '@/app/shared/IconVisible';
+import Input from '@/app/shared/include/input/input-all';
+import type { UsuarioFieldsProps } from '../types/usuario';
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import PerfilUserDropdownField from '../../permissoes/dropdown/perfilUsuario';
-import { fetchFilteredCompany, listTheCompany } from '@/app/(main)/configuracoes/empresas/controller/controller';
-import type { UsuarioFieldsProps, UsuarioFormProps, UsuarioFormRef } from '../types/usuario';
-
 export type { UsuarioFieldsProps, UsuarioFormProps, UsuarioFormRef } from '../types/usuario';
+import { fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 
 export function UsuarioFields({
     userConta,
@@ -32,7 +31,8 @@ export function UsuarioFields({
     onTogglePasswordVisibility,
     onTriggerProfileImageUpload,
     onOpenPerfilUserModal,
-    onOpenEmpresaModal
+    onOpenEmpresaModal,
+    onOpenChangeEmailModal
 }: UsuarioFieldsProps) {
     return (
         <div className="grid formgrid">
@@ -90,8 +90,21 @@ export function UsuarioFields({
                     required
                 />
             </div>
-
             <div className="col-12">
+                {userContaID && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', height:"20px", gap:"10px" }}>
+                        {onOpenChangeEmailModal && (
+                            <Button
+                                type="button"
+                                label="Trocar E-mail"
+                                severity="secondary"
+                                outlined
+                                onClick={onOpenChangeEmailModal}
+                            />
+                        )}
+                        <Button type="button" label="Recuperação de Senha" severity="secondary" outlined />
+                    </div>
+                )}
                 <Input
                     id="email"
                     value={userConta.email || ''}
@@ -100,6 +113,7 @@ export function UsuarioFields({
                     type="email"
                     useRightButton
                     outlined
+                    readOnly={Boolean(userContaID)}
                     hasError={!!errors.email}
                     errorMessage={errors.email}
                     iconLeft="pi pi-at"
@@ -108,14 +122,9 @@ export function UsuarioFields({
                     required
                 />
             </div>
-
-            {userContaID ? (
-                <div className="col-12" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button type="button" style={{ width: '15%', height: '10px' }} label="Trocar Senha" severity="secondary" outlined />
-                </div>
-            ) : (
+            {userContaID ? null : (
                 <>
-                    <div className="col-12">
+                    <div className="col-12 ">
                         <Input
                             value={userConta.senha || ''}
                             onChange={onChange}
@@ -217,8 +226,8 @@ export function UsuarioFields({
                     initialSelectedValues={userConta.id_empresas_acesso ?? []}
                     placeholder="Selecione as Empresas"
                     maxSelectedLabels={3}
-                    fetchFilteredItems={fetchFilteredCompany}
-                    fetchAllItems={listTheCompany}
+                    fetchFilteredItems={fetchFilteredEmpresa}
+                    fetchAllItems={listTheEmpresa}
                     hasError={!!errors.selectedEmpresa}
                     errorMessage={errors.selectedEmpresa}
                     showChips

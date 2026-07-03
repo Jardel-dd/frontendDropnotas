@@ -5,12 +5,77 @@
   box-shadow: none;
 
 }
+
+.table-cell-truncate {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: clamp(140px, 22vw, 320px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.datatable-selectable-shell {
+    position: relative;
+    min-height: clamp(24rem, 60vh, 40rem);
+}
+
+.datatable-selectable-loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.datatable-selectable-loading-overlay > .loading-container {
+    height: 100% !important;
+    min-height: 100% !important;
+}
+
+.datatable-mobile-load-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.75rem;
+    flex-shrink: 0;
+}
+
+.datatable-mobile-load-more-button {
+    min-width: 12rem;
+}
+
+.datatable-mobile-fixed-layout {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.datatable-mobile-fixed-header.p-datatable {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.datatable-mobile-fixed-header .p-datatable-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
 @media (max-width: 768px) {
+    .table-cell-truncate {
+        max-width: min(44vw, 220px);
+    }
+
     .responsive-table .p-datatable-thead > tr > th {
         padding: 0.3rem 0.4rem !important;
         font-size: 0.7rem !important;
         white-space: nowrap;
         height: auto;
+
     }
 
     .responsive-table .p-datatable-tbody > tr > td {
@@ -18,13 +83,13 @@
         font-size: 0.7rem !important;
         white-space: nowrap;
         height: 65px;
-        width: 20px;
-        max-width: 50px;
+        width: 10px;
+
      
     }
 
     .responsive-table .p-button {
-        width: 200px !important;
+        width: 20px !important;
         height: 18px !important;
         font-size: 0.rem !important;
     }
@@ -36,5 +101,13 @@
 
     .responsive-table .p-checkbox-icon {
         font-size: 9px;
+    }
+
+    .responsive-table .p-datatable-tbody > tr.p-datatable-row-expansion > td,
+    .responsive-table .p-datatable-row-expansion > td {
+        height: auto !important;
+        width: auto !important;
+        white-space: normal !important;
+        padding: 0 !important;
     }
 }

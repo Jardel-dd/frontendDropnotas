@@ -201,20 +201,24 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
-                    id="base_calculo"
-                    value={nfseGerada.servico?.valores?.base_calculo ?? 0}
-                    label="Base de Cálculo"
+                   <CustomInputNumber
+                    id="valor_servico"
+                    value={nfseGerada.servico.valores?.base_calculo ?? 0}
                     onChange={(e) => handleNumberChange(e, 'servico')}
+                    label="Base de Cálculo:"
+                    useRightButton
+                    outlined
+                    iconLeft={<IconReal isDarkMode={false} />}
+                    hasError={!!servicoErrors['valores.base_calculo']}
+                    errorMessage={servicoErrors['valores.base_calculo']}
                     showTopLabel
                     required
-                    topLabel="Base de Cálculo:"
-                    type="number"
-                    iconLeft={<IconPorcentagem isDarkMode={false} />}
+                    topLabel="Base de Cálculo"
                 />
+                
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="aliquota_iss"
                     value={nfseGerada.servico?.valores.aliquota_iss ?? 0}
                     label="Alíquota ISS"
@@ -222,12 +226,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Alíquota ISS:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="aliquota_deducoes"
                     value={nfseGerada.servico?.valores.aliquota_deducoes ?? 0}
                     label="Alíquota Deduções"
@@ -235,12 +238,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Alíquota Deduções:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="aliquota_pis"
                     value={nfseGerada.servico?.valores.aliquota_pis ?? 0}
                     label="Alíquota PIS"
@@ -248,12 +250,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Alíquota PIS:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="aliquota_cofins"
                     value={nfseGerada.servico?.valores.aliquota_cofins ?? 0}
                     label="Alíquota COFINS"
@@ -261,12 +262,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Alíquota COFINS:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="aliquota_inss"
                     value={nfseGerada.servico?.valores.aliquota_inss ?? 0}
                     label="Alíquota INSS"
@@ -274,12 +274,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Alíquota INSS:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="aliquota_ir"
                     value={nfseGerada.servico?.valores.aliquota_ir ?? 0}
                     label="Alíquota IR"
@@ -287,12 +286,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Alíquota IR:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="aliquota_csll"
                     value={nfseGerada.servico?.valores.aliquota_csll ?? 0}
                     label="Alíquota CSLL"
@@ -300,12 +298,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Alíquota CSLL:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="aliquota_outras_retencoes"
                     value={nfseGerada.servico?.valores.aliquota_outras_retencoes ?? 0}
                     label="Alíquota outras Retenções"
@@ -313,12 +310,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Alíquota outras Retenções:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="percentual_desconto_incondicionado"
                     value={nfseGerada.servico?.valores.percentual_desconto_incondicionado ?? 0}
                     label="Percentual desconto Incondicionado"
@@ -326,12 +322,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Percentual desconto Incondicionado:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <Input
+                <CustomInputNumber
                     id="percentual_desconto_condicionado"
                     value={nfseGerada.servico?.valores.percentual_desconto_condicionado ?? 0}
                     label="Percentual desconto Condicionado"
@@ -339,7 +334,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                     required
                     topLabel="Percentual desconto Condicionado:"
-                    type="number"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>

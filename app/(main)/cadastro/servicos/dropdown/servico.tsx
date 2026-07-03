@@ -1,10 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ServiceEntity } from "@/app/entity/ServiceEntity";
-import { ServicoDropdownFieldProps } from "../types/servico";
+import { SERVICE_DROPDOWN_CACHE_TIME_MS, ServicoDropdownFieldProps } from "../types/servico";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
 import { fetchFilteredService, fetchServicesByID, listTheService } from "../controller/controller";
 
-const SERVICE_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;
 
 export default function ServicoDropdownField({
     selectedService,
@@ -25,7 +24,8 @@ export default function ServicoDropdownField({
     loadOnMount = false,
     useCachedAllItems = false,
     fetchAllItems = listTheService,
-    fetchFilteredItems = fetchFilteredService
+    fetchFilteredItems = fetchFilteredService,
+    autoLoadAndSelectSingle = true
 }: ServicoDropdownFieldProps) {
     const queryClient = useQueryClient();
     const serviceDropdownQueryKey = ["dropdown", "servico", "all", reloadKey] as const;
@@ -73,7 +73,7 @@ export default function ServicoDropdownField({
             topLabel={topLabel}
             showTopLabel={showTopLabel}
             required={required}
-            autoLoadAndSelectSingle
+            autoLoadAndSelectSingle={autoLoadAndSelectSingle}
             reloadAllOnShow={useCachedAllItems}
         />
     );

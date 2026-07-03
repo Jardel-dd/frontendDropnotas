@@ -3,23 +3,22 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
+import { usePermissions } from '@/app/routes/permissoes';
 import ListarVendedores from './tabela/vendedorListagem';
 import Input from '@/app/shared/include/input/input-all';
+import {  CheckboxChangeEvent } from 'primereact/checkbox';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
-import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
-import {  CheckboxChangeEvent } from 'primereact/checkbox';
-import { useGenericSearch } from '@/app/services/debounceSearch/controller';
-import { ativarVendedor, deletarVendedor, listVendedor } from './controller/controller';
-import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
-import { usePermissions } from '@/app/routes/permissoes';
+import { useGenericSearch } from '@/app/services/debounceSearch/controller';
+import { activateVendedor, deletarVendedor, listVendedor } from './controller/controller';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 
 const Vendedores: React.FC = () => {
     const router = useRouter();
@@ -203,7 +202,7 @@ const Vendedores: React.FC = () => {
                                 loading={loading}
                                 listPaginationVendedores={listPaginationVendedores}
                                 deletar={(id) => deletarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => ativarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
+                                ativar={(id) => activateVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
                                 setLoading={setLoading}
                                 searchTerm={searchTerm}
                                 listarInativos={listarInativos}
@@ -271,7 +270,7 @@ const Vendedores: React.FC = () => {
                                     loading={loading}
                                     listPaginationVendedores={listPaginationVendedores}
                                     deletar={(id) => deletarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
-                                    ativar={(id) => ativarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
+                                    ativar={(id) => activateVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
                                     setLoading={setLoading}
                                     searchTerm={searchTerm}
                                     listarInativos={listarInativos}

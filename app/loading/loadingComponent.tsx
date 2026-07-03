@@ -12,6 +12,7 @@ interface LoadingScreenProps {
     height?: number | string;
     fullScreen?: boolean;
     overlayOpacity?: number;
+    backgroundColor?: string;
 }
 
 type ContainerSize = {
@@ -26,7 +27,8 @@ function LoadingScreenComponent({
     loadingText,
     height,
     fullScreen = true,
-    overlayOpacity = 0.7
+    overlayOpacity = 0.7,
+    backgroundColor
 }: LoadingScreenProps) {
     const { isDarkMode, textColor } = useTheme();
     const containerRef = React.useRef<HTMLDivElement>(null);
@@ -100,7 +102,8 @@ function LoadingScreenComponent({
         return null;
     }
 
-    const backgroundColor = isDarkMode ? '#293B51' : '#FFFFFF';
+    const defaultBackgroundColor = isDarkMode ? '#293B51' : '#FFFFFF';
+    const overlayBackgroundColor = backgroundColor ?? defaultBackgroundColor;
     const fallbackWidth = fullScreen ? 1280 : 320;
     const fallbackHeight = fullScreen ? 720 : INLINE_MIN_HEIGHT;
     const availableWidth = containerSize.width || fallbackWidth;
@@ -125,8 +128,8 @@ function LoadingScreenComponent({
             ref={containerRef}
             className={`loading-container ${fullScreen ? 'loading-container-fullscreen' : 'loading-container-inline'}`}
             style={{
-                backgroundColor,
-                opacity: overlayOpacity,
+                backgroundColor: overlayBackgroundColor,
+                '--loading-overlay-opacity': overlayOpacity,
                 width: fullScreen ? '100vw' : '100%',
                 height: fullScreen ? '100vh' : '100%',
                 minHeight: fullScreen ? '100vh' : `${minInlineHeight}px`,

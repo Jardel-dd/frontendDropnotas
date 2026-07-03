@@ -1,7 +1,7 @@
 import { PessoaEntity } from "@/app/entity/PessoaEntity";
 import { PessoaDropdownFieldProps } from "../types/pessoa";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
-import { fetchFilteredPessoas, fetchPessoasById, listThePessoas } from "../controller/controller";
+import { fetchFilteredPessoa, fetchPessoasById, listThePessoas } from "../controller/controller";
 
 export default function PessoaDropdownField({
     selectedPessoa,
@@ -18,7 +18,8 @@ export default function PessoaDropdownField({
     required = false,
     autoSelectSingle = false,
     showAddButton = false,
-    onAddClick
+    onAddClick,
+    autoLoadAndSelectSingle = true
 }: PessoaDropdownFieldProps & { required?: boolean }) {
 
     return (
@@ -28,7 +29,7 @@ export default function PessoaDropdownField({
             selectedItem={selectedPessoa}
             onItemChange={onPessoaChange}
             fetchAllItems={listThePessoas}
-            fetchFilteredItems={fetchFilteredPessoas}
+            fetchFilteredItems={fetchFilteredPessoa}
             fetchItemByValue={async (value) => {
                 const response = await fetchPessoasById(String(value));
                 return response.dataPessoa ?? null;
@@ -46,7 +47,7 @@ export default function PessoaDropdownField({
             showTopLabel={showTopLabel}
             required={required}
             topLabel={topLabel}
-            autoLoadAndSelectSingle
+            autoLoadAndSelectSingle={autoLoadAndSelectSingle}
         />
     );
 }

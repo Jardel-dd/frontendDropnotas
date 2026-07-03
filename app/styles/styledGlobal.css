@@ -20,6 +20,23 @@ textarea.p-inputtextarea {
     min-height: unset !important;
     box-sizing: border-box;
 }
+
+@media (max-width: 768px) {
+    input.p-inputtext,
+    textarea.p-inputtext,
+    textarea.p-inputtextarea,
+    .p-inputnumber-input,
+    .p-inputmask,
+    .p-dropdown .p-dropdown-label,
+    .p-multiselect .p-multiselect-label,
+    .p-dropdown-panel .p-dropdown-filter,
+    .p-multiselect-panel .p-multiselect-header .p-multiselect-filter-container .p-inputtext,
+    .custom-multiselect-filter-input,
+    .p-inputtext.p-inputtext-sm,
+    .p-inputtext-sm .p-inputtext {
+        font-size: 16px !important;
+    }
+}
 /* .p-invalid .p-inputtext {
     border: 1px solid #fca5a5;
 } */
@@ -394,10 +411,12 @@ height: 66px;
 }
 
 .p-dialog-content {
-    padding: 12px;
+    padding: 0 12px 12px 12px;
 }
 
 .scrollable-container {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0.5rem;
@@ -636,6 +655,15 @@ height: 66px;
     backdrop-filter: blur(10px);
 }
 
+.auth-card__logo {
+    display: block;
+    width: min(100%, 25rem);
+    height: 500px;
+    max-height: 10rem;
+    object-fit: contain;
+    align-self: center;
+}
+
 .styled-containerSignUp-SignIn {
     background:
         radial-gradient(circle at top, rgba(34, 197, 94, 0.12), transparent 32%),
@@ -658,6 +686,15 @@ height: 66px;
 }
 
 @media (max-width: 768px) {
+    .styled-container-login-register {
+        padding: 1.25rem;
+    }
+
+    .auth-card__logo {
+        width: min(100%, 15.5rem);
+        max-height: 9.5rem;
+    }
+
     .shared-form-tabs.p-tabview .p-tabview-nav {
         padding-bottom: 0.5rem;
     }

@@ -32,10 +32,10 @@ export const validateFieldsUserConta = (
         newErrors.confirmPassword = 'A confirmação de senha deve ser igual à senha.';
         valid = false;
     } else if (!selectedPerfilUser) {
-        newErrors.selectedPerfilUser = 'Este Campo deve ser selecionado.';
+        newErrors.selectedPerfilUser = 'Selecione um Perfil de Usuário .';
         valid = false;
     } else if (!hasSelectedEmpresa && !hasSavedEmpresaIds) {
-        newErrors.selectedEmpresa = 'Este Campo deve ser selecionado.';
+        newErrors.selectedEmpresa = 'Selecione uma Empresa.';
         valid = false;
     }
     setErrors(newErrors);

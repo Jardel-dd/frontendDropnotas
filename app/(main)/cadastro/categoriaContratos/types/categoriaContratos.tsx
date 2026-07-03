@@ -1,11 +1,11 @@
-import { CategoryContratosEntity } from "@/app/entity/CategoryContratEntity";
-import { Messages } from "primereact/messages";
 import { RefObject } from "react";
+import { Messages } from "primereact/messages";
+import { CategoryContratosEntity } from "@/app/entity/CategoryContratEntity";
+
 
 export interface CategoriaContratoFormRef {
     handleSave: () => Promise<void>;
 }
-
 export interface CategoriaContratoFormProps {
     categoriaContrato: any;
     initialId?: string | null;
@@ -23,8 +23,6 @@ export interface CategoriaContratoFormProps {
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
 }
-
-
 export interface CategoriaContratoFieldsProps {
     categoriaContrato: CategoryContratosEntity;
     errors: Record<string, string>;
@@ -38,11 +36,6 @@ export interface CategoriaContratoFieldsProps {
     }) => void;
     onValidateDescricao: () => void;
 }
-
-export type FormCategoriaContratoCreatedProps =
-    | CategoriaContratoFieldsProps
-    | CategoriaContratoFormProps;
-
 export interface CategoriaContratoDropdownFieldProps {
     selectedCategoriaContrato: CategoryContratosEntity | null;
     selectedCategoriaContratoId?: number | null;
@@ -57,3 +50,5 @@ export interface CategoriaContratoDropdownFieldProps {
     loadOnMount?: boolean;
     useCachedAllItems?: boolean;
 }
+export type FormCategoriaContratoCreatedProps = | CategoriaContratoFieldsProps | CategoriaContratoFormProps;
+export const CATEGORIA_CONTRATO_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;

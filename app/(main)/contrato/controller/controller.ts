@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { RefObject } from 'react';
 import api from '@/app/services/api';
+import { RefObject, useCallback } from 'react';
 import { Messages } from 'primereact/messages';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
@@ -9,6 +9,7 @@ import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
+import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
 export const listContrato = async (
     listPaginationContratos: Record<string, any>,
     listarInativos: boolean,
@@ -417,4 +418,23 @@ export const fetchContratoByID  = async (contratoId: string) => {
         console.error("Erro ao buscar Contrato:", error);
         throw error;
     }
+};
+export const fetchContratoMobilePage = async ({
+    searchTerm: termo,
+    page,
+    size
+}: {
+    searchTerm: string;
+    page: number;
+    size: number;
+}) => {
+    const response = await api.get('/contrato', {
+        params: {
+            page,
+            size,
+            termo: termo || undefined
+        }
+    });
+
+    return buildMobilePickerPageResult<ContratoEntity>(response.data);
 };

@@ -25,7 +25,6 @@ const normalizeTipoFormaPagamento = (value?: string | null): TipoFormaPagamento 
 
     return formaPagamentoMap[normalizedValue] ?? (value as TipoFormaPagamento) ?? ('' as TipoFormaPagamento);
 };
-
 const normalizeTipoTaxa = (value?: string | null) => {
     const normalizedValue = normalizeTextToken(value);
 
@@ -39,7 +38,6 @@ const normalizeTipoTaxa = (value?: string | null) => {
 
     return value ?? '';
 };
-
 export const createEmptyFormaPagamento = () =>
     new FormaPagamentoEntity({
         ativo: true,
@@ -109,3 +107,4 @@ export interface FormaPagamentoDropdownFieldProps {
     useCachedAllItems?: boolean;
 }
 export type FormCreatedFormaPagamentoProps = | FormaPagamentoFieldsProps| FormaPagamentoFormProps;
+export const FORMA_PAGAMENTO_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;

@@ -2674,6 +2674,7 @@
   .p-datatable .p-paginator-top {
     border-width: 1px 0 1px 0;
     border-radius: 0;
+    background-color: red;
   }
   .p-datatable .p-paginator-bottom {
     border-width: 0 0 1px 0;
@@ -3267,7 +3268,7 @@
   .p-paginator {
     background: #293b51;
     color: rgba(255, 255, 255, 0.6);
-    border: solid #3e4f62;
+    /* border: solid #3e4f62; */
     border-width: 1px;
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -4080,9 +4081,10 @@
     border-bottom: 0 none;
     background: #293b51;
     color: rgba(255, 255, 255, 0.87);
-    padding: 1.5rem;
     border-top-right-radius: 6px;
     border-top-left-radius: 6px;
+    padding: 0.5rem;
+
   }
   .p-dialog .p-dialog-header .p-dialog-title {
     font-weight: 700;

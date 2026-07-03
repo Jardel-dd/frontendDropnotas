@@ -147,11 +147,10 @@ const AppConfig = () => {
 
     return (
         <>
-            {isLoading && <LoadingScreen loadingText="Carregando cor do tema..." />}
+            {isLoading && <LoadingScreen loadingText="Carregando cor do tema..." overlayOpacity={1} />}
             <div className="card styled-container-main-all-routes">
-                <div className="p-2">
                     <div className="mb-4 lg:mb-0 custom-container">
-                        <Divider align="center" className="form-divider">
+                        {/* <Divider align="center" className="form-divider">
                             <span>Aparencia do Sistema</span>
                         </Divider>
                         <div className="field primary-color-switch-row">
@@ -173,13 +172,11 @@ const AppConfig = () => {
                             >
                                 Cor Primaria (Somente no modo claro)
                             </label>
-                        </div>
-
-                        <Divider align="center" className="form-divider mt-6">
+                        </div> */}
+                        <Divider align="center" className="form-divider">
                             <span>Modo de cores</span>
                         </Divider>
-
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-wrap gap-3 p-2">
                             {componentThemes.map((t, i) => (
                                 <div key={i}>
                                     <div
@@ -206,7 +203,6 @@ const AppConfig = () => {
                             ))}
                         </div>
                     </div>
-                </div>
                 <div
                     className="StyleContainer-btn-Created"
                     style={{

@@ -1,27 +1,25 @@
 import axios from 'axios';
 import api from '@/app/services/api';
+import { getToken } from '@/app/services/token';
 import { Messages } from 'primereact/messages';
-import { PessoaEntity } from '@/app/entity/PessoaEntity';
-import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
-import { DetalPrestadorValoresEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams } from '../types/notaServico';
+import { DetalPrestadorValoresEntity } from '@/app/entity/ServiceEntity';
+import { CreatedNotaServicoResult, ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams, NotaServicoFeedback } from '../types/notaServico';
 
 const NOTA_SERVICO_FEEDBACK_KEY = 'notaServicoFeedback';
+const inflightNotaServicoRequests = new Map<string, Promise<any>>();
+const MOBILE_DOWNLOAD_USER_AGENT_REGEX = /Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini/i;
+const MOBILE_DOWNLOAD_ROUTE = '/api/nfse-download';
+const MOBILE_PDF_VIEW_ROUTE = '/api/nfse-view';
 
-type NotaServicoFeedback = {
-    severity: 'success' | 'warn' | 'error';
-    summary: string;
-    detail: string;
-    notaAutorizada?: Partial<NfsEntity> | null;
+type MobileNotaDownloadKind = 'pdf' | 'xml' | 'arquivos';
+type PendingDownloadTarget = {
+    targetName: string;
+    cleanup: () => void;
 };
 
-type CreatedNotaServicoResult = {
-    wasCreated: boolean;
-    redirected: boolean;
-};
 
 const extractBackendErrorMessage = (data: any, fallback: string): string => {
     if (!data) {
@@ -49,7 +47,31 @@ const extractBackendErrorMessage = (data: any, fallback: string): string => {
 
     return fallback;
 };
+const extractAxiosBlobErrorMessage = async (error: unknown, fallback: string): Promise<string> => {
+    if (!axios.isAxiosError(error)) {
+        return fallback;
+    }
+    const responseData = error.response?.data;
+    if (responseData instanceof Blob) {
+        try {
+            const rawText = await responseData.text();
 
+            if (!rawText.trim()) {
+                return fallback;
+            }
+
+            try {
+                return extractBackendErrorMessage(JSON.parse(rawText), fallback);
+            } catch {
+                return extractBackendErrorMessage(rawText, fallback);
+            }
+        } catch {
+            return fallback;
+        }
+    }
+
+    return extractBackendErrorMessage(responseData, fallback);
+};
 const normalizeOptionalNumberToZero = (value: unknown): number => {
     if (value === null || value === undefined || value === '') {
         return 0;
@@ -60,6 +82,280 @@ const normalizeOptionalNumberToZero = (value: unknown): number => {
     }
     const normalized = Number(value);
     return Number.isFinite(normalized) ? normalized : 0;
+};
+const sanitizeDownloadFileNamePart = (value?: string | null): string => {
+    const normalizedValue = (value ?? '')
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\\/:*?"<>|]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    return normalizedValue;
+};
+const isMobileDownloadBrowser = (): boolean => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+        return false;
+    }
+
+    const matchesMobileViewport = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 868px)').matches;
+    const matchesCoarsePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+    const hasTouchPoints = typeof navigator.maxTouchPoints === 'number' && navigator.maxTouchPoints > 0;
+    const matchesMobileUserAgent = MOBILE_DOWNLOAD_USER_AGENT_REGEX.test(navigator.userAgent);
+
+    return matchesMobileViewport || matchesMobileUserAgent || (matchesCoarsePointer && hasTouchPoints);
+};
+const openPendingDownloadTarget = (): PendingDownloadTarget | null => {
+    if (!isMobileDownloadBrowser()) {
+        return null;
+    }
+
+    const targetName = `nfse-download-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    try {
+        const iframe = document.createElement('iframe');
+        iframe.name = targetName;
+        iframe.setAttribute('aria-hidden', 'true');
+        iframe.style.display = 'none';
+
+        const cleanup = () => {
+            if (iframe.parentNode) {
+                iframe.parentNode.removeChild(iframe);
+            }
+        };
+
+        document.body.appendChild(iframe);
+
+        window.setTimeout(() => {
+            cleanup();
+        }, 120_000);
+
+        iframe.addEventListener('load', () => {
+            try {
+                const responseText = iframe.contentDocument?.body?.textContent?.trim();
+
+                if (responseText) {
+                    console.warn('Retorno do download mobile:', responseText);
+                }
+            } catch {
+            }
+        });
+
+        return {
+            targetName,
+            cleanup
+        }
+    } catch (error) {
+        console.warn('Nao foi possivel preparar o alvo oculto de download no mobile.', error);
+        return null;
+    }
+};
+const submitMobileDownloadForm = ({
+    notaId,
+    kind,
+    fileName,
+    token,
+    targetName
+}: {
+    notaId: string | number;
+    kind: MobileNotaDownloadKind;
+    fileName: string;
+    token: string;
+    targetName: string;
+}) => {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = MOBILE_DOWNLOAD_ROUTE;
+    form.target = targetName;
+    form.style.display = 'none';
+
+    const fields: Record<string, string> = {
+        notaId: String(notaId),
+        kind,
+        fileName,
+        token
+    };
+
+    Object.entries(fields).forEach(([name, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+};
+const openMobilePdfViewTarget = () => {
+    const targetName = `nfse-view-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    try {
+        const windowRef = window.open('', targetName);
+
+        if (windowRef?.document?.body) {
+            windowRef.document.title = 'Abrindo nota...';
+            windowRef.document.body.innerHTML = '<p style="font-family: Arial, sans-serif; padding: 16px;">Abrindo nota para visualizacao...</p>';
+        }
+
+        return {
+            targetName,
+            windowRef
+        };
+    } catch (error) {
+        console.warn('Nao foi possivel abrir a nova aba de visualizacao da nota.', error);
+        return null;
+    }
+};
+const submitMobilePdfViewForm = ({
+    notaId,
+    fileName,
+    token,
+    targetName
+}: {
+    notaId: string | number;
+    fileName: string;
+    token: string;
+    targetName: string;
+}) => {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = MOBILE_PDF_VIEW_ROUTE;
+    form.target = targetName;
+    form.style.display = 'none';
+
+    const fields: Record<string, string> = {
+        notaId: String(notaId),
+        fileName,
+        token
+    };
+
+    Object.entries(fields).forEach(([name, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+};
+const handleMobilePdfView = async (
+    nota: NfsEntity,
+    msgs: React.RefObject<Messages | null>
+): Promise<boolean> => {
+    if (!isMobileDownloadBrowser()) {
+        return false;
+    }
+
+    const fileName = `${sanitizeDownloadFileNamePart(nota.razao_social_cliente) || `nfse-${nota.id}`}.pdf`;
+    const viewTarget = openMobilePdfViewTarget();
+    const targetName = viewTarget?.targetName ?? '_blank';
+
+    if (!viewTarget?.windowRef) {
+        msgs.current?.show({
+            severity: 'warn',
+            summary: 'Aviso',
+            detail: 'O navegador bloqueou a abertura automatica da nota. Permita pop-ups para visualizar o PDF.',
+            life: 6000
+        });
+        return true;
+    }
+
+    try {
+        const token = await getToken();
+
+        if (!token) {
+            throw new Error('Sessao expirada');
+        }
+
+        submitMobilePdfViewForm({
+            notaId: nota.id,
+            fileName,
+            token,
+            targetName
+        });
+
+        return true;
+    } catch (error) {
+        viewTarget.windowRef.close();
+        console.error('Erro ao abrir visualizacao mobile da nota:', error);
+        msgs.current?.show({
+            severity: 'error',
+            summary: 'AtenÃ§Ã£o:',
+            detail: 'NÃ£o foi possÃ­vel abrir o PDF da nota.',
+            life: 5000
+        });
+        return true;
+    }
+};
+const startMobileNotaDownload = async ({
+    notaId,
+    kind,
+    fileName,
+    msgs
+}: {
+    notaId: string | number;
+    kind: MobileNotaDownloadKind;
+    fileName: string;
+    msgs: React.RefObject<Messages | null>;
+}): Promise<boolean> => {
+    if (!isMobileDownloadBrowser()) {
+        return false;
+    }
+
+    const pendingTarget = openPendingDownloadTarget();
+    const targetName = pendingTarget?.targetName ?? '_self';
+
+    try {
+        const token = await getToken();
+        if (!token) {
+            throw new Error('Sessao expirada');
+        }
+        submitMobileDownloadForm({
+            notaId,
+            kind,
+            fileName,
+            token,
+            targetName
+        });
+      
+    } catch (error) {
+        pendingTarget?.cleanup();
+        console.error('Erro ao iniciar download mobile da nota:', error);
+        msgs.current?.show({
+            severity: 'error',
+            summary: 'Atencao:',
+            detail: 'Nao foi possivel iniciar o download da nota no celular. Tente novamente em instantes.',
+            life: 6000
+        });
+    }
+
+    return true;
+};
+const releaseObjectUrl = (objectUrl: string, delay = 60_000) => {
+    window.setTimeout(() => {
+        window.URL.revokeObjectURL(objectUrl);
+    }, delay);
+};
+const triggerBlobDownload = (
+    blob: Blob,
+    fileName: string
+): void => {
+    const fileUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.setAttribute('download', fileName);
+    link.rel = 'noopener noreferrer';
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    releaseObjectUrl(fileUrl);
 };
 const extractNotaServicoStatus = (data: any): string => {
     const status = data?.status_nota ?? data?.nfse?.status_nota ?? data?.dados_emissao?.status_nota ?? data?.dados_emissao?.nfse?.status_nota;
@@ -77,6 +373,9 @@ const extractNotaServicoPayload = (data: any): Partial<NfsEntity> | null => {
         return null;
     }
 
+    const empresaResumo = payload.empresa ?? data?.empresa ?? {};
+    const clienteResumo = payload.cliente ?? data?.cliente ?? {};
+    const prestador = payload.prestador ?? data?.prestador ?? {};
     const tomador = payload.tomador ?? data?.tomador ?? {};
     const contato = tomador?.contato ?? {};
 
@@ -85,14 +384,48 @@ const extractNotaServicoPayload = (data: any): Partial<NfsEntity> | null => {
         id: payload.id ?? payload.id_nfse ?? data?.id ?? data?.id_nfse,
         status_nota: payload.status_nota ?? data?.status_nota ?? data?.dados_emissao?.status_nota,
         data_emissao: payload.data_emissao ?? data?.data_emissao ?? data?.dados_emissao?.data_emissao,
-        razao_social_empresa: payload.razao_social_empresa ?? payload.prestador?.razao_social ?? data?.razao_social_empresa,
-        razao_social_cliente: payload.razao_social_cliente ?? tomador?.razao_social ?? data?.razao_social_cliente,
+        razao_social_empresa:
+            payload.razao_social_empresa ??
+            empresaResumo?.razao_social ??
+            empresaResumo?.nome_fantasia ??
+            prestador?.razao_social ??
+            data?.razao_social_empresa,
+        razao_social_cliente:
+            payload.razao_social_cliente ??
+            clienteResumo?.razao_social ??
+            clienteResumo?.nome_fantasia ??
+            tomador?.razao_social ??
+            data?.razao_social_cliente,
         total_valor_servico: payload.total_valor_servico ?? payload.servico?.valores?.valor_servico ?? data?.total_valor_servico,
+        prestador: {
+            ...prestador,
+            razao_social:
+                prestador?.razao_social ??
+                empresaResumo?.razao_social ??
+                empresaResumo?.nome_fantasia ??
+                '',
+            nome_fantasia:
+                prestador?.nome_fantasia ??
+                empresaResumo?.nome_fantasia ??
+                empresaResumo?.razao_social ??
+                ''
+        },
         tomador: {
             ...tomador,
+            razao_social:
+                tomador?.razao_social ??
+                clienteResumo?.razao_social ??
+                clienteResumo?.nome_fantasia ??
+                '',
             contato: {
                 ...contato,
-                email: contato?.email ?? tomador?.email ?? data?.tomador?.contato?.email ?? data?.tomador?.email ?? ''
+                email:
+                    contato?.email ??
+                    tomador?.email ??
+                    clienteResumo?.email ??
+                    data?.tomador?.contato?.email ??
+                    data?.tomador?.email ??
+                    ''
             }
         }
     };
@@ -108,18 +441,14 @@ export const consumeNotaServicoFeedback = (): NotaServicoFeedback | null => {
     if (typeof window === 'undefined') {
         return null;
     }
-
     const rawFeedback = window.sessionStorage.getItem(NOTA_SERVICO_FEEDBACK_KEY);
     if (!rawFeedback) {
         return null;
     }
-
     window.sessionStorage.removeItem(NOTA_SERVICO_FEEDBACK_KEY);
-
     try {
         return JSON.parse(rawFeedback) as NotaServicoFeedback;
     } catch (error) {
-        console.error('Erro ao ler feedback da nota de servico:', error);
         return null;
     }
 };
@@ -137,7 +466,7 @@ export const normalizeNfseServiceValores = (valores?: Partial<DetalPrestadorValo
         aliquota_outras_retencoes: normalizeOptionalNumberToZero(valores?.aliquota_outras_retencoes),
         percentual_desconto_incondicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_incondicionado),
         percentual_desconto_condicionado: normalizeOptionalNumberToZero(valores?.percentual_desconto_condicionado)
-    });
+});
 export const fetchNotaServico = async (params: NotaFiscalParams, msgs?: any) => {
     try {
         const searchParams = new URLSearchParams();
@@ -148,10 +477,21 @@ export const fetchNotaServico = async (params: NotaFiscalParams, msgs?: any) => 
             }
         });
 
-        const response = await api.get(`/nfse?${searchParams.toString()}`);
+        const requestKey = searchParams.toString();
+        const existingRequest = inflightNotaServicoRequests.get(requestKey);
+        if (existingRequest) {
+            return await existingRequest;
+        }
 
-        console.log('resposta', response.data);
-        return response.data;
+        const requestPromise = api
+            .get(`/nfse?${requestKey}`)
+            .then((response) => response.data)
+            .finally(() => {
+                inflightNotaServicoRequests.delete(requestKey);
+            });
+
+        inflightNotaServicoRequests.set(requestKey, requestPromise);
+        return await requestPromise;
     } catch (error: any) {
         console.error('Erro ao buscar notas fiscais:', error);
         if (error.response?.status === 403) {
@@ -231,23 +571,10 @@ export const fetchNotaServicoByID = async (id: string | number) => {
 export const prepararCorrecaoNotaServico = async (params: { referencia?: string | null; id?: string | number | null }, msgs?: any) => {
     try {
         const payload = params.referencia ? { referencia: params.referencia } : { id: params.id };
-        console.group('[NotaServico] Preparar correcao da NFS-e');
-        console.log('Payload enviado para /nfse/preparar-emissao:', payload);
         const response = await api.post('/nfse/preparar-emissao', payload);
-        console.log('Status HTTP:', response.status);
-        console.log('Headers da resposta:', response.headers);
-        console.log('Body retornado pelo backend:', response.data);
-        console.groupEnd();
-
         return response.data;
     } catch (error: any) {
-        console.group('[NotaServico] Erro ao preparar correcao da NFS-e');
-        console.log('Payload original:', params);
-        console.log('Status HTTP:', error.response?.status);
-        console.log('Headers da resposta:', error.response?.headers);
-        console.log('Body retornado pelo backend:', error.response?.data);
         console.error('Erro ao preparar correcao da NFS-e:', error);
-        console.groupEnd();
 
         msgs?.current?.show({
             severity: 'error',
@@ -259,57 +586,11 @@ export const prepararCorrecaoNotaServico = async (params: { referencia?: string 
         throw error;
     }
 };
-export const deletarNotaServico = async (nfsId: number, msgs: any, listPaginationNotaServico: Record<string, any>, listarInativos: boolean, setLoading: (state: boolean) => void, searchTerm: string) => {
+export const prepararNotaServico = async (prepararNfs: PrepararNfs, msgs: any) => {
     try {
-        await api.delete(`/nfse/cancelar${String(nfsId)}`);
-        msgs.current?.clear();
-        msgs.current?.show([
-            {
-                life: 3000,
-                severity: 'success',
-                summary: 'Sucesso:',
-                detail: 'Nfse Cancelada com sucesso.'
-            }
-        ]);
-    } catch (error) {
-        msgs.current?.clear();
-        msgs.current?.show([
-            {
-                life: 3000,
-                severity: 'error',
-                summary: 'Atenção:',
-                detail: 'Houve um erro ao tentar Cancelar Nfse, tente novamente.'
-            }
-        ]);
-    }
-};
-export const prepararNotaServico = async (
-    prepararNfs: PrepararNfs,
-    selectedEmpresa: CompanyEntity | null,
-    selectedCliente: PessoaEntity | null,
-    selectedServico: ServiceEntity | null,
-    setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
-    msgs: any,
-    router?: AppRouterInstance
-) => {
-    try {
-        console.group('[NotaServico] Preparar emissao da NFS-e');
-        console.log('Payload enviado para /nfse/preparar-emissao:', prepararNfs);
         const response = await api.post('/nfse/preparar-emissao', prepararNfs);
-        console.log('Status HTTP:', response.status);
-        console.log('Headers da resposta:', response.headers);
-        console.log('Body retornado pelo backend:', response.data);
-        console.groupEnd();
         return response.data;
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.group('[NotaServico] Erro ao preparar emissao da NFS-e');
-            console.log('Payload original:', prepararNfs);
-            console.log('Status HTTP:', error.response?.status);
-            console.log('Headers da resposta:', error.response?.headers);
-            console.log('Body retornado pelo backend:', error.response?.data);
-            console.groupEnd();
-        }
         console.error('Erro ao preparar NFS-e:', error);
         if (axios.isAxiosError(error)) {
             const msg = error.response?.data?.message || 'Erro ao preparar NFS-e.';
@@ -319,17 +600,18 @@ export const prepararNotaServico = async (
                 detail: msg,
                 life: 5000
             });
-        } else {
-            msgs.current?.show({
+            return;
+        }
+
+        msgs.current?.show({
                 severity: 'error',
                 summary: 'Atenção:',
                 detail: 'Erro inesperado ao preparar NFS-e.',
                 life: 5000
             });
-        }
     }
 };
-export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>, msgs: any, router: AppRouterInstance, redirectAfterSave = true): Promise<CreatedNotaServicoResult> => {
+export const createdNotaServico = async (nfs: NfsEntity, msgs: any, router: AppRouterInstance, redirectAfterSave = true): Promise<CreatedNotaServicoResult> => {
     try {
         const valoresNormalizados = normalizeNfseServiceValores(nfs.servico?.valores);
         const valorServicoNormalizado = (() => {
@@ -349,9 +631,7 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
                 })
             }
         };
-        console.log('Envio:', { nfse: dataNfse });
         const response = await api.post('/nfse', { nfse: dataNfse });
-        console.log('Response NFS:', response);
         const statusNota = extractNotaServicoStatus(response.data);
         const notaAutorizada = statusNota === 'AUTORIZADA' ? extractNotaServicoPayload(response.data) : null;
         if (statusNota === 'REJEITADA' && redirectAfterSave) {
@@ -403,11 +683,6 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
     } catch (error: any) {
         let detailMessage = 'Ocorreu um erro ao cadastrar a NFS-e.';
         if (error.response) {
-            console.group('retorno:');
-            console.log('Status:', error.response.status);
-            console.log('Headers:', error.response.headers);
-            console.log('resp:', error.response.data);
-            console.groupEnd();
             detailMessage = extractBackendErrorMessage(error.response.data, 'Ocorreu um erro ao cadastrar a NFS-e.');
             if (error.response?.status === 409) {
                 msgs.current?.show({
@@ -437,22 +712,22 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
         };
     }
 };
-export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+export const downloadPdfNota = async (
+    nota: NfsEntity,
+    msgs: React.RefObject<Messages | null>
+) => {
+    const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.pdf`;
+    if (await startMobileNotaDownload({ notaId: nota.id, kind: 'pdf', fileName, msgs })) {
+        return;
+    }
     try {
         const response = await api.get(`/nfse/${nota.id}/pdf`, {
             responseType: 'blob'
         });
-        const fileURL = window.URL.createObjectURL(new Blob([response.data]));
-        const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.pdf`;
-        const link = document.createElement('a');
-        link.href = fileURL;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(fileURL);
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        triggerBlobDownload(blob, fileName);
     } catch (error) {
-        console.log('Erro ao baixar PDF:', error);
+        console.error('Erro ao baixar PDF:', error);
         msgs.current?.show({
             severity: 'error',
             summary: 'Atenção:',
@@ -461,21 +736,21 @@ export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
         });
     }
 };
-export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+export const downloadXmlNota = async (
+    nota: NfsEntity,
+    msgs: React.RefObject<Messages | null>
+) => {
+    const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.xml`;
+    if (await startMobileNotaDownload({ notaId: nota.id, kind: 'xml', fileName, msgs })) {
+        return;
+    }
     try {
         const response = await api.get(`/nfse/${nota.id}/xml`, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.xml`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        triggerBlobDownload(blob, fileName);
 
-        window.URL.revokeObjectURL(url);
     } catch (error) {
         console.error(' Erro ao baixar XML:', error);
         msgs.current?.show({
@@ -486,7 +761,39 @@ export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
         });
     }
 };
+export const downloadArquivosNota = async (
+    nota: NfsEntity,
+    msgs: React.RefObject<Messages | null>
+) => {
+    const clientName = sanitizeDownloadFileNamePart(
+        nota.razao_social_cliente ?? (nota.tomador as any)?.razao_social ?? null
+    );
+    const fileName = `PDFeXML-${clientName || `nfse-${nota.id}`}.zip`;
+
+    if (await startMobileNotaDownload({ notaId: nota.id, kind: 'arquivos', fileName, msgs })) {
+        return;
+    }
+    try {
+        const response = await api.get(`/nfse/${nota.id}/arquivos`, {
+            responseType: 'blob'
+        });
+        const blob = new Blob([response.data], { type: 'application/zip' });
+        triggerBlobDownload(blob, fileName);
+    } catch (error) {
+        console.error('Erro ao baixar ZIP da NFS-e:', error);
+        msgs.current?.show({
+            severity: 'error',
+            summary: '',
+            detail: 'Erro ao baixar os arquivos PDF e XML da Nota Fiscal. Tente novamente em instantes.',
+            life: 5000
+        });
+    }
+};
 export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+    if (await handleMobilePdfView(nota, msgs)) {
+        return;
+    }
+
     try {
         const response = await api.get(`/nfse/${nota.id}/pdf`, {
             responseType: 'blob'
@@ -513,20 +820,21 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
 };
 export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, msgs: React.RefObject<Messages | null>) => {
     try {
-        const response = await api.post('/nfse/exportar-pdf', payload, {
+        const filledPayload = Object.fromEntries(
+            Object.entries(payload).filter(([, value]) => {
+                if (Array.isArray(value)) {
+                    return value.length > 0;
+                }
+                return value !== undefined && value !== null && value !== '';
+            })
+        );
+        const response = await api.post('/nfse/exportar-pdf', filledPayload, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], {
             type: 'application/pdf'
         });
-        const fileURL = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = fileURL;
-        link.setAttribute('download', 'notas-servico.pdf');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(fileURL);
+        triggerBlobDownload(blob, 'notas-servico.pdf');
     } catch (error) {
         console.error('Erro ao exportar PDF das notas:', error);
         if (axios.isAxiosError(error) && error.response?.status === 404) {
@@ -538,10 +846,14 @@ export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, m
             return;
         }
         if (axios.isAxiosError(error) && error.response?.status === 400) {
+            const detailMessage = await extractAxiosBlobErrorMessage(
+                error,
+                'Nao foi possivel exportar o PDF com os filtros informados.'
+            );
             msgs.current?.show({
                 severity: 'warn',
-                summary: 'Período não informado',
-                detail: 'Selecione uma data inicial e uma data final para realizar a exportação do PDF.',
+                summary: 'Exportacao invalida',
+                detail: detailMessage,
                 life: 5000
             });
 

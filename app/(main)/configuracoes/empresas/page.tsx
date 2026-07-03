@@ -2,21 +2,21 @@
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import ListarEmpresas from './tabela/empresaListagem';
 import Input from '@/app/shared/include/input/input-all';
 import { usePermissions } from '@/app/routes/permissoes';
 import {  CheckboxChangeEvent } from 'primereact/checkbox';
 import { CompanyEntity, } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import {  PaginatorPageChangeEvent } from 'primereact/paginator';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
-import { ativarEmpresa, deletarEmpresa, listEmpresa } from './controller/controller';
+import { activateEmpresa, deletarEmpresa, listEmpresa } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 
@@ -221,7 +221,7 @@ const Empresas: React.FC = () => {
                                 loading={loading}
                                 listPaginationEmpresa={listPaginationEmpresa}
                                 deletar={(id) => deletarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => ativarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
+                                ativar={(id) => activateEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
                                 setSelectedEmpresa={setSelectedEmpresa}
                                 selectedEmpresa={selectedEmpresa}
                                 setLoading={setLoading}
@@ -291,7 +291,7 @@ const Empresas: React.FC = () => {
                                         loading={loading}
                                         listPaginationEmpresa={listPaginationEmpresa}
                                         deletar={(id) => deletarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
-                                        ativar={(id) => ativarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
+                                        ativar={(id) => activateEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
                                         setSelectedEmpresa={setSelectedEmpresa}
                                         selectedEmpresa={selectedEmpresa}
                                         setLoading={setLoading}

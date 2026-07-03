@@ -67,11 +67,11 @@ export const validateFieldsPrepararNfs = (
     msgs.current?.clear();
 
     if (!selectedEmpresa || Object.keys(selectedEmpresa).length === 0) {
-        newErrors.selectedEmpresa = 'Este Campo deve ser selecionado.';
+        newErrors.selectedEmpresa = 'Selecione uma empresa.';
     }  else if (!selectedCliente || Object.keys(selectedCliente).length === 0) {
-        newErrors.selectedCliente = 'Este Campo deve ser selecionado.';
+        newErrors.selectedCliente = 'Selecione um Cliente ou Fornecedor..';
     } else if (!selectedServico || Object.keys(selectedServico).length === 0) {
-        newErrors.selectedServico = 'Este Campo deve ser selecionado.';
+        newErrors.selectedServico = 'Selecione um Serviço.';
     }
     const valid = Object.keys(newErrors).length === 0;
     setErrors(newErrors);

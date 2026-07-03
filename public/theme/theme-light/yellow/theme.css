@@ -3267,7 +3267,7 @@
   .p-paginator {
     background: #ffffff;
     color: #6c757d;
-    border: solid #e9ecef;
+    /* border: solid #e9ecef; */
     border-width: 0;
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -4080,9 +4080,9 @@
     border-bottom: 0 none;
     background: #ffffff;
     color: #343a40;
-    padding: 1.5rem;
     border-top-right-radius: 6px;
     border-top-left-radius: 6px;
+    padding: 0.5rem;
   }
   .p-dialog .p-dialog-header .p-dialog-title {
     font-weight: 700;

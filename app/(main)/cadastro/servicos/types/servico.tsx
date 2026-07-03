@@ -1,12 +1,13 @@
-import { ServiceEntity } from "@/app/entity/ServiceEntity";
-import { TableCodigoNBSEntity } from "@/app/entity/TableCodigoNBS";
-import { TableClassificacaoTributariaEntity } from "@/app/entity/TableClassificacaoTributariaEntity";
-import { DropdownChangeEvent } from "primereact/dropdown";
-import { InputNumberValueChangeEvent } from "primereact/inputnumber";
 import { Messages } from "primereact/messages";
+import { DropdownChangeEvent } from "primereact/dropdown";
+import { ServiceEntity } from "@/app/entity/ServiceEntity";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { TableService } from "@/app/entity/TableServiceEntity";
 import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
+import { TableCodigoNBSEntity } from "@/app/entity/TableCodigoNBS";
+import { InputNumberValueChangeEvent } from "primereact/inputnumber";
+import { TableClassificacaoTributariaEntity } from "@/app/entity/TableClassificacaoTributariaEntity";
+
 export const createEmptyServico = () =>
     new ServiceEntity({
         ativo: true,
@@ -41,7 +42,7 @@ export const createEmptyServico = () =>
         valor_servico: null,
         valor_desconto: 0,
         aliquota_deducoes: 0
-    });
+});
 export interface ServiceFormProps {
     servico: ServiceEntity;
     initialId?: string | null;
@@ -58,11 +59,9 @@ export interface ServiceFormProps {
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
 }
-
 export interface ServiceFormRef {
     handleSave: () => Promise<void>;
 }
-
 export interface ServicoFieldsProps {
     servico: ServiceEntity;
     errors: Record<string, string>;
@@ -109,6 +108,7 @@ export interface ServicoDropdownFieldProps {
     fetchAllItems?: () => Promise<ServiceEntity[]>;
     fetchFilteredItems?: (filter: string) => Promise<ServiceEntity[]>;
     useCachedAllItems?: boolean;
+    autoLoadAndSelectSingle?: boolean;
 }
 export interface PreloadedServicoData {
     servico: ServiceEntity;
@@ -117,4 +117,25 @@ export interface PreloadedServicoData {
     selectedCodigoServico: TableService | null;
     selectedClassificacaoTributaria: TableClassificacaoTributariaEntity | null;
 }
+export const normalizeEmptyValuesToNull = <T,>(value: T): T => {
+    if (Array.isArray(value)) {
+        return value.map((item) => normalizeEmptyValuesToNull(item)) as T;
+    }
+
+    if (value && typeof value === 'object') {
+        const normalizedEntries = Object.entries(value as Record<string, unknown>).map(([key, entryValue]) => [
+            key,
+            normalizeEmptyValuesToNull(entryValue)
+        ]);
+
+        return Object.fromEntries(normalizedEntries) as T;
+    }
+
+    if (typeof value === 'string') {
+        return (value.trim() === '' ? null : value) as T;
+    }
+
+    return value;
+};
 export type FormCreatedServicoProps = ServicoFieldsProps | ServiceFormProps;
+export const SERVICE_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;

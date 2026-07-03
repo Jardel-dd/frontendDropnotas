@@ -146,7 +146,7 @@ function SignUp() {
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="card styled-container-login-register sign-up-card">
                     <div className="sign-up-card__header">
-                        <img className="sign-up-card__logo" alt="dropdown icon" src="/layout/images/logoDropNotasMain.png" />
+                        <img className="auth-card__logo sign-up-card__logo" alt="dropdown icon" src="/layout/images/logoDropNotasMain.png" />
                         <p className="sign-up-card__description">
                             Para fazer o cadastro você precisa preencher os campos abaixo:
                         </p>
@@ -279,7 +279,7 @@ function SignUp() {
                         </div>
                     </div>
                      <div className='ml-2 mr-2'>
-                        <Button
+                        {/* <Button
                             type="submit"
                             label={isLoadingBtnCreated ? 'Criando conta...' : 'Criar conta'}
                             icon={isLoadingBtnCreated ? 'pi pi-spin pi-spinner' : undefined}
@@ -294,7 +294,7 @@ function SignUp() {
                                 !userConta.senha ||
                                 !confirmPassword
                             }
-                        />
+                        /> */}
                         <div className="text-center ">
                             Já tem uma conta? {'  '}
                             <Link href="/">
@@ -310,4 +310,3 @@ function SignUp() {
 }
 
 export default SignUp;
-

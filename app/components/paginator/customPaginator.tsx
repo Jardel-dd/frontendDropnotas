@@ -1,4 +1,5 @@
 'use client';
+import './style.css'
 import { CSSProperties } from 'react';
 import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
 import { useTheme } from '../isDarkMode/isDarkMode';
@@ -23,7 +24,6 @@ export default function CustomPaginator({
     style
 }: CustomPaginatorProps) {
     const { isDarkMode } = useTheme();
-
     const paginatorStyle = isMobile
         ? {
               background: isDarkMode ? '#162A41' : '#EFF3F8',
@@ -38,7 +38,8 @@ export default function CustomPaginator({
             totalRecords={totalRecords}
             alwaysShow
             onPageChange={onPageChange}
-            className={className}
+                className={`no-border-color ${className ?? ''}`}
+
             style={paginatorStyle}
             template={
                 isMobile

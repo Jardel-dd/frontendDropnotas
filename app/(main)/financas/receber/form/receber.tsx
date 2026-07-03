@@ -2,63 +2,25 @@
 
 import '@/app/styles/styledGlobal.css';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import Input from '@/app/shared/include/input/input-all';
-import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
+import { VendedorEntity } from '@/app/entity/VendedorEntity';
+import { createdContasReceber } from '../controller/controller';
+import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
+import { Messages } from '@/app/components/messages/GlobalMessages';
+import { ContasReceberEntity } from '@/app/entity/contasReceberEntity';
+import { validateFieldsContasReceber } from '../controller/validation';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
+import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { ContasReceberEntity } from '@/app/entity/contasReceberEntity';
-import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
-import { PessoaEntity } from '@/app/entity/PessoaEntity';
-import { VendedorEntity } from '@/app/entity/VendedorEntity';
-import { fetchFilteredPessoas, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { fetchAllVendedores, fetchFilteredVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import { createdContasReceber } from '../controller/controller';
-import { validateFieldsContasReceber } from '../controller/validation';
-import type {
-    ContasReceberFieldsProps,
-    ContasReceberFormProps,
-    ContasReceberFormRef,
-    FormCreatedContasReceberProps
-} from '../types/receber';
 import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dropDown/formaPagamento';
+import { fetchFilteredPessoa, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { fetchAllVendedores, fetchFilteredVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import {getInitialContasReceber, toContasReceberEntity, type ContasReceberFieldsProps, type ContasReceberFormProps, type ContasReceberFormRef,type FormCreatedContasReceberProps} from '../types/receber';
 
-const getTodayDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-};
-
-const createEmptyContasReceber = () =>
-    new ContasReceberEntity({
-        ativo: true,
-        id: 0,
-        descricao: '',
-        id_forma_pagamento: 0,
-        id_vendedor: 0,
-        id_cliente: 0,
-        valor_original: 0,
-        data_vencimento: getTodayDate(),
-        observacao: ''
-    });
-
-const toContasReceberEntity = (contasReceber?: Partial<ContasReceberEntity> | null) =>
-    new ContasReceberEntity({
-        ...createEmptyContasReceber(),
-        ...(contasReceber ?? {})
-    });
-
-const getInitialContasReceber = (contasReceber?: Partial<ContasReceberEntity> | null) =>
-    toContasReceberEntity({
-        ...(contasReceber ?? {}),
-        data_vencimento: contasReceber?.data_vencimento || getTodayDate()
-    });
 
 export function ContasReceberFields({
     contasReceber,
@@ -95,7 +57,7 @@ export function ContasReceberFields({
                     selectedItem={selectedCliente}
                     onItemChange={onClienteChange}
                     fetchAllItems={listThePessoas}
-                    fetchFilteredItems={fetchFilteredPessoas}
+                    fetchFilteredItems={fetchFilteredPessoa}
                     optionLabel="razao_social"
                     optionValue="id"
                     placeholder="Selecione o Cliente"
@@ -222,7 +184,6 @@ const ContasReceberFormContainer = forwardRef<ContasReceberFormRef, ContasRecebe
             } else if (['id_cliente', 'id_vendedor', 'id_forma_pagamento', 'valor_original'].includes(id)) {
                 value = value === '' ? 0 : Number(value);
             }
-
             setContasReceber((prev) =>
                 toContasReceberEntity({
                     ...prev,

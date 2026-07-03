@@ -64,6 +64,7 @@ export interface UsuarioFieldsProps {
     onTriggerProfileImageUpload: () => void;
     onOpenPerfilUserModal: () => void;
     onOpenEmpresaModal: () => void;
+    onOpenChangeEmailModal?: () => void;
 }
 
 export type FormCreatedUsuarioProps = UsuarioFieldsProps | UsuarioFormProps;

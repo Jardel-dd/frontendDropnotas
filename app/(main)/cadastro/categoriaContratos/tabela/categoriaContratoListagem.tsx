@@ -3,11 +3,11 @@ import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Skeleton } from 'primereact/skeleton';
 import { usePermissions } from '@/app/routes/permissoes';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { handleActiveOrInativeCategoriaContrato } from '../controller/controller';
@@ -22,7 +22,10 @@ export function ListarCategoriaContrato({
     setLoading,
     searchTerm,
     listarInativos,
-    onCategoriaClick
+    onCategoriaClick,
+    mobileLoadMoreVisible,
+    mobileLoadMoreLoading,
+    onMobileLoadMore
 }: {
     listPaginationCategoriaContrato: Record<string, any>;
     loading: boolean;
@@ -33,6 +36,9 @@ export function ListarCategoriaContrato({
     setLoading: (state: boolean) => void;
     listarInativos: boolean;
     onCategoriaClick?: (categoria: CategoryContratosEntity) => void;
+    mobileLoadMoreVisible?: boolean;
+    mobileLoadMoreLoading?: boolean;
+    onMobileLoadMore?: () => void | Promise<void>;
 }) {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -99,6 +105,9 @@ export function ListarCategoriaContrato({
                                     }
                                 ]}
                                 listarInativos={listarInativos}
+                                mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                onMobileLoadMore={onMobileLoadMore}
                             />
                         </div>
                     )}

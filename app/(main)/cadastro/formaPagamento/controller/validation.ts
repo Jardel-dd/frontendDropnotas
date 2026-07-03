@@ -10,16 +10,16 @@ export const validateFieldsFormaPagamento = (
     let newErrors: { [key: string]: string } = {};
     msgs.current?.clear();
     if (!formaPagamento.descricao || formaPagamento.descricao.trim().length < 2) {
-        newErrors.descricao = 'A descrição deve ter pelo menos 2 caracteres.';
+        newErrors.descricao = 'A Descrição deve ter pelo menos 2 caracteres.';
         valid = false;
     } else if (!formaPagamento.tipo_forma_pagamento) {
-        newErrors.tipo_forma_pagamento = 'Este Campo deve ser selecionado.';
+        newErrors.tipo_forma_pagamento = 'Selecione uma Forma de Pagamento.';
         valid = false;
     } else if (!formaPagamento.tipo_taxa) {
-        newErrors.tipo_taxa = 'Este Campo deve ser selecionado.';
+        newErrors.tipo_taxa = 'Inclua um tipo de taxa.';
         valid = false;
     } else if (!formaPagamento.valor_taxa || formaPagamento.descricao.trim().length < 1) {
-        newErrors.valor_taxa = 'Este campo deve ter pelo menos 1 caracter.';
+        newErrors.valor_taxa = 'Digite um valor.';
         valid = false;
     } else {
         valid = true;
