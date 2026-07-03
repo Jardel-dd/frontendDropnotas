@@ -1,107 +1,104 @@
+'use client';
 import React from 'react';
 
-export const IconReal = ({ isDarkMode }: { isDarkMode: boolean }) => {
+type IconProps = {
+    isDarkMode?: boolean;
+    size?: number;
+    className?: string;
+};
+const getColor = (isDarkMode?: boolean) =>
+    isDarkMode ? '#FFFFFFCC' : '#6c757d';
+const BaseIcon = ({
+    children,
+    isDarkMode,
+    size = 16,
+    className
+}: React.PropsWithChildren<IconProps>) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={getColor(isDarkMode)}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        {children}
+    </svg>
+);
+
+export const IconReal = ({ isDarkMode, size = 16, className }: IconProps) => {
+    const color = getColor(isDarkMode);
+
     return (
         <svg
-            xmlns="http://www.w3.org/2000/svg"
+            width={size}
+            height={size}
             viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="currentColor"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ color: isDarkMode ? '#FFFFFF99' : '#6c757d' }}
+            className={className}
         >
-            <text x="2" y="18" fontSize="16" fontWeight="bold" fill="currentColor">
+            <text
+                x="50%"
+                y="59%"
+                dominantBaseline="middle"
+                textAnchor="middle"
+                fontSize="18"
+                fontWeight="500"
+                fill={color}
+                style={{
+                    fontFamily: 'Inter, system-ui, Arial, sans-serif',
+                    letterSpacing: '-0.5px'
+                }}
+            >
                 R$
             </text>
         </svg>
     );
 };
-export const IconPorcentagem = ({ isDarkMode }: { isDarkMode: boolean }) => {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="currentColor"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ color: isDarkMode ? '#FFFFFF99' : '#6c757d' }}
-        >
-            <text x="2" y="18" fontSize="16" fontWeight="bold" fill="currentColor">
-                %
-            </text>
-        </svg>
-    );
-};
-export const IconNumero = ({ isDarkMode }: { isDarkMode: boolean }) => {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="currentColor"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ color: isDarkMode ? '#FFFFFF99' : '#6c757d' }}
-        >
-            <text x="2" y="18" fontSize="16" fontWeight="bold" fill="currentColor">
-                N°
-            </text>
-        </svg>
-    );
-};
 
-export const IconDollar = ({ isDarkMode }: { isDarkMode: boolean }) => {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="currentColor"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ color: isDarkMode ? '#FFFFFF99' : '#6c757d' }}
-        >
-            <text x="2" y="18" fontSize="16" fontWeight="bold" fill="currentColor">
-                $
-            </text>
-        </svg>
-    );
-};
-export const IconCNPJ = () => (
-    <svg
-        id="Layer_1"
-        style={{ color: '#FFF' }}
-        fill="#FFF"
-        height="16"
-        viewBox="0 0 24 24"
-        width="16"
-        xmlns="http://www.w3.org/2000/svg"
-    >
-        <g>
-            <path d="m5 17c-.6 0-1-.4-1-1v-5.6l-.3.3c-.4.4-1 .4-1.4 0s-.4-1 0-1.4l2-2c.3-.3.7-.4 1.1-.2.4.1.6.5.6.9v8c0 .6-.4 1-1 1z" />
-        </g>
-        <g>
-            <path d="m13 17h-3c-.5 0-1-.2-1.4-.6s-.6-.9-.6-1.4v-2c0-.5.2-1 .6-1.4s.9-.6 1.4-.6h2v-2h-3c-.6 0-1-.4-1-1s.4-1 1-1h3c.5 0 1 .2 1.4.6s.6.9.6 1.4v2c0 .5-.2 1-.6 1.4s-.9.6-1.4.6h-2v2h3c.6 0 1 .4 1 1s-.4 1-1 1z" />
-        </g>
-        <g>
-            <path d="m19.5 17h-2.5c-.6 0-1-.4-1-1s.4-1 1-1h2.5c.1 0 .3-.1.4-.1s.1-.2.1-.4v-1c0-.1-.1-.3-.1-.4s-.3-.1-.4-.1h-1.5c-.6 0-1-.4-1-1s.4-1 1-1h1.5c.1 0 .3-.1.4-.1.1-.1.1-.2.1-.4v-1c0-.1-.1-.3-.1-.4-.1 0-.3-.1-.4-.1h-2.5c-.6 0-1-.4-1-1s.4-1 1-1h2.5c.7 0 1.3.3 1.8.7.4.5.7 1.1.7 1.8v1c0 .5-.2 1.1-.5 1.5.3.4.5 1 .5 1.5v1c0 .7-.3 1.3-.7 1.8s-1.1.7-1.8.7z" />
-        </g>
-    </svg>
+export const IconMoney = (props: IconProps) => (
+    <BaseIcon {...props}>
+        <rect x="2" y="6" width="20" height="12" rx="2" />
+        <circle cx="12" cy="12" r="3" />
+        <line x1="2" y1="10" x2="22" y2="10" />
+        <line x1="2" y1="14" x2="22" y2="14" />
+    </BaseIcon>
 );
-export const IconSearch = () => (
-    <i className="pi pi-search" style={{ color: '#FFF' }}></i>
+
+
+export const IconPorcentagem = (props: IconProps) => (
+    <BaseIcon {...props}>
+        <line x1="19" y1="5" x2="5" y2="19" />
+        <circle cx="7" cy="7" r="2" />
+        <circle cx="17" cy="17" r="2" />
+    </BaseIcon>
+);
+
+export const IconNumero = (props: IconProps) => (
+    <BaseIcon {...props}>
+        <line x1="4" y1="9" x2="20" y2="9" />
+        <line x1="4" y1="15" x2="20" y2="15" />
+        <line x1="10" y1="3" x2="8" y2="21" />
+        <line x1="16" y1="3" x2="14" y2="21" />
+    </BaseIcon>
+);
+
+
+export const IconSearch = (props: IconProps) => (
+    <BaseIcon {...props}>
+        <circle cx="11" cy="11" r="7" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </BaseIcon>
+);
+
+
+export const IconCNPJ = (props: IconProps) => (
+    <BaseIcon {...props}>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <line x1="7" y1="8" x2="17" y2="8" />
+        <line x1="7" y1="12" x2="17" y2="12" />
+        <line x1="7" y1="16" x2="13" y2="16" />
+    </BaseIcon>
 );

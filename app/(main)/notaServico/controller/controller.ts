@@ -45,9 +45,7 @@ const extractAxiosBlobErrorMessage = async (error: unknown, fallback: string): P
     if (!axios.isAxiosError(error)) {
         return fallback;
     }
-
     const responseData = error.response?.data;
-
     if (responseData instanceof Blob) {
         try {
             const rawText = await responseData.text();
@@ -238,7 +236,6 @@ export const consumeNotaServicoFeedback = (): NotaServicoFeedback | null => {
     try {
         return JSON.parse(rawFeedback) as NotaServicoFeedback;
     } catch (error) {
-        console.error('Erro ao ler feedback da nota de servico:', error);
         return null;
     }
 };
@@ -364,14 +361,10 @@ export const fetchNotaServicoByID = async (id: string | number) => {
 export const prepararCorrecaoNotaServico = async (params: { referencia?: string | null; id?: string | number | null }, msgs?: any) => {
     try {
         const payload = params.referencia ? { referencia: params.referencia } : { id: params.id };
-        console.group('[NotaServico] Preparar correcao da NFS-e');
-        console.log('Payload enviado para /nfse/preparar-emissao:', payload);
+        console.group(' Preparar correcao da NFS-e');
         const response = await api.post('/nfse/preparar-emissao', payload);
-        console.log('Status HTTP:', response.status);
-        console.log('Headers da resposta:', response.headers);
         console.log('Body retornado pelo backend:', response.data);
         console.groupEnd();
-
         return response.data;
     } catch (error: any) {
         console.group('[NotaServico] Erro ao preparar correcao da NFS-e');
@@ -426,21 +419,12 @@ export const prepararNotaServico = async (
     router?: AppRouterInstance
 ) => {
     try {
-        console.group('[NotaServico] Preparar emissao da NFS-e');
-        console.log('Payload enviado para /nfse/preparar-emissao:', prepararNfs);
         const response = await api.post('/nfse/preparar-emissao', prepararNfs);
-        console.log('Status HTTP:', response.status);
-        console.log('Headers da resposta:', response.headers);
-        console.log('Body retornado pelo backend:', response.data);
         console.groupEnd();
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.group('[NotaServico] Erro ao preparar emissao da NFS-e');
             console.log('Payload original:', prepararNfs);
-            console.log('Status HTTP:', error.response?.status);
-            console.log('Headers da resposta:', error.response?.headers);
-            console.log('Body retornado pelo backend:', error.response?.data);
             console.groupEnd();
         }
         console.error('Erro ao preparar NFS-e:', error);
@@ -572,7 +556,6 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
 };
 export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
     const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.pdf`;
-
     const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/pdf`, {
@@ -593,7 +576,6 @@ export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
 };
 export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
     const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.xml`;
-
     const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/xml`, {
@@ -665,13 +647,23 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
 export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, msgs: React.RefObject<Messages | null>) => {
     const pendingWindow = openPendingDownloadWindow();
     try {
+        const filledPayload = Object.fromEntries(
+            Object.entries(payload).filter(([, value]) => {
+                if (Array.isArray(value)) {
+                    return value.length > 0;
+                }
+                return value !== undefined && value !== null && value !== '';
+            })
+        );
+        console.log('exportar pdf:', filledPayload);
+        console.groupEnd();
         const response = await api.post('/nfse/exportar-pdf', payload, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], {
             type: 'application/pdf'
         });
-        triggerBlobDownload(blob, 'notas-servico.pdf', pendingWindow);
+        // triggerBlobDownload(blob, 'notas-servico.pdf', pendingWindow);
     } catch (error) {
         pendingWindow?.close();
         console.error('Erro ao exportar PDF das notas:', error);

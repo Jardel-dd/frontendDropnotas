@@ -11,7 +11,6 @@ const api = axios.create({
         'Content-Type': 'application/json'
     }
 });
-
 const logRequest = (request: InternalAxiosRequestConfig) => {
     if (request.url) {
         console.log('', request.url);
@@ -25,8 +24,8 @@ api.interceptors.request.use(async (request) => {
     if (request.url === '/refresh-token') {
         return request;
     }
-
     const token = await getToken();
+    console.log(' Token do usuário:', token);
 
     if (token) {
         request.headers.Authorization = `Bearer ${token}`;

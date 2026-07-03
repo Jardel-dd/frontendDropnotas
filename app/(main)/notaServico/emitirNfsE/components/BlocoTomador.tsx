@@ -90,6 +90,9 @@ export default function BlocoTomador({ nfseGerada, handleAllChanges, handleDropd
                         onDropdownChangeEndereco={handleDropdownChangeEnderecoTomador}
                         getCitiesFromState={getCitiesFromState}
                         loadingCep={loadingCep}
+                         nomePaisObrigatorio
+    codigoPaisObrigatorio
+    codigoMunicipioObrigatorio
                     />
                 </div>
             </div>

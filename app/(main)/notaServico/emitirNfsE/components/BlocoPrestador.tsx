@@ -177,6 +177,9 @@ export default function BlocoPrestador({
                         onDropdownChangeEndereco={handleDropdownChangeEnderecoPrestador}
                         getCitiesFromState={getCitiesFromState}
                         loadingCep={loadingCep}
+                         nomePaisObrigatorio
+    codigoPaisObrigatorio
+    codigoMunicipioObrigatorio
                     />
                 </div>
             </div>

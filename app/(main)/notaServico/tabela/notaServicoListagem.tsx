@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { StatusNota } from '../types/statusClassNfs';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
-import { Dispatch, SetStateAction, useContext, useRef } from 'react';
+import { useContext, useRef } from 'react';
 import { CancelarNfs } from '@/app/components/dataTableComponent/DataTableComponent';
 import {
     DataTableSelectable,
@@ -26,11 +26,8 @@ import { usePermissions } from '@/app/routes/permissoes';
 
 export function ListarNotaServico({
     listPaginationNotaServico,
-    setListPaginationNotaServico,
     loading,
-    setLoading,
     searchTerm,
-    listarInativos,
     selectedNotas,
     setSelectedNotas,
     mobileLoadMoreVisible = false,
@@ -38,11 +35,8 @@ export function ListarNotaServico({
     onMobileLoadMore
 }: {
     listPaginationNotaServico: Record<string, any>;
-    setListPaginationNotaServico: Dispatch<SetStateAction<any>>;
     loading: boolean;
     searchTerm: string;
-    setLoading: (state: boolean) => void;
-    listarInativos: boolean;
     selectedNotas: NfsEntity[];
     setSelectedNotas: (selected: NfsEntity[]) => void;
     mobileLoadMoreVisible?: boolean;
@@ -166,230 +160,232 @@ export function ListarNotaServico({
     return (
         <div style={{ marginTop: '0' }}>
             <Messages ref={msgs} className="custom-messages" />
-            {loading ? (
-                <LoadingScreen loadingText={'Carregando Notas Fiscais...'} />
-            ) : (
-                <div>
-                    {isDesktop && (
-                        <DataTableSelectable<NfsEntity>
-                            data={notas}
-                            selected={selectedNotas}
-                            onSelectionChange={setSelectedNotas}
-                            isRowSelectable={(nota) => canSelectPendingNota && nota.status_nota === 'PENDENTE'}
-                            dataKey="id"
-                            loading={loading}
-                            isDarkMode={isDarkMode}
-                            columns={[
-                                {
-                                    field: 'numero_rps',
-                                    header: 'Numero',
-                                    body: (data) =>
-                                        loading ? (
-                                            <Skeleton />
-                                        ) : (
-                                            <span>
-                                                {highlightSearchTerm(
-                                                    limitarText(data.numero_rps, 3),
-                                                    searchTerm
-                                                )}
-                                            </span>
-                                        )
-                                },
-                                {
-                                    field: 'razao_social_cliente',
-                                    header: 'Nome Cliente',
-                                    body: (data) =>
-                                        loading ? (
-                                            <Skeleton />
-                                        ) : (
-                                            <span>
-                                                {highlightSearchTerm(
-                                                    limitarText(data.razao_social_cliente, 25),
-                                                    searchTerm
-                                                )}
-                                            </span>
-                                        )
-                                },
-                                {
-                                    field: 'razao_social_empresa',
-                                    header: 'Nome Empresa',
-                                    body: (data) =>
-                                        loading ? (
-                                            <Skeleton />
-                                        ) : (
-                                            <span>
-                                                {highlightSearchTerm(
-                                                    limitarText(data.razao_social_empresa, 25),
-                                                    searchTerm
-                                                )}
-                                            </span>
-                                        )
-                                },
-                                {
-                                    field: 'data_emissao',
-                                    header: 'Data de Emissao',
-                                    body: (data) => {
-                                        const dataEmissao = formatarDataEmissao(data.data_emissao);
-
-                                        return (
-                                            <span title={dataEmissao}>
-                                                {highlightSearchTerm(
-                                                    limitarText(dataEmissao, 10),
-                                                    searchTerm
-                                                )}
-                                            </span>
-                                        );
-                                    }
-                                },
-                                {
-                                    field: 'total_valor_servico',
-                                    header: 'Valor',
-                                    body: (data) => <span>{formatarValor(data.total_valor_servico)}</span>
-                                },
-                                {
-                                    field: 'status_nota',
-                                    header: 'Status',
-                                    body: (data) => (
-                                        <span
-                                            style={{
-                                                borderRadius: '1REM',
-                                                width: '90%',
-                                                display: 'flex',
-                                                alignItems: 'center'
-                                            }}
-                                            className={`px-3 py-1 rounded-2xl text-sm font-medium inline-block ${StatusNota(
-                                                data.status_nota ?? ''
-                                            )}`}
-                                        >
-                                            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                                {data.status_nota}
-                                            </div>
+            <div>
+                {isDesktop && (
+                    <DataTableSelectable<NfsEntity>
+                        data={notas}
+                        selected={selectedNotas}
+                        onSelectionChange={setSelectedNotas}
+                        isRowSelectable={(nota) => canSelectPendingNota && nota.status_nota === 'PENDENTE'}
+                        dataKey="id"
+                        loading={loading}
+                        isDarkMode={isDarkMode}
+                        columns={[
+                            {
+                                field: 'numero_rps',
+                                header: 'Numero',
+                                body: (data) =>
+                                    loading ? (
+                                        <Skeleton />
+                                    ) : (
+                                        <span>
+                                            {highlightSearchTerm(
+                                                limitarText(data.numero_rps, 3),
+                                                searchTerm
+                                            )}
                                         </span>
                                     )
-                                }
-                            ]}
-                            extraActionsTemplate={renderExtraActions}
-                        />
-                    )}
-                    {isMobile && (
-                        <div className="nota-servico-mobile-list">
-                            {selectableNotas.length > 0 && (
-                                <div className="nota-servico-mobile-select-all">
-                                    <Checkbox
-                                        inputId="selecionar-todas-notas-mobile"
-                                        checked={allSelectableRowsSelected}
-                                        onChange={(e) => toggleAllSelectableNotas(Boolean(e.checked))}
-                                    />
-                                    <label htmlFor="selecionar-todas-notas-mobile">Selecionar pendentes</label>
-                                </div>
-                            )}
-
-                            {notas.length === 0 ? (
-                                <div className="nota-servico-mobile-empty">
-                                    Nenhum resultado encontrado na pesquisa
-                                </div>
-                            ) : (
-                                notas.map((nota: NfsEntity) => {
-                                    const isSelectable = canSelectPendingNota && nota.status_nota === 'PENDENTE';
-                                    const isSelected = selectedNotas.some((selectedNota) => selectedNota.id === nota.id);
+                            },
+                            {
+                                field: 'razao_social_cliente',
+                                header: 'Nome Cliente',
+                                body: (data) =>
+                                    loading ? (
+                                        <Skeleton />
+                                    ) : (
+                                        <span>
+                                            {highlightSearchTerm(
+                                                limitarText(data.razao_social_cliente, 25),
+                                                searchTerm
+                                            )}
+                                        </span>
+                                    )
+                            },
+                            {
+                                field: 'razao_social_empresa',
+                                header: 'Nome Empresa',
+                                body: (data) =>
+                                    loading ? (
+                                        <Skeleton />
+                                    ) : (
+                                        <span>
+                                            {highlightSearchTerm(
+                                                limitarText(data.razao_social_empresa, 25),
+                                                searchTerm
+                                            )}
+                                        </span>
+                                    )
+                            },
+                            {
+                                field: 'data_emissao',
+                                header: 'Data de Emissao',
+                                body: (data) => {
+                                    const dataEmissao = formatarDataEmissao(data.data_emissao);
 
                                     return (
-                                        <div
-                                            key={nota.id ?? `${nota.numero_rps}-${nota.referencia}`}
-                                            className="nota-servico-mobile-card"
-                                        >
-                                            <div className="nota-servico-mobile-card-top">
-                                                <div className="nota-servico-mobile-card-summary-grid">
+                                        <span title={dataEmissao}>
+                                            {highlightSearchTerm(
+                                                limitarText(dataEmissao, 10),
+                                                searchTerm
+                                            )}
+                                        </span>
+                                    );
+                                }
+                            },
+                            {
+                                field: 'total_valor_servico',
+                                header: 'Valor',
+                                body: (data) => <span>{formatarValor(data.total_valor_servico)}</span>
+                            },
+                            {
+                                field: 'status_nota',
+                                header: 'Status',
+                                body: (data) => (
+                                    <span
+                                        style={{
+                                            borderRadius: '1REM',
+                                            width: '90%',
+                                            display: 'flex',
+                                            alignItems: 'center'
+                                        }}
+                                        className={`px-3 py-1 rounded-2xl text-sm font-medium inline-block ${StatusNota(
+                                            data.status_nota ?? ''
+                                        )}`}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                            {data.status_nota}
+                                        </div>
+                                    </span>
+                                )
+                            }
+                        ]}
+                        extraActionsTemplate={renderExtraActions}
+                    />
+                )}
+                {isMobile && (
+                    <div className="nota-servico-mobile-list">
+                        {loading ? (
+                            <LoadingScreen loadingText="Carregando Notas Fiscais..." fullScreen={false} />
+                        ) : (
+                            <>
+                                {selectableNotas.length > 0 && (
+                                    <div className="nota-servico-mobile-select-all">
+                                        <Checkbox
+                                            inputId="selecionar-todas-notas-mobile"
+                                            checked={allSelectableRowsSelected}
+                                            onChange={(e) => toggleAllSelectableNotas(Boolean(e.checked))}
+                                        />
+                                        <label htmlFor="selecionar-todas-notas-mobile">Selecionar pendentes</label>
+                                    </div>
+                                )}
+
+                                {notas.length === 0 ? (
+                                    <div className="nota-servico-mobile-empty">
+                                        Nenhum resultado encontrado na pesquisa
+                                    </div>
+                                ) : (
+                                    notas.map((nota: NfsEntity) => {
+                                        const isSelectable = canSelectPendingNota && nota.status_nota === 'PENDENTE';
+                                        const isSelected = selectedNotas.some((selectedNota) => selectedNota.id === nota.id);
+
+                                        return (
+                                            <div
+                                                key={nota.id ?? `${nota.numero_rps}-${nota.referencia}`}
+                                                className="nota-servico-mobile-card"
+                                            >
+                                                <div className="nota-servico-mobile-card-top">
+                                                    <div className="nota-servico-mobile-card-summary-grid">
+                                                        <div className="nota-servico-mobile-card-detail">
+                                                            <span className="nota-servico-mobile-card-label">Numero</span>
+                                                            <span className="nota-servico-mobile-card-value">
+                                                                {highlightSearchTerm(
+                                                                    limitarText(nota.numero_rps, 25),
+                                                                    searchTerm
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                        <div className="nota-servico-mobile-card-detail">
+                                                            <span className="nota-servico-mobile-card-label">Data Emissao</span>
+                                                            <span className="nota-servico-mobile-card-meta-value">
+                                                                {formatarDataEmissao(nota.data_emissao)}
+                                                            </span>
+                                                        </div>
+                                                        <div className="nota-servico-mobile-card-detail nota-servico-mobile-card-status-detail">
+                                                            <span className="nota-servico-mobile-card-label">Status</span>
+                                                            <span
+                                                                className={`nota-servico-mobile-status ${StatusNota(
+                                                                    nota.status_nota ?? ''
+                                                                )}`}
+                                                            >
+                                                                {nota.status_nota || '-'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    {isSelectable && (
+                                                        <div className="nota-servico-mobile-card-select">
+                                                            <Checkbox
+                                                                checked={isSelected}
+                                                                onChange={(e) => toggleNotaSelection(nota, Boolean(e.checked))}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="nota-servico-mobile-card-body">
                                                     <div className="nota-servico-mobile-card-detail">
-                                                        <span className="nota-servico-mobile-card-label">Numero</span>
-                                                        <span className="nota-servico-mobile-card-value">
+                                                        <span className="nota-servico-mobile-card-label">Cliente</span>
+                                                        <span
+                                                            className="nota-servico-mobile-card-text"
+                                                            title={nota.razao_social_cliente}
+                                                        >
                                                             {highlightSearchTerm(
-                                                                limitarText(nota.numero_rps, 25),
+                                                                nota.razao_social_cliente,
                                                                 searchTerm
                                                             )}
                                                         </span>
                                                     </div>
+
                                                     <div className="nota-servico-mobile-card-detail">
-                                                        <span className="nota-servico-mobile-card-label">Data Emissao</span>
-                                                        <span className="nota-servico-mobile-card-meta-value">
-                                                            {formatarDataEmissao(nota.data_emissao)}
-                                                        </span>
-                                                    </div>
-                                                    <div className="nota-servico-mobile-card-detail nota-servico-mobile-card-status-detail">
-                                                        <span className="nota-servico-mobile-card-label">Status</span>
+                                                        <span className="nota-servico-mobile-card-label">Empresa</span>
                                                         <span
-                                                            className={`nota-servico-mobile-status ${StatusNota(
-                                                                nota.status_nota ?? ''
-                                                            )}`}
+                                                            className="nota-servico-mobile-card-text"
+                                                            title={nota.razao_social_empresa}
                                                         >
-                                                            {nota.status_nota || '-'}
+                                                            {highlightSearchTerm(
+                                                                nota.razao_social_empresa,
+                                                                searchTerm
+                                                            )}
                                                         </span>
                                                     </div>
                                                 </div>
-                                                {isSelectable && (
-                                                    <div className="nota-servico-mobile-card-select">
-                                                        <Checkbox
-                                                            checked={isSelected}
-                                                            onChange={(e) => toggleNotaSelection(nota, Boolean(e.checked))}
-                                                        />
+                                                <div>
+                                                    <div className="nota-servico-btn-actions ">
+                                                        {renderExtraActions(nota, true)}
                                                     </div>
-                                                )}
-                                            </div>
-
-                                            <div className="nota-servico-mobile-card-body">
-                                                <div className="nota-servico-mobile-card-detail">
-                                                    <span className="nota-servico-mobile-card-label">Cliente</span>
-                                                    <span
-                                                        className="nota-servico-mobile-card-text"
-                                                        title={nota.razao_social_cliente}
-                                                    >
-                                                        {highlightSearchTerm(
-                                                            nota.razao_social_cliente,
-                                                            searchTerm
-                                                        )}
-                                                    </span>
-                                                </div>
-
-                                                <div className="nota-servico-mobile-card-detail">
-                                                    <span className="nota-servico-mobile-card-label">Empresa</span>
-                                                    <span
-                                                        className="nota-servico-mobile-card-text"
-                                                        title={nota.razao_social_empresa}
-                                                    >
-                                                        {highlightSearchTerm(
-                                                            nota.razao_social_empresa,
-                                                            searchTerm
-                                                        )}
-                                                    </span>
                                                 </div>
                                             </div>
-                                            <div >
-                                                <div className="nota-servico-btn-actions ">
-                                                    {renderExtraActions(nota, true)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })
-                            )}
-                            {mobileLoadMoreVisible && onMobileLoadMore && (
-                                <div className="nota-servico-mobile-load-more">
-                                    <Button
-                                        type="button"
-                                        outlined
-                                        label={mobileLoadMoreLoading ? 'Carregando...' : 'Carregar mais'}
-                                        loading={mobileLoadMoreLoading}
-                                        disabled={mobileLoadMoreLoading || loading}
-                                        onClick={() => {
-                                            void onMobileLoadMore();
-                                        }}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            )}
+                                        );
+                                    })
+                                )}
+                                {mobileLoadMoreVisible && onMobileLoadMore && (
+                                    <div className="nota-servico-mobile-load-more">
+                                        <Button
+                                            type="button"
+                                            outlined
+                                            label={mobileLoadMoreLoading ? 'Carregando...' : 'Carregar mais'}
+                                            loading={mobileLoadMoreLoading}
+                                            disabled={mobileLoadMoreLoading || loading}
+                                            onClick={() => {
+                                                void onMobileLoadMore();
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

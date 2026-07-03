@@ -157,12 +157,6 @@ const RelatoriosServicos: React.FC = () => {
                 <div className="scrollable-container">
                     {loading && <LoadingScreen loadingText={'Carregando Serviços...'} />}
                     <div className="row flex w-full">
-                        <div className=" mt-2 p-2">
-                            <div className="col-12 mb-0 lg:col-12 lg:mb-0 p-0 w-full ">
-                                <label className="filter-label">Filtar por Data:</label>
-                                {/* <DateRangeField value={dateRange} onChange={setDateRange} /> */}
-                            </div>
-                        </div>
                         <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-2  ">
                             <div className="StyleDiv-row-filtro-all w-full ">
                                 <label className="filter-label">Filtrar por:</label>

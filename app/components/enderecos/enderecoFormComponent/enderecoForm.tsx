@@ -4,6 +4,7 @@ import { statesMaps } from '@/app/entity/maps';
 import Input from '@/app/shared/include/input/input-all';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
+
 type Props = {
     endereco: any;
     telefone?: string;
@@ -18,7 +19,10 @@ type Props = {
     exibirTelefone?: boolean;
     telefoneObrigatorio?: boolean;
     nomePaisObrigatorio?: boolean;
+    codigoPaisObrigatorio?: boolean;
+    codigoMunicipioObrigatorio?: boolean;
 };
+
 export default function EnderecoForm({
     endereco,
     telefone,
@@ -32,9 +36,12 @@ export default function EnderecoForm({
     readOnly,
     exibirTelefone = true,
     telefoneObrigatorio = false,
-    nomePaisObrigatorio = false
+    nomePaisObrigatorio = false,
+    codigoPaisObrigatorio = false,
+    codigoMunicipioObrigatorio = false
 }: Props) {
     const enderecoSafe = endereco || {};
+
     return (
         <>
             <Divider align="center" className="form-divider">
@@ -63,16 +70,49 @@ export default function EnderecoForm({
                     />
                 </div>
                 <div className="col-12 lg:col-3 ">
-                    <Input readOnly={readOnly} id="logradouro" label="Logradouro" value={endereco?.logradouro || ''} onChange={onChange} hasError={!!errors.logradouro} errorMessage={errors.logradouro} topLabel="Logradouro:" showTopLabel required />
+                    <Input
+                        readOnly={readOnly}
+                        id="logradouro"
+                        label="Logradouro"
+                        value={endereco?.logradouro || ''}
+                        onChange={onChange}
+                        hasError={!!errors.logradouro}
+                        errorMessage={errors.logradouro}
+                        topLabel="Logradouro:"
+                        showTopLabel
+                        required
+                    />
                 </div>
                 <div className="col-12 lg:col-3 ">
                     <Input id="complemento" label="Complemento" value={endereco?.complemento || ''} onChange={onChange} readOnly={readOnly} topLabel="Complemento:" showTopLabel />
                 </div>
                 <div className="col-12 lg:col-3 ">
-                    <Input id="numero" label="Número" value={endereco?.numero || ''} onChange={onChange} hasError={!!errors.numero} errorMessage={errors.numero} readOnly={readOnly} topLabel="Número:" showTopLabel required />
+                    <Input
+                        id="numero"
+                        label="Número"
+                        value={endereco?.numero || ''}
+                        onChange={onChange}
+                        hasError={!!errors.numero}
+                        errorMessage={errors.numero}
+                        readOnly={readOnly}
+                        topLabel="Número:"
+                        showTopLabel
+                        required
+                    />
                 </div>
                 <div className="col-12  lg:col-3 ">
-                    <Input id="bairro" label="Bairro" value={endereco?.bairro || ''} onChange={onChange} hasError={!!errors.bairro} errorMessage={errors.bairro} readOnly={readOnly} topLabel="Bairro:" showTopLabel required />
+                    <Input
+                        id="bairro"
+                        label="Bairro"
+                        value={endereco?.bairro || ''}
+                        onChange={onChange}
+                        hasError={!!errors.bairro}
+                        errorMessage={errors.bairro}
+                        readOnly={readOnly}
+                        topLabel="Bairro:"
+                        showTopLabel
+                        required
+                    />
                 </div>
                 <div className="col-12  lg:col-3 ">
                     <Dropdown
@@ -113,12 +153,12 @@ export default function EnderecoForm({
                         label="Código do Município"
                         value={endereco?.codigo_municipio || ''}
                         onChange={onChange}
-                        hasError={!!errors.codigo_municipio}
-                        errorMessage={errors.codigo_municipio}
+                        hasError={!!errors.codigo_municipio && codigoMunicipioObrigatorio}
+                        errorMessage={codigoMunicipioObrigatorio ? errors.codigo_municipio : undefined}
                         readOnly={readOnly}
                         topLabel="Código do Município:"
                         showTopLabel
-                        required
+                        required={codigoMunicipioObrigatorio}
                     />
                 </div>
                 <div className="col-12  lg:col-3 ">
@@ -132,7 +172,7 @@ export default function EnderecoForm({
                         readOnly={readOnly}
                         topLabel="Nome do país:"
                         showTopLabel
-                        required
+                        required={nomePaisObrigatorio}
                     />
                 </div>
                 <div className="col-12  lg:col-3 ">
@@ -141,12 +181,12 @@ export default function EnderecoForm({
                         label="Código do País"
                         value={endereco?.codigo_pais || ''}
                         onChange={onChange}
-                        hasError={!!errors.codigo_pais}
-                        errorMessage={errors.codigo_pais}
+                        hasError={!!errors.codigo_pais && codigoPaisObrigatorio}
+                        errorMessage={codigoPaisObrigatorio ? errors.codigo_pais : undefined}
                         readOnly={readOnly}
                         topLabel="Código do País:"
                         showTopLabel
-                        required
+                        required={codigoPaisObrigatorio}
                     />
                 </div>
                 {exibirTelefone && (
