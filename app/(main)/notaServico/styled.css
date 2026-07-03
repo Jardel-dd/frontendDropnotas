@@ -240,8 +240,9 @@
     justify-content: flex-start;
     align-items: flex-end;
     gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    width: 100%;
 }
 
 .nota-servico-summary-mini-field {
@@ -249,6 +250,9 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.2rem;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 65px;
 }
 
 .nota-servico-summary-mini-label {
@@ -273,6 +277,15 @@
 }
 
 @media (max-width: 768px) {
+    .nota-servico-page-shell .styled-container-main-all-routes {
+        height: calc(100vh - 4.375rem - 2.8rem);
+        max-height: calc(100vh - 4.375rem - 2.8rem);
+        height: calc(100dvh - 4.375rem - 2.8rem);
+        max-height: calc(100dvh - 4.375rem - 2.8rem);
+        min-height: 0;
+        overflow: hidden;
+    }
+
     .nota-servico-list-footer {
         min-height: auto;
     }
@@ -290,15 +303,21 @@
 
     .nota-servico-summary-footer {
         justify-content: center;
+        flex-wrap: nowrap;
     }
 
     .nota-servico-summary-mini-field {
         align-items: center;
+        flex: 1 1 0;
     }
 
     .nota-servico-summary-mini-input {
         width: 7.25rem;
         min-width: 7.25rem;
+    }
+
+    .nota-servico-mobile-list-wrapper {
+        padding-bottom: 0.25rem;
     }
 }
 

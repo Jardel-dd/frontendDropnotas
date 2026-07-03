@@ -3267,7 +3267,7 @@
   .p-paginator {
     background: #ffffff;
     color: #6c757d;
-    border: solid #e9ecef;
+    /* border: solid #e9ecef; */
     border-width: 0;
     padding: 0.5rem 1rem;
     border-radius: 6px;

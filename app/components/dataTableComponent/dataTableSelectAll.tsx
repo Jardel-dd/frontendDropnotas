@@ -269,7 +269,7 @@ export const downloadPdfButton = (
                     if (isMobileActionContext()) {
                         confirmMobileDownloadAction(
                             "Deseja baixar o PDF desta nota no celular?",
-                            () => downloadPdfNota(nota, msgs, { skipMobileConfirmation: true })
+                            () => downloadPdfNota(nota, msgs)
                         );
                         return;
                     }
@@ -312,7 +312,7 @@ export const downloadXmlButton = (
                     if (isMobileActionContext()) {
                         confirmMobileDownloadAction(
                             "Deseja baixar o XML desta nota no celular?",
-                            () => downloadXmlNota(nota, msgs, { skipMobileConfirmation: true })
+                            () => downloadXmlNota(nota, msgs)
                         );
                         return;
                     }
@@ -375,7 +375,7 @@ export const downloadArquivosButton = (
                     if (isMobileActionContext()) {
                         confirmMobileDownloadAction(
                             "Deseja baixar o arquivo com PDF e XML desta nota no celular?",
-                            () => downloadArquivosNota(nota, msgs, { skipMobileConfirmation: true })
+                            () => downloadArquivosNota(nota, msgs)
                         );
                         return;
                     }
