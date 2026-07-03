@@ -1,11 +1,11 @@
 import axios from 'axios';
 import api from '@/app/services/api';
+import { getToken } from '@/app/services/token';
 import { Messages } from 'primereact/messages';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
-import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DetalPrestadorValoresEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { CreatedNotaServicoResult, ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams, NotaServicoFeedback } from '../types/notaServico';
@@ -13,6 +13,18 @@ import { CreatedNotaServicoResult, ExportarPdfNfsePayload, ListNotaServicoParams
 const NOTA_SERVICO_FEEDBACK_KEY = 'notaServicoFeedback';
 const inflightNotaServicoRequests = new Map<string, Promise<any>>();
 const MOBILE_DOWNLOAD_USER_AGENT_REGEX = /Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini/i;
+const MOBILE_DOWNLOAD_FALLBACK_MESSAGE = 'No celular, o arquivo pode abrir em outra aba. Se isso acontecer, use o menu do navegador para Compartilhar ou Salvar nos Arquivos/Downloads.';
+const MOBILE_DOWNLOAD_ROUTE = '/api/nfse-download';
+const MOBILE_PDF_VIEW_ROUTE = '/api/nfse-view';
+
+type MobileNotaDownloadKind = 'pdf' | 'xml' | 'arquivos';
+type PendingDownloadTarget = {
+    targetName: string;
+    cleanup: () => void;
+};
+type DownloadNotaOptions = {
+    skipMobileConfirmation?: boolean;
+};
 
 
 const extractBackendErrorMessage = (data: any, fallback: string): string => {
@@ -93,7 +105,286 @@ const isMobileDownloadBrowser = (): boolean => {
         return false;
     }
 
-    return MOBILE_DOWNLOAD_USER_AGENT_REGEX.test(navigator.userAgent);
+    const matchesMobileViewport = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 868px)').matches;
+    const matchesCoarsePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+    const hasTouchPoints = typeof navigator.maxTouchPoints === 'number' && navigator.maxTouchPoints > 0;
+    const matchesMobileUserAgent = MOBILE_DOWNLOAD_USER_AGENT_REGEX.test(navigator.userAgent);
+
+    return matchesMobileViewport || matchesMobileUserAgent || (matchesCoarsePointer && hasTouchPoints);
+};
+const getMobileDownloadConfirmationMessage = (kind: MobileNotaDownloadKind): string => {
+    if (kind === 'pdf') {
+        return 'Deseja baixar o PDF desta nota no celular?';
+    }
+
+    if (kind === 'xml') {
+        return 'Deseja baixar o XML desta nota no celular?';
+    }
+
+    return 'Deseja baixar o arquivo com PDF e XML desta nota no celular?';
+};
+const openPendingDownloadTarget = (): PendingDownloadTarget | null => {
+    if (!isMobileDownloadBrowser()) {
+        return null;
+    }
+
+    const targetName = `nfse-download-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    try {
+        const iframe = document.createElement('iframe');
+        iframe.name = targetName;
+        iframe.setAttribute('aria-hidden', 'true');
+        iframe.style.display = 'none';
+
+        const cleanup = () => {
+            if (iframe.parentNode) {
+                iframe.parentNode.removeChild(iframe);
+            }
+        };
+
+        document.body.appendChild(iframe);
+
+        window.setTimeout(() => {
+            cleanup();
+        }, 120_000);
+
+        iframe.addEventListener('load', () => {
+            try {
+                const responseText = iframe.contentDocument?.body?.textContent?.trim();
+
+                if (responseText) {
+                    console.warn('Retorno do download mobile:', responseText);
+                }
+            } catch {
+            }
+        });
+
+        return {
+            targetName,
+            cleanup
+        }
+    } catch (error) {
+        console.warn('Nao foi possivel preparar o alvo oculto de download no mobile.', error);
+        return null;
+    }
+};
+const submitMobileDownloadForm = ({
+    notaId,
+    kind,
+    fileName,
+    token,
+    targetName
+}: {
+    notaId: string | number;
+    kind: MobileNotaDownloadKind;
+    fileName: string;
+    token: string;
+    targetName: string;
+}) => {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = MOBILE_DOWNLOAD_ROUTE;
+    form.target = targetName;
+    form.style.display = 'none';
+
+    const fields: Record<string, string> = {
+        notaId: String(notaId),
+        kind,
+        fileName,
+        token
+    };
+
+    Object.entries(fields).forEach(([name, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+};
+const openMobilePdfViewTarget = () => {
+    const targetName = `nfse-view-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    try {
+        const windowRef = window.open('', targetName);
+
+        if (windowRef?.document?.body) {
+            windowRef.document.title = 'Abrindo nota...';
+            windowRef.document.body.innerHTML = '<p style="font-family: Arial, sans-serif; padding: 16px;">Abrindo nota para visualizacao...</p>';
+        }
+
+        return {
+            targetName,
+            windowRef
+        };
+    } catch (error) {
+        console.warn('Nao foi possivel abrir a nova aba de visualizacao da nota.', error);
+        return null;
+    }
+};
+const submitMobilePdfViewForm = ({
+    notaId,
+    fileName,
+    token,
+    targetName
+}: {
+    notaId: string | number;
+    fileName: string;
+    token: string;
+    targetName: string;
+}) => {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = MOBILE_PDF_VIEW_ROUTE;
+    form.target = targetName;
+    form.style.display = 'none';
+
+    const fields: Record<string, string> = {
+        notaId: String(notaId),
+        fileName,
+        token
+    };
+
+    Object.entries(fields).forEach(([name, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+};
+const handleMobilePdfView = async (
+    nota: NfsEntity,
+    msgs: React.RefObject<Messages | null>
+): Promise<boolean> => {
+    if (!isMobileDownloadBrowser()) {
+        return false;
+    }
+
+    const fileName = `${sanitizeDownloadFileNamePart(nota.razao_social_cliente) || `nfse-${nota.id}`}.pdf`;
+    const viewTarget = openMobilePdfViewTarget();
+    const targetName = viewTarget?.targetName ?? '_blank';
+
+    if (!viewTarget?.windowRef) {
+        msgs.current?.show({
+            severity: 'warn',
+            summary: 'Aviso',
+            detail: 'O navegador bloqueou a abertura automatica da nota. Permita pop-ups para visualizar o PDF.',
+            life: 6000
+        });
+        return true;
+    }
+
+    try {
+        const token = await getToken();
+
+        if (!token) {
+            throw new Error('Sessao expirada');
+        }
+
+        submitMobilePdfViewForm({
+            notaId: nota.id,
+            fileName,
+            token,
+            targetName
+        });
+
+        return true;
+    } catch (error) {
+        viewTarget.windowRef.close();
+        console.error('Erro ao abrir visualizacao mobile da nota:', error);
+        msgs.current?.show({
+            severity: 'error',
+            summary: 'AtenÃ§Ã£o:',
+            detail: 'NÃ£o foi possÃ­vel abrir o PDF da nota.',
+            life: 5000
+        });
+        return true;
+    }
+};
+const startMobileNotaDownload = async ({
+    notaId,
+    kind,
+    fileName,
+    msgs
+}: {
+    notaId: string | number;
+    kind: MobileNotaDownloadKind;
+    fileName: string;
+    msgs: React.RefObject<Messages | null>;
+}): Promise<boolean> => {
+    if (!isMobileDownloadBrowser()) {
+        return false;
+    }
+
+    const pendingTarget = openPendingDownloadTarget();
+    const targetName = pendingTarget?.targetName ?? '_self';
+
+    try {
+        const token = await getToken();
+        if (!token) {
+            throw new Error('Sessao expirada');
+        }
+        submitMobileDownloadForm({
+            notaId,
+            kind,
+            fileName,
+            token,
+            targetName
+        });
+      
+    } catch (error) {
+        pendingTarget?.cleanup();
+        console.error('Erro ao iniciar download mobile da nota:', error);
+        msgs.current?.show({
+            severity: 'error',
+            summary: 'Atencao:',
+            detail: 'Nao foi possivel iniciar o download da nota no celular. Tente novamente em instantes.',
+            life: 6000
+        });
+    }
+
+    return true;
+};
+const handleMobileNotaDownload = async ({
+    notaId,
+    kind,
+    fileName,
+    msgs,
+    skipConfirmation = false
+}: {
+    notaId: string | number;
+    kind: MobileNotaDownloadKind;
+    fileName: string;
+    msgs: React.RefObject<Messages | null>;
+    skipConfirmation?: boolean;
+}): Promise<boolean> => {
+    if (!isMobileDownloadBrowser()) {
+        return false;
+    }
+
+    if (!skipConfirmation) {
+        const confirmed = window.confirm(getMobileDownloadConfirmationMessage(kind));
+
+        if (!confirmed) {
+            return true;
+        }
+    }
+
+    return startMobileNotaDownload({
+        notaId,
+        kind,
+        fileName,
+        msgs
+    });
 };
 const openPendingDownloadWindow = (): Window | null => {
     if (!isMobileDownloadBrowser()) {
@@ -101,7 +392,14 @@ const openPendingDownloadWindow = (): Window | null => {
     }
 
     try {
-        return window.open('', '_blank', 'noopener,noreferrer');
+        const pendingWindow = window.open('', '_blank', 'noopener,noreferrer');
+
+        if (pendingWindow?.document?.body) {
+            pendingWindow.document.title = 'Preparando arquivo...';
+            pendingWindow.document.body.innerHTML = '<p style="font-family: Arial, sans-serif; padding: 16px;">Preparando arquivo para download...</p>';
+        }
+
+        return pendingWindow;
     } catch (error) {
         console.warn('Nao foi possivel abrir a janela temporaria de download no mobile.', error);
         return null;
@@ -112,16 +410,83 @@ const releaseObjectUrl = (objectUrl: string, delay = 60_000) => {
         window.URL.revokeObjectURL(objectUrl);
     }, delay);
 };
-const triggerBlobDownload = (
+const canUseNativeMobileFileShare = (file: File): boolean => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+        return false;
+    }
+
+    if (!window.isSecureContext || typeof navigator.share !== 'function') {
+        return false;
+    }
+
+    if (typeof navigator.canShare === 'function') {
+        try {
+            return navigator.canShare({ files: [file] });
+        } catch (error) {
+            console.warn('Falha ao validar compartilhamento nativo do arquivo.', error);
+            return false;
+        }
+    }
+
+    return false;
+};
+const tryShareBlobOnMobile = async (
     blob: Blob,
     fileName: string,
     pendingWindow?: Window | null
-) => {
+): Promise<'shared' | 'canceled' | 'unsupported'> => {
+    if (!isMobileDownloadBrowser() || typeof File === 'undefined') {
+        return 'unsupported';
+    }
+
+    const file = new File([blob], fileName, {
+        type: blob.type || 'application/octet-stream'
+    });
+
+    if (!canUseNativeMobileFileShare(file)) {
+        return 'unsupported';
+    }
+
+    try {
+        await navigator.share({ files: [file] });
+        pendingWindow?.close();
+        return 'shared';
+    } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+            pendingWindow?.close();
+            return 'canceled';
+        }
+
+        console.warn('Falha ao abrir o compartilhamento nativo do arquivo.', error);
+        return 'unsupported';
+    }
+};
+const showMobileDownloadFallbackMessage = (msgs?: React.RefObject<Messages | null>) => {
+    msgs?.current?.show({
+        severity: 'info',
+        summary: 'Download no celular',
+        detail: MOBILE_DOWNLOAD_FALLBACK_MESSAGE,
+        life: 7000
+    });
+};
+const triggerBlobDownload = async (
+    blob: Blob,
+    fileName: string,
+    pendingWindow?: Window | null,
+    msgs?: React.RefObject<Messages | null>
+): Promise<void> => {
+    const shareResult = await tryShareBlobOnMobile(blob, fileName, pendingWindow);
+
+    if (shareResult === 'shared' || shareResult === 'canceled') {
+        return;
+    }
+
     const fileUrl = window.URL.createObjectURL(blob);
 
     if (pendingWindow && !pendingWindow.closed) {
         try {
             pendingWindow.location.href = fileUrl;
+            showMobileDownloadFallbackMessage(msgs);
             releaseObjectUrl(fileUrl);
             return;
         } catch (error) {
@@ -142,6 +507,11 @@ const triggerBlobDownload = (
     document.body.appendChild(link);
     link.click();
     link.remove();
+
+    if (isMobileDownloadBrowser()) {
+        showMobileDownloadFallbackMessage(msgs);
+    }
+
     releaseObjectUrl(fileUrl);
 };
 const extractNotaServicoStatus = (data: any): string => {
@@ -554,15 +924,23 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
         };
     }
 };
-export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+export const downloadPdfNota = async (
+    nota: NfsEntity,
+    msgs: React.RefObject<Messages | null>,
+    options?: DownloadNotaOptions
+) => {
     const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.pdf`;
+    if (await handleMobileNotaDownload({ notaId: nota.id, kind: 'pdf', fileName, msgs, skipConfirmation: options?.skipMobileConfirmation })) {
+        return;
+    }
+
     const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/pdf`, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/pdf' });
-        triggerBlobDownload(blob, fileName, pendingWindow);
+        await triggerBlobDownload(blob, fileName, pendingWindow, msgs);
     } catch (error) {
         pendingWindow?.close();
         console.log('Erro ao baixar PDF:', error);
@@ -574,15 +952,23 @@ export const downloadPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
         });
     }
 };
-export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+export const downloadXmlNota = async (
+    nota: NfsEntity,
+    msgs: React.RefObject<Messages | null>,
+    options?: DownloadNotaOptions
+) => {
     const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.xml`;
+    if (await handleMobileNotaDownload({ notaId: nota.id, kind: 'xml', fileName, msgs, skipConfirmation: options?.skipMobileConfirmation })) {
+        return;
+    }
+
     const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/xml`, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/xml' });
-        triggerBlobDownload(blob, fileName, pendingWindow);
+        await triggerBlobDownload(blob, fileName, pendingWindow, msgs);
 
     } catch (error) {
         pendingWindow?.close();
@@ -595,11 +981,19 @@ export const downloadXmlNota = async (nota: NfsEntity, msgs: React.RefObject<Mes
         });
     }
 };
-export const downloadArquivosNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+export const downloadArquivosNota = async (
+    nota: NfsEntity,
+    msgs: React.RefObject<Messages | null>,
+    options?: DownloadNotaOptions
+) => {
     const clientName = sanitizeDownloadFileNamePart(
         nota.razao_social_cliente ?? (nota.tomador as any)?.razao_social ?? null
     );
     const fileName = `PDFeXML-${clientName || `nfse-${nota.id}`}.zip`;
+
+    if (await handleMobileNotaDownload({ notaId: nota.id, kind: 'arquivos', fileName, msgs, skipConfirmation: options?.skipMobileConfirmation })) {
+        return;
+    }
 
     const pendingWindow = openPendingDownloadWindow();
     try {
@@ -607,7 +1001,7 @@ export const downloadArquivosNota = async (nota: NfsEntity, msgs: React.RefObjec
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/zip' });
-        triggerBlobDownload(blob, fileName, pendingWindow);
+        await triggerBlobDownload(blob, fileName, pendingWindow, msgs);
     } catch (error) {
         pendingWindow?.close();
         console.error('Erro ao baixar ZIP da NFS-e:', error);
@@ -620,6 +1014,10 @@ export const downloadArquivosNota = async (nota: NfsEntity, msgs: React.RefObjec
     }
 };
 export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<Messages | null>) => {
+    if (await handleMobilePdfView(nota, msgs)) {
+        return;
+    }
+
     try {
         const response = await api.get(`/nfse/${nota.id}/pdf`, {
             responseType: 'blob'

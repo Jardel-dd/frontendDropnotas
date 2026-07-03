@@ -73,13 +73,13 @@ const buildBoletoArtifact = (paymentId: string, dueDate: string) => {
 const buildPendingMessage = (method: SubscriptionPaymentMethod) => {
     switch (method) {
         case 'pix':
-            return 'QR Code gerado. Aguardando confirmacao do Pix.';
+            return 'QR Code gerado. Aguardando confirmação do Pix.';
         case 'boleto':
             return 'Boleto emitido. A compensacao pode levar alguns instantes.';
         case 'credit_card':
             return 'Cartao tokenizado e enviado para autorizacao.';
         default:
-            return 'Pagamento pendente de confirmacao.';
+            return 'Pagamento pendente de confirmação.';
     }
 };
 

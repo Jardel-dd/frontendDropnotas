@@ -164,6 +164,13 @@
 .nota-servico-btn-actions {
     justify-content: space-between;
     display: flex;
+    gap: 0.35rem;
+}
+
+.nota-servico-btn-actions .p-button {
+    min-width: 2.35rem;
+    min-height: 2.35rem;
+    touch-action: manipulation;
 }
 .nota-servico-mobile-actions {
     display: flex;
