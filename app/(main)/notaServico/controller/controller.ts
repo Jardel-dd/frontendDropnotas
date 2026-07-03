@@ -2,18 +2,15 @@ import axios from 'axios';
 import api from '@/app/services/api';
 import { getToken } from '@/app/services/token';
 import { Messages } from 'primereact/messages';
-import { PessoaEntity } from '@/app/entity/PessoaEntity';
-import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
-import { DetalPrestadorValoresEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
+import { DetalPrestadorValoresEntity } from '@/app/entity/ServiceEntity';
 import { CreatedNotaServicoResult, ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams, NotaServicoFeedback } from '../types/notaServico';
 
 const NOTA_SERVICO_FEEDBACK_KEY = 'notaServicoFeedback';
 const inflightNotaServicoRequests = new Map<string, Promise<any>>();
 const MOBILE_DOWNLOAD_USER_AGENT_REGEX = /Android|webOS|iPhone|iPad|iPod|IEMobile|Opera Mini/i;
-const MOBILE_DOWNLOAD_FALLBACK_MESSAGE = 'No celular, o arquivo pode abrir em outra aba. Se isso acontecer, use o menu do navegador para Compartilhar ou Salvar nos Arquivos/Downloads.';
 const MOBILE_DOWNLOAD_ROUTE = '/api/nfse-download';
 const MOBILE_PDF_VIEW_ROUTE = '/api/nfse-view';
 
@@ -21,9 +18,6 @@ type MobileNotaDownloadKind = 'pdf' | 'xml' | 'arquivos';
 type PendingDownloadTarget = {
     targetName: string;
     cleanup: () => void;
-};
-type DownloadNotaOptions = {
-    skipMobileConfirmation?: boolean;
 };
 
 
@@ -111,17 +105,6 @@ const isMobileDownloadBrowser = (): boolean => {
     const matchesMobileUserAgent = MOBILE_DOWNLOAD_USER_AGENT_REGEX.test(navigator.userAgent);
 
     return matchesMobileViewport || matchesMobileUserAgent || (matchesCoarsePointer && hasTouchPoints);
-};
-const getMobileDownloadConfirmationMessage = (kind: MobileNotaDownloadKind): string => {
-    if (kind === 'pdf') {
-        return 'Deseja baixar o PDF desta nota no celular?';
-    }
-
-    if (kind === 'xml') {
-        return 'Deseja baixar o XML desta nota no celular?';
-    }
-
-    return 'Deseja baixar o arquivo com PDF e XML desta nota no celular?';
 };
 const openPendingDownloadTarget = (): PendingDownloadTarget | null => {
     if (!isMobileDownloadBrowser()) {
@@ -354,164 +337,24 @@ const startMobileNotaDownload = async ({
 
     return true;
 };
-const handleMobileNotaDownload = async ({
-    notaId,
-    kind,
-    fileName,
-    msgs,
-    skipConfirmation = false
-}: {
-    notaId: string | number;
-    kind: MobileNotaDownloadKind;
-    fileName: string;
-    msgs: React.RefObject<Messages | null>;
-    skipConfirmation?: boolean;
-}): Promise<boolean> => {
-    if (!isMobileDownloadBrowser()) {
-        return false;
-    }
-
-    if (!skipConfirmation) {
-        const confirmed = window.confirm(getMobileDownloadConfirmationMessage(kind));
-
-        if (!confirmed) {
-            return true;
-        }
-    }
-
-    return startMobileNotaDownload({
-        notaId,
-        kind,
-        fileName,
-        msgs
-    });
-};
-const openPendingDownloadWindow = (): Window | null => {
-    if (!isMobileDownloadBrowser()) {
-        return null;
-    }
-
-    try {
-        const pendingWindow = window.open('', '_blank', 'noopener,noreferrer');
-
-        if (pendingWindow?.document?.body) {
-            pendingWindow.document.title = 'Preparando arquivo...';
-            pendingWindow.document.body.innerHTML = '<p style="font-family: Arial, sans-serif; padding: 16px;">Preparando arquivo para download...</p>';
-        }
-
-        return pendingWindow;
-    } catch (error) {
-        console.warn('Nao foi possivel abrir a janela temporaria de download no mobile.', error);
-        return null;
-    }
-};
 const releaseObjectUrl = (objectUrl: string, delay = 60_000) => {
     window.setTimeout(() => {
         window.URL.revokeObjectURL(objectUrl);
     }, delay);
 };
-const canUseNativeMobileFileShare = (file: File): boolean => {
-    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
-        return false;
-    }
-
-    if (!window.isSecureContext || typeof navigator.share !== 'function') {
-        return false;
-    }
-
-    if (typeof navigator.canShare === 'function') {
-        try {
-            return navigator.canShare({ files: [file] });
-        } catch (error) {
-            console.warn('Falha ao validar compartilhamento nativo do arquivo.', error);
-            return false;
-        }
-    }
-
-    return false;
-};
-const tryShareBlobOnMobile = async (
+const triggerBlobDownload = (
     blob: Blob,
-    fileName: string,
-    pendingWindow?: Window | null
-): Promise<'shared' | 'canceled' | 'unsupported'> => {
-    if (!isMobileDownloadBrowser() || typeof File === 'undefined') {
-        return 'unsupported';
-    }
-
-    const file = new File([blob], fileName, {
-        type: blob.type || 'application/octet-stream'
-    });
-
-    if (!canUseNativeMobileFileShare(file)) {
-        return 'unsupported';
-    }
-
-    try {
-        await navigator.share({ files: [file] });
-        pendingWindow?.close();
-        return 'shared';
-    } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-            pendingWindow?.close();
-            return 'canceled';
-        }
-
-        console.warn('Falha ao abrir o compartilhamento nativo do arquivo.', error);
-        return 'unsupported';
-    }
-};
-const showMobileDownloadFallbackMessage = (msgs?: React.RefObject<Messages | null>) => {
-    msgs?.current?.show({
-        severity: 'info',
-        summary: 'Download no celular',
-        detail: MOBILE_DOWNLOAD_FALLBACK_MESSAGE,
-        life: 7000
-    });
-};
-const triggerBlobDownload = async (
-    blob: Blob,
-    fileName: string,
-    pendingWindow?: Window | null,
-    msgs?: React.RefObject<Messages | null>
-): Promise<void> => {
-    const shareResult = await tryShareBlobOnMobile(blob, fileName, pendingWindow);
-
-    if (shareResult === 'shared' || shareResult === 'canceled') {
-        return;
-    }
-
+    fileName: string
+): void => {
     const fileUrl = window.URL.createObjectURL(blob);
-
-    if (pendingWindow && !pendingWindow.closed) {
-        try {
-            pendingWindow.location.href = fileUrl;
-            showMobileDownloadFallbackMessage(msgs);
-            releaseObjectUrl(fileUrl);
-            return;
-        } catch (error) {
-            console.warn('Falha ao redirecionar a janela temporaria de download.', error);
-            pendingWindow.close();
-        }
-    }
-
     const link = document.createElement('a');
     link.href = fileUrl;
     link.setAttribute('download', fileName);
     link.rel = 'noopener noreferrer';
 
-    if (isMobileDownloadBrowser()) {
-        link.target = '_blank';
-    }
-
     document.body.appendChild(link);
     link.click();
     link.remove();
-
-    if (isMobileDownloadBrowser()) {
-        showMobileDownloadFallbackMessage(msgs);
-    }
-
     releaseObjectUrl(fileUrl);
 };
 const extractNotaServicoStatus = (data: any): string => {
@@ -642,10 +485,7 @@ export const fetchNotaServico = async (params: NotaFiscalParams, msgs?: any) => 
 
         const requestPromise = api
             .get(`/nfse?${requestKey}`)
-            .then((response) => {
-                console.log('resposta', response.data);
-                return response.data;
-            })
+            .then((response) => response.data)
             .finally(() => {
                 inflightNotaServicoRequests.delete(requestKey);
             });
@@ -731,19 +571,10 @@ export const fetchNotaServicoByID = async (id: string | number) => {
 export const prepararCorrecaoNotaServico = async (params: { referencia?: string | null; id?: string | number | null }, msgs?: any) => {
     try {
         const payload = params.referencia ? { referencia: params.referencia } : { id: params.id };
-        console.group(' Preparar correcao da NFS-e');
         const response = await api.post('/nfse/preparar-emissao', payload);
-        console.log('Body retornado pelo backend:', response.data);
-        console.groupEnd();
         return response.data;
     } catch (error: any) {
-        console.group('[NotaServico] Erro ao preparar correcao da NFS-e');
-        console.log('Payload original:', params);
-        console.log('Status HTTP:', error.response?.status);
-        console.log('Headers da resposta:', error.response?.headers);
-        console.log('Body retornado pelo backend:', error.response?.data);
         console.error('Erro ao preparar correcao da NFS-e:', error);
-        console.groupEnd();
 
         msgs?.current?.show({
             severity: 'error',
@@ -755,48 +586,11 @@ export const prepararCorrecaoNotaServico = async (params: { referencia?: string 
         throw error;
     }
 };
-export const deletarNotaServico = async (nfsId: number, msgs: any, listPaginationNotaServico: Record<string, any>, listarInativos: boolean, setLoading: (state: boolean) => void, searchTerm: string) => {
-    try {
-        await api.delete(`/nfse/cancelar${String(nfsId)}`);
-        msgs.current?.clear();
-        msgs.current?.show([
-            {
-                life: 3000,
-                severity: 'success',
-                summary: 'Sucesso:',
-                detail: 'Nfse Cancelada com sucesso.'
-            }
-        ]);
-    } catch (error) {
-        msgs.current?.clear();
-        msgs.current?.show([
-            {
-                life: 3000,
-                severity: 'error',
-                summary: 'Atenção:',
-                detail: 'Houve um erro ao tentar Cancelar Nfse, tente novamente.'
-            }
-        ]);
-    }
-};
-export const prepararNotaServico = async (
-    prepararNfs: PrepararNfs,
-    selectedEmpresa: CompanyEntity | null,
-    selectedCliente: PessoaEntity | null,
-    selectedServico: ServiceEntity | null,
-    setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
-    msgs: any,
-    router?: AppRouterInstance
-) => {
+export const prepararNotaServico = async (prepararNfs: PrepararNfs, msgs: any) => {
     try {
         const response = await api.post('/nfse/preparar-emissao', prepararNfs);
-        console.groupEnd();
         return response.data;
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.log('Payload original:', prepararNfs);
-            console.groupEnd();
-        }
         console.error('Erro ao preparar NFS-e:', error);
         if (axios.isAxiosError(error)) {
             const msg = error.response?.data?.message || 'Erro ao preparar NFS-e.';
@@ -806,17 +600,18 @@ export const prepararNotaServico = async (
                 detail: msg,
                 life: 5000
             });
-        } else {
-            msgs.current?.show({
+            return;
+        }
+
+        msgs.current?.show({
                 severity: 'error',
                 summary: 'Atenção:',
                 detail: 'Erro inesperado ao preparar NFS-e.',
                 life: 5000
             });
-        }
     }
 };
-export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>, msgs: any, router: AppRouterInstance, redirectAfterSave = true): Promise<CreatedNotaServicoResult> => {
+export const createdNotaServico = async (nfs: NfsEntity, msgs: any, router: AppRouterInstance, redirectAfterSave = true): Promise<CreatedNotaServicoResult> => {
     try {
         const valoresNormalizados = normalizeNfseServiceValores(nfs.servico?.valores);
         const valorServicoNormalizado = (() => {
@@ -836,9 +631,7 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
                 })
             }
         };
-        console.log('Envio:', { nfse: dataNfse });
         const response = await api.post('/nfse', { nfse: dataNfse });
-        console.log('Response NFS:', response);
         const statusNota = extractNotaServicoStatus(response.data);
         const notaAutorizada = statusNota === 'AUTORIZADA' ? extractNotaServicoPayload(response.data) : null;
         if (statusNota === 'REJEITADA' && redirectAfterSave) {
@@ -890,11 +683,6 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
     } catch (error: any) {
         let detailMessage = 'Ocorreu um erro ao cadastrar a NFS-e.';
         if (error.response) {
-            console.group('retorno:');
-            console.log('Status:', error.response.status);
-            console.log('Headers:', error.response.headers);
-            console.log('resp:', error.response.data);
-            console.groupEnd();
             detailMessage = extractBackendErrorMessage(error.response.data, 'Ocorreu um erro ao cadastrar a NFS-e.');
             if (error.response?.status === 409) {
                 msgs.current?.show({
@@ -926,24 +714,20 @@ export const createdNotaServico = async (nfs: NfsEntity, setErrors: React.Dispat
 };
 export const downloadPdfNota = async (
     nota: NfsEntity,
-    msgs: React.RefObject<Messages | null>,
-    options?: DownloadNotaOptions
+    msgs: React.RefObject<Messages | null>
 ) => {
     const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.pdf`;
-    if (await handleMobileNotaDownload({ notaId: nota.id, kind: 'pdf', fileName, msgs, skipConfirmation: options?.skipMobileConfirmation })) {
+    if (await startMobileNotaDownload({ notaId: nota.id, kind: 'pdf', fileName, msgs })) {
         return;
     }
-
-    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/pdf`, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/pdf' });
-        await triggerBlobDownload(blob, fileName, pendingWindow, msgs);
+        triggerBlobDownload(blob, fileName);
     } catch (error) {
-        pendingWindow?.close();
-        console.log('Erro ao baixar PDF:', error);
+        console.error('Erro ao baixar PDF:', error);
         msgs.current?.show({
             severity: 'error',
             summary: 'Atenção:',
@@ -954,24 +738,20 @@ export const downloadPdfNota = async (
 };
 export const downloadXmlNota = async (
     nota: NfsEntity,
-    msgs: React.RefObject<Messages | null>,
-    options?: DownloadNotaOptions
+    msgs: React.RefObject<Messages | null>
 ) => {
     const fileName = `${nota.razao_social_cliente} Valor Serviço- ${nota.total_valor_servico}.xml`;
-    if (await handleMobileNotaDownload({ notaId: nota.id, kind: 'xml', fileName, msgs, skipConfirmation: options?.skipMobileConfirmation })) {
+    if (await startMobileNotaDownload({ notaId: nota.id, kind: 'xml', fileName, msgs })) {
         return;
     }
-
-    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/xml`, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/xml' });
-        await triggerBlobDownload(blob, fileName, pendingWindow, msgs);
+        triggerBlobDownload(blob, fileName);
 
     } catch (error) {
-        pendingWindow?.close();
         console.error(' Erro ao baixar XML:', error);
         msgs.current?.show({
             severity: 'error',
@@ -983,27 +763,23 @@ export const downloadXmlNota = async (
 };
 export const downloadArquivosNota = async (
     nota: NfsEntity,
-    msgs: React.RefObject<Messages | null>,
-    options?: DownloadNotaOptions
+    msgs: React.RefObject<Messages | null>
 ) => {
     const clientName = sanitizeDownloadFileNamePart(
         nota.razao_social_cliente ?? (nota.tomador as any)?.razao_social ?? null
     );
     const fileName = `PDFeXML-${clientName || `nfse-${nota.id}`}.zip`;
 
-    if (await handleMobileNotaDownload({ notaId: nota.id, kind: 'arquivos', fileName, msgs, skipConfirmation: options?.skipMobileConfirmation })) {
+    if (await startMobileNotaDownload({ notaId: nota.id, kind: 'arquivos', fileName, msgs })) {
         return;
     }
-
-    const pendingWindow = openPendingDownloadWindow();
     try {
         const response = await api.get(`/nfse/${nota.id}/arquivos`, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], { type: 'application/zip' });
-        await triggerBlobDownload(blob, fileName, pendingWindow, msgs);
+        triggerBlobDownload(blob, fileName);
     } catch (error) {
-        pendingWindow?.close();
         console.error('Erro ao baixar ZIP da NFS-e:', error);
         msgs.current?.show({
             severity: 'error',
@@ -1043,7 +819,6 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
     }
 };
 export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, msgs: React.RefObject<Messages | null>) => {
-    const pendingWindow = openPendingDownloadWindow();
     try {
         const filledPayload = Object.fromEntries(
             Object.entries(payload).filter(([, value]) => {
@@ -1053,17 +828,14 @@ export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, m
                 return value !== undefined && value !== null && value !== '';
             })
         );
-        console.log('exportar pdf:', filledPayload);
-        console.groupEnd();
-        const response = await api.post('/nfse/exportar-pdf', payload, {
+        const response = await api.post('/nfse/exportar-pdf', filledPayload, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], {
             type: 'application/pdf'
         });
-        // triggerBlobDownload(blob, 'notas-servico.pdf', pendingWindow);
+        triggerBlobDownload(blob, 'notas-servico.pdf');
     } catch (error) {
-        pendingWindow?.close();
         console.error('Erro ao exportar PDF das notas:', error);
         if (axios.isAxiosError(error) && error.response?.status === 404) {
             msgs.current?.show({
@@ -1082,14 +854,6 @@ export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, m
                 severity: 'warn',
                 summary: 'Exportacao invalida',
                 detail: detailMessage,
-                life: 5000
-            });
-
-            return;
-            msgs.current?.show({
-                severity: 'warn',
-                summary: 'Período não informado',
-                detail: 'Selecione uma data inicial e uma data final para realizar a exportação do PDF.',
                 life: 5000
             });
 

@@ -3,7 +3,6 @@ import './styled.css';
 import dayjs from 'dayjs';
 import api from '@/app/services/api';
 import '@/app/styles/styledGlobal.css';
-import { Toast } from 'primereact/toast';
 import { InputText } from 'primereact/inputtext';
 import LoadingScreen from '@/app/loading';
 import { Dialog } from 'primereact/dialog';
@@ -43,7 +42,7 @@ import { mapDateRangeToParams } from '@/app/components/calendarComponent/control
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import type { PessoaFormRef, PreloadedPessoaData } from '../cadastro/pessoas/types/pessoa';
+import type { PreloadedPessoaData } from '../cadastro/pessoas/types/pessoa';
 import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import { createEmptyEmpresa, createEmptyServico } from '../ordemServicos/types/ordemServico';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
@@ -138,13 +137,11 @@ const NotaServico: React.FC = () => {
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
-    const toast = useRef<Toast>(null);
     const { permissaoNfse } = usePermissions();
     const canSearchNotaServico = permissaoNfse.search;
     const canCreateNotaServico = permissaoNfse.create;
     const canUpdateNotaServico = permissaoNfse.update;
     const msgs = useRef<Messages | null>(null);
-    const formRef = useRef<PessoaFormRef>(null);
     const mobileListWrapperRef = useRef<HTMLDivElement | null>(null);
     const hasLoadedNotaServicoRef = useRef(false);
     const searchTermRef = useRef('');
@@ -193,9 +190,7 @@ const NotaServico: React.FC = () => {
     const [servico, setServico] = useState<ServiceEntity>(createEmptyServico());
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity | null>(null);
-    const [selectedServico, setSelectedServico] = useState<ServiceEntity | null>(null);
     const [draftDateRange, setDraftDateRange] = useState<DateRangeValue>([null, null]);
-    const [stateDisableBtnPrepararNfse, setStateDisableBtnPrepararNfse] = useState(false);
     const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [selectedStatusNotaServico, setSelectedStatusNotaServico] = useState<string>('');
     const [draftSelectedPessoa, setDraftSelectedPessoa] = useState<PessoaEntity | null>(null);
@@ -469,10 +464,8 @@ const NotaServico: React.FC = () => {
             .map((nota) => nota.referencia?.trim())
             .filter((referencia): referencia is string => Boolean(referencia));
         if (notaReferencias.length === 0) return;
-        console.log('Referências das notas selecionadas para emissão:', notaReferencias);
         try {
-            const response = await api.post('/nfse/emitir-lote', { referencias: notaReferencias });
-            console.log('Notas enviadas com sucesso:', response);
+            await api.post('/nfse/emitir-lote', { referencias: notaReferencias });
             msgs.current?.show({
                 severity: 'success',
                 summary: 'Sucesso:',
@@ -1009,7 +1002,7 @@ const NotaServico: React.FC = () => {
     if (loadingPrepararNfs) {
         return <LoadingScreen loadingText={'Preparando NFS-E...'} />;
     }
-    const disableConfirmarPrepararNfs = stateDisableBtnPrepararNfse || Object.keys(errors).length > 0 || !selectedEmpresaDialog || !selectedPessoaDialog || !selectedServicoDialog;
+    const disableConfirmarPrepararNfs = Object.keys(errors).length > 0 || !selectedEmpresaDialog || !selectedPessoaDialog || !selectedServicoDialog;
     const authorizedNotaEmpresa =
         authorizedNota?.razao_social_empresa ||
         (authorizedNota as any)?.empresa?.razao_social ||
@@ -1031,29 +1024,31 @@ const NotaServico: React.FC = () => {
 
         return (
             <div className="nota-servico-summary-footer">
-                 <div className="nota-servico-summary-mini-field">
-                    <span className="nota-servico-summary-mini-label">Notas Emitidas</span>
-                    <InputText
+                <div className="nota-servico-summary-mini-field">
+                    <Input
+                        topLabel="Quantidade Notas:"
+                        showTopLabel
                         value={notaServicoSummary.issuedCountDisplay}
                         disabled
-                        className="p-inputtext-sm nota-servico-summary-mini-input"
+                        onChange={() => undefined}
+                        label=""
                     />
                 </div>
                 <div className="nota-servico-summary-mini-field">
-                    <span className="nota-servico-summary-mini-label">Valor Total:</span>
-                    <InputText
+                    <Input
+                        topLabel="Valor Total:"
+                        showTopLabel
                         value={notaServicoSummary.totalValueDisplay}
                         disabled
-                        className="p-inputtext-sm nota-servico-summary-mini-input"
+                        onChange={() => undefined}
+                        label=""
                     />
                 </div>
-               
             </div>
         );
     };
     return (
-        <div className="w-full">
-            <Toast ref={toast} />
+        <div className="w-full nota-servico-page-shell">
             <ConfirmDialog group={NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP} draggable={false} />
             <Messages ref={msgs} className="custom-messages" />
             <div className="p-0">
@@ -1655,7 +1650,6 @@ const NotaServico: React.FC = () => {
                     <FormEmpresaCreated
                         key={`${editingEmpresaId ?? 'novo'}-${empresaDialogKey}`}
                         msgs={msgs}
-                        ref={formRef}
                         empresa={empresa}
                         initialId={editingEmpresaId}
                         preloadedEmpresa={preloadedEmpresa}
@@ -1680,7 +1674,6 @@ const NotaServico: React.FC = () => {
                     <FormCreatedPessoa
                         key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
                         msgs={msgs}
-                        ref={formRef}
                         pessoa={pessoa}
                         initialId={editingPessoaId}
                         preloadedPessoa={preloadedPessoa}
@@ -1705,7 +1698,6 @@ const NotaServico: React.FC = () => {
                     <FormCreatedServico
                         key={`${editingServicoId ?? 'novo'}-${servicoDialogKey}`}
                         msgs={msgs}
-                        ref={formRef}
                         servico={servico}
                         initialId={editingServicoId}
                         preloadedServico={preloadedServico}

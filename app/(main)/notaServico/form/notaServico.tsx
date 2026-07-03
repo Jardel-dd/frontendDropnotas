@@ -225,9 +225,6 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
     const [dateRange, setDateRange] = useState<Date[] | null>([new Date(), new Date()]);
     const [mensagemRetornoCorrecao, setMensagemRetornoCorrecao] = useState<string | null>(null);
     const [isBaseCalculoDirty, setIsBaseCalculoDirty] = useState(() => hasManualBaseCalculoValue(notaServico));
-    const [selectedEmpresa] = useState<CompanyEntity | null>(null);
-    const [selectedCliente] = useState<PessoaEntity | null>(null);
-    const [selectedServico] = useState<ServiceEntity | null>(null);
 
     const handleAllChanges = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any, bloco: 'prestador' | 'tomador' | 'servico' = 'prestador', subBloco?: "contato") => {
         const id = e?.target?.id ?? e?.id;
@@ -416,7 +413,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         try {
             setLoadingText('Emitindo NFS-e...');
             setLoading(true);
-            const submitResult = await createdNotaServico(gerarNfse, setErrors, msgs, router, redirectAfterSave);
+            const submitResult = await createdNotaServico(gerarNfse, msgs, router, redirectAfterSave);
             shouldKeepLoadingDuringRedirect = submitResult.redirected;
 
             if (submitResult.wasCreated) {
@@ -478,7 +475,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                     id_cliente,
                     id_servico
                 });
-                const response = await prepararNotaServico(payload, selectedEmpresa, selectedCliente, selectedServico, setErrors, msgs, router);
+                const response = await prepararNotaServico(payload, msgs);
 
                 const preparedNfse = getPreparedNfseFromResponse(response);
 
@@ -503,7 +500,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         };
 
         prepararEmissao();
-    }, [hasCorrectionReference, initialId, msgs, router, searchParams, selectedCliente, selectedEmpresa, selectedServico]);
+    }, [hasCorrectionReference, initialId, msgs, searchParams]);
     useEffect(() => {
         if (!correctionReference || hasPrepararParams) {
             return;
@@ -515,14 +512,12 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
             setMensagemRetornoCorrecao(null);
 
             try {
-                console.log('[NotaServico] Iniciando correcao por referencia:', correctionReference);
                 const response = await prepararCorrecaoNotaServico(
                     {
                         referencia: correctionReference
                     },
                     msgs
                 );
-                console.log('[NotaServico] Resposta recebida no formulario de correcao:', response);
                 setMensagemRetornoCorrecao(getMensagemRetornoFromResponse(response));
                 const notaServicoCarregada = buildNotaServicoFromResponse(getPreparedNfseFromResponse(response));
                 const competenciaDate = parseCompetenciaDate(notaServicoCarregada.competencia);
