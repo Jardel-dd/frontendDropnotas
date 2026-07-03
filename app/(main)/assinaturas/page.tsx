@@ -206,7 +206,7 @@ export default function AssinaturasPage() {
         if (activePayment.status === 'pending') {
             return {
                 severity: 'warn' as const,
-                text: 'Existe uma cobranca pendente. Aguarde a confirmacao automatica ou cancele para gerar outra.'
+                text: 'Existe uma cobrança pendente. Aguarde a confirmação utomática ou cancele para gerar outra.'
             };
         }
 

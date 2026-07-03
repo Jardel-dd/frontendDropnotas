@@ -5,10 +5,51 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Messages } from "primereact/messages";
 import { Checkbox } from "primereact/checkbox";
+import { confirmDialog } from "primereact/confirmdialog";
 import { NfsEntity } from "@/app/entity/NfsEntity";
 import { DataTable, DataTableRowToggleEvent } from "primereact/datatable";
 import { useIsDesktop, useIsMobile } from "../responsiveCelular/responsive";
 import { downloadArquivosNota, downloadPdfNota, downloadXmlNota, visualizarPdfNota } from "@/app/(main)/notaServico/controller/controller";
+
+const NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP = "nota-servico-download";
+
+const isMobileActionContext = () => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+        return false;
+    }
+
+    const matchesViewport = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 868px)").matches;
+    const hasTouchPoints = typeof navigator.maxTouchPoints === "number" && navigator.maxTouchPoints > 0;
+
+    return matchesViewport || hasTouchPoints;
+};
+
+const confirmMobileDownloadAction = (
+    message: string,
+    action: () => void | Promise<void>
+) => {
+    confirmDialog({
+        group: NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP,
+        message,
+        header: "Confirmação",
+        icon: "pi pi-download",
+        acceptLabel: "Baixar",
+        rejectLabel: "Cancelar",
+        className: "custom-confirm-buttons",
+        acceptClassName: "btn-sim",
+        rejectClassName: "p-button-outlined btn-nao",
+        accept: async () => await action()
+    });
+};
+
+const handleActionButtonClick = (
+    event: React.MouseEvent<HTMLElement>,
+    action: () => void | Promise<void>
+) => {
+    event.preventDefault();
+    event.stopPropagation();
+    void action();
+};
 
 export interface GenericColumn<T> {
     field: keyof T;
@@ -210,6 +251,7 @@ export const downloadPdfButton = (
 ) => {
     return (
         <Button
+            type="button"
             icon="pi pi-file-pdf"
             label={options?.label}
             tooltip="Baixar PDF"
@@ -222,10 +264,24 @@ export const downloadPdfButton = (
                 boxShadow: "none",
                 ...options?.style
             }}
-            onClick={() => downloadPdfNota(nota, msgs)}
+            onClick={(event) =>
+                handleActionButtonClick(event, () => {
+                    if (isMobileActionContext()) {
+                        confirmMobileDownloadAction(
+                            "Deseja baixar o PDF desta nota no celular?",
+                            () => downloadPdfNota(nota, msgs, { skipMobileConfirmation: true })
+                        );
+                        return;
+                    }
+
+                    return downloadPdfNota(nota, msgs);
+                })
+            }
         />
     );
 };
+
+export { NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP };
 
 export const downloadXmlButton = (
     nota: NfsEntity,
@@ -238,6 +294,7 @@ export const downloadXmlButton = (
 ) => {
     return (
         <Button
+            type="button"
             icon="pi pi-code"
             label={options?.label}
             tooltip="Baixar XML"
@@ -250,7 +307,19 @@ export const downloadXmlButton = (
                 boxShadow: "none",
                 ...options?.style
             }}
-            onClick={() => downloadXmlNota(nota, msgs)}
+            onClick={(event) =>
+                handleActionButtonClick(event, () => {
+                    if (isMobileActionContext()) {
+                        confirmMobileDownloadAction(
+                            "Deseja baixar o XML desta nota no celular?",
+                            () => downloadXmlNota(nota, msgs, { skipMobileConfirmation: true })
+                        );
+                        return;
+                    }
+
+                    return downloadXmlNota(nota, msgs);
+                })
+            }
         />
     );
 };
@@ -261,6 +330,7 @@ export const visualiarButton = (
 ) => {
     return (
         <Button
+            type="button"
             icon="pi pi-eye"
             tooltip="Visualizar PDF"
             className="p-button-text p-button-warning bottom-All-plus-datatableDetails"
@@ -271,7 +341,7 @@ export const visualiarButton = (
                 color: "#64748B",
                 boxShadow: "none"
             }}
-            onClick={() => visualizarPdfNota(nota, msgs)}
+            onClick={(event) => handleActionButtonClick(event, () => visualizarPdfNota(nota, msgs))}
         />
     );
 };
@@ -287,6 +357,7 @@ export const downloadArquivosButton = (
 ) => {
     return (
         <Button
+            type="button"
             icon="pi pi-download"
             label={options?.label}
             tooltip="Baixar PDF e XML"
@@ -299,7 +370,19 @@ export const downloadArquivosButton = (
                 boxShadow: "none",
                 ...options?.style
             }}
-            onClick={() => downloadArquivosNota(nota, msgs)}
+            onClick={(event) =>
+                handleActionButtonClick(event, () => {
+                    if (isMobileActionContext()) {
+                        confirmMobileDownloadAction(
+                            "Deseja baixar o arquivo com PDF e XML desta nota no celular?",
+                            () => downloadArquivosNota(nota, msgs, { skipMobileConfirmation: true })
+                        );
+                        return;
+                    }
+
+                    return downloadArquivosNota(nota, msgs);
+                })
+            }
         />
     );
 };

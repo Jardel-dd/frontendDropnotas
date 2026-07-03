@@ -8,6 +8,7 @@ import { InputText } from 'primereact/inputtext';
 import LoadingScreen from '@/app/loading';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
+import { ConfirmDialog } from 'primereact/confirmdialog';
 import { useRouter } from 'next/navigation';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
@@ -47,9 +48,9 @@ import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/Pe
 import { createEmptyEmpresa, createEmptyServico } from '../ordemServicos/types/ordemServico';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { downloadPdfButton, downloadXmlButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
+import { NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP, downloadArquivosButton, downloadPdfButton, downloadXmlButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import { consumeNotaServicoFeedback, downloadArquivosNota, exportarPdfNotasServico, listNotaServico } from './controller/controller';
+import { consumeNotaServicoFeedback, exportarPdfNotasServico, listNotaServico } from './controller/controller';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
 import { buildEmptyNotaServicoPagination, createEmptyPessoa, formatAuthorizedNotaDateTime, formatAuthorizedNotaValue } from './types/notaServico';
 import { fetchFilteredPessoa, fetchPessoaMobilePage, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
@@ -1053,6 +1054,7 @@ const NotaServico: React.FC = () => {
     return (
         <div className="w-full">
             <Toast ref={toast} />
+            <ConfirmDialog group={NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP} draggable={false} />
             <Messages ref={msgs} className="custom-messages" />
             <div className="p-0">
                 {isMobile && (
@@ -1397,17 +1399,15 @@ const NotaServico: React.FC = () => {
                                                 boxShadow: 'none'
                                             }
                                         })}
-                                        <Button
-                                            icon="pi pi-download"
-                                            label="PDF e XML"
-                                            className="p-button-outlined p-button-success nota-servico-authorized-dialog-button"
-                                            style={{
+                                        {downloadArquivosButton(authorizedNota as NfsEntity, msgs, {
+                                            label: 'PDF e XML',
+                                            className: 'p-button-outlined p-button-success nota-servico-authorized-dialog-button',
+                                            style: {
                                                 width: 'auto',
                                                 height: 'auto',
                                                 boxShadow: 'none'
-                                            }}
-                                            onClick={() => downloadArquivosNota(authorizedNota as NfsEntity, msgs)}
-                                        />
+                                            }
+                                        })}
                                     </>
                                 ) : (
                                     <span className="text-sm text-600">Arquivos ainda indisponíveis para download.</span>

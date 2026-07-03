@@ -136,7 +136,7 @@ export const SUBSCRIPTION_METHOD_META: Record<SubscriptionPaymentMethod, Subscri
         label: 'PIX',
         shortLabel: 'Pix',
         accentClass: 'is-pix',
-        helperText: 'Gera QR Code e codigo copia e cola com confirmacao automatica.'
+        helperText: 'Gera QR Code e codigo copia e cola com confirmação automatica.'
     },
     boleto: {
         label: 'Boleto',
@@ -160,7 +160,7 @@ export const SUBSCRIPTION_STATUS_META: Record<SubscriptionPaymentStatus, Subscri
     },
     pending: {
         label: 'Pendente',
-        description: 'Cobranca gerada. Aguarde a confirmacao do provedor.',
+        description: 'Cobranca gerada. Aguarde a confirmação do provedor.',
         severity: 'warning'
     },
     canceled: {
