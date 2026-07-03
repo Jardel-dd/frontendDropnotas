@@ -7,7 +7,6 @@ const AppMenu = () => {
     const { userConta } = useUserContext();
 
     const model = useMemo(() => {
-        
         return filterVisibleMenuItems([
             {
                 label: 'Dashboard',
@@ -81,6 +80,7 @@ const AppMenu = () => {
                 to: '/notaServico',
                 visible: hasPermissionAccess(userConta, 'nfse')
             },
+
             {
                 label: 'Finanças',
                 icon: 'pi pi-money-bill',
@@ -90,19 +90,19 @@ const AppMenu = () => {
                     {
                         label: 'Contas a Pagar',
                         icon: 'pi pi-building',
-                        to: '/financas/pagar',
+                        to: '/financas/pagar'
                     },
                     {
                         label: 'Contas a Receber',
                         icon: 'pi pi-palette',
-                        to: '/financas/receber',
+                        to: '/financas/receber'
                     },
                     {
                         label: 'Comissões',
                         icon: 'pi pi-dollar',
-                        to: '/financas/comissoes',
+                        to: '/financas/comissoes'
                     }
-                ],
+                ]
             },
             {
                 label: 'Relatório',
@@ -111,14 +111,20 @@ const AppMenu = () => {
                     {
                         label: 'Serviços',
                         icon: 'pi pi-wrench',
-                        to: '/relatorios/servicos',
+                        to: '/relatorios/servicos'
                     },
                     {
                         label: 'Recebimentos',
                         icon: 'pi pi-wallet',
-                        to: '/relatorios/recebimentos',
+                        to: '/relatorios/recebimentos'
                     }
-                ],
+                ]
+            },
+            {
+                label: 'Assinaturas',
+                icon: 'pi pi-credit-card',
+                to: '/assinaturas',
+                visible: hasPermissionAccess(userConta, 'financeiro')
             },
             {
                 label: 'Configurações',
@@ -130,24 +136,19 @@ const AppMenu = () => {
                         label: 'Minhas Empresas',
                         icon: 'pi pi-building',
                         to: '/configuracoes/empresas',
-                        visible: hasPermissionAccess(userConta, 'empresa'),
+                        visible: hasPermissionAccess(userConta, 'empresa')
                     },
                     {
                         label: 'Temas',
                         icon: 'pi pi-palette',
-                        to: '/configuracoes/geral',
+                        to: '/configuracoes/geral'
                     }
-                ],
-                
-            },
-           
-           
-            
+                ]
+            }
         ]);
     }, [userConta]);
-  
-    return <AppSubMenu key={JSON.stringify(model)} model={model}
-     />;
+
+    return <AppSubMenu key={JSON.stringify(model)} model={model} />;
 };
 
 export default AppMenu;

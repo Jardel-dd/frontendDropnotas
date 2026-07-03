@@ -231,7 +231,11 @@ export function EmpresaFields({
                         onDropdownChange={onDropdownChange}
                         onDropdownChangeEndereco={onDropdownChangeEndereco}
                         getCitiesFromState={getCitiesFromState}
-                        loadingCep={loadingCep} />
+                        loadingCep={loadingCep}
+                         nomePaisObrigatorio
+    codigoPaisObrigatorio
+    codigoMunicipioObrigatorio
+                         />
 
                 </TabPanel>
                 <TabPanel
@@ -293,7 +297,7 @@ export function EmpresaFields({
                             <Dropdown id="tipo_rps" value={empresa.tipo_rps ?? ''} options={tipo_rps} onChange={onDropdownChange} label="Selecione o Tipo de RPS" hasError={!!errors.tipo_rps} errorMessage={errors.tipo_rps} topLabel="Tipo de RPS:" showTopLabel required />
                         </div>
                         <div className="col-12  lg:col-3 ">
-                            <Input value={empresa.aliquota_iss?.toString() ?? 0} onChange={onChange} label="Alíquota ISS" id="aliquota_iss" type="number" hasError={!!errors.aliquota_iss} errorMessage={errors.aliquota_iss} topLabel="Alíquota ISS:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
+                            <CustomInputNumber value={empresa.aliquota_iss?.toString() ?? 0} onChange={onChange} label="Alíquota ISS" id="aliquota_iss"  hasError={!!errors.aliquota_iss} errorMessage={errors.aliquota_iss} topLabel="Alíquota ISS:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
                         </div>
                         <div className="col-12  lg:col-3 ">
                             <CustomInputNumber id="aliquota_pis" value={empresa.aliquota_pis || 0} onChange={onNumberChange} label="Alíquota PIS" useRightButton outlined hasError={!!errors.aliquota_pis} errorMessage={errors.aliquota_pis} topLabel="Alíquota PIS:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
@@ -311,16 +315,16 @@ export function EmpresaFields({
                             <CustomInputNumber id="aliquota_csll" value={empresa.aliquota_csll || 0} onChange={onNumberChange} label="Alíquota CSLL" useRightButton outlined hasError={!!errors.aliquota_csll} errorMessage={errors.aliquota_csll} topLabel="Alíquota CSLL:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
                         </div>
                         <div className="col-12  lg:col-3 ">
-                            <Input id="aliquota_outras_retencoes" type="number" value={empresa.aliquota_outras_retencoes ?? 0} onChange={onChange} label="Outras Retenções" hasError={!!errors.aliquota_outras_retencoes} errorMessage={errors.aliquota_outras_retencoes} topLabel="Outras Retenções:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
+                            <CustomInputNumber id="aliquota_outras_retencoes"  value={empresa.aliquota_outras_retencoes ?? 0} onChange={onChange} label="Outras Retenções" hasError={!!errors.aliquota_outras_retencoes} errorMessage={errors.aliquota_outras_retencoes} topLabel="Outras Retenções:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
                         </div>
                         <div className="col-12  lg:col-3 ">
-                            <Input id="aliquota_deducoes" type="number" value={empresa.aliquota_deducoes ?? 0} onChange={onChange} label="Alíquota Deduções" hasError={!!errors.aliquota_deducoes} errorMessage={errors.aliquota_deducoes} topLabel="Alíquota Deduções:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
+                            <CustomInputNumber id="aliquota_deducoes" value={empresa.aliquota_deducoes ?? 0} onChange={onChange} label="Alíquota Deduções" hasError={!!errors.aliquota_deducoes} errorMessage={errors.aliquota_deducoes} topLabel="Alíquota Deduções:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
                         </div>
                         <div className="col-12  lg:col-3 ">
-                            <Input id="percentual_desconto_incondicionado" type="number" value={empresa.percentual_desconto_incondicionado ?? 0} onChange={onChange} label="Desconto Incondicionado" hasError={!!errors.percentual_desconto_incondicionado} errorMessage={errors.percentual_desconto_incondicionado} topLabel="Desconto Incondicionado:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
+                            <CustomInputNumber id="percentual_desconto_incondicionado"value={empresa.percentual_desconto_incondicionado ?? 0} onChange={onChange} label="Desconto Incondicionado" hasError={!!errors.percentual_desconto_incondicionado} errorMessage={errors.percentual_desconto_incondicionado} topLabel="Desconto Incondicionado:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
                         </div>
                         <div className="col-12  lg:col-3 ">
-                            <Input id="percentual_desconto_condicionado" type="number" value={empresa.percentual_desconto_condicionado ?? 0} onChange={onChange} label="Desconto Incondicionado" hasError={!!errors.percentual_desconto_condicionado} errorMessage={errors.percentual_desconto_condicionado} topLabel="Desconto Condicionado:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
+                            <CustomInputNumber id="percentual_desconto_condicionado"  value={empresa.percentual_desconto_condicionado ?? 0} onChange={onChange} label="Desconto Incondicionado" hasError={!!errors.percentual_desconto_condicionado} errorMessage={errors.percentual_desconto_condicionado} topLabel="Desconto Condicionado:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
                         </div>
                         <div className="col-12  lg:col-3 ">
                             <DropdownSearch<TableCNAEEntity>

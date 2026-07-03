@@ -21,10 +21,7 @@
 }
 
 .sign-up-card__logo {
-    height: 10rem;
-    width: auto;
-    max-width: 100%;
-    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .sign-up-card__description {
@@ -68,7 +65,8 @@
     }
 
     .sign-up-card__logo {
-        height: clamp(8.5rem, 28vw, 10.5rem);
+        width: min(100%, 14rem);
+        max-height: 5.5rem;
     }
 
     .sign-up-card__body {

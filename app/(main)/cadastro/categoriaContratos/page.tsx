@@ -302,7 +302,6 @@ const CategoriaContrato: React.FC = () => {
                             </div>
                         </div>
                         <div className="p-2" style={{ marginTop: 'auto' }}>
-                            <Divider style={{ margin: "0 0" }} />
                             <CustomPaginator
                                 first={listPaginationCategoriaContrato.pageable.pageNumber * listPaginationCategoriaContrato.pageable.pageSize}
                                 rows={pageSize}

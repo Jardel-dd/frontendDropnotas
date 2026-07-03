@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import api from '@/app/services/api';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
+import { InputText } from 'primereact/inputtext';
 import LoadingScreen from '@/app/loading';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
@@ -56,13 +57,80 @@ import { fetchFilteredService, fetchServiceFormDataByID, fetchServicesByID, list
 import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 
 
-const getAuthorizedNotaEmail = (nota: Partial<NfsEntity> | null) =>
-    nota?.tomador?.contato?.email ||
-    (nota?.tomador as any)?.email ||
-    (nota as any)?.cliente?.email ||
-    '-';
+
+const NOTA_SERVICO_TOTAL_VALUE_PATHS = [
+    'valor_total',
+    'total_valor_notas',
+    'totalValorNotas',
+    'valor_total_notas',
+    'valorTotalNotas',
+    'total_valor_nfse',
+    'totalValorNfse',
+    'resumo.valor_total',
+    'resumo.total_valor_notas',
+    'resumo.totalValorNotas',
+    'resumo.valor_total_notas',
+    'resumo.valorTotalNotas'
+];
+const NOTA_SERVICO_ISSUED_COUNT_PATHS = [
+    'quantidade_notas_emitidas',
+    'quantidadeNotasEmitidas',
+    'total_notas_emitidas',
+    'totalNotasEmitidas',
+    'qtd_notas_emitidas',
+    'qtdNotasEmitidas',
+    'quantidade_emitidas',
+    'quantidadeEmitidas',
+    'resumo.quantidade_notas_emitidas',
+    'resumo.quantidadeNotasEmitidas',
+    'resumo.total_notas_emitidas',
+    'resumo.totalNotasEmitidas'
+];
 const NOTA_SERVICO_MOBILE_CARD_FALLBACK_HEIGHT = 224;
 const NOTA_SERVICO_MOBILE_CARD_GAP = 12;
+
+const getNestedValue = (source: Record<string, any> | null | undefined, path: string) =>
+    path.split('.').reduce<any>((currentValue, key) => currentValue?.[key], source);
+
+const normalizeSummaryNumber = (value: unknown): number | null => {
+    if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : null;
+    }
+
+    if (typeof value === 'string') {
+        const normalizedValue = value.trim();
+
+        if (!normalizedValue) {
+            return null;
+        }
+
+        const parsedValue = Number(normalizedValue.includes(',') ? normalizedValue.replace(/\./g, '').replace(',', '.') : normalizedValue);
+        return Number.isFinite(parsedValue) ? parsedValue : null;
+    }
+
+    return null;
+};
+const getSummaryNumberFromPaths = (source: Record<string, any> | null | undefined, paths: string[]) => {
+    for (const path of paths) {
+        const parsedValue = normalizeSummaryNumber(getNestedValue(source, path));
+
+        if (parsedValue !== null) {
+            return parsedValue;
+        }
+    }
+
+    return null;
+};
+const buildNotaServicoSummary = (pagination: Record<string, any> | null | undefined) => {
+    const totalElements = normalizeSummaryNumber(pagination?.totalElements) ?? 0;
+    const totalValue = getSummaryNumberFromPaths(pagination, NOTA_SERVICO_TOTAL_VALUE_PATHS);
+    const issuedCount = getSummaryNumberFromPaths(pagination, NOTA_SERVICO_ISSUED_COUNT_PATHS) ?? totalElements;
+
+    return {
+        totalValueDisplay: totalValue !== null ? formatAuthorizedNotaValue(totalValue) : '-',
+        issuedCountDisplay: new Intl.NumberFormat('pt-BR').format(issuedCount)
+    };
+};
 
 const NotaServico: React.FC = () => {
     const router = useRouter();
@@ -357,7 +425,6 @@ const NotaServico: React.FC = () => {
 
         return buildMobilePickerPageResult<CompanyEntity>(response.data);
     }, []);
- 
     const fetchServicoMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
         const response = await api.get('/servico', {
             params: {
@@ -446,32 +513,10 @@ const NotaServico: React.FC = () => {
         const activeFilters = getActiveFilters();
         setLoadingExportPdf(true);
         try {
-            const totalRegistros = Number(listPaginationNotaServico?.totalElements ?? 0);
-            const response = await listNotaServico(
-                {
-                    page: 0,
-                    size: Math.max(totalRegistros, resolvedPageSize, 1),
-                    termo: searchTerm,
-                    status: activeFilters.selectedStatusNotaServico,
-                    dateRange: activeFilters.dateRange,
-                    id_empresa: activeFilters.selectedEmpresa?.id,
-                    id_cliente: activeFilters.selectedPessoa?.id,
-                    id_vendedor: activeFilters.selectedVendedor?.id
-                },
-                msgs
-            );
-            const referencias = (response?.content ?? []).map((nota: NfsEntity) => nota.referencia?.trim()).filter((referencia: string | undefined): referencia is string => Boolean(referencia));
             const dateParams = mapDateRangeToParams(activeFilters.dateRange);
-            const exportPayload: ExportarPdfNfsePayload = {};
-
-            if (dateParams.data_hora_inicio && dateParams.data_hora_fim) {
-                exportPayload.data_hora_inicio = dateParams.data_hora_inicio;
-                exportPayload.data_hora_fim = dateParams.data_hora_fim;
-            }
-
-            if (referencias.length > 0) {
-                exportPayload.referencias = referencias;
-            }
+            const exportPayload: ExportarPdfNfsePayload = {
+                ...dateParams
+            };
 
             if (activeFilters.selectedStatusNotaServico) {
                 exportPayload.status = [activeFilters.selectedStatusNotaServico];
@@ -485,11 +530,11 @@ const NotaServico: React.FC = () => {
                 exportPayload.id_cliente = activeFilters.selectedPessoa.id;
             }
 
-            if (!exportPayload.data_hora_inicio && !exportPayload.referencias?.length) {
+            if (!exportPayload.data_hora_inicio || !exportPayload.data_hora_fim) {
                 msgs.current?.show({
                     severity: 'warn',
-                    summary: 'Filtros insuficientes',
-                    detail: 'Informe um periodo ou mantenha notas filtradas para montar o PDF.',
+                    summary: 'Periodo obrigatorio',
+                    detail: 'Selecione uma data inicial e uma data final para exportar o PDF.',
                     life: 5000
                 });
                 return;
@@ -658,7 +703,6 @@ const NotaServico: React.FC = () => {
         if (!canSearchNotaServico) {
             return;
         }
-
         const clearedDateRange: DateRangeValue = [null, null];
         const nextFilters = {
             dateRange: clearedDateRange,
@@ -978,6 +1022,34 @@ const NotaServico: React.FC = () => {
         authorizedNota?.tomador?.razao_social ||
         '-';
     const canDownloadAuthorizedNota = Boolean(authorizedNota?.id);
+    const notaServicoSummary = buildNotaServicoSummary(listPaginationNotaServico);
+    const renderNotaServicoSummaryFields = () => {
+        if (!canSearchNotaServico) {
+            return null;
+        }
+
+        return (
+            <div className="nota-servico-summary-footer">
+                 <div className="nota-servico-summary-mini-field">
+                    <span className="nota-servico-summary-mini-label">Notas Emitidas</span>
+                    <InputText
+                        value={notaServicoSummary.issuedCountDisplay}
+                        disabled
+                        className="p-inputtext-sm nota-servico-summary-mini-input"
+                    />
+                </div>
+                <div className="nota-servico-summary-mini-field">
+                    <span className="nota-servico-summary-mini-label">Valor Total:</span>
+                    <InputText
+                        value={notaServicoSummary.totalValueDisplay}
+                        disabled
+                        className="p-inputtext-sm nota-servico-summary-mini-input"
+                    />
+                </div>
+               
+            </div>
+        );
+    };
     return (
         <div className="w-full">
             <Toast ref={toast} />
@@ -1116,13 +1188,10 @@ const NotaServico: React.FC = () => {
                                 {canSearchNotaServico ? (
                                     <ListarNotaServico
                                         loading={loading}
-                                        setLoading={setLoading}
                                         listPaginationNotaServico={listPaginationNotaServico}
-                                        setListPaginationNotaServico={setListPaginationNotaServico}
                                         searchTerm={searchTerm}
                                         selectedNotas={selectedNotas}
                                         setSelectedNotas={handleSelectedNotasChange}
-                                        listarInativos={false}
                                         mobileLoadMoreVisible={hasMoreMobileContent(listPaginationNotaServico)}
                                         mobileLoadMoreLoading={loadingMore}
                                         onMobileLoadMore={handleLoadMoreNotaServico}
@@ -1131,6 +1200,7 @@ const NotaServico: React.FC = () => {
                                     <div className="p-3">Sem permissao para pesquisar notas fiscais.</div>
                                 )}
                             </div>
+                            {renderNotaServicoSummaryFields()}
                         </div>
                     </>
                 )}
@@ -1266,26 +1336,28 @@ const NotaServico: React.FC = () => {
                                 {canSearchNotaServico ? (
                                     <ListarNotaServico
                                         loading={loading}
-                                        setLoading={setLoading}
                                         listPaginationNotaServico={listPaginationNotaServico}
-                                        setListPaginationNotaServico={setListPaginationNotaServico}
                                         searchTerm={searchTerm}
                                         selectedNotas={selectedNotas}
                                         setSelectedNotas={handleSelectedNotasChange}
-                                        listarInativos={false}
                                     />
                                 ) : (
                                     <div className="p-3">Sem permissao para pesquisar notas fiscais.</div>
                                 )}
                             </div>
                             {canSearchNotaServico && (
-                                <div style={{ marginTop: 'auto' }}>
-                                    <CustomPaginator
-                                        first={safeNotaPageable.pageNumber * safeNotaPageable.pageSize}
-                                        rows={safeNotaPageable.pageSize}
-                                        totalRecords={safeNotaPagination.totalElements}
-                                        onPageChange={onPageChange}
-                                    />
+                                <div className="nota-servico-list-footer">
+                                    <div className="nota-servico-list-footer-paginator">
+                                        <CustomPaginator
+                                            first={safeNotaPageable.pageNumber * safeNotaPageable.pageSize}
+                                            rows={safeNotaPageable.pageSize}
+                                            totalRecords={safeNotaPagination.totalElements}
+                                            onPageChange={onPageChange}
+                                        />
+                                    </div>
+                                    <div className="nota-servico-list-footer-summary">
+                                        {renderNotaServicoSummaryFields()}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -1385,8 +1457,8 @@ const NotaServico: React.FC = () => {
                             </div>
                             <div className="col-12 md:col-6">
                                 <div className="border-1 border-200 border-round-xl p-3 surface-50 h-full">
-                                    <span className="text-600 text-sm block mb-2">Email do tomador</span>
-                                    <strong className="block">{getAuthorizedNotaEmail(authorizedNota)}</strong>
+                                    <span className="text-600 text-sm block mb-2">E-mail do tomador</span>
+                                    <strong className="block">{(authorizedNota?.tomador?.contato.email)}</strong>
                                 </div>
                             </div>
                             <div className="col-12">
@@ -1547,7 +1619,7 @@ const NotaServico: React.FC = () => {
                     cancelLabel="Cancelar"
                     showSaveButton
                     showCancelButton
-                    saveDisabled={loadingExportPdf}
+                    saveDisabled={loadingExportPdf || !dateRange?.[0] || !dateRange?.[1]}
                     cancelDisabled={loadingExportPdf}
                     width="32rem"
                 >

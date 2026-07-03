@@ -289,24 +289,24 @@ export function OrdemServicoFields({
             </div>
             <div className="grid formgrid w-full">
                 <div className="col-12 lg:col-4 ">
-                    <DatePicker value={emitirOS.data_hora_inicio ?? null} onChange={(date) => onDateChange('data_hora_inicio', date)} showTopLabel topLabel="Data inicio" />
+                    <DatePicker value={emitirOS.data_hora_inicio ?? null} onChange={(date) => onDateChange('data_hora_inicio', date)} showTopLabel topLabel="Data início" />
                 </div>
                 <div className="col-12 lg:col-4 ">
                     <DatePicker value={emitirOS.data_hora_prevista ?? null} onChange={(date) => onDateChange('data_hora_prevista', date)} showTopLabel topLabel="Data prevista" />
                 </div>
                 <div className="col-12 lg:col-4 ">
-                    <DatePicker value={emitirOS.data_hora_conclusao ?? null} onChange={(date) => onDateChange('data_hora_conclusao', date)} showTopLabel topLabel="Data conclusÃ£o" />
+                    <DatePicker value={emitirOS.data_hora_conclusao ?? null} onChange={(date) => onDateChange('data_hora_conclusao', date)} showTopLabel topLabel="Data conclusão" />
                 </div>
             </div>
             <div className="grid formgrid w-full">
                 <div className="col-12 lg:col-12 ">
-                    <InputTextarea value={emitirOS.consideracoes_finais || ''} onChange={onChange} rows={5} cols={30} label="" id="consideracoes_finais" showTopLabel topLabel="ConsideraÃ§Ãµes finais:" />
+                    <InputTextarea value={emitirOS.consideracoes_finais || ''} onChange={onChange} rows={5} cols={30} label="" id="consideracoes_finais" showTopLabel topLabel="Observações finais:" />
                 </div>
                 <div className="col-12 lg:col-12 ">
-                    <InputTextarea value={emitirOS.observacao_interna || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao_interna" showTopLabel topLabel="ObservaÃ§Ãµes internas:" />
+                    <InputTextarea value={emitirOS.observacao_interna || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao_interna" showTopLabel topLabel="Observações internas:" />
                 </div>
                 <div className="col-12 lg:col-12 ">
-                    <InputTextarea value={emitirOS.observacao_servico || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao_servico" showTopLabel topLabel="ObservaÃ§Ãµes do ServiÃ§o:" />
+                    <InputTextarea value={emitirOS.observacao_servico || ''} onChange={onChange} rows={5} cols={30} label="" id="observacao_servico" showTopLabel topLabel="Observações do Serviço:" />
                 </div>
                 <div className="col-12 lg:col-12 ">
                     <div className="switchRow">

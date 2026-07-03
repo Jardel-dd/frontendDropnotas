@@ -548,32 +548,37 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 setIsEditMode(true);
 
                 if (preloadedPessoa?.dataPessoa?.id && String(preloadedPessoa.dataPessoa.id) === String(pessoaId)) {
-                    const hydratePreloadedPessoa = async () => {
-                        setPessoa(new PessoaEntity(preloadedPessoa.dataPessoa));
-                        setSelectedContato(mapPessoaContatoToSelection(preloadedPessoa.dataPessoa));
-                        await resolveSelectedContrato(
-                            preloadedPessoa.dataPessoa.id_contrato ?? null,
-                            preloadedPessoa.selectedContrato ?? (preloadedPessoa.dataPessoa as PessoaEntity & { contrato?: Partial<ContratoEntity> }).contrato ?? null,
-                            false
+                    const pessoaPrecarregada = new PessoaEntity(preloadedPessoa.dataPessoa);
+                    const contratoPrecarregado =
+                        preloadedPessoa.selectedContrato ??
+                        buildContratoSelectionFromResumo(
+                            (preloadedPessoa.dataPessoa as PessoaEntity & { contrato?: Partial<ContratoEntity> }).contrato ?? null,
+                            preloadedPessoa.dataPessoa.id_contrato ?? null
                         );
-                        setSelectedCNAE(
-                            preloadedPessoa.dataPessoa.cnae_fiscal
-                                ? new TableCNAEEntity({
-                                    id: 0,
-                                    codigo: preloadedPessoa.dataPessoa.cnae_fiscal,
-                                    descricao: preloadedPessoa.dataPessoa.cnae_fiscal
-                                })
-                                : null
-                        );
-                        if (preloadedPessoa.selectedVendedor) {
-                            setSelectedVendedor(preloadedPessoa.selectedVendedor);
-                        } else {
-                            await resolveSelectedVendedor(preloadedPessoa.dataPessoa.id_vendedor_padrao ?? null);
-                        }
-                        setIsLoading(false);
-                    };
 
-                    void hydratePreloadedPessoa();
+                    setPessoa(pessoaPrecarregada);
+                    setSelectedContato(mapPessoaContatoToSelection(preloadedPessoa.dataPessoa));
+                    setSelectedContrato(contratoPrecarregado);
+                    setSelectedCNAE(
+                        preloadedPessoa.dataPessoa.cnae_fiscal
+                            ? new TableCNAEEntity({
+                                id: 0,
+                                codigo: preloadedPessoa.dataPessoa.cnae_fiscal,
+                                descricao: preloadedPessoa.dataPessoa.cnae_fiscal
+                            })
+                            : null
+                    );
+                    setSelectedVendedor(preloadedPessoa.selectedVendedor ?? null);
+                    setIsLoading(false);
+
+                    if (!contratoPrecarregado && preloadedPessoa.dataPessoa.id_contrato) {
+                        void resolveSelectedContrato(preloadedPessoa.dataPessoa.id_contrato, null, true);
+                    }
+
+                    if (!preloadedPessoa.selectedVendedor && preloadedPessoa.dataPessoa.id_vendedor_padrao) {
+                        void resolveSelectedVendedor(preloadedPessoa.dataPessoa.id_vendedor_padrao ?? null);
+                    }
+
                     return;
                 }
 
@@ -729,6 +734,9 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                 onDropdownChangeEndereco={handleDropdownChangeEndereco}
                                 getCitiesFromState={getCitiesFromState}
                                 loadingCep={loadingCep}
+                                 nomePaisObrigatorio
+    codigoPaisObrigatorio
+    codigoMunicipioObrigatorio
                             />
                         </div>
                     </div>

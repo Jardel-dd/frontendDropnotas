@@ -147,7 +147,7 @@ const AppConfig = () => {
 
     return (
         <>
-            {isLoading && <LoadingScreen loadingText="Carregando cor do tema..." />}
+            {isLoading && <LoadingScreen loadingText="Carregando cor do tema..." overlayOpacity={1} />}
             <div className="card styled-container-main-all-routes">
                     <div className="mb-4 lg:mb-0 custom-container">
                         {/* <Divider align="center" className="form-divider">
