@@ -52,14 +52,14 @@ export function ListarCategoriaContrato({
         await handleActiveOrInativeCategoriaContrato(rowData, msgs, listPaginationCategoriaContrato, listarInativos, setLoading, searchTerm, setListPaginationCategoriaContrato);
     };
     return (
-        <div style={{ marginTop: '0' }}>
+        <div style={{ marginTop: '0', display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
             <Messages ref={msgs} className="custom-messages" />
             {loading ? (
                 <LoadingScreen loadingText={'Carregando Categoria de Contratos...'} />
             ) : (
                 <>
                     {isMobile && (
-                        <div>
+                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <DataTableComponent
                                 value={listPaginationCategoriaContrato?.content as CategoryContratosEntity[]}
                                 loading={loading}
@@ -108,6 +108,7 @@ export function ListarCategoriaContrato({
                                 mobileLoadMoreVisible={mobileLoadMoreVisible}
                                 mobileLoadMoreLoading={mobileLoadMoreLoading}
                                 onMobileLoadMore={onMobileLoadMore}
+                                mobileBodyScroll
                             />
                         </div>
                     )}

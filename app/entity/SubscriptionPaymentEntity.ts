@@ -126,7 +126,7 @@ export interface SubscriptionStatusMeta {
 
 export const SUBSCRIPTION_PLAN: SubscriptionPlanConfig = {
     id: 'dropnotas-saas-pro',
-    name: 'Plano Pro',
+    name: 'Plano Teste',
     priceInCents: 9990,
     billingLabel: 'mensal',
     description: 'Plano recorrente com emissão, operacao financeira e suporte contínuo.'

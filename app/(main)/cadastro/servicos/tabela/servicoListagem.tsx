@@ -91,7 +91,7 @@ export function ListarServicos(
                                 columns={[
                                     {
                                         field: 'descricao',
-                                        header: 'Descricao',
+                                        header: 'Descrição',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (
@@ -139,7 +139,7 @@ export function ListarServicos(
                                 columns={[
                                     {
                                         field: 'descricao',
-                                        header: 'Descricao',
+                                        header: 'Descrição',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (

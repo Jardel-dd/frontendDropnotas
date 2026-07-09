@@ -251,7 +251,7 @@ function Servicos() {
                     <div className="grid formgrid p-2">
                         <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
                             <Input
-                                label="Pesquisar Descricao"
+                                label="Pesquisar Descrição"
                                 outlined={true}
                                 useRightButton={true}
                                 iconRight={'pi pi-search'}
@@ -307,7 +307,7 @@ function Servicos() {
                             <div className="grid formgrid">
                                 <div className="col-12 lg:col-12 container-input-search-all">
                                     <Input
-                                        label="Pesquisar Descricao"
+                                        label="Pesquisar Descrição"
                                         outlined={true}
                                         useRightButton={true}
                                         iconRight={'pi pi-search'}

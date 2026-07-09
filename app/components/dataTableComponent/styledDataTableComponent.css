@@ -35,11 +35,43 @@
     min-height: 100% !important;
 }
 
+.datatable-component-shell {
+    position: relative;
+    min-height: clamp(24rem, 60vh, 40rem);
+}
+
+.datatable-component-loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.datatable-component-loading-overlay > .loading-container {
+    height: 100% !important;
+    min-height: 100% !important;
+}
+
 .datatable-mobile-load-more-container {
     display: flex;
     justify-content: center;
     margin-top: 0.75rem;
     flex-shrink: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+}
+
+.datatable-mobile-load-more-container--visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.datatable-mobile-load-more-container--hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .datatable-mobile-load-more-button {

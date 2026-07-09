@@ -19,26 +19,64 @@ import { DetalServiceOSEntity } from '@/app/entity/ServiceEntity';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
+import {
+    MOBILE_LOAD_MORE_PAGE_SIZE,
+    hasMoreMobileContent,
+    mergePaginatedContent,
+    rebuildLoadedMobilePages
+} from '@/app/components/paginator/mobileLoadMore';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { DropDownFilterOrdemOrdemServico } from '@/app/shared/optionsDropDown/options';
-import { fetchOrdemServico, listOrdemServico, preparar } from './controller/controller';
+import { deletarOrdemServico, fetchOrdemServico, listOrdemServico, preparar } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
 import { fetchFilteredPessoa, listThePessoas } from '../cadastro/pessoas/controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { fetchFilteredEmpresa, listTheEmpresa } from '../configuracoes/empresas/controller/controller';
+
+const buildEmptyOrdemServicoPagination = (pageSize: number, pageNumber = 0) => ({
+    content: [],
+    pageable: {
+        pageNumber,
+        pageSize,
+        sort: {
+            empty: true,
+            sorted: false,
+            unsorted: true
+        },
+        offset: pageNumber * pageSize,
+        paged: true,
+        unpaged: false
+    },
+    totalPages: 0,
+    totalElements: 0,
+    last: true,
+    size: pageSize,
+    number: pageNumber,
+    sort: {
+        empty: true,
+        sorted: false,
+        unsorted: true
+    },
+    numberOfElements: 0,
+    first: pageNumber === 0,
+    empty: true
+});
+
 const OrdemServicos: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const msgs = useRef<Messages | null>(null);
     const hasLoadedInitialList = useRef(false);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const { permissaoOrdemServico } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
@@ -90,33 +128,13 @@ const OrdemServicos: React.FC = () => {
     const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
     const [selectedStatusOrdemServico, setSelectedStatusOrdemServico] = useState<string>('');
     const [draftSelectedStatusOrdemServico, setDraftSelectedStatusOrdemServico] = useState<string>('');
-    const [listPaginationOrdemServico, setListPaginationOrdemServico] = useState<Record<string, any>>({
-        pageable: {
-            pageNumber: 0,
-            pageSize: 10,
-            sort: {
-                empty: true,
-                sorted: false,
-                unsorted: true
-            },
-            offset: 0,
-            paged: true,
-            unpaged: false
-        },
-        totalPages: 1,
-        totalElements: 2,
-        last: true,
-        size: 20,
-        number: 0,
-        sort: {
-            empty: true,
-            sorted: false,
-            unsorted: true
-        },
-        numberOfElements: 0,
-        first: true,
-        empty: false
-    });
+    const [listPaginationOrdemServico, setListPaginationOrdemServico] = useState<Record<string, any>>(
+        () => buildEmptyOrdemServicoPagination(resolvedPageSize)
+    );
+    const safePagination =
+        listPaginationOrdemServico ?? buildEmptyOrdemServicoPagination(resolvedPageSize);
+    const safePageable =
+        safePagination.pageable ?? buildEmptyOrdemServicoPagination(resolvedPageSize).pageable;
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setEmitirOS,
         field: 'descricao',
@@ -142,34 +160,184 @@ const OrdemServicos: React.FC = () => {
         const _empresa = emitirOS!.copyWith({ [event.target.id]: value });
         setEmitirOS(_empresa);
     };
-    const handleListOrdemServico = useCallback(async (pageNumber?: number, _searchTerm?: string, listarInativos = false, status?: string, periodo?: DateRangeValue) => {
-        setLoading(true);
-        try {
-            const periodoToSend = periodo ?? dateRange;
-            const statusToSend = status ?? selectedStatusOrdemServico;
-            const ordemServicos = await listOrdemServico(
-                {
-                    ...listPaginationOrdemServico,
-                    pageable: {
-                        ...listPaginationOrdemServico.pageable,
-                        pageNumber: pageNumber ?? listPaginationOrdemServico.pageable.pageNumber,
-                        pageSize: pageSize
-                    }
-                },
-                listarInativos,
-                setLoading,
-                _searchTerm ?? searchTerm,
-                statusToSend,
-                periodoToSend,
-                msgs
+    const fetchOrdemServicoPage = useCallback(
+        async (
+            pageNumber = 0,
+            term = searchTerm,
+            inactive = listarInativos,
+            status = selectedStatusOrdemServico,
+            periodo = dateRange
+        ) => {
+            return (
+                (await listOrdemServico(
+                    {
+                        ...safePagination,
+                        pageable: {
+                            ...safePageable,
+                            pageNumber,
+                            pageSize: resolvedPageSize
+                        }
+                    },
+                    inactive,
+                    () => {},
+                    term,
+                    status,
+                    periodo,
+                    msgs
+                )) ?? buildEmptyOrdemServicoPagination(resolvedPageSize, pageNumber)
             );
-            if (ordemServicos) {
-                setListPaginationOrdemServico(ordemServicos);
+        },
+        [
+            dateRange,
+            listarInativos,
+            resolvedPageSize,
+            safePageable,
+            safePagination,
+            searchTerm,
+            selectedStatusOrdemServico
+        ]
+    );
+    const handleListOrdemServico = useCallback(
+        async (
+            pageNumber = 0,
+            term = searchTerm,
+            inactive = listarInativos,
+            status = selectedStatusOrdemServico,
+            periodo = dateRange,
+            append = false
+        ) => {
+            if (!append) {
+                setLoading(true);
             }
-        } finally {
-            setLoading(false);
+
+            try {
+                const ordemServicos = await fetchOrdemServicoPage(
+                    pageNumber,
+                    term,
+                    inactive,
+                    status,
+                    periodo
+                );
+
+                setListPaginationOrdemServico((current) => {
+                    if (isMobile && append) {
+                        return (
+                            mergePaginatedContent(current, ordemServicos, pageNumber) ??
+                            buildEmptyOrdemServicoPagination(resolvedPageSize, pageNumber)
+                        );
+                    }
+
+                    return ordemServicos ?? buildEmptyOrdemServicoPagination(resolvedPageSize, pageNumber);
+                });
+            } finally {
+                if (!append) {
+                    setLoading(false);
+                }
+            }
+        },
+        [
+            dateRange,
+            fetchOrdemServicoPage,
+            isMobile,
+            listarInativos,
+            resolvedPageSize,
+            searchTerm,
+            selectedStatusOrdemServico
+        ]
+    );
+    const refreshVisibleOrdemServico = useCallback(
+        async (
+            term = searchTerm,
+            inactive = listarInativos,
+            status = selectedStatusOrdemServico,
+            periodo = dateRange
+        ) => {
+            setLoading(true);
+            try {
+                const currentPage = safePageable.pageNumber ?? 0;
+
+                if (isMobile && currentPage > 0) {
+                    const rebuilt = await rebuildLoadedMobilePages({
+                        lastLoadedPage: currentPage,
+                        fetchPage: (page) =>
+                            fetchOrdemServicoPage(page, term, inactive, status, periodo)
+                    });
+
+                    setListPaginationOrdemServico(
+                        rebuilt ?? buildEmptyOrdemServicoPagination(resolvedPageSize)
+                    );
+                    return;
+                }
+
+                const ordemServicos = await fetchOrdemServicoPage(
+                    isMobile ? 0 : currentPage,
+                    term,
+                    inactive,
+                    status,
+                    periodo
+                );
+                setListPaginationOrdemServico(
+                    ordemServicos ?? buildEmptyOrdemServicoPagination(resolvedPageSize)
+                );
+            } finally {
+                setLoading(false);
+            }
+        },
+        [
+            dateRange,
+            fetchOrdemServicoPage,
+            isMobile,
+            listarInativos,
+            resolvedPageSize,
+            safePageable.pageNumber,
+            searchTerm,
+            selectedStatusOrdemServico
+        ]
+    );
+    const handleDeleteOrdemServico = useCallback(
+        async (rowData: ServiceOrderEntity) => {
+            await deletarOrdemServico(
+                rowData.id!,
+                msgs,
+                safePagination,
+                () => {},
+                searchTerm
+            );
+            await refreshVisibleOrdemServico(
+                searchTerm,
+                listarInativos,
+                selectedStatusOrdemServico,
+                dateRange
+            );
+        },
+        [
+            dateRange,
+            listarInativos,
+            refreshVisibleOrdemServico,
+            safePagination,
+            searchTerm,
+            selectedStatusOrdemServico
+        ]
+    );
+    const handleLoadMoreOrdemServico = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationOrdemServico)) {
+            return;
         }
-    }, [dateRange, listPaginationOrdemServico, pageSize, searchTerm, selectedStatusOrdemServico]);
+
+        setLoadingMore(true);
+        try {
+            await handleListOrdemServico(
+                (safePageable.pageNumber ?? 0) + 1,
+                searchTerm,
+                listarInativos,
+                selectedStatusOrdemServico,
+                dateRange,
+                true
+            );
+        } finally {
+            setLoadingMore(false);
+        }
+    };
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
@@ -253,9 +421,9 @@ const OrdemServicos: React.FC = () => {
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationOrdemServico((prev) => ({
-            ...prev,
+            ...(prev ?? buildEmptyOrdemServicoPagination(resolvedPageSize)),
             pageable: {
-                ...prev.pageable,
+                ...(prev?.pageable ?? buildEmptyOrdemServicoPagination(resolvedPageSize).pageable),
                 pageNumber: selectedPage
             }
         }));
@@ -285,7 +453,7 @@ const OrdemServicos: React.FC = () => {
                                             onChange={handleSearchChange}
                                             value={searchTerm}
                                             loading={loading}
-                                            onClickSearch={() => handleSearchChange({ target: { value: searchTerm } } as ChangeEvent<HTMLInputElement>)}
+                                            onClickSearch={() => searchNow(searchTerm)}
                                             topLabel="Ordem de Serviço:"
                                             showTopLabel
                                         />
@@ -374,26 +542,25 @@ const OrdemServicos: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-3">
+                            <div
+                                className="mt-3"
+                                style={{
+                                    display: 'flex',
+                                    flex: '1 1 auto',
+                                    minHeight: 0,
+                                    flexDirection: 'column'
+                                }}
+                            >
                                 <ListarOrdemServico
                                     loading={loading}
-                                    setLoading={setLoading}
                                     listPaginationOrdemServico={listPaginationOrdemServico}
-                                    setListPaginationOrdemServico={setListPaginationOrdemServico}
                                     searchTerm={searchTerm}
-                                    listarInativos={false}
+                                    listarInativos={listarInativos}
+                                    onDelete={handleDeleteOrdemServico}
+                                    mobileLoadMoreVisible={hasMoreMobileContent(listPaginationOrdemServico)}
+                                    mobileLoadMoreLoading={loadingMore}
+                                    onMobileLoadMore={handleLoadMoreOrdemServico}
                                 />
-                            </div>
-                            <div style={{ marginTop: 'auto' }}>
-                                <div className="custom-paginator">
-                                    <CustomPaginator
-                                        first={listPaginationOrdemServico.pageable.pageNumber * listPaginationOrdemServico.pageable.pageSize}
-                                        rows={listPaginationOrdemServico.pageable.pageSize}
-                                        totalRecords={listPaginationOrdemServico.totalElements}
-                                        onPageChange={onPageChange}
-                                        isMobile
-                                    />
-                                </div>
                             </div>
                         </div>
                     </>
@@ -414,7 +581,7 @@ const OrdemServicos: React.FC = () => {
                                                 onChange={handleSearchChange}
                                                 value={searchTerm}
                                                 loading={loading}
-                                                onClickSearch={() => handleSearchChange({ target: { value: searchTerm } } as ChangeEvent<HTMLInputElement>)}
+                                                onClickSearch={() => searchNow(searchTerm)}
                                                 topLabel="Ordem de Serviço:"
                                                 showTopLabel
                                             />
@@ -499,20 +666,19 @@ const OrdemServicos: React.FC = () => {
                                     <div className="mt-3">
                                         <ListarOrdemServico
                                             loading={loading}
-                                            setLoading={setLoading}
                                             listPaginationOrdemServico={listPaginationOrdemServico}
-                                            setListPaginationOrdemServico={setListPaginationOrdemServico}
                                             searchTerm={searchTerm}
-                                            listarInativos={false}
+                                            listarInativos={listarInativos}
+                                            onDelete={handleDeleteOrdemServico}
                                         />
                                     </div>
                                 </div>
                             </div>
                             <div style={{ marginTop: 'auto' }}>
                                 <CustomPaginator
-                                    first={listPaginationOrdemServico.pageable.pageNumber * listPaginationOrdemServico.pageable.pageSize}
-                                    rows={listPaginationOrdemServico.pageable.pageSize}
-                                    totalRecords={listPaginationOrdemServico.totalElements}
+                                    first={safePageable.pageNumber * safePageable.pageSize}
+                                    rows={resolvedPageSize}
+                                    totalRecords={safePagination.totalElements}
                                     onPageChange={onPageChange}
                                 />
                             </div>

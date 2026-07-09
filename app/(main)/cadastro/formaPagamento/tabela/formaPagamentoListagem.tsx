@@ -64,13 +64,13 @@ export function ListarFormaPagamento(
         );
     };
     return (
-        <div style={{ marginTop: '0' }}>
+        <div style={{ marginTop: '0', display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
             <Messages ref={msgs} className="custom-messages" />
             {loading ? (<LoadingScreen loadingText={'Carregando Formas de Pagamentos...'} />) :
                 (
                     <>
                         {isMobile &&
-                            <div>
+                            <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                                 <DataTableComponent
                                     value={listPaginationFormaPagamento?.content as FormaPagamentoEntity[]}
                                     loading={loading}
@@ -112,6 +112,7 @@ export function ListarFormaPagamento(
                                     mobileLoadMoreVisible={mobileLoadMoreVisible}
                                     mobileLoadMoreLoading={mobileLoadMoreLoading}
                                     onMobileLoadMore={onMobileLoadMore}
+                                    mobileBodyScroll
                                 />
                             </div>
                         }

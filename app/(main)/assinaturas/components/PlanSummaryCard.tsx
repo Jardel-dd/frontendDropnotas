@@ -36,8 +36,8 @@ export default function PlanSummaryCard({ status, payment, isPolling }: Props) {
             <p className="subscription-summary-description">{SUBSCRIPTION_PLAN.description}</p>
 
             <div className="subscription-price-block">
-                <strong>{formatCurrency(SUBSCRIPTION_PLAN.priceInCents / 100)}</strong>
-                <span>/ {SUBSCRIPTION_PLAN.billingLabel}</span>
+                {/* <strong>{formatCurrency(SUBSCRIPTION_PLAN.priceInCents / 100)}</strong> */}
+                {/* <span>/ {SUBSCRIPTION_PLAN.billingLabel}</span> */}
             </div>
 
             <div className="subscription-summary-grid">

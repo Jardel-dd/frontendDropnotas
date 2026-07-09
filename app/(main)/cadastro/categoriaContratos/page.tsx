@@ -22,14 +22,43 @@ import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialog
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { ativarCategoriaContrato, deletarCategoriaContrato, listCategoriaContrato } from './controller/controller';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
+
+const createInitialPagination = (pageSize: number) => ({
+    content: [],
+    pageable: {
+        pageNumber: 0,
+        pageSize,
+        sort: {
+            empty: true,
+            unsorted: true,
+            sorted: false
+        }
+    },
+    totalPages: 0,
+    totalElements: 0,
+    last: false,
+    size: pageSize,
+    number: 0,
+    sort: {
+        empty: true,
+        unsorted: true,
+        sorted: false
+    },
+    numberOfElements: 0,
+    first: true,
+    empty: false
+});
 
 const CategoriaContrato: React.FC = () => {
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const { permissaoCategoriaContrato } = usePermissions();
     const formRef = useRef<CategoriaContratoFormRef>(null);
@@ -49,92 +78,159 @@ const CategoriaContrato: React.FC = () => {
             ativo: true
         })
     );
-    const [listPaginationCategoriaContrato, setListPaginationCategoriaContrato] = useState<Record<string, any>>({
-        content: [],
-        pageable: {
-            pageNumber: 0,
-            pageSize: pageSize,
-            sort: {
-                empty: true,
-                unsorted: true,
-                sorted: false
-            }
-        },
-        totalPages: 0,
-        totalElements: 0,
-        last: false,
-        size: 10,
-        number: 0,
-        sort: {
-            empty: true,
-            unsorted: true,
-            sorted: false
-        },
-        numberOfElements: 0,
-        first: true,
-        empty: false
-    });
+    const [listPaginationCategoriaContrato, setListPaginationCategoriaContrato] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
+    const safePagination = listPaginationCategoriaContrato ?? createInitialPagination(resolvedPageSize);
+    const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
+
     const handleCategoriaContratoSaved = async (created: CategoryContratosEntity) => {
         setShowModalCategoriaContrato(false);
         setSelectedCategoriaContrato(created);
         setReloadKeyCategoriaContrato((k) => k + 1);
         await handleListCategoriaContrato(0, searchTerm, listarInativos);
     };
+
     const handleCategoriaContrato = (updatedCategoriaContrato: CategoryContratosEntity) => {
         setCategoriaContrato(updatedCategoriaContrato);
     };
-    const handleListCategoriaContrato = async (pageNumber?: number, _searchTerm?: string, listarInativos = false) => {
-        setLoading(true);
+
+    const fetchCategoriaContratoPage = async (
+        pageNumber = 0,
+        term = searchTerm,
+        inactive = listarInativos
+    ) => {
+        const categoriaContratos = await listCategoriaContrato(
+            {
+                ...safePagination,
+                pageable: {
+                    ...safePageable,
+                    pageNumber,
+                    pageSize: resolvedPageSize
+                }
+            },
+            inactive,
+            () => {},
+            term
+        );
+
+        return categoriaContratos ?? createInitialPagination(resolvedPageSize);
+    };
+
+    const handleListCategoriaContrato = async (
+        pageNumber = 0,
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos,
+        append = false
+    ) => {
+        if (!append) {
+            setLoading(true);
+        }
+
         try {
-            const categoriaContratos = await listCategoriaContrato(
-                {
-                    ...listPaginationCategoriaContrato,
-                    pageable: {
-                        ...listPaginationCategoriaContrato.pageable,
-                        pageNumber: pageNumber ?? listPaginationCategoriaContrato.pageable.pageNumber,
-                        pageSize: pageSize
-                    }
-                },
-                listarInativos,
-                setLoading,
-                _searchTerm ?? searchTerm
-            );
-            setListPaginationCategoriaContrato(categoriaContratos);
+            const categoriaContratos = await fetchCategoriaContratoPage(pageNumber, currentSearchTerm, currentListarInativos);
+            setListPaginationCategoriaContrato((current) => {
+                if (isMobile && append) {
+                    return mergePaginatedContent(current, categoriaContratos, pageNumber) ?? createInitialPagination(resolvedPageSize);
+                }
+
+                return categoriaContratos ?? createInitialPagination(resolvedPageSize);
+            });
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Atenção:',
-                detail: 'Falha ao buscar Categoria Contrato ',
+                summary: 'Atencao:',
+                detail: 'Falha ao buscar Categoria Contrato',
+                life: 3000
+            });
+        } finally {
+            if (!append) {
+                setLoading(false);
+            }
+        }
+    };
+
+    const refreshVisibleCategoriaContrato = async (
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos
+    ) => {
+        setLoading(true);
+        try {
+            const currentPage = safePageable.pageNumber ?? 0;
+
+            if (isMobile && currentPage > 0) {
+                const rebuilt = await rebuildLoadedMobilePages({
+                    lastLoadedPage: currentPage,
+                    fetchPage: (page) => fetchCategoriaContratoPage(page, currentSearchTerm, currentListarInativos)
+                });
+
+                setListPaginationCategoriaContrato(rebuilt ?? createInitialPagination(resolvedPageSize));
+                return;
+            }
+
+            const categoriaContratos = await fetchCategoriaContratoPage(isMobile ? 0 : currentPage, currentSearchTerm, currentListarInativos);
+            setListPaginationCategoriaContrato(categoriaContratos ?? createInitialPagination(resolvedPageSize));
+        } catch (error) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Atencao:',
+                detail: 'Falha ao atualizar Categoria Contrato',
                 life: 3000
             });
         } finally {
             setLoading(false);
         }
     };
+
+    const handleDeleteCategoriaContrato = async (id: number) => {
+        await deletarCategoriaContrato(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleCategoriaContrato(searchTerm, listarInativos);
+    };
+
+    const handleAtivarCategoriaContrato = async (id: number) => {
+        await ativarCategoriaContrato(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleCategoriaContrato(searchTerm, listarInativos);
+    };
+
+    const handleLoadMoreCategoriaContrato = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationCategoriaContrato)) {
+            return;
+        }
+
+        setLoadingMore(true);
+        try {
+            await handleListCategoriaContrato((safePageable.pageNumber ?? 0) + 1, searchTerm, listarInativos, true);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setCategoriaContrato,
         field: 'descricao',
         onSearch: (value) => handleListCategoriaContrato(0, value, listarInativos)
     });
+
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationCategoriaContrato((prev) => ({
-            ...prev,
+            ...(prev ?? createInitialPagination(resolvedPageSize)),
             pageable: {
-                ...prev.pageable,
+                ...(prev?.pageable ?? createInitialPagination(resolvedPageSize).pageable),
                 pageNumber: selectedPage
             }
         }));
         handleListCategoriaContrato(selectedPage, searchTerm, listarInativos);
     };
+
     const handleErrorsChange = (updatedErrors: Record<string, string>) => {
         setErrors(updatedErrors);
     };
+
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
         debouncedSearch(value);
     };
+
     const handleNavigate = () => {
         setSelectedCategoriaId(null);
         setCategoriaContrato(
@@ -147,35 +243,44 @@ const CategoriaContrato: React.FC = () => {
         );
         setShowModalCategoriaContrato(true);
     };
+
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
+
     const handleEditCategoria = (categoria: CategoryContratosEntity) => {
         setSelectedCategoriaId(String(categoria.id));
         setCategoriaContrato(categoria);
         setShowModalCategoriaContrato(true);
     };
+
     const handleClearFilters = () => {
         setListarInativos(false);
-        handleListCategoriaContrato(0,'' , false);
+        handleListCategoriaContrato(0, '', false);
         setVisible(false);
     };
+
     const handleApplyFilters = () => {
         handleListCategoriaContrato(0, searchTerm, listarInativos);
         setVisible(false);
     };
+
     const handleSalvarFiltro = () => {
         handleListCategoriaContrato(0, searchTerm, listarInativos);
         setVisible(false);
     };
+
     useEffect(() => {
         handleListCategoriaContrato();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
     useEffect(() => {
         if (Object.values(touchedFields).some((touched) => touched)) {
             validateFieldsCategoriaContrato(categoriaContrato, setErrors, msgs);
         }
     }, [categoriaContrato, touchedFields, msgs]);
+
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
@@ -183,7 +288,7 @@ const CategoriaContrato: React.FC = () => {
             {isMobile && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                        <div className="grid formgrid p-2" >
+                        <div className="grid formgrid p-2">
                             <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
                                 <Input
                                     label="Pesquisar Descrição "
@@ -219,29 +324,21 @@ const CategoriaContrato: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarCategoriaContrato
                                 loading={loading}
                                 listPaginationCategoriaContrato={listPaginationCategoriaContrato}
-                                deletar={(id) => deletarCategoriaContrato(id, msgs, listPaginationCategoriaContrato, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => ativarCategoriaContrato(id, msgs, listPaginationCategoriaContrato, listarInativos, setLoading, searchTerm)}
+                                deletar={handleDeleteCategoriaContrato}
+                                ativar={handleAtivarCategoriaContrato}
                                 setLoading={setLoading}
                                 searchTerm={searchTerm}
                                 setListPaginationCategoriaContrato={setListPaginationCategoriaContrato}
                                 listarInativos={listarInativos}
                                 onCategoriaClick={handleEditCategoria}
+                                mobileLoadMoreVisible={hasMoreMobileContent(listPaginationCategoriaContrato)}
+                                mobileLoadMoreLoading={loadingMore}
+                                onMobileLoadMore={handleLoadMoreCategoriaContrato}
                             />
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <div className="custom-paginator">
-                                <CustomPaginator
-                                    first={listPaginationCategoriaContrato.pageable.pageNumber * listPaginationCategoriaContrato.pageable.pageSize}
-                                    rows={pageSize}
-                                    totalRecords={listPaginationCategoriaContrato.totalElements}
-                                    onPageChange={onPageChange}
-                                    isMobile
-                                />
-                            </div>
                         </div>
                     </div>
                 </>
@@ -252,7 +349,7 @@ const CategoriaContrato: React.FC = () => {
                         <div className="scrollable-container">
                             <div className="p-0">
                                 <div className="grid formgrid">
-                                    <div className="col-12 lg:col-3 container-input-search-all" >
+                                    <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input
                                             label="Pesquisar Descrição"
                                             outlined={true}
@@ -291,8 +388,8 @@ const CategoriaContrato: React.FC = () => {
                                 <ListarCategoriaContrato
                                     loading={loading}
                                     listPaginationCategoriaContrato={listPaginationCategoriaContrato}
-                                    deletar={(id) => deletarCategoriaContrato(id, msgs, listPaginationCategoriaContrato, listarInativos, setLoading, searchTerm)}
-                                    ativar={(id) => ativarCategoriaContrato(id, msgs, listPaginationCategoriaContrato, listarInativos, setLoading, searchTerm)}
+                                    deletar={handleDeleteCategoriaContrato}
+                                    ativar={handleAtivarCategoriaContrato}
                                     setLoading={setLoading}
                                     searchTerm={searchTerm}
                                     setListPaginationCategoriaContrato={setListPaginationCategoriaContrato}
@@ -303,9 +400,9 @@ const CategoriaContrato: React.FC = () => {
                         </div>
                         <div className="p-2" style={{ marginTop: 'auto' }}>
                             <CustomPaginator
-                                first={listPaginationCategoriaContrato.pageable.pageNumber * listPaginationCategoriaContrato.pageable.pageSize}
-                                rows={pageSize}
-                                totalRecords={listPaginationCategoriaContrato.totalElements}
+                                first={safePageable.pageNumber * safePageable.pageSize}
+                                rows={resolvedPageSize}
+                                totalRecords={safePagination.totalElements}
                                 onPageChange={onPageChange}
                             />
                         </div>
@@ -343,7 +440,5 @@ const CategoriaContrato: React.FC = () => {
         </div>
     );
 };
+
 export default CategoriaContrato;
-
-
-

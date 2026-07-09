@@ -9,8 +9,6 @@
     max-width: calc(100vw - 1rem);
 }
 .p-multiselect-panel .p-component .p-ripple-disabled .p-connected-overlay-enter-done{
-
-
     background-color: red;
 }
 .custom-multiselect-filter {
