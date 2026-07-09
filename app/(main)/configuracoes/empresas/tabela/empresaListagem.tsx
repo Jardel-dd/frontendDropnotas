@@ -163,6 +163,20 @@ export function ListarEmpresas({
     const changeStatusActivateandDelete = async (rowData: CompanyEntity) => {
         await handleActiveOrInativeEmpresa(rowData, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm, setListPaginationEmpresa);
     };
+    const listLoadingShellStyle = {
+        position: 'relative' as const,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        flex: '1 1 auto',
+        minHeight: 'clamp(24rem, 60vh, 40rem)'
+    };
+
+    const listLoadingOverlayStyle = {
+        position: 'absolute' as const,
+        inset: 0,
+        zIndex: 3
+    };
+
     return (
         <div className="mt-0">
             
@@ -178,15 +192,12 @@ export function ListarEmpresas({
                    Finalize o cadastrado de informações da empresa para emissão das Notas Fiscais.
                 </div>
             )}
-            {loading ? (
-                <LoadingScreen loadingText={'Carregando Empresas...'} />
-            ) : (
-                <>
+            <>
                     {isMobile && (
-                        <div>
+                        <div style={listLoadingShellStyle}>
                             <DataTableComponent
                                 value={listPaginationEmpresa?.content as CompanyEntity[]}
-                                loading={loading}
+                                loading={false}
                                 totalRecords={listPaginationEmpresa?.size ?? 0}
                                 expandedRows={expandedRows}
                                 setExpandedRows={setExpandedRows}
@@ -218,18 +229,23 @@ export function ListarEmpresas({
                                     }
                                 ]}
                                 listarInativos={listarInativos}
-                                mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                mobileLoadMoreVisible={!loading && mobileLoadMoreVisible}
                                 mobileLoadMoreLoading={mobileLoadMoreLoading}
                                 onMobileLoadMore={onMobileLoadMore}
                                 mobileBodyScroll
                             />
+                            {loading && (
+                                <div style={listLoadingOverlayStyle}>
+                                    <LoadingScreen loadingText="Carregando Empresas..." fullScreen={false} />
+                                </div>
+                            )}
                         </div>
                     )}
                     {isDesktop && (
-                        <div>
+                        <div style={listLoadingShellStyle}>
                             <DataTableComponent
                                 value={listPaginationEmpresa?.content as CompanyEntity[]}
-                                loading={loading}
+                                loading={false}
                                 totalRecords={listPaginationEmpresa?.size ?? 0}
                                 setExpandedRows={setExpandedRows}
                                 expandedRows={expandedRows}
@@ -277,10 +293,14 @@ export function ListarEmpresas({
                                 ]}
                                 listarInativos={listarInativos}
                             />
+                            {loading && (
+                                <div style={listLoadingOverlayStyle}>
+                                    <LoadingScreen loadingText="Carregando Empresas..." fullScreen={false} />
+                                </div>
+                            )}
                         </div>
                     )}
-                </>
-            )}
+            </>
         </div>
     );
 }

@@ -17,7 +17,6 @@ const logRequest = (request: InternalAxiosRequestConfig) => {
         return;
     }
 };
-
 api.interceptors.request.use(async (request) => {
     logRequest(request);
 

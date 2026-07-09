@@ -543,7 +543,7 @@ const OrdemServicos: React.FC = () => {
                                 </div>
                             </div>
                             <div
-                                className="mt-3"
+                                className="ordem-servico-mobile-list-wrapper mt-3"
                                 style={{
                                     display: 'flex',
                                     flex: '1 1 auto',

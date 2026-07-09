@@ -44,6 +44,18 @@ export function ListarOrdemServico({
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const ordensServico = listPaginationOrdemServico?.content ?? [];
+    const listLoadingShellStyle = {
+        position: 'relative' as const,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        flex: '1 1 auto',
+        minHeight: 'clamp(24rem, 60vh, 40rem)'
+    };
+    const listLoadingOverlayStyle = {
+        position: 'absolute' as const,
+        inset: 0,
+        zIndex: 3
+    };
 
     const formatDateTime = (value?: Date | string | null) => {
         if (!value) {
@@ -104,195 +116,195 @@ export function ListarOrdemServico({
             <div>
                 {isDesktop && (
                     <>
-                        {loading ? (
-                            <LoadingScreen loadingText="Carregando Ordens de Servicos..." />
-                        ) : (
-                            <div>
-                                <DataTableComponent<ServiceOrderEntity>
-                                    value={ordensServico}
-                                    loading={loading}
-                                    totalRecords={listPaginationOrdemServico?.size ?? 0}
-                                    expandedRows={false}
-                                    setExpandedRows={() => {}}
-                                    rowExpansionTemplate={() => null}
-                                    expandButtonTemplate={() => null}
-                                    isDarkMode={isDarkMode}
-                                    searchTerm={searchTerm}
-                                    editButtonTemplate={
-                                        permissaoOrdemServico.update
-                                            ? (rowData) =>
-                                                  editButton(
-                                                      rowData,
-                                                      '/ordemServicos/created',
-                                                      router
-                                                  )
-                                            : undefined
-                                    }
-                                    toggleStatusOrDeleteButtonTemplate={
-                                        permissaoOrdemServico.delete
-                                            ? (rowData) => deleteButtonTemplate(rowData)
-                                            : undefined
-                                    }
-                                    showExpandButton={false}
-                                    columns={[
-                                        {
-                                            field: 'numero',
-                                            header: 'Numero',
-                                            body: (data) => {
-                                                const isStatusInactive = data.ativo === false;
-                                                return loading ? (
-                                                    <Skeleton />
-                                                ) : (
-                                                    <span
-                                                        className={
-                                                            isStatusInactive ? 'text-red-custom' : ''
-                                                        }
-                                                    >
-                                                        {highlightSearchTerm(
-                                                            limitarText(String(data.numero ?? '-'), 25),
-                                                            searchTerm
-                                                        )}
-                                                    </span>
-                                                );
-                                            }
-                                        },
-                                        {
-                                            field: 'descricao',
-                                            header: 'Descricao',
-                                            body: (data) => {
-                                                const isStatusInactive = data.ativo === false;
-                                                return loading ? (
-                                                    <Skeleton />
-                                                ) : (
-                                                    <span
-                                                        className={
-                                                            isStatusInactive ? 'text-red-custom' : ''
-                                                        }
-                                                    >
-                                                        {highlightSearchTerm(
-                                                            limitarText(data.descricao ?? '-', 25),
-                                                            searchTerm
-                                                        )}
-                                                    </span>
-                                                );
-                                            }
-                                        },
-                                        {
-                                            field: 'razao_social_cliente',
-                                            header: 'Nome Cliente',
-                                            body: (data) => {
-                                                const isStatusInactive = data.ativo === false;
-                                                return loading ? (
-                                                    <Skeleton />
-                                                ) : (
-                                                    <span
-                                                        className={
-                                                            isStatusInactive ? 'text-red-custom' : ''
-                                                        }
-                                                    >
-                                                        {highlightSearchTerm(
-                                                            limitarText(
-                                                                data.razao_social_cliente ?? '-',
-                                                                25
-                                                            ),
-                                                            searchTerm
-                                                        )}
-                                                    </span>
-                                                );
-                                            }
-                                        },
-                                        {
-                                            field: 'razao_social_empresa',
-                                            header: 'Nome Empresa',
-                                            body: (data) => {
-                                                const isStatusInactive = data.ativo === false;
-                                                return loading ? (
-                                                    <Skeleton />
-                                                ) : (
-                                                    <span
-                                                        className={
-                                                            isStatusInactive ? 'text-red-custom' : ''
-                                                        }
-                                                    >
-                                                        {highlightSearchTerm(
-                                                            limitarText(
-                                                                data.razao_social_empresa ?? '-',
-                                                                25
-                                                            ),
-                                                            searchTerm
-                                                        )}
-                                                    </span>
-                                                );
-                                            }
-                                        },
-                                        {
-                                            field: 'data_hora_inicio',
-                                            header: 'Data de Inicio',
-                                            body: (data) => (
-                                                <span>{formatDateTime(data.data_hora_inicio)}</span>
-                                            )
-                                        },
-                                        {
-                                            field: 'data_hora_prevista',
-                                            header: 'Data Prevista',
-                                            body: (data) => (
-                                                <span>{formatDateTime(data.data_hora_prevista)}</span>
-                                            )
-                                        },
-                                        {
-                                            field: 'data_hora_conclusao',
-                                            header: 'Data de Conclusao',
-                                            body: (data) => (
-                                                <span>{formatDateTime(data.data_hora_conclusao)}</span>
-                                            )
-                                        },
-                                        {
-                                            field: 'status',
-                                            header: 'Status',
-                                            body: (data) =>
-                                                loading ? (
-                                                    <Skeleton />
-                                                ) : (
-                                                    <span
-                                                        style={{
-                                                            borderRadius: '1rem',
-                                                            width: '90%',
-                                                            display: 'flex',
-                                                            alignItems: 'center'
-                                                        }}
-                                                        className={`px-3 py-1 rounded-2xl text-sm font-medium inline-block ${getStatusClassOs(data.status ?? '')}`}
-                                                    >
-                                                        <div
-                                                            style={{
-                                                                display: 'flex',
-                                                                justifyContent: 'center'
-                                                            }}
-                                                        >
-                                                            {data.status}
-                                                        </div>
-                                                    </span>
-                                                )
+                        <div style={listLoadingShellStyle}>
+                            <DataTableComponent<ServiceOrderEntity>
+                                value={ordensServico}
+                                loading={false}
+                                totalRecords={listPaginationOrdemServico?.size ?? 0}
+                                expandedRows={false}
+                                setExpandedRows={() => {}}
+                                rowExpansionTemplate={() => null}
+                                expandButtonTemplate={() => null}
+                                isDarkMode={isDarkMode}
+                                searchTerm={searchTerm}
+                                editButtonTemplate={
+                                    permissaoOrdemServico.update
+                                        ? (rowData) =>
+                                              editButton(
+                                                  rowData,
+                                                  '/ordemServicos/created',
+                                                  router
+                                              )
+                                        : undefined
+                                }
+                                toggleStatusOrDeleteButtonTemplate={
+                                    permissaoOrdemServico.delete
+                                        ? (rowData) => deleteButtonTemplate(rowData)
+                                        : undefined
+                                }
+                                showExpandButton={false}
+                                columns={[
+                                    {
+                                        field: 'numero',
+                                        header: 'Numero',
+                                        body: (data) => {
+                                            const isStatusInactive = data.ativo === false;
+                                            return loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span
+                                                    className={
+                                                        isStatusInactive ? 'text-red-custom' : ''
+                                                    }
+                                                >
+                                                    {highlightSearchTerm(
+                                                        limitarText(String(data.numero ?? '-'), 25),
+                                                        searchTerm
+                                                    )}
+                                                </span>
+                                            );
                                         }
-                                    ]}
-                                    listarInativos={listarInativos}
-                                />
-                            </div>
-                        )}
+                                    },
+                                    {
+                                        field: 'descricao',
+                                        header: 'Descricao',
+                                        body: (data) => {
+                                            const isStatusInactive = data.ativo === false;
+                                            return loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span
+                                                    className={
+                                                        isStatusInactive ? 'text-red-custom' : ''
+                                                    }
+                                                >
+                                                    {highlightSearchTerm(
+                                                        limitarText(data.descricao ?? '-', 25),
+                                                        searchTerm
+                                                    )}
+                                                </span>
+                                            );
+                                        }
+                                    },
+                                    {
+                                        field: 'razao_social_cliente',
+                                        header: 'Nome Cliente',
+                                        body: (data) => {
+                                            const isStatusInactive = data.ativo === false;
+                                            return loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span
+                                                    className={
+                                                        isStatusInactive ? 'text-red-custom' : ''
+                                                    }
+                                                >
+                                                    {highlightSearchTerm(
+                                                        limitarText(
+                                                            data.razao_social_cliente ?? '-',
+                                                            25
+                                                        ),
+                                                        searchTerm
+                                                    )}
+                                                </span>
+                                            );
+                                        }
+                                    },
+                                    {
+                                        field: 'razao_social_empresa',
+                                        header: 'Nome Empresa',
+                                        body: (data) => {
+                                            const isStatusInactive = data.ativo === false;
+                                            return loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span
+                                                    className={
+                                                        isStatusInactive ? 'text-red-custom' : ''
+                                                    }
+                                                >
+                                                    {highlightSearchTerm(
+                                                        limitarText(
+                                                            data.razao_social_empresa ?? '-',
+                                                            25
+                                                        ),
+                                                        searchTerm
+                                                    )}
+                                                </span>
+                                            );
+                                        }
+                                    },
+                                    {
+                                        field: 'data_hora_inicio',
+                                        header: 'Data de Inicio',
+                                        body: (data) => (
+                                            <span>{formatDateTime(data.data_hora_inicio)}</span>
+                                        )
+                                    },
+                                    {
+                                        field: 'data_hora_prevista',
+                                        header: 'Data Prevista',
+                                        body: (data) => (
+                                            <span>{formatDateTime(data.data_hora_prevista)}</span>
+                                        )
+                                    },
+                                    {
+                                        field: 'data_hora_conclusao',
+                                        header: 'Data de Conclusao',
+                                        body: (data) => (
+                                            <span>{formatDateTime(data.data_hora_conclusao)}</span>
+                                        )
+                                    },
+                                    {
+                                        field: 'status',
+                                        header: 'Status',
+                                        body: (data) =>
+                                            loading ? (
+                                                <Skeleton />
+                                            ) : (
+                                                <span
+                                                    style={{
+                                                        borderRadius: '1rem',
+                                                        width: '90%',
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}
+                                                    className={`px-3 py-1 rounded-2xl text-sm font-medium inline-block ${getStatusClassOs(data.status ?? '')}`}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                    >
+                                                        {data.status}
+                                                    </div>
+                                                </span>
+                                            )
+                                    }
+                                ]}
+                                listarInativos={listarInativos}
+                            />
+                            {loading && (
+                                <div style={listLoadingOverlayStyle}>
+                                    <LoadingScreen
+                                        loadingText="Carregando Ordens de Servicos..."
+                                        fullScreen={false}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </>
                 )}
                 {isMobile && (
-                    <div className="ordem-servico-mobile-list">
-                        {loading ? (
-                            <LoadingScreen
-                                loadingText="Carregando Ordens de Servicos..."
-                                fullScreen={false}
-                            />
-                        ) : ordensServico.length === 0 ? (
+                    <div className="ordem-servico-mobile-list-shell" style={listLoadingShellStyle}>
+                        <div className="ordem-servico-mobile-list">
+                            {ordensServico.length === 0 && !loading ? (
                             <div className="ordem-servico-mobile-empty">
                                 Nenhum resultado encontrado na pesquisa
                             </div>
-                        ) : (
-                            <>
+                            ) : (
+                                <>
                                 {ordensServico.map((ordem: ServiceOrderEntity) => {
                                     const isStatusInactive = ordem.ativo === false;
                                     const hasActions =
@@ -435,7 +447,19 @@ export function ListarOrdemServico({
                                         />
                                     </div>
                                 )}
-                            </>
+                                </>
+                            )}
+                        </div>
+                        {loading && (
+                            <div
+                                className="ordem-servico-mobile-loading-overlay"
+                                style={listLoadingOverlayStyle}
+                            >
+                                <LoadingScreen
+                                    loadingText="Carregando Ordens de Servicos..."
+                                    fullScreen={false}
+                                />
+                            </div>
                         )}
                     </div>
                 )}

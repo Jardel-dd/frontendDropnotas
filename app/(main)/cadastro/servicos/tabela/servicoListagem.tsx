@@ -47,6 +47,18 @@ export function ListarServicos(
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
+    const listLoadingShellStyle = {
+        position: 'relative' as const,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        flex: '1 1 auto',
+        minHeight: 'clamp(24rem, 60vh, 40rem)'
+    };
+    const listLoadingOverlayStyle = {
+        position: 'absolute' as const,
+        inset: 0,
+        zIndex: 3
+    };
 
     const changeStatusActivateandDelete = async (rowData: ServiceEntity) => {
         if (rowData.ativo) {
@@ -60,15 +72,12 @@ export function ListarServicos(
     return (
         <div style={{ marginTop: '0', display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
             <Messages ref={msgs} className="custom-messages" />
-            {loading ? (
-                <LoadingScreen loadingText={'Carregando Servicos...'} />
-            ) : (
-                <>
+            <>
                     {isMobile && (
-                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
+                        <div style={listLoadingShellStyle}>
                             <DataTableComponent
                                 value={listPaginationServicos?.content}
-                                loading={loading}
+                                loading={false}
                                 totalRecords={listPaginationServicos?.size ?? 0}
                                 expandedRows={false}
                                 setExpandedRows={() => {}}
@@ -105,18 +114,23 @@ export function ListarServicos(
                                     }
                                 ]}
                                 listarInativos={listarInativos}
-                                mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                mobileLoadMoreVisible={!loading && mobileLoadMoreVisible}
                                 mobileLoadMoreLoading={mobileLoadMoreLoading}
                                 onMobileLoadMore={onMobileLoadMore}
                                 mobileBodyScroll
                             />
+                            {loading && (
+                                <div style={listLoadingOverlayStyle}>
+                                    <LoadingScreen loadingText="Carregando Servicos..." fullScreen={false} />
+                                </div>
+                            )}
                         </div>
                     )}
                     {isDesktop && (
-                        <div>
+                        <div style={listLoadingShellStyle}>
                             <DataTableComponent
                                 value={listPaginationServicos?.content}
-                                loading={loading}
+                                loading={false}
                                 totalRecords={listPaginationServicos?.size ?? 0}
                                 expandedRows={false}
                                 setExpandedRows={() => {}}
@@ -169,10 +183,14 @@ export function ListarServicos(
                                 ]}
                                 listarInativos={listarInativos}
                             />
+                            {loading && (
+                                <div style={listLoadingOverlayStyle}>
+                                    <LoadingScreen loadingText="Carregando Servicos..." fullScreen={false} />
+                                </div>
+                            )}
                         </div>
                     )}
-                </>
-            )}
+            </>
         </div>
     );
 }

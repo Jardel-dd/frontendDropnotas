@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormaPagamentoEntity } from "@/app/entity/FormaPagamento";
 import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
@@ -17,10 +18,30 @@ export default function FormaPagamentoDropdownField({
     autoSelectSingle = false,
     loadOnMount = false,
     useCachedAllItems = false,
-    required = false
+    required = false,
+    autoLoadAndSelectSingle = true
 }: FormaPagamentoDropdownFieldProps & { required?: boolean }) {
     const queryClient = useQueryClient();
-    const formaPagamentoDropdownQueryKey = ["dropdown", "forma-pagamento", "all", reloadKey] as const;
+    const formaPagamentoDropdownQueryKey = useMemo(
+        () => ["dropdown", "forma-pagamento", "all", reloadKey] as const,
+        [reloadKey]
+    );
+    const resolveAllItems = useCallback(() => {
+        if (!useCachedAllItems) {
+            return listTheFormaPagamento();
+        }
+
+        return queryClient.fetchQuery({
+            queryKey: formaPagamentoDropdownQueryKey,
+            queryFn: listTheFormaPagamento,
+            staleTime: FORMA_PAGAMENTO_DROPDOWN_CACHE_TIME_MS,
+            gcTime: FORMA_PAGAMENTO_DROPDOWN_CACHE_TIME_MS
+        });
+    }, [formaPagamentoDropdownQueryKey, queryClient, useCachedAllItems]);
+    const resolveItemByValue = useCallback(async (value: string | number) => {
+        const response = await fetchFormaPagamentoByID(String(value));
+        return response.formaPagamento ?? null;
+    }, []);
 
     useQuery({
         queryKey: formaPagamentoDropdownQueryKey,
@@ -36,21 +57,9 @@ export default function FormaPagamentoDropdownField({
             key={reloadKey}
             selectedItem={selectedFormaPagamento}
             onItemChange={onFormaPagamentoChange}
-            fetchAllItems={() =>
-                useCachedAllItems
-                    ? queryClient.fetchQuery({
-                        queryKey: formaPagamentoDropdownQueryKey,
-                        queryFn: listTheFormaPagamento,
-                        staleTime: FORMA_PAGAMENTO_DROPDOWN_CACHE_TIME_MS,
-                        gcTime: FORMA_PAGAMENTO_DROPDOWN_CACHE_TIME_MS
-                    })
-                    : listTheFormaPagamento()
-            }
+            fetchAllItems={resolveAllItems}
             fetchFilteredItems={fetchFilteredFormaPagamento}
-            fetchItemByValue={async (value) => {
-                const response = await fetchFormaPagamentoByID(String(value));
-                return response.formaPagamento ?? null;
-            }}
+            fetchItemByValue={resolveItemByValue}
             optionLabel="descricao"
             optionValue="id"
             initialOptionValue={selectedFormaPagamentoId ?? null}
@@ -65,7 +74,7 @@ export default function FormaPagamentoDropdownField({
             topLabel="Forma de pagamento:"
             showTopLabel
             required={required}
-            autoLoadAndSelectSingle
+            autoLoadAndSelectSingle={autoLoadAndSelectSingle}
             reloadAllOnShow={useCachedAllItems}
         />
     );

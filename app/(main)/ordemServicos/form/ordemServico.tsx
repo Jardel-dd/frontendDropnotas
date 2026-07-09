@@ -123,6 +123,7 @@ export function OrdemServicoFields({
                                 showTopLabel
                                 required
                                 topLabel="Serviço:"
+                                autoLoadAndSelectSingle={false}
                             />
                         </div>
                         <div className="col-12 lg:col-4">
@@ -152,6 +153,7 @@ export function OrdemServicoFields({
                                 showAddButton
                                 onAddClick={onAddFormaPagamento}
                                 onEditClick={onEditFormaPagamento}
+                                autoLoadAndSelectSingle={false}
                             />
                         </div>
                         <div className="col-12 lg:col-4">
@@ -207,7 +209,7 @@ export function OrdemServicoFields({
                                 errorMessage={errors.selectedService}
                                 onAddClick={onAddServico}
                                 onEditClick={onEditServico}
-                                autoLoadAndSelectSingle
+                                autoLoadAndSelectSingle={false}
                             />
                         </div>
                         <div className="col-12 lg:col-4">
@@ -247,7 +249,7 @@ export function OrdemServicoFields({
                                 errorMessage={errors.selectedFormaPagamento}
                                 onAddClick={onAddFormaPagamento}
                                 onEditClick={onEditFormaPagamento}
-                                autoLoadAndSelectSingle
+                                autoLoadAndSelectSingle={false}
                             />
                         </div>
                         <div className="col-12 lg:col-4">

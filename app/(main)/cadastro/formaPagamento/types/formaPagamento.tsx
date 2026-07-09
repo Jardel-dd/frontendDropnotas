@@ -105,6 +105,7 @@ export interface FormaPagamentoDropdownFieldProps {
     autoSelectSingle?: boolean;
     loadOnMount?: boolean;
     useCachedAllItems?: boolean;
+    autoLoadAndSelectSingle?: boolean;
 }
 export type FormCreatedFormaPagamentoProps = | FormaPagamentoFieldsProps| FormaPagamentoFormProps;
 export const FORMA_PAGAMENTO_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;

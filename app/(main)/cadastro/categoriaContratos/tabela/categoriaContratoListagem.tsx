@@ -48,21 +48,30 @@ export function ListarCategoriaContrato({
     const { permissaoCategoriaContrato } = usePermissions();
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
+    const listLoadingShellStyle = {
+        position: 'relative' as const,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        flex: '1 1 auto',
+        minHeight: 'clamp(24rem, 60vh, 40rem)'
+    };
+    const listLoadingOverlayStyle = {
+        position: 'absolute' as const,
+        inset: 0,
+        zIndex: 3
+    };
     const changeStatusActivateandDelete = async (rowData: CategoryContratosEntity) => {
         await handleActiveOrInativeCategoriaContrato(rowData, msgs, listPaginationCategoriaContrato, listarInativos, setLoading, searchTerm, setListPaginationCategoriaContrato);
     };
     return (
         <div style={{ marginTop: '0', display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
             <Messages ref={msgs} className="custom-messages" />
-            {loading ? (
-                <LoadingScreen loadingText={'Carregando Categoria de Contratos...'} />
-            ) : (
-                <>
+            <>
                     {isMobile && (
-                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
+                        <div style={listLoadingShellStyle}>
                             <DataTableComponent
                                 value={listPaginationCategoriaContrato?.content as CategoryContratosEntity[]}
-                                loading={loading}
+                                loading={false}
                                 totalRecords={listPaginationCategoriaContrato?.size ?? 0}
                                 expandedRows={false}
                                 setExpandedRows={() => { }}
@@ -105,18 +114,23 @@ export function ListarCategoriaContrato({
                                     }
                                 ]}
                                 listarInativos={listarInativos}
-                                mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                mobileLoadMoreVisible={!loading && mobileLoadMoreVisible}
                                 mobileLoadMoreLoading={mobileLoadMoreLoading}
                                 onMobileLoadMore={onMobileLoadMore}
                                 mobileBodyScroll
                             />
+                            {loading && (
+                                <div style={listLoadingOverlayStyle}>
+                                    <LoadingScreen loadingText="Carregando Categoria de Contratos..." fullScreen={false} />
+                                </div>
+                            )}
                         </div>
                     )}
                     {isDesktop && (
-                        <div>
+                        <div style={listLoadingShellStyle}>
                             <DataTableComponent
                                 value={listPaginationCategoriaContrato?.content as CategoryContratosEntity[]}
-                                loading={loading}
+                                loading={false}
                                 totalRecords={listPaginationCategoriaContrato?.size ?? 0}
                                 expandedRows={false}
                                 setExpandedRows={() => { }}
@@ -155,10 +169,14 @@ export function ListarCategoriaContrato({
                                 ]}
                                 listarInativos={listarInativos}
                             />
+                            {loading && (
+                                <div style={listLoadingOverlayStyle}>
+                                    <LoadingScreen loadingText="Carregando Categoria de Contratos..." fullScreen={false} />
+                                </div>
+                            )}
                         </div>
                     )}
-                </>
-            )}
+            </>
         </div>
     );
 }

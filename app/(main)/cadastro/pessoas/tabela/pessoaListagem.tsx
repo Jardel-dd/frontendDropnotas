@@ -50,6 +50,18 @@ export function ListarClientesFornecedores(
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
+    const listLoadingShellStyle = {
+        position: 'relative' as const,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        flex: '1 1 auto',
+        minHeight: 'clamp(24rem, 60vh, 40rem)'
+    };
+    const listLoadingOverlayStyle = {
+        position: 'absolute' as const,
+        inset: 0,
+        zIndex: 3
+    };
     const changeStatusActivateandDelete = async (rowData: PessoaEntity) => {
         if (rowData.ativo) {
             await deletar(rowData.id!);
@@ -61,15 +73,12 @@ export function ListarClientesFornecedores(
     return (
         <div style={{ marginTop: '0', display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
             <Messages ref={msgs} className="custom-messages" />
-            {loading ? (
-                <LoadingScreen loadingText={'Carregando Clientes ou Fornecedores...'} />
-            ) : (
-                <>
+            <>
                     {isMobile && (
-                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
+                        <div style={listLoadingShellStyle}>
                             <DataTableComponent
                                 value={listPaginationClientesFornecedores?.content as PessoaEntity[]}
-                                loading={loading}
+                                loading={false}
                                 totalRecords={listPaginationClientesFornecedores?.totalElements ?? 0}
                                 expandedRows={false}
                                 setExpandedRows={() => { }}
@@ -110,18 +119,23 @@ export function ListarClientesFornecedores(
                                 listarInativos={listarInativos}
                                 cliente={cliente}
                                 fornecedor={fornecedor}
-                                mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                mobileLoadMoreVisible={!loading && mobileLoadMoreVisible}
                                 mobileLoadMoreLoading={mobileLoadMoreLoading}
                                 onMobileLoadMore={onMobileLoadMore}
                                 mobileBodyScroll
                             />
+                            {loading && (
+                                <div style={listLoadingOverlayStyle}>
+                                    <LoadingScreen loadingText="Carregando Clientes ou Fornecedores..." fullScreen={false} />
+                                </div>
+                            )}
                         </div>
                     )}
                     {isDesktop && (
-                        <div>
+                        <div style={listLoadingShellStyle}>
                             <DataTableComponent
                                 value={listPaginationClientesFornecedores?.content as PessoaEntity[]}
-                                loading={loading}
+                                loading={false}
                                 totalRecords={listPaginationClientesFornecedores?.totalElements ?? 0}
                                 expandedRows={false}
                                 setExpandedRows={() => { }}
@@ -180,10 +194,14 @@ export function ListarClientesFornecedores(
                                 cliente={cliente}
                                 fornecedor={fornecedor}
                             />
+                            {loading && (
+                                <div style={listLoadingOverlayStyle}>
+                                    <LoadingScreen loadingText="Carregando Clientes ou Fornecedores..." fullScreen={false} />
+                                </div>
+                            )}
                         </div>
                     )}
-                </>
-            )}
+            </>
         </div>
     );
 }

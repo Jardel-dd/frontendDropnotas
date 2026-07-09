@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ServiceEntity } from "@/app/entity/ServiceEntity";
 import { SERVICE_DROPDOWN_CACHE_TIME_MS, ServicoDropdownFieldProps } from "../types/servico";
@@ -28,7 +29,26 @@ export default function ServicoDropdownField({
     autoLoadAndSelectSingle = true
 }: ServicoDropdownFieldProps) {
     const queryClient = useQueryClient();
-    const serviceDropdownQueryKey = ["dropdown", "servico", "all", reloadKey] as const;
+    const serviceDropdownQueryKey = useMemo(
+        () => ["dropdown", "servico", "all", reloadKey] as const,
+        [reloadKey]
+    );
+    const resolveAllItems = useCallback(() => {
+        if (!useCachedAllItems) {
+            return fetchAllItems();
+        }
+
+        return queryClient.fetchQuery({
+            queryKey: serviceDropdownQueryKey,
+            queryFn: fetchAllItems,
+            staleTime: SERVICE_DROPDOWN_CACHE_TIME_MS,
+            gcTime: SERVICE_DROPDOWN_CACHE_TIME_MS
+        });
+    }, [fetchAllItems, queryClient, serviceDropdownQueryKey, useCachedAllItems]);
+    const resolveItemByValue = useCallback(async (value: string | number) => {
+        const response = await fetchServicesByID(String(value));
+        return response.servico ?? null;
+    }, []);
 
     useQuery({
         queryKey: serviceDropdownQueryKey,
@@ -44,21 +64,9 @@ export default function ServicoDropdownField({
             key={reloadKey}
             selectedItem={selectedService}
             onItemChange={onServiceChange}
-            fetchAllItems={() =>
-                useCachedAllItems
-                    ? queryClient.fetchQuery({
-                        queryKey: serviceDropdownQueryKey,
-                        queryFn: fetchAllItems,
-                        staleTime: SERVICE_DROPDOWN_CACHE_TIME_MS,
-                        gcTime: SERVICE_DROPDOWN_CACHE_TIME_MS
-                    })
-                    : fetchAllItems()
-            }
+            fetchAllItems={resolveAllItems}
             fetchFilteredItems={fetchFilteredItems}
-            fetchItemByValue={async (value) => {
-                const response = await fetchServicesByID(String(value));
-                return response.servico ?? null;
-            }}
+            fetchItemByValue={resolveItemByValue}
             optionLabel="descricao"
             optionValue="id"
             initialOptionValue={selectedServiceId ?? null}
