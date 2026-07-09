@@ -1,7 +1,6 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
-import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
 import { usePermissions } from '@/app/routes/permissoes';
@@ -15,31 +14,30 @@ import { Dispatch, SetStateAction, useContext, useRef, useState } from 'react';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
-export function ListarUserConta(
-    {
-        listPaginationUserConta,
-        setListPaginationUserConta,
-        loading,
-        setLoading,
-        searchTerm,
-        listarInativos,
-        mobileLoadMoreVisible,
-        mobileLoadMoreLoading,
-        onMobileLoadMore
-    }: {
-        listPaginationUserConta: Record<string, any>
-        loading: boolean
-        searchTerm: string
-        deletar: (id: number) => Promise<void>
-        ativar: (id: number) => Promise<void>
-        setListPaginationUserConta: Dispatch<SetStateAction<any>>;
-        setLoading: (state: boolean) => void;
-        listarInativos: boolean;
-        mobileLoadMoreVisible?: boolean;
-        mobileLoadMoreLoading?: boolean;
-        onMobileLoadMore?: () => void | Promise<void>;
-    }
-) {
+
+export function ListarUserConta({
+    listPaginationUserConta,
+    setListPaginationUserConta,
+    loading,
+    setLoading,
+    searchTerm,
+    listarInativos,
+    mobileLoadMoreVisible,
+    mobileLoadMoreLoading,
+    onMobileLoadMore
+}: {
+    listPaginationUserConta: Record<string, any>;
+    loading: boolean;
+    searchTerm: string;
+    deletar: (id: number) => Promise<void>;
+    ativar: (id: number) => Promise<void>;
+    setListPaginationUserConta: Dispatch<SetStateAction<any>>;
+    setLoading: (state: boolean) => void;
+    listarInativos: boolean;
+    mobileLoadMoreVisible?: boolean;
+    mobileLoadMoreLoading?: boolean;
+    onMobileLoadMore?: () => void | Promise<void>;
+}) {
     const router = useRouter();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
@@ -47,195 +45,194 @@ export function ListarUserConta(
     const msgs = useRef<Messages>(null);
     const { permissaoUsuarioConta } = usePermissions();
     const { layoutConfig } = useContext(LayoutContext);
-    const isDarkMode = layoutConfig.colorScheme === "dark";
+    const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
+
     const changeStatusActivateandDelete = async (rowData: UsuarioContaEntity) => {
         await handleActiveOrInativeUserConta(
-                   rowData,
-                   msgs,
-                   listPaginationUserConta,
-                   listarInativos,
-                   setLoading,
-                   searchTerm,
-                   setListPaginationUserConta
+            rowData,
+            msgs,
+            listPaginationUserConta,
+            listarInativos,
+            setLoading,
+            searchTerm,
+            setListPaginationUserConta
         );
     };
+
     return (
         <div style={{ marginTop: '0' }}>
-      <Messages ref={msgs} className="custom-messages" />
-            {loading ? (<LoadingScreen loadingText={'Carregando Usuários...'} />) :
-                (
-                    <>
-                        {isMobile &&
-                            <div>
-                                <DataTableComponent
-                                    value={listPaginationUserConta?.content as UsuarioContaEntity[]}
-                                    loading={loading}
-                                    totalRecords={listPaginationUserConta?.size ?? 0}
-                                    expandedRows={false}
-                                    setExpandedRows={() => {}}
-                                    rowExpansionTemplate={() => null}
-                                    expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
-                                    isDarkMode={isDarkMode}
-                                    searchTerm={searchTerm}
-                                    editButtonTemplate={permissaoUsuarioConta.update ? (rowData) => editButton(rowData, "/cadastro/usuarios/created", router) : undefined}
-                                    toggleStatusOrDeleteButtonTemplate={permissaoUsuarioConta.delete ? (rowData) => toggleStatusOrDeleteButton({
-                                        entity: rowData,
-                                        onToggle: changeStatusActivateandDelete,
-                                        entityType: "",
-                                    }) : undefined}
-                                    showExpandButton={false} 
-                                    columns={[
-                                         {
-                                        field: "nome",
-                                        header: "Nome",
-                                        body: (data) => {
-                                            const isStatusInactive = data.ativo === false;
-                                            return loading ? (
-                                                <Skeleton />
-                                            ) : (
-                                                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                                    <div
-                                                        style={{
-                                                            width: "25px",
-                                                            height: "25px",
-                                                            borderRadius: "50%",
-                                                            overflow: "hidden",
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            justifyContent: "center",
-                                                            backgroundColor: "#f0f0f0", 
-                                                        }}
-                                                    >
-                                                        {(data.foto_perfil || data.fotoPerfil) ? (
-                                                            <img
-                                                                src={data.foto_perfil?.startsWith('data:image') ? data.foto_perfil : data.foto_perfil}
-                                                                alt="Foto de Perfil"
-                                                                style={{
-                                                                    width: "100%",
-                                                                    height: "100%",
-                                                                    objectFit: "cover",
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <i className="pi pi-user" style={{ fontSize: "1.5rem", color: "#aaa" }}></i>
-                                                        )}
-                                                    </div>
-                                                    <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
-                                                        {highlightSearchTerm(limitarText(data.nome, 30), searchTerm)}
-                                                    </span>
+            <Messages ref={msgs} className="custom-messages" />
+            <>
+                {isMobile && (
+                    <div>
+                        <DataTableComponent
+                            value={listPaginationUserConta?.content as UsuarioContaEntity[]}
+                            loading={loading}
+                            totalRecords={listPaginationUserConta?.size ?? 0}
+                            expandedRows={false}
+                            setExpandedRows={() => {}}
+                            rowExpansionTemplate={() => null}
+                            expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
+                            isDarkMode={isDarkMode}
+                            searchTerm={searchTerm}
+                            editButtonTemplate={permissaoUsuarioConta.update ? (rowData) => editButton(rowData, '/cadastro/usuarios/created', router) : undefined}
+                            toggleStatusOrDeleteButtonTemplate={permissaoUsuarioConta.delete ? (rowData) => toggleStatusOrDeleteButton({
+                                entity: rowData,
+                                onToggle: changeStatusActivateandDelete,
+                                entityType: ''
+                            }) : undefined}
+                            showExpandButton={false}
+                            columns={[
+                                {
+                                    field: 'nome',
+                                    header: 'Nome',
+                                    body: (data) => {
+                                        const isStatusInactive = data.ativo === false;
+                                        return loading ? (
+                                            <Skeleton />
+                                        ) : (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <div
+                                                    style={{
+                                                        width: '25px',
+                                                        height: '25px',
+                                                        borderRadius: '50%',
+                                                        overflow: 'hidden',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        backgroundColor: '#f0f0f0'
+                                                    }}
+                                                >
+                                                    {(data.foto_perfil || data.fotoPerfil) ? (
+                                                        <img
+                                                            src={data.foto_perfil?.startsWith('data:image') ? data.foto_perfil : data.foto_perfil}
+                                                            alt="Foto de Perfil"
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                objectFit: 'cover'
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <i className="pi pi-user" style={{ fontSize: '1.5rem', color: '#aaa' }}></i>
+                                                    )}
                                                 </div>
-                                            );
-                                        },
-                                    },
-                                    ]} 
-                                    listarInativos={listarInativos}
-                                    mobileLoadMoreVisible={mobileLoadMoreVisible}
-                                    mobileLoadMoreLoading={mobileLoadMoreLoading}
-                                    onMobileLoadMore={onMobileLoadMore}
-                             />
-                            </div>
-                        }
-                        {isDesktop &&
-                            <div>
-                            <DataTableComponent
-                                value={listPaginationUserConta?.content as PerfilUser[]}
-                                loading={loading}
-                                totalRecords={listPaginationUserConta?.size ?? 0}
-                                expandedRows={false}
-                                setExpandedRows={() => {}}
-                                rowExpansionTemplate={() => null}
-                                expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
-                                isDarkMode={isDarkMode}
-                                searchTerm={searchTerm}
-                                editButtonTemplate={permissaoUsuarioConta.update ? (rowData) => editButton(rowData, "/cadastro/usuarios/created", router) : undefined}
-                                toggleStatusOrDeleteButtonTemplate={permissaoUsuarioConta.delete ? (rowData) => toggleStatusOrDeleteButton({
-                                    entity: rowData,
-                                    onToggle: changeStatusActivateandDelete,
-                                    entityType: "",
-                                }) : undefined}
-                                showExpandButton={false} 
-                                columns={[
-                                    {
-                                        field: "nome",
-                                        header: "Nome",
-                                        body: (data) => {
-                                            const isStatusInactive = data.ativo === false;
-                                            return loading ? (
-                                                <Skeleton />
-                                            ) : (
-                                                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                                    <div
-                                                        style={{
-                                                            width: "25px",
-                                                            height: "25px",
-                                                            borderRadius: "50%",
-                                                            overflow: "hidden",
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            justifyContent: "center",
-                                                            backgroundColor: "#f0f0f0", 
-                                                        }}
-                                                    >
-                                                        {(data.foto_perfil || data.fotoPerfil) ? (
-                                                            <img
-                                                                src={data.foto_perfil?.startsWith('data:image') ? data.foto_perfil : data.foto_perfil}
-                                                                alt="Foto de Perfil"
-                                                                style={{
-                                                                    width: "100%",
-                                                                    height: "100%",
-                                                                    objectFit: "cover",
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <i className="pi pi-user" style={{ fontSize: "1.5rem", color: "#aaa" }}></i>
-                                                        )}
-                                                    </div>
-                                                    <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
-                                                        {highlightSearchTerm(limitarText(data.nome, 30), searchTerm)}
-                                                    </span>
+                                                <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
+                                                    {highlightSearchTerm(limitarText(data.nome, 30), searchTerm)}
+                                                </span>
+                                            </div>
+                                        );
+                                    }
+                                }
+                            ]}
+                            listarInativos={listarInativos}
+                            mobileLoadMoreVisible={mobileLoadMoreVisible}
+                            mobileLoadMoreLoading={mobileLoadMoreLoading}
+                            onMobileLoadMore={onMobileLoadMore}
+                            mobileBodyScroll
+                        />
+                    </div>
+                )}
+                {isDesktop && (
+                    <div>
+                        <DataTableComponent
+                            value={listPaginationUserConta?.content as PerfilUser[]}
+                            loading={loading}
+                            totalRecords={listPaginationUserConta?.size ?? 0}
+                            expandedRows={false}
+                            setExpandedRows={() => {}}
+                            rowExpansionTemplate={() => null}
+                            expandButtonTemplate={(rowData) => defaultExpandButtonTemplate(rowData, expandedRows, setExpandedRows)}
+                            isDarkMode={isDarkMode}
+                            searchTerm={searchTerm}
+                            editButtonTemplate={permissaoUsuarioConta.update ? (rowData) => editButton(rowData, '/cadastro/usuarios/created', router) : undefined}
+                            toggleStatusOrDeleteButtonTemplate={permissaoUsuarioConta.delete ? (rowData) => toggleStatusOrDeleteButton({
+                                entity: rowData,
+                                onToggle: changeStatusActivateandDelete,
+                                entityType: ''
+                            }) : undefined}
+                            showExpandButton={false}
+                            columns={[
+                                {
+                                    field: 'nome',
+                                    header: 'Nome',
+                                    body: (data) => {
+                                        const isStatusInactive = data.ativo === false;
+                                        return loading ? (
+                                            <Skeleton />
+                                        ) : (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <div
+                                                    style={{
+                                                        width: '25px',
+                                                        height: '25px',
+                                                        borderRadius: '50%',
+                                                        overflow: 'hidden',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        backgroundColor: '#f0f0f0'
+                                                    }}
+                                                >
+                                                    {(data.foto_perfil || data.fotoPerfil) ? (
+                                                        <img
+                                                            src={data.foto_perfil?.startsWith('data:image') ? data.foto_perfil : data.foto_perfil}
+                                                            alt="Foto de Perfil"
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                objectFit: 'cover'
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <i className="pi pi-user" style={{ fontSize: '1.5rem', color: '#aaa' }}></i>
+                                                    )}
                                                 </div>
-                                            );
-                                        },
-                                    },
-                                    {
-                                        field: "email",
-                                        header: "E-mail",
-                                        body: (data) => {
-                                            const isStatusInactive = data.ativo === false;
-                                            return loading ? (
-                                                <Skeleton />
-                                            ) : (
                                                 <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
-                                                    {highlightSearchTerm(limitarText(data.email, 80), searchTerm)}
+                                                    {highlightSearchTerm(limitarText(data.nome, 30), searchTerm)}
                                                 </span>
-                                            );
-                                        },
-                                    },
-                                    {
-                                        field: "permissoes",
-                                        header: "Permissão",
-                                        body: (data) => {
-                                            const isStatusInactive = data.ativo === false;
-                                            return loading ? (
-                                                <Skeleton />
-                                            ) : (
-                                                <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
-                                                    {highlightSearchTerm(limitarText(data.nome_perfil_usuario, 25), searchTerm)}
-                                                </span>
-                                            );
-                                        },
-                                    },
-                                ]} 
-                                listarInativos={listarInativos}        
-                         />
-                        </div>
-                        }
-                    </>
-                )
-            }
+                                            </div>
+                                        );
+                                    }
+                                },
+                                {
+                                    field: 'email',
+                                    header: 'E-mail',
+                                    body: (data) => {
+                                        const isStatusInactive = data.ativo === false;
+                                        return loading ? (
+                                            <Skeleton />
+                                        ) : (
+                                            <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
+                                                {highlightSearchTerm(limitarText(data.email, 80), searchTerm)}
+                                            </span>
+                                        );
+                                    }
+                                },
+                                {
+                                    field: 'permissoes',
+                                    header: 'Permissões',
+                                    body: (data) => {
+                                        const isStatusInactive = data.ativo === false;
+                                        return loading ? (
+                                            <Skeleton />
+                                        ) : (
+                                            <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>
+                                                {highlightSearchTerm(limitarText(data.nome_perfil_usuario, 25), searchTerm)}
+                                            </span>
+                                        );
+                                    }
+                                }
+                            ]}
+                            listarInativos={listarInativos}
+                        />
+                    </div>
+                )}
+            </>
         </div>
     );
-};
-export default ListarUserConta;
+}
 
+export default ListarUserConta;

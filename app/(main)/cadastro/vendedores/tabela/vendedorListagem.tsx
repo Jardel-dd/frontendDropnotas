@@ -105,6 +105,7 @@ export function ListarVendedores(
                                     mobileLoadMoreVisible={mobileLoadMoreVisible}
                                     mobileLoadMoreLoading={mobileLoadMoreLoading}
                                     onMobileLoadMore={onMobileLoadMore}
+                                    mobileBodyScroll
                                 />
                             </div>
                         }

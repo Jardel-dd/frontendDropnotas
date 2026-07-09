@@ -64,13 +64,13 @@ export function ListarPerfilUsers(
         );
     };
     return (
-        <div style={{ marginTop: '0' }}>
+        <div style={{ marginTop: '0', display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
             <Messages ref={msgs} className="custom-messages" />
             {loading ? (<LoadingScreen loadingText={'Carregando Permissões...'} />) :
                 (
                     <>
                         {isMobile &&
-                            <div>
+                            <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                                 <DataTableComponent
                                     value={listPaginationPerfilUser?.content as PerfilUser[]}
                                     loading={loading}
@@ -115,6 +115,7 @@ export function ListarPerfilUsers(
                                     mobileLoadMoreVisible={mobileLoadMoreVisible}
                                     mobileLoadMoreLoading={mobileLoadMoreLoading}
                                     onMobileLoadMore={onMobileLoadMore}
+                                    mobileBodyScroll
                                 />
                             </div>
                         }
@@ -161,6 +162,9 @@ export function ListarPerfilUsers(
                                         },
                                     ]}
                                     listarInativos={listarInativos}
+                                    mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                    mobileLoadMoreLoading={mobileLoadMoreLoading}
+                                    onMobileLoadMore={onMobileLoadMore}
 
                                 />
                             </div>

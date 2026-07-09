@@ -7,6 +7,9 @@ export class ServiceOrderEntity {
     ativo?: boolean;
     status?: string;
     descricao!: string;
+    razao_social_vendedor?: string;
+    razao_social_cliente?: string;
+    razao_social_empresa?: string;
     formaPagamento!: Formas_recebimento;
     consideracoes_finais?: string;
     data_hora_inicio?: Date;
@@ -28,6 +31,9 @@ export class ServiceOrderEntity {
         ativo,
         status,
         descricao,
+        razao_social_vendedor,
+        razao_social_cliente,
+        razao_social_empresa,
         formaPagamento,
         consideracoes_finais,
         data_hora_inicio,
@@ -49,6 +55,9 @@ export class ServiceOrderEntity {
         status?: string;
         formaPagamento?: Formas_recebimento;
         descricao: string;
+        razao_social_vendedor?: string;
+        razao_social_cliente?: string;
+        razao_social_empresa?: string;
         consideracoes_finais?: string;
         data_hora_inicio?: Date;
         data_hora_prevista?: Date;
@@ -68,6 +77,9 @@ export class ServiceOrderEntity {
             numero,
             ativo,
             status,
+            razao_social_vendedor,
+            razao_social_cliente,
+            razao_social_empresa,
             id_forma_pagamento,
             formaPagamento,
             descricao,
@@ -91,6 +103,9 @@ export class ServiceOrderEntity {
         ativo,
         status,
         descricao,
+        razao_social_vendedor,
+        razao_social_cliente,
+        razao_social_empresa,
         id_forma_pagamento,
         formaPagamento,
         consideracoes_finais,
@@ -112,6 +127,9 @@ export class ServiceOrderEntity {
         status?: string;
         formaPagamento?: Formas_recebimento;
         descricao?: string;
+        razao_social_vendedor?: string;
+        razao_social_cliente?: string;
+        razao_social_empresa?: string;
         id_forma_pagamento?: number;
         consideracoes_finais?: string;
         data_hora_inicio?: Date;
@@ -133,6 +151,9 @@ export class ServiceOrderEntity {
             ativo: ativo ?? this.ativo,
             status: status ?? this.status,
             descricao: descricao ?? this.descricao,
+            razao_social_vendedor: razao_social_vendedor ?? this.razao_social_vendedor,
+            razao_social_cliente: razao_social_cliente ?? this.razao_social_cliente,
+            razao_social_empresa: razao_social_empresa ?? this.razao_social_empresa,
             servicos: servicos ?? this.servicos,
             formaPagamento: formaPagamento ?? this.formaPagamento,
             consideracoes_finais: consideracoes_finais ?? this.consideracoes_finais,

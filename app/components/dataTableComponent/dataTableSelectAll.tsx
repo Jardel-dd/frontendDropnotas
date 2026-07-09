@@ -17,13 +17,11 @@ const isMobileActionContext = () => {
     if (typeof window === "undefined" || typeof navigator === "undefined") {
         return false;
     }
-
     const matchesViewport = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 868px)").matches;
     const hasTouchPoints = typeof navigator.maxTouchPoints === "number" && navigator.maxTouchPoints > 0;
 
     return matchesViewport || hasTouchPoints;
 };
-
 const confirmMobileDownloadAction = (
     message: string,
     action: () => void | Promise<void>

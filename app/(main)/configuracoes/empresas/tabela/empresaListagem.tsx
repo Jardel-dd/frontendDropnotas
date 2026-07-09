@@ -11,7 +11,7 @@ import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { handleActiveOrInativeEmpresa } from '../controller/controller';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
-import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { DataTableComponent, defaultExpandButtonTemplate, editButton, toggleStatusOrDeleteButton } from '@/app/components/dataTableComponent/DataTableComponent';
 
@@ -62,7 +62,7 @@ export function ListarEmpresas({
     const [onboardingHintPosition, setOnboardingHintPosition] = useState<{ top: number; left: number } | null>(null);
   
 
-    const updateOnboardingHintPosition = () => {
+    const updateOnboardingHintPosition = useCallback(() => {
         const targetButton = onboardingButtonRef.current;
 
         if (!showOnboardingHint || !targetButton) {
@@ -83,7 +83,7 @@ export function ListarEmpresas({
         );
 
         setOnboardingHintPosition({ top, left });
-    };
+    }, [isMobile, showOnboardingHint]);
 
     useEffect(() => {
         if (!showOnboardingHint || loading || onboardingFocusDoneRef.current || !onboardingButtonRef.current) {
@@ -98,7 +98,7 @@ export function ListarEmpresas({
         });
         updateOnboardingHintPosition();
         onboardingFocusDoneRef.current = true;
-    }, [showOnboardingHint, loading, listPaginationEmpresa]);
+    }, [showOnboardingHint, loading, listPaginationEmpresa, updateOnboardingHintPosition]);
 
     useEffect(() => {
         if (!showOnboardingHint || loading) {
@@ -116,7 +116,7 @@ export function ListarEmpresas({
             window.removeEventListener('resize', handleWindowUpdate);
             window.removeEventListener('scroll', handleWindowUpdate, true);
         };
-    }, [showOnboardingHint, loading, isMobile, listPaginationEmpresa]);
+    }, [showOnboardingHint, loading, isMobile, listPaginationEmpresa, updateOnboardingHintPosition]);
 
     const renderOnboardingEditButton = (rowData: CompanyEntity) => {
         const rowCnpj = rowData.cnpj?.replace(/\D/g, '') ?? '';
@@ -221,6 +221,7 @@ export function ListarEmpresas({
                                 mobileLoadMoreVisible={mobileLoadMoreVisible}
                                 mobileLoadMoreLoading={mobileLoadMoreLoading}
                                 onMobileLoadMore={onMobileLoadMore}
+                                mobileBodyScroll
                             />
                         </div>
                     )}

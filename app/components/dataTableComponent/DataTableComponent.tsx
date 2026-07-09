@@ -19,6 +19,10 @@ import { DataTable, DataTableRowToggleEvent } from 'primereact/datatable';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { useIsMobile } from '../responsiveCelular/responsive';
 import { CancelarNfsActionProps, DataTableComponentProps, Identifiable, ToggleButtonProps } from './types/types';
+
+const MOBILE_LOAD_MORE_SHOW_THRESHOLD = 40;
+const MOBILE_LOAD_MORE_HIDE_THRESHOLD = 80;
+
 export const DataTableComponent = <T extends Identifiable>({
     value,
     loading,
@@ -51,6 +55,12 @@ export const DataTableComponent = <T extends Identifiable>({
     const pendingScrollRestoreRef = useRef<number | null>(null);
     const isMobile = useIsMobile();
     const [showMobileLoadMoreButton, setShowMobileLoadMoreButton] = useState(false);
+    const [loadingOverlayBounds, setLoadingOverlayBounds] = useState<{
+        top: number;
+        left: number;
+        width: number;
+        height: number;
+    } | null>(null);
     const shouldShowActionsColumn =
         showActionsColumn ?? Boolean(editButtonTemplate || toggleStatusOrDeleteButtonTemplate || extraActionsTemplate);
     const useMobileBodyScroll = isMobile && mobileBodyScroll;
@@ -98,7 +108,13 @@ export const DataTableComponent = <T extends Identifiable>({
             }
 
             const distanceToBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight;
-            setShowMobileLoadMoreButton(distanceToBottom <= 24);
+            setShowMobileLoadMoreButton((currentVisible) => {
+                if (currentVisible) {
+                    return distanceToBottom <= MOBILE_LOAD_MORE_HIDE_THRESHOLD;
+                }
+
+                return distanceToBottom <= MOBILE_LOAD_MORE_SHOW_THRESHOLD;
+            });
         };
 
         updateButtonVisibility();
@@ -109,8 +125,45 @@ export const DataTableComponent = <T extends Identifiable>({
         };
     }, [isMobile, loading, mobileLoadMoreVisible, mobileLoadMoreLoading, onMobileLoadMore, rowCount]);
 
+    useEffect(() => {
+        const tableContainer = tableContainerRef.current;
+        const scrollContainer = tableContainer?.querySelector('.p-datatable-wrapper') as HTMLDivElement | null;
+
+        if (!tableContainer || !scrollContainer) {
+            setLoadingOverlayBounds(null);
+            return;
+        }
+
+        const updateOverlayBounds = () => {
+            setLoadingOverlayBounds({
+                top: scrollContainer.offsetTop,
+                left: scrollContainer.offsetLeft,
+                width: scrollContainer.offsetWidth,
+                height: scrollContainer.offsetHeight
+            });
+        };
+
+        updateOverlayBounds();
+
+        const resizeObserver = new ResizeObserver(() => {
+            updateOverlayBounds();
+        });
+
+        resizeObserver.observe(tableContainer);
+        resizeObserver.observe(scrollContainer);
+        window.addEventListener('resize', updateOverlayBounds);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', updateOverlayBounds);
+        };
+    }, [loading, rowCount, useMobileBodyScroll]);
+
     return (
-        <div ref={tableContainerRef} className={`mt-1${useMobileBodyScroll ? ' datatable-mobile-fixed-layout' : ''}`}>
+        <div
+            ref={tableContainerRef}
+            className={`mt-1 datatable-component-shell${useMobileBodyScroll ? ' datatable-mobile-fixed-layout' : ''}`}
+        >
             <Messages ref={msgs} className="custom-messages" />
             <DataTable
                 value={value}
@@ -127,7 +180,7 @@ export const DataTableComponent = <T extends Identifiable>({
                 rowExpansionTemplate={rowExpansionTemplate}
                 className={`p-datatable-row-expansion${useMobileBodyScroll ? ' datatable-mobile-fixed-header' : ''}`}
                 style={useMobileBodyScroll ? { height: '100%' } : undefined}
-                emptyMessage={loading ? <LoadingScreen loadingText={''} /> : 'Nenhum resultado encontrado na pesquisa'}
+                emptyMessage="Nenhum resultado encontrado na pesquisa"
                 totalRecords={totalRecords}
             >
                 {showExpandButton && <Column expander={true} body={expandButtonTemplate} className="width-3rem-Collum-Btn-Plus-Desktop-left" headerStyle={{ background: isDarkMode ? '#162A41' : '#EFF3F8' }} />}
@@ -159,8 +212,8 @@ export const DataTableComponent = <T extends Identifiable>({
                     />
                 )}
             </DataTable>
-            {isMobile && mobileLoadMoreVisible && onMobileLoadMore && showMobileLoadMoreButton && (
-                <div className="datatable-mobile-load-more-container">
+            {isMobile && mobileLoadMoreVisible && onMobileLoadMore && (
+                <div className={`datatable-mobile-load-more-container${showMobileLoadMoreButton ? ' datatable-mobile-load-more-container--visible' : ' datatable-mobile-load-more-container--hidden'}`}>
                     <Button
                         type="button"
                         outlined
@@ -178,6 +231,19 @@ export const DataTableComponent = <T extends Identifiable>({
                             void onMobileLoadMore();
                         }}
                     />
+                </div>
+            )}
+            {loading && loadingOverlayBounds && (
+                <div
+                    className="datatable-component-loading-overlay"
+                    style={{
+                        top: `${loadingOverlayBounds.top}px`,
+                        left: `${loadingOverlayBounds.left}px`,
+                        width: `${loadingOverlayBounds.width}px`,
+                        height: `${loadingOverlayBounds.height}px`
+                    }}
+                >
+                    <LoadingScreen loadingText="Carregando..." fullScreen={false} />
                 </div>
             )}
         </div>

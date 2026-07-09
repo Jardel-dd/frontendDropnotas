@@ -19,6 +19,33 @@ import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { activateEmpresa, deletarEmpresa, listEmpresa } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
+
+const createInitialPagination = (pageSize: number) => ({
+    content: [],
+    pageable: {
+        pageNumber: 0,
+        pageSize,
+        sort: {
+            empty: true,
+            unsorted: true,
+            sorted: false
+        }
+    },
+    totalPages: 0,
+    totalElements: 0,
+    last: false,
+    size: pageSize,
+    number: 0,
+    sort: {
+        empty: true,
+        unsorted: true,
+        sorted: false
+    },
+    numberOfElements: 0,
+    first: true,
+    empty: false
+});
 
 const Empresas: React.FC = () => {
     const router = useRouter();
@@ -26,10 +53,12 @@ const Empresas: React.FC = () => {
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const {permissaoEmpresa} = usePermissions();
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [empresa, setEmpresa] = useState<CompanyEntity>(
         new CompanyEntity({
@@ -78,58 +107,57 @@ const Empresas: React.FC = () => {
     const [isCompanyCreated, setIsCompanyCreated] = useState(false);
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity | null>(null);
-    const [listPaginationEmpresa, setListPaginationEmpresa] = useState<Record<string, any>>({
-        content: [],
-        pageable: {
-            pageNumber: 0,
-            pageSize: pageSize,
-            sort: {
-                empty: true,
-                unsorted: true,
-                sorted: false
-            }
-        },
-        totalPages: 0,
-        totalElements: 0,
-        last: false,
-        size: 10,
-        number: 0,
-        sort: {
-            empty: true,
-            unsorted: true,
-            sorted: false
-        },
-        numberOfElements: 0,
-        first: true,
-        empty: false
-    });
+    const [listPaginationEmpresa, setListPaginationEmpresa] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
+    const safePagination = listPaginationEmpresa ?? createInitialPagination(resolvedPageSize);
+    const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
     const showOnboardingHint = searchParams.get('onboarding') === 'company-setup';
     const onboardingCnpj = searchParams.get('cnpj')?.replace(/\D/g, '') ?? '';
     const handleNavigate = () => {
         router.push('/configuracoes/empresas/created');
         setIsCompanyCreated(true);
     };
-    const handleListCompany = async (
-        pageNumber?: number,
-        _searchTerm?: string,
-        listarInativos = false
+
+    const fetchCompanyPage = async (
+        pageNumber = 0,
+        term = searchTerm,
+        inactive = listarInativos
     ) => {
-        setLoading(true);
+        const empresas = await listEmpresa(
+            {
+                ...safePagination,
+                pageable: {
+                    ...safePageable,
+                    pageNumber,
+                    pageSize: resolvedPageSize
+                }
+            },
+            inactive,
+            () => {},
+            term
+        );
+
+        return empresas ?? createInitialPagination(resolvedPageSize);
+    };
+
+    const handleListCompany = async (
+        pageNumber = 0,
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos,
+        append = false
+    ) => {
+        if (!append) {
+            setLoading(true);
+        }
+
         try {
-            const empresas = await listEmpresa(
-                {
-                    ...listPaginationEmpresa,
-                    pageable: {
-                        ...listPaginationEmpresa.pageable,
-                        pageNumber: pageNumber ?? listPaginationEmpresa.pageable.pageNumber,
-                        pageSize: pageSize,
-                    },
-                },
-                listarInativos,
-                setLoading,
-                _searchTerm ?? searchTerm
-            );
-            setListPaginationEmpresa(empresas);
+            const empresas = await fetchCompanyPage(pageNumber, currentSearchTerm, currentListarInativos);
+            setListPaginationEmpresa((current) => {
+                if (isMobile && append) {
+                    return mergePaginatedContent(current, empresas, pageNumber) ?? createInitialPagination(resolvedPageSize);
+                }
+
+                return empresas ?? createInitialPagination(resolvedPageSize);
+            });
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
@@ -137,9 +165,66 @@ const Empresas: React.FC = () => {
                 detail: 'Falha ao buscar empresas',
             });
         } finally {
+            if (!append) {
+                setLoading(false);
+            }
+        }
+    };
+
+    const refreshVisibleEmpresas = async (
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos
+    ) => {
+        setLoading(true);
+        try {
+            const currentPage = safePageable.pageNumber ?? 0;
+
+            if (isMobile && currentPage > 0) {
+                const rebuilt = await rebuildLoadedMobilePages({
+                    lastLoadedPage: currentPage,
+                    fetchPage: (page) => fetchCompanyPage(page, currentSearchTerm, currentListarInativos)
+                });
+
+                setListPaginationEmpresa(rebuilt ?? createInitialPagination(resolvedPageSize));
+                return;
+            }
+
+            const empresas = await fetchCompanyPage(isMobile ? 0 : currentPage, currentSearchTerm, currentListarInativos);
+            setListPaginationEmpresa(empresas ?? createInitialPagination(resolvedPageSize));
+        } catch (error) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Atenção:',
+                detail: 'Falha ao atualizar empresas',
+            });
+        } finally {
             setLoading(false);
         }
     };
+
+    const handleDeleteEmpresa = async (id: number) => {
+        await deletarEmpresa(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleEmpresas(searchTerm, listarInativos);
+    };
+
+    const handleAtivarEmpresa = async (id: number) => {
+        await activateEmpresa(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleEmpresas(searchTerm, listarInativos);
+    };
+
+    const handleLoadMoreEmpresas = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationEmpresa)) {
+            return;
+        }
+
+        setLoadingMore(true);
+        try {
+            await handleListCompany((safePageable.pageNumber ?? 0) + 1, searchTerm, listarInativos, true);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setEmpresa,
         field: 'razao_social',
@@ -148,9 +233,9 @@ const Empresas: React.FC = () => {
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationEmpresa((prev) => ({
-            ...prev,
+            ...(prev ?? createInitialPagination(resolvedPageSize)),
             pageable: {
-                ...prev.pageable,
+                ...(prev?.pageable ?? createInitialPagination(resolvedPageSize).pageable),
                 pageNumber: selectedPage
             }
         }));
@@ -175,6 +260,7 @@ const Empresas: React.FC = () => {
     };
     useEffect(() => {
         handleListCompany();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     return (
         <div className='p-fluid'>
@@ -216,12 +302,12 @@ const Empresas: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div >
+                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarEmpresas
                                 loading={loading}
                                 listPaginationEmpresa={listPaginationEmpresa}
-                                deletar={(id) => deletarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => activateEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
+                                deletar={handleDeleteEmpresa}
+                                ativar={handleAtivarEmpresa}
                                 setSelectedEmpresa={setSelectedEmpresa}
                                 selectedEmpresa={selectedEmpresa}
                                 setLoading={setLoading}
@@ -230,18 +316,10 @@ const Empresas: React.FC = () => {
                                 listarInativos={listarInativos}
                                 showOnboardingHint={showOnboardingHint}
                                 onboardingCnpj={onboardingCnpj}
+                                mobileLoadMoreVisible={hasMoreMobileContent(listPaginationEmpresa)}
+                                mobileLoadMoreLoading={loadingMore}
+                                onMobileLoadMore={handleLoadMoreEmpresas}
                             />
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <div className="custom-paginator">
-                                <CustomPaginator
-                                    first={listPaginationEmpresa.pageable.pageNumber * listPaginationEmpresa.pageable.pageSize}
-                                    rows={pageSize}
-                                    totalRecords={listPaginationEmpresa.totalElements}
-                                    onPageChange={onPageChange}
-                                    isMobile
-                                />
-                            </div>
                         </div>
                     </div>
                 </>
@@ -290,8 +368,8 @@ const Empresas: React.FC = () => {
                                     <ListarEmpresas
                                         loading={loading}
                                         listPaginationEmpresa={listPaginationEmpresa}
-                                        deletar={(id) => deletarEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
-                                        ativar={(id) => activateEmpresa(id, msgs, listPaginationEmpresa, listarInativos, setLoading, searchTerm)}
+                                        deletar={handleDeleteEmpresa}
+                                        ativar={handleAtivarEmpresa}
                                         setSelectedEmpresa={setSelectedEmpresa}
                                         selectedEmpresa={selectedEmpresa}
                                         setLoading={setLoading}
@@ -306,9 +384,9 @@ const Empresas: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <CustomPaginator
-                                first={listPaginationEmpresa.pageable.pageNumber * listPaginationEmpresa.pageable.pageSize}
-                                rows={pageSize}
-                                totalRecords={listPaginationEmpresa.totalElements}
+                                first={safePageable.pageNumber * safePageable.pageSize}
+                                rows={resolvedPageSize}
+                                totalRecords={safePagination.totalElements}
                                 onPageChange={onPageChange}
                             />
                         </div>

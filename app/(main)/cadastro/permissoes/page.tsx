@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import ListarPerfilUsers from './tabela/perfilUsuario';
 import { usePermissions } from '@/app/routes/permissoes';
+import { CheckboxChangeEvent } from 'primereact/checkbox';
 import Input from '@/app/shared/include/input/input-all';
-import {  CheckboxChangeEvent } from 'primereact/checkbox';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
@@ -18,17 +18,46 @@ import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { ativarPerfilUser, deletarPerfilUser, listPerfilUser } from './controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
+
+const createInitialPagination = (pageSize: number) => ({
+    content: [],
+    pageable: {
+        pageNumber: 0,
+        pageSize,
+        sort: {
+            empty: true,
+            unsorted: true,
+            sorted: false
+        }
+    },
+    totalPages: 0,
+    totalElements: 0,
+    last: false,
+    size: pageSize,
+    number: 0,
+    sort: {
+        empty: true,
+        unsorted: true,
+        sorted: false
+    },
+    numberOfElements: 0,
+    first: true,
+    empty: false
+});
 
 const PerfilUsuarios: React.FC = () => {
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const router = useRouter();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const {permissaoPerfilUsuario} = usePermissions();
+    const { permissaoPerfilUsuario } = usePermissions();
     const [visible, setVisible] = useState<boolean>(false);
     const [perfilUser, setPerfilUser] = useState<PerfilUser>(
         new PerfilUser({
@@ -88,127 +117,174 @@ const PerfilUsuarios: React.FC = () => {
             formaPagamentoDesativar: false,
             formaPagamentoPesquisar: false,
             nfseTipoVisualizacao: ''
-    }));
+        })
+    );
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [isPerfilUsuarioCreated, setIsPerfilUsuarioCreated] = useState(false);
     const [selectedPerfilUser, setSelectedPerfilUser] = useState<PerfilUser | null>(null);
-    const [listPaginationPerfilUser, setListPaginationPerfilUser] = useState<Record<string, any>>({
-        content: [],
-        pageable: {
-            pageNumber: 0,
-            pageSize: pageSize,
-            sort: {
-                empty: true,
-                unsorted: true,
-                sorted: false
-            }
-        },
-        totalPages: 0,
-        totalElements: 0,
-        last: false,
-        size: 10,
-        number: 0,
-        sort: {
-            empty: true,
-            unsorted: true,
-            sorted: false
-        },
-        numberOfElements: 0,
-        first: true,
-        empty: false
-    });
+    const [listPaginationPerfilUser, setListPaginationPerfilUser] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
+    const safePagination = listPaginationPerfilUser ?? createInitialPagination(resolvedPageSize);
+    const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
+
     const handleNavigate = () => {
         router.push('/cadastro/permissoes/created');
         setIsPerfilUsuarioCreated(true);
     };
-    const handleListPerfilUser = async (pageNumber?: number, _searchTerm?: string, listarInativos = false) => {
-        setLoading(true);
+
+    const fetchPerfilUserPage = async (
+        pageNumber = 0,
+        term = searchTerm,
+        inactive = listarInativos
+    ) => {
+        const perfilUsers = await listPerfilUser(
+            {
+                ...safePagination,
+                pageable: {
+                    ...safePageable,
+                    pageNumber,
+                    pageSize: resolvedPageSize
+                }
+            },
+            inactive,
+            () => {},
+            term
+        );
+
+        return perfilUsers ?? createInitialPagination(resolvedPageSize);
+    };
+
+    const handleListPerfilUser = async (
+        pageNumber = 0,
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos,
+        append = false
+    ) => {
+        if (!append) {
+            setLoading(true);
+        }
+
         try {
-            const perfilUsers = await listPerfilUser(
-                {
-                    ...listPaginationPerfilUser,
-                    pageable: {
-                        ...listPaginationPerfilUser.pageable,
-                        pageNumber: pageNumber ?? listPaginationPerfilUser.pageable.pageNumber,
-                        pageSize: pageSize
-                    }
-                },
-                listarInativos,
-                setLoading,
-                _searchTerm ?? searchTerm
-            );
-            setListPaginationPerfilUser(perfilUsers);
+            const perfilUsers = await fetchPerfilUserPage(pageNumber, currentSearchTerm, currentListarInativos);
+            setListPaginationPerfilUser((current) => {
+                if (isMobile && append) {
+                    return mergePaginatedContent(current, perfilUsers, pageNumber) ?? createInitialPagination(resolvedPageSize);
+                }
+
+                return perfilUsers ?? createInitialPagination(resolvedPageSize);
+            });
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Atenção:',
-                detail: 'Falha ao buscar Perfil de Usuário',
+                summary: 'Atencao:',
+                detail: 'Falha ao buscar Perfil de Usuario',
+                life: 3000
+            });
+        } finally {
+            if (!append) {
+                setLoading(false);
+            }
+        }
+    };
+
+    const refreshVisiblePerfilUser = async (
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos
+    ) => {
+        setLoading(true);
+        try {
+            const currentPage = safePageable.pageNumber ?? 0;
+
+            if (isMobile && currentPage > 0) {
+                const rebuilt = await rebuildLoadedMobilePages({
+                    lastLoadedPage: currentPage,
+                    fetchPage: (page) => fetchPerfilUserPage(page, currentSearchTerm, currentListarInativos)
+                });
+
+                setListPaginationPerfilUser(rebuilt ?? createInitialPagination(resolvedPageSize));
+                return;
+            }
+
+            const perfilUsers = await fetchPerfilUserPage(isMobile ? 0 : currentPage, currentSearchTerm, currentListarInativos);
+            setListPaginationPerfilUser(perfilUsers ?? createInitialPagination(resolvedPageSize));
+        } catch (error) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Atencao:',
+                detail: 'Falha ao atualizar Perfil de Usuario',
                 life: 3000
             });
         } finally {
             setLoading(false);
         }
     };
+
+    const handleDeletePerfilUser = async (id: number) => {
+        await deletarPerfilUser(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisiblePerfilUser(searchTerm, listarInativos);
+    };
+
+    const handleAtivarPerfilUser = async (id: number) => {
+        await ativarPerfilUser(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisiblePerfilUser(searchTerm, listarInativos);
+    };
+
+    const handleLoadMorePerfilUser = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationPerfilUser)) {
+            return;
+        }
+
+        setLoadingMore(true);
+        try {
+            await handleListPerfilUser((safePageable.pageNumber ?? 0) + 1, searchTerm, listarInativos, true);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setPerfilUser,
         field: 'nome',
         onSearch: (value) => handleListPerfilUser(0, value, listarInativos)
     });
+
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationPerfilUser((prev) => ({
-            ...prev,
+            ...(prev ?? createInitialPagination(resolvedPageSize)),
             pageable: {
-                ...prev.pageable,
+                ...(prev?.pageable ?? createInitialPagination(resolvedPageSize).pageable),
                 pageNumber: selectedPage
             }
         }));
         handleListPerfilUser(selectedPage, searchTerm, listarInativos);
     };
+
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
         debouncedSearch(value);
     };
+
     const handleSalvarFiltro = () => {
         handleListPerfilUser(0, searchTerm, listarInativos);
         setVisible(false);
     };
+
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
+
     const handleClearFilters = () => {
         setListarInativos(false);
         handleListPerfilUser(0, '', false);
         setVisible(false);
     };
-    useEffect(() => {
-        const loadInitialPerfilUsers = async () => {
-            try {
-                const perfilUsers = await listPerfilUser(
-                    {
-                        pageable: {
-                            pageNumber: 0,
-                            pageSize
-                        }
-                    },
-                    false,
-                    setLoading,
-                    ''
-                );
-                setListPaginationPerfilUser(perfilUsers);
-            } catch (error) {
-                toast.current?.show({
-                    severity: 'error',
-                    summary: 'Atenção:',
-                    detail: 'Falha ao buscar Perfil de Usuário',
-                    life: 3000
-                });
-            }
-        };
 
-        void loadInitialPerfilUsers();
-    }, [pageSize]);
+    useEffect(() => {
+        handleListPerfilUser();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
@@ -248,30 +324,22 @@ const PerfilUsuarios: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarPerfilUsers
                                 loading={loading}
                                 listPaginationPerfilUser={listPaginationPerfilUser}
-                                deletar={(id) => deletarPerfilUser(id, msgs, listPaginationPerfilUser, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => ativarPerfilUser(id, msgs, listPaginationPerfilUser, listarInativos, setLoading, searchTerm)}
+                                deletar={handleDeletePerfilUser}
+                                ativar={handleAtivarPerfilUser}
                                 setSelectedPerfilUser={setSelectedPerfilUser}
                                 selectedPerfil={selectedPerfilUser}
                                 setLoading={setLoading}
                                 searchTerm={searchTerm}
                                 setListPaginationPerfilUser={setListPaginationPerfilUser}
                                 listarInativos={listarInativos}
+                                mobileLoadMoreVisible={hasMoreMobileContent(listPaginationPerfilUser)}
+                                mobileLoadMoreLoading={loadingMore}
+                                onMobileLoadMore={handleLoadMorePerfilUser}
                             />
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <div className="custom-paginator">
-                                <CustomPaginator
-                                    first={listPaginationPerfilUser.pageable.pageNumber * listPaginationPerfilUser.pageable.pageSize}
-                                    rows={pageSize}
-                                    totalRecords={listPaginationPerfilUser.totalElements}
-                                    onPageChange={onPageChange}
-                                    isMobile
-                                />
-                            </div>
                         </div>
                     </div>
                 </>
@@ -281,7 +349,7 @@ const PerfilUsuarios: React.FC = () => {
                     <div className="card styled-container-main-all-routes p-2">
                         <div className="p-0">
                             <div className="grid formgrid p-2">
-                                <div className="col-12 lg:col-3 container-input-search-all" >
+                                <div className="col-12 lg:col-3 container-input-search-all">
                                     <Input
                                         label="Pesquisar Descrição"
                                         outlined={true}
@@ -309,7 +377,7 @@ const PerfilUsuarios: React.FC = () => {
                                         />
                                     </FilterOverlay>
                                 </div>
-                                {permissaoPerfilUsuario.create  && (
+                                {permissaoPerfilUsuario.create && (
                                     <div className="container-button-primary-novo">
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
@@ -320,8 +388,8 @@ const PerfilUsuarios: React.FC = () => {
                             <ListarPerfilUsers
                                 loading={loading}
                                 listPaginationPerfilUser={listPaginationPerfilUser}
-                                deletar={(id) => deletarPerfilUser(id, msgs, listPaginationPerfilUser, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => ativarPerfilUser(id, msgs, listPaginationPerfilUser, listarInativos, setLoading, searchTerm)}
+                                deletar={handleDeletePerfilUser}
+                                ativar={handleAtivarPerfilUser}
                                 setSelectedPerfilUser={setSelectedPerfilUser}
                                 selectedPerfil={selectedPerfilUser}
                                 setLoading={setLoading}
@@ -332,10 +400,11 @@ const PerfilUsuarios: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <CustomPaginator
-                                first={listPaginationPerfilUser.pageable.pageNumber * listPaginationPerfilUser.pageable.pageSize}
-                                rows={pageSize}
-                                totalRecords={listPaginationPerfilUser.totalElements}
-                                onPageChange={onPageChange} />
+                                first={safePageable.pageNumber * safePageable.pageSize}
+                                rows={resolvedPageSize}
+                                totalRecords={safePagination.totalElements}
+                                onPageChange={onPageChange}
+                            />
                         </div>
                     </div>
                 </>
@@ -343,5 +412,5 @@ const PerfilUsuarios: React.FC = () => {
         </div>
     );
 };
-export default PerfilUsuarios;
 
+export default PerfilUsuarios;

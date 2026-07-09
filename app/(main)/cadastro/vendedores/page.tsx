@@ -19,15 +19,44 @@ import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { activateVendedor, deletarVendedor, listVendedor } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
+
+const createInitialPagination = (pageSize: number) => ({
+    content: [],
+    pageable: {
+        pageNumber: 0,
+        pageSize,
+        sort: {
+            empty: true,
+            unsorted: true,
+            sorted: false
+        }
+    },
+    totalPages: 0,
+    totalElements: 0,
+    last: false,
+    size: pageSize,
+    number: 0,
+    sort: {
+        empty: true,
+        unsorted: true,
+        sorted: false
+    },
+    numberOfElements: 0,
+    first: true,
+    empty: false
+});
 
 const Vendedores: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const {permissaoVendedor} = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
@@ -58,52 +87,55 @@ const Vendedores: React.FC = () => {
     );
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [isVendedoresCreated, setIsVendedoresCreated] = useState(false);
-    const [listPaginationVendedores, setListPaginationVendedores] = useState<Record<string, any>>({
-        content: [],
-        pageable: {
-            pageNumber: 0,
-            pageSize: pageSize,
-            sort: {
-                empty: true,
-                unsorted: true,
-                sorted: false
-            }
-        },
-        totalPages: 0,
-        totalElements: 0,
-        last: false,
-        size: 10,
-        number: 0,
-        sort: {
-            empty: true,
-            unsorted: true,
-            sorted: false
-        },
-        numberOfElements: 0,
-        first: true,
-        empty: false
-    });
+    const [listPaginationVendedores, setListPaginationVendedores] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
+    const safePagination = listPaginationVendedores ?? createInitialPagination(resolvedPageSize);
+    const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
     const handleNavigate = () => {
         router.push('/cadastro/vendedores/created');
         setIsVendedoresCreated(true);
     };
-    const handleListVendedores = async (pageNumber?: number, _searchTerm?: string, listarInativos = false) => {
-        setLoading(true);
+
+    const fetchVendedoresPage = async (
+        pageNumber = 0,
+        term = searchTerm,
+        inactive = listarInativos
+    ) => {
+        const vendedores = await listVendedor(
+            {
+                ...safePagination,
+                pageable: {
+                    ...safePageable,
+                    pageNumber,
+                    pageSize: resolvedPageSize
+                }
+            },
+            inactive,
+            () => {},
+            term
+        );
+
+        return vendedores ?? createInitialPagination(resolvedPageSize);
+    };
+
+    const handleListVendedores = async (
+        pageNumber = 0,
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos,
+        append = false
+    ) => {
+        if (!append) {
+            setLoading(true);
+        }
+
         try {
-            const vendedores = await listVendedor(
-                {
-                    ...listPaginationVendedores,
-                    pageable: {
-                        ...listPaginationVendedores.pageable,
-                        pageNumber: pageNumber ?? listPaginationVendedores.pageable.pageNumber,
-                        pageSize: pageSize
-                    }
-                },
-                listarInativos,
-                setLoading,
-                _searchTerm ?? searchTerm
-            );
-            setListPaginationVendedores(vendedores);
+            const vendedores = await fetchVendedoresPage(pageNumber, currentSearchTerm, currentListarInativos);
+            setListPaginationVendedores((current) => {
+                if (isMobile && append) {
+                    return mergePaginatedContent(current, vendedores, pageNumber) ?? createInitialPagination(resolvedPageSize);
+                }
+
+                return vendedores ?? createInitialPagination(resolvedPageSize);
+            });
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
@@ -111,9 +143,66 @@ const Vendedores: React.FC = () => {
                 detail: 'Falha Vendedor '
             });
         } finally {
+            if (!append) {
+                setLoading(false);
+            }
+        }
+    };
+
+    const refreshVisibleVendedores = async (
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos
+    ) => {
+        setLoading(true);
+        try {
+            const currentPage = safePageable.pageNumber ?? 0;
+
+            if (isMobile && currentPage > 0) {
+                const rebuilt = await rebuildLoadedMobilePages({
+                    lastLoadedPage: currentPage,
+                    fetchPage: (page) => fetchVendedoresPage(page, currentSearchTerm, currentListarInativos)
+                });
+
+                setListPaginationVendedores(rebuilt ?? createInitialPagination(resolvedPageSize));
+                return;
+            }
+
+            const vendedores = await fetchVendedoresPage(isMobile ? 0 : currentPage, currentSearchTerm, currentListarInativos);
+            setListPaginationVendedores(vendedores ?? createInitialPagination(resolvedPageSize));
+        } catch (error) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Atenção:',
+                detail: 'Falha ao atualizar vendedores'
+            });
+        } finally {
             setLoading(false);
         }
     };
+
+    const handleDeleteVendedor = async (id: number) => {
+        await deletarVendedor(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleVendedores(searchTerm, listarInativos);
+    };
+
+    const handleAtivarVendedor = async (id: number) => {
+        await activateVendedor(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleVendedores(searchTerm, listarInativos);
+    };
+
+    const handleLoadMoreVendedores = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationVendedores)) {
+            return;
+        }
+
+        setLoadingMore(true);
+        try {
+            await handleListVendedores((safePageable.pageNumber ?? 0) + 1, searchTerm, listarInativos, true);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setVendedor,
         field: 'razao_social',
@@ -122,9 +211,9 @@ const Vendedores: React.FC = () => {
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationVendedores((prev) => ({
-            ...prev,
+            ...(prev ?? createInitialPagination(resolvedPageSize)),
             pageable: {
-                ...prev.pageable,
+                ...(prev?.pageable ?? createInitialPagination(resolvedPageSize).pageable),
                 pageNumber: selectedPage
             }
         }));
@@ -136,16 +225,11 @@ const Vendedores: React.FC = () => {
         debouncedSearch(value);
     };
     const handleClearFilters = () => {
-        const defaultFilter = {
-            cliente: true,
-            fornecedor: true
-        };
         setListarInativos(false);
         handleListVendedores(0, '', false);
         setVisible(false);
     };
     const handleApplyFilters = () => {
-        const firstPage = 0;
         handleListVendedores(0, searchTerm, listarInativos);
         setVisible(false);
     };
@@ -158,6 +242,7 @@ const Vendedores: React.FC = () => {
     };
     useEffect(() => {
         handleListVendedores();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     return (
         <div className="w-full">
@@ -197,28 +282,20 @@ const Vendedores: React.FC = () => {
                                     </div>
                             </div>
                         </div>
-                        <div>
+                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarVendedores
                                 loading={loading}
                                 listPaginationVendedores={listPaginationVendedores}
-                                deletar={(id) => deletarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => activateVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
+                                deletar={handleDeleteVendedor}
+                                ativar={handleAtivarVendedor}
                                 setLoading={setLoading}
                                 searchTerm={searchTerm}
                                 listarInativos={listarInativos}
                                 setListPaginationVendedores={setListPaginationVendedores}
+                                mobileLoadMoreVisible={hasMoreMobileContent(listPaginationVendedores)}
+                                mobileLoadMoreLoading={loadingMore}
+                                onMobileLoadMore={handleLoadMoreVendedores}
                             />
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <div className="custom-paginator">
-                                <CustomPaginator
-                                    first={listPaginationVendedores.pageable.pageNumber * listPaginationVendedores.pageable.pageSize}
-                                    rows={pageSize}
-                                    totalRecords={listPaginationVendedores.totalElements}
-                                    onPageChange={onPageChange}
-                                    isMobile
-                                />
-                            </div>
                         </div>
                     </div>
                 </>
@@ -269,8 +346,8 @@ const Vendedores: React.FC = () => {
                                 <ListarVendedores
                                     loading={loading}
                                     listPaginationVendedores={listPaginationVendedores}
-                                    deletar={(id) => deletarVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
-                                    ativar={(id) => activateVendedor(id, msgs, listPaginationVendedores, listarInativos, setLoading, searchTerm)}
+                                    deletar={handleDeleteVendedor}
+                                    ativar={handleAtivarVendedor}
                                     setLoading={setLoading}
                                     searchTerm={searchTerm}
                                     listarInativos={listarInativos}
@@ -279,7 +356,7 @@ const Vendedores: React.FC = () => {
                             </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>
-                            <CustomPaginator first={listPaginationVendedores.pageable.pageNumber * listPaginationVendedores.pageable.pageSize} rows={pageSize} totalRecords={listPaginationVendedores.totalElements} onPageChange={onPageChange} />
+                            <CustomPaginator first={safePageable.pageNumber * safePageable.pageSize} rows={resolvedPageSize} totalRecords={safePagination.totalElements} onPageChange={onPageChange} />
                         </div>
                     </div>
                 </>

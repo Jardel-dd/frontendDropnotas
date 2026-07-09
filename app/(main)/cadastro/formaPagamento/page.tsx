@@ -21,16 +21,46 @@ import { FormaPagamentoEntity, TipoFormaPagamento } from '@/app/entity/FormaPaga
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { ativarFormaPagamento, deletarFormaPagamento, listFormaPagamento } from './controller/controller';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
+
+const createInitialPagination = (pageSize: number) => ({
+    content: [],
+    pageable: {
+        pageNumber: 0,
+        pageSize,
+        sort: {
+            empty: true,
+            unsorted: true,
+            sorted: false
+        }
+    },
+    totalPages: 0,
+    totalElements: 0,
+    last: false,
+    size: pageSize,
+    number: 0,
+    sort: {
+        empty: true,
+        unsorted: true,
+        sorted: false
+    },
+    numberOfElements: 0,
+    first: true,
+    empty: false
+});
+
 const CategoriaContrato: React.FC = () => {
     const router = useRouter();
     const isMobile = useIsMobile();
     const pageSize = usePageSize();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const {permissaoFormaPagamento} = usePermissions();
+    const { permissaoFormaPagamento } = usePermissions();
     const [visible, setVisible] = useState<boolean>(false);
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [formaPagamento, setFormaPagamento] = useState<FormaPagamentoEntity>(
@@ -47,120 +77,192 @@ const CategoriaContrato: React.FC = () => {
     const [isFormaPagamentoCreated, setIsFormaPagamentoCreated] = useState(false);
     const [selectedFormaPagamento, setSelectedFormaPagamento] = useState<string | null>(null);
     const [draftSelectedFormaPagamento, setDraftSelectedFormaPagamento] = useState<string | null>(null);
-    const [listPaginationFormaPagamento, setListPaginationFormaPagamento] = useState<Record<string, any>>({
-        content: [],
-        pageable: {
-            pageNumber: 0,
-            pageSize: pageSize,
-            sort: {
-                empty: true,
-                unsorted: true,
-                sorted: false
-            }
-        },
-        totalPages: 0,
-        totalElements: 0,
-        last: false,
-        size: 10,
-        number: 0,
-        sort: {
-            empty: true,
-            unsorted: true,
-            sorted: false
-        },
-        numberOfElements: 0,
-        first: true,
-        empty: false
-    });
+    const [listPaginationFormaPagamento, setListPaginationFormaPagamento] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
+    const safePagination = listPaginationFormaPagamento ?? createInitialPagination(resolvedPageSize);
+    const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
+
     const handleNavigate = () => {
         router.push('/cadastro/formaPagamento/created');
         setIsFormaPagamentoCreated(true);
     };
-    const handleListFormaPagamento = async (pageNumber?: number, _searchTerm?: string, listarInativos = false, tipo_forma_pagamento?: string) => {
-        const tipoFinal = tipo_forma_pagamento ?? selectedFormaPagamento ?? '';
-        setLoading(true);
+
+    const fetchFormaPagamentoPage = async (
+        pageNumber = 0,
+        term = searchTerm,
+        inactive = listarInativos,
+        tipoFormaPagamento = selectedFormaPagamento ?? ''
+    ) => {
+        const formaPagamentoPage = await listFormaPagamento(
+            {
+                ...safePagination,
+                pageable: {
+                    ...safePageable,
+                    pageNumber,
+                    pageSize: resolvedPageSize
+                }
+            },
+            inactive,
+            () => {},
+            term,
+            tipoFormaPagamento
+        );
+
+        return formaPagamentoPage ?? createInitialPagination(resolvedPageSize);
+    };
+
+    const handleListFormaPagamento = async (
+        pageNumber = 0,
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos,
+        tipoFormaPagamento = selectedFormaPagamento ?? '',
+        append = false
+    ) => {
+        if (!append) {
+            setLoading(true);
+        }
+
         try {
-            const formaPagamento = await listFormaPagamento(
-                {
-                    ...listPaginationFormaPagamento,
-                    pageable: {
-                        ...listPaginationFormaPagamento.pageable,
-                        pageNumber: pageNumber ?? listPaginationFormaPagamento.pageable.pageNumber,
-                        pageSize: pageSize
-                    }
-                },
-                listarInativos,
-                setLoading,
-                _searchTerm ?? searchTerm,
-                tipoFinal
-            );
-            setListPaginationFormaPagamento(formaPagamento);
+            const formaPagamentoPage = await fetchFormaPagamentoPage(pageNumber, currentSearchTerm, currentListarInativos, tipoFormaPagamento);
+            setListPaginationFormaPagamento((current) => {
+                if (isMobile && append) {
+                    return mergePaginatedContent(current, formaPagamentoPage, pageNumber) ?? createInitialPagination(resolvedPageSize);
+                }
+
+                return formaPagamentoPage ?? createInitialPagination(resolvedPageSize);
+            });
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Atenção:',
-                detail: 'Falha ao buscar Forma de Pagamento ',
+                summary: 'Atencao:',
+                detail: 'Falha ao buscar Forma de Pagamento',
+                life: 3000
+            });
+        } finally {
+            if (!append) {
+                setLoading(false);
+            }
+        }
+    };
+
+    const refreshVisibleFormaPagamento = async (
+        currentSearchTerm = searchTerm,
+        currentListarInativos = listarInativos,
+        tipoFormaPagamento = selectedFormaPagamento ?? ''
+    ) => {
+        setLoading(true);
+        try {
+            const currentPage = safePageable.pageNumber ?? 0;
+
+            if (isMobile && currentPage > 0) {
+                const rebuilt = await rebuildLoadedMobilePages({
+                    lastLoadedPage: currentPage,
+                    fetchPage: (page) => fetchFormaPagamentoPage(page, currentSearchTerm, currentListarInativos, tipoFormaPagamento)
+                });
+
+                setListPaginationFormaPagamento(rebuilt ?? createInitialPagination(resolvedPageSize));
+                return;
+            }
+
+            const formaPagamentoPage = await fetchFormaPagamentoPage(isMobile ? 0 : currentPage, currentSearchTerm, currentListarInativos, tipoFormaPagamento);
+            setListPaginationFormaPagamento(formaPagamentoPage ?? createInitialPagination(resolvedPageSize));
+        } catch (error) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Atencao:',
+                detail: 'Falha ao atualizar Forma de Pagamento',
                 life: 3000
             });
         } finally {
             setLoading(false);
         }
     };
+
+    const handleDeleteFormaPagamento = async (id: number) => {
+        await deletarFormaPagamento(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleFormaPagamento(searchTerm, listarInativos, selectedFormaPagamento ?? '');
+    };
+
+    const handleAtivarFormaPagamento = async (id: number) => {
+        await ativarFormaPagamento(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisibleFormaPagamento(searchTerm, listarInativos, selectedFormaPagamento ?? '');
+    };
+
+    const handleLoadMoreFormaPagamento = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationFormaPagamento)) {
+            return;
+        }
+
+        setLoadingMore(true);
+        try {
+            await handleListFormaPagamento((safePageable.pageNumber ?? 0) + 1, searchTerm, listarInativos, selectedFormaPagamento ?? '', true);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setFormaPagamento,
         field: 'descricao',
-        onSearch: (value) => handleListFormaPagamento(0, value, listarInativos)
+        onSearch: (value) => handleListFormaPagamento(0, value, listarInativos, selectedFormaPagamento ?? '')
     });
+
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
         setListPaginationFormaPagamento((prev) => ({
-            ...prev,
+            ...(prev ?? createInitialPagination(resolvedPageSize)),
             pageable: {
-                ...prev.pageable,
+                ...(prev?.pageable ?? createInitialPagination(resolvedPageSize).pageable),
                 pageNumber: selectedPage
             }
         }));
-        handleListFormaPagamento(selectedPage, searchTerm, listarInativos);
+        handleListFormaPagamento(selectedPage, searchTerm, listarInativos, selectedFormaPagamento ?? '');
     };
+
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setListarInativos(e.checked ?? false);
     };
+
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setSearchTerm(value);
         debouncedSearch(value);
     };
+
     const syncDraftFilters = () => {
         setListarInativos(listarInativos);
         setDraftSelectedFormaPagamento(selectedFormaPagamento);
     };
+
     const handleClearFilters = () => {
-        setListarInativos(false);
         setListarInativos(false);
         setSelectedFormaPagamento(null);
         setDraftSelectedFormaPagamento(null);
         handleListFormaPagamento(0, '', false, '');
     };
+
     const handleTipoFormaPagamentoChange = (e: DropdownChangeEvent) => {
         setDraftSelectedFormaPagamento(e.value ?? null);
     };
+
     const handleApplyFilters = () => {
-        const firstPage = 0;
         setListarInativos(listarInativos);
         setSelectedFormaPagamento(draftSelectedFormaPagamento);
-        handleListFormaPagamento(firstPage, searchTerm, listarInativos, draftSelectedFormaPagamento ?? '');
+        handleListFormaPagamento(0, searchTerm, listarInativos, draftSelectedFormaPagamento ?? '');
         setVisible(false);
     };
+
     useEffect(() => {
         handleListFormaPagamento();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
     return (
         <div className="w-full">
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                        <div className="grid formgrid p-2" >
+                        <div className="grid formgrid p-2">
                             <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
                                 <Input
                                     label="Pesquisar Descrição"
@@ -204,13 +306,13 @@ const CategoriaContrato: React.FC = () => {
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
-                                     {permissaoFormaPagamento.create && (
-                                    <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
-                                     )}
-                                     </div>
+                                    {permissaoFormaPagamento.create && (
+                                        <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                    )}
+                                </div>
                             </div>
                         </div>
-                        <div>
+                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarFormaPagamento
                                 loading={loading}
                                 searchTerm={searchTerm}
@@ -218,21 +320,13 @@ const CategoriaContrato: React.FC = () => {
                                 listarInativos={listarInativos}
                                 setListPaginationFormaPagamento={setListPaginationFormaPagamento}
                                 listPaginationFormaPagamento={listPaginationFormaPagamento}
-                                deletar={(id) => deletarFormaPagamento(id, msgs, listPaginationFormaPagamento, listarInativos, setLoading, searchTerm)}
-                                ativar={(id) => ativarFormaPagamento(id, msgs, listPaginationFormaPagamento, listarInativos, setLoading, searchTerm)}
+                                deletar={handleDeleteFormaPagamento}
+                                ativar={handleAtivarFormaPagamento}
                                 tipo_forma_pagamento={selectedFormaPagamento ?? ''}
+                                mobileLoadMoreVisible={hasMoreMobileContent(listPaginationFormaPagamento)}
+                                mobileLoadMoreLoading={loadingMore}
+                                onMobileLoadMore={handleLoadMoreFormaPagamento}
                             />
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <div className="custom-paginator">
-                                <CustomPaginator
-                                    first={listPaginationFormaPagamento.pageable.pageNumber * listPaginationFormaPagamento.pageable.pageSize}
-                                    rows={pageSize}
-                                    totalRecords={listPaginationFormaPagamento.totalElements}
-                                    onPageChange={onPageChange}
-                                    isMobile
-                                />
-                            </div>
                         </div>
                     </div>
                 </>
@@ -282,12 +376,12 @@ const CategoriaContrato: React.FC = () => {
                                         </FilterOverlay>
                                     </div>
                                     {permissaoFormaPagamento.create && (
-                                    <div className="container-button-primary-novo">
-                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
-                                    </div>
-                                     )}
+                                        <div className="container-button-primary-novo">
+                                            <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                        </div>
+                                    )}
                                 </div>
-                                <div >
+                                <div>
                                     <ListarFormaPagamento
                                         loading={loading}
                                         searchTerm={searchTerm}
@@ -295,8 +389,8 @@ const CategoriaContrato: React.FC = () => {
                                         listarInativos={listarInativos}
                                         setListPaginationFormaPagamento={setListPaginationFormaPagamento}
                                         listPaginationFormaPagamento={listPaginationFormaPagamento}
-                                        deletar={(id) => deletarFormaPagamento(id, msgs, listPaginationFormaPagamento, listarInativos, setLoading, searchTerm)}
-                                        ativar={(id) => ativarFormaPagamento(id, msgs, listPaginationFormaPagamento, listarInativos, setLoading, searchTerm)}
+                                        deletar={handleDeleteFormaPagamento}
+                                        ativar={handleAtivarFormaPagamento}
                                         tipo_forma_pagamento={selectedFormaPagamento ?? ''}
                                     />
                                 </div>
@@ -304,9 +398,9 @@ const CategoriaContrato: React.FC = () => {
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <CustomPaginator
-                                first={listPaginationFormaPagamento.pageable.pageNumber * listPaginationFormaPagamento.pageable.pageSize}
-                                rows={pageSize}
-                                totalRecords={listPaginationFormaPagamento.totalElements}
+                                first={safePageable.pageNumber * safePageable.pageSize}
+                                rows={resolvedPageSize}
+                                totalRecords={safePagination.totalElements}
                                 onPageChange={onPageChange}
                             />
                         </div>
@@ -316,5 +410,5 @@ const CategoriaContrato: React.FC = () => {
         </div>
     );
 };
-export default CategoriaContrato;
 
+export default CategoriaContrato;

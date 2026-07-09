@@ -50,14 +50,14 @@ export function ListarContratos({
         await handleActiveOrInativeContrato(rowData, msgs, listPaginationContratos, listarInativos, setLoading, searchTerm, setListPaginationContratos);
     };
     return (
-        <div style={{ marginTop: '0' }}>
+        <div style={{ marginTop: '0', display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
             <Messages ref={msgs} className="custom-messages" />
             {loading ? (
                 <LoadingScreen loadingText={'Carregando Contratos...'} />
             ) : (
                 <>
                     {isMobile && (
-                        <div>
+                        <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <DataTableComponent
                                 value={listPaginationContratos?.content as ContratoEntity[]}
                                 loading={loading}
@@ -91,6 +91,7 @@ export function ListarContratos({
                                 mobileLoadMoreVisible={mobileLoadMoreVisible}
                                 mobileLoadMoreLoading={mobileLoadMoreLoading}
                                 onMobileLoadMore={onMobileLoadMore}
+                                mobileBodyScroll
                             />
                         </div>
                     )}

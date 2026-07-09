@@ -281,7 +281,7 @@ export function OrdemServicoFields({
                         id="servicos.quantidade"
                         type="number"
                         showTopLabel
-                        topLabel="Quantidade de serviÃ§os:"
+                        topLabel="Quantidade de Serviços:"
                         hasError={!!errors['servicos.quantidade']}
                         errorMessage={errors['servicos.quantidade']}
                     />
