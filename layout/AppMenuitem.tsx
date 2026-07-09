@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Ripple } from 'primereact/ripple';
 import { useRouter } from 'next/navigation';
 import { classNames } from 'primereact/utils';
+import type { IconProps } from 'phosphor-react';
 import type { AppMenuItemProps } from '@/types';
 import { MenuContext } from './context/menucontext';
 import { LayoutContext } from './context/layoutcontext';
@@ -49,7 +50,38 @@ const AppMenuitem = (props: AppMenuItemProps) => {
                 resetMenu: false
             }));
         }
-    }, [layoutState.resetMenu]);
+    }, [layoutState.resetMenu, setActiveMenu, setLayoutState]);
+
+    const renderMenuIcon = (isRootMenu = false) => {
+        const iconColor = isActiveRoute || isHovered ? 'var(--primary-color)' : undefined;
+
+        if (!item?.icon) {
+            return null;
+        }
+
+        if (typeof item.icon === 'string') {
+            return (
+                <i
+                    className={classNames('layout-menuitem-icon', item.icon)}
+                    style={{ color: iconColor }}
+                />
+            );
+        }
+
+        const IconComponent = item.icon as React.ComponentType<IconProps>;
+
+        return (
+            <IconComponent
+                className={classNames('layout-menuitem-icon', 'layout-menuitem-vector-icon', {
+                    'layout-menuitem-vector-icon-root': isRootMenu
+                })}
+                size={isRootMenu ? 22 : 21}
+                weight={isActiveRoute || isHovered ? 'fill' : 'duotone'}
+                style={{ color: iconColor }}
+                aria-hidden="true"
+            />
+        );
+    };
 
     const itemClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
         if (item!.disabled) {
@@ -157,12 +189,7 @@ const AppMenuitem = (props: AppMenuItemProps) => {
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                     >
-                        <i
-                            className={classNames('layout-menuitem-icon', item?.icon)}
-                            style={{
-                                color: isActiveRoute || isHovered ? 'var(--primary-color)' : undefined
-                            }}
-                        />
+                        {renderMenuIcon(true)}
                         <span
                             className="layout-menuitem-text"
                             style={{
@@ -194,12 +221,7 @@ const AppMenuitem = (props: AppMenuItemProps) => {
                         backgroundColor: isActiveRoute && !isDesktop() ? 'var(--primary-color)' : 'transparent'
                     }}
                 >
-                    <i
-                        className={classNames('layout-menuitem-icon', item?.icon)}
-                        style={{
-                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : undefined
-                        }}
-                    ></i>
+                    {renderMenuIcon()}
                     <span
                         className="layout-menuitem-text"
                         style={{
@@ -225,12 +247,7 @@ const AppMenuitem = (props: AppMenuItemProps) => {
                     })}
                     tabIndex={0}
                 >
-                    <i
-                        className={classNames('layout-menuitem-icon', item?.icon)}
-                        style={{
-                            color: isActiveRoute || isHovered ? 'var(--primary-color)' : undefined
-                        }}
-                    ></i>
+                    {renderMenuIcon()}
                     <span
                         className="layout-menuitem-text"
                         style={{

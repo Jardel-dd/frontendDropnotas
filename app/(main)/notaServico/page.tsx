@@ -59,7 +59,7 @@ import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredEmpres
 
 
 const NOTA_SERVICO_TOTAL_VALUE_PATHS = [
-    'valor_total',
+    'valorTotalNotas',
     'total_valor_notas',
     'totalValorNotas',
     'valor_total_notas',
@@ -1021,7 +1021,6 @@ const NotaServico: React.FC = () => {
         if (!canSearchNotaServico) {
             return null;
         }
-
         return (
             <div className="nota-servico-summary-footer">
                 <div className="nota-servico-summary-mini-field">

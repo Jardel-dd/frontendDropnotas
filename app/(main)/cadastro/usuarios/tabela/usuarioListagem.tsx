@@ -1,6 +1,7 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
+import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from 'primereact/skeleton';
 import { usePermissions } from '@/app/routes/permissoes';
@@ -47,6 +48,18 @@ export function ListarUserConta({
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === 'dark';
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
+    const listLoadingShellStyle = {
+        position: 'relative' as const,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        flex: '1 1 auto',
+        minHeight: 'clamp(24rem, 60vh, 40rem)'
+    };
+    const listLoadingOverlayStyle = {
+        position: 'absolute' as const,
+        inset: 0,
+        zIndex: 3
+    };
 
     const changeStatusActivateandDelete = async (rowData: UsuarioContaEntity) => {
         await handleActiveOrInativeUserConta(
@@ -65,10 +78,10 @@ export function ListarUserConta({
             <Messages ref={msgs} className="custom-messages" />
             <>
                 {isMobile && (
-                    <div>
+                    <div style={listLoadingShellStyle}>
                         <DataTableComponent
                             value={listPaginationUserConta?.content as UsuarioContaEntity[]}
-                            loading={loading}
+                            loading={false}
                             totalRecords={listPaginationUserConta?.size ?? 0}
                             expandedRows={false}
                             setExpandedRows={() => {}}
@@ -128,18 +141,23 @@ export function ListarUserConta({
                                 }
                             ]}
                             listarInativos={listarInativos}
-                            mobileLoadMoreVisible={mobileLoadMoreVisible}
+                            mobileLoadMoreVisible={!loading && mobileLoadMoreVisible}
                             mobileLoadMoreLoading={mobileLoadMoreLoading}
                             onMobileLoadMore={onMobileLoadMore}
                             mobileBodyScroll
                         />
+                        {loading && (
+                            <div style={listLoadingOverlayStyle}>
+                                <LoadingScreen loadingText="Carregando Usuários..." fullScreen={false} />
+                            </div>
+                        )}
                     </div>
                 )}
                 {isDesktop && (
-                    <div>
+                    <div style={listLoadingShellStyle}>
                         <DataTableComponent
                             value={listPaginationUserConta?.content as PerfilUser[]}
-                            loading={loading}
+                            loading={false}
                             totalRecords={listPaginationUserConta?.size ?? 0}
                             expandedRows={false}
                             setExpandedRows={() => {}}
@@ -228,6 +246,11 @@ export function ListarUserConta({
                             ]}
                             listarInativos={listarInativos}
                         />
+                        {loading && (
+                            <div style={listLoadingOverlayStyle}>
+                                <LoadingScreen loadingText="Carregando Usuários..." fullScreen={false} />
+                            </div>
+                        )}
                     </div>
                 )}
             </>

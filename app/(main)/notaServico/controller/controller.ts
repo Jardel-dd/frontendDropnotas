@@ -83,6 +83,17 @@ const normalizeOptionalNumberToZero = (value: unknown): number => {
     const normalized = Number(value);
     return Number.isFinite(normalized) ? normalized : 0;
 };
+const normalizeNotaServicoListPayload = (data: any) => {
+    if (!data || typeof data !== 'object' || !data.notas || typeof data.notas !== 'object') {
+        return data;
+    }
+
+    return {
+        ...data,
+        ...data.notas,
+        notas: data.notas
+    };
+};
 const sanitizeDownloadFileNamePart = (value?: string | null): string => {
     const normalizedValue = (value ?? '')
         .trim()
@@ -485,7 +496,11 @@ export const fetchNotaServico = async (params: NotaFiscalParams, msgs?: any) => 
 
         const requestPromise = api
             .get(`/nfse?${requestKey}`)
-            .then((response) => response.data)
+            .then((response) => {
+                const normalizedResponse = normalizeNotaServicoListPayload(response.data);
+                console.log('Response :', response.data);
+                return normalizedResponse;
+            })
             .finally(() => {
                 inflightNotaServicoRequests.delete(requestKey);
             });

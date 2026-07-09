@@ -1,8 +1,36 @@
+.ordem-servico-mobile-list-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.ordem-servico-mobile-list-shell {
+    position: relative;
+    min-height: clamp(24rem, 60vh, 40rem);
+}
+
 .ordem-servico-mobile-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     padding-bottom: 0.5rem;
+}
+
+.ordem-servico-mobile-loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.ordem-servico-mobile-loading-overlay > .loading-container {
+    height: 100% !important;
+    min-height: 100% !important;
 }
 
 .ordem-servico-mobile-empty {

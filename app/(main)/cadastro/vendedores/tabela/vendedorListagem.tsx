@@ -48,6 +48,18 @@ export function ListarVendedores(
     const { layoutConfig } = useContext(LayoutContext);
     const isDarkMode = layoutConfig.colorScheme === "dark";
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
+    const listLoadingShellStyle = {
+        position: 'relative' as const,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        flex: '1 1 auto',
+        minHeight: 'clamp(24rem, 60vh, 40rem)'
+    };
+    const listLoadingOverlayStyle = {
+        position: 'absolute' as const,
+        inset: 0,
+        zIndex: 3
+    };
 
     const changeStatusActivateandDelete = async (rowData: VendedorEntity) => {
         await handleActiveOrInativeVendedor(
@@ -63,14 +75,12 @@ export function ListarVendedores(
     return (
         <div style={{ marginTop: '0' }}>
             <Messages ref={msgs} className="custom-messages" />
-            {loading ? (<LoadingScreen loadingText={'Carregando Vendedores...'} />) :
-                (
-                    <>
+            <>
                         {isMobile &&
-                            <div>
+                            <div style={listLoadingShellStyle}>
                                 <DataTableComponent
                                     value={listPaginationVendedores?.content as VendedorEntity[]}
-                                    loading={loading}
+                                    loading={false}
                                     totalRecords={listPaginationVendedores?.size ?? 0}
                                     expandedRows={false}
                                     setExpandedRows={() => { }}
@@ -102,18 +112,23 @@ export function ListarVendedores(
                                         },
                                     ]} 
                                     listarInativos={listarInativos}
-                                    mobileLoadMoreVisible={mobileLoadMoreVisible}
+                                    mobileLoadMoreVisible={!loading && mobileLoadMoreVisible}
                                     mobileLoadMoreLoading={mobileLoadMoreLoading}
                                     onMobileLoadMore={onMobileLoadMore}
                                     mobileBodyScroll
                                 />
+                                {loading && (
+                                    <div style={listLoadingOverlayStyle}>
+                                        <LoadingScreen loadingText="Carregando Vendedores..." fullScreen={false} />
+                                    </div>
+                                )}
                             </div>
                         }
                         {isDesktop &&
-                            <div>
+                            <div style={listLoadingShellStyle}>
                                 <DataTableComponent
                                     value={listPaginationVendedores?.content as VendedorEntity[]}
-                                    loading={loading}
+                                    loading={false}
                                     totalRecords={listPaginationVendedores?.size ?? 0}
                                     expandedRows={false}
                                     setExpandedRows={() => { }}
@@ -161,11 +176,14 @@ export function ListarVendedores(
                                     ]}
                                     listarInativos={listarInativos}
                                 />
+                                {loading && (
+                                    <div style={listLoadingOverlayStyle}>
+                                        <LoadingScreen loadingText="Carregando Vendedores..." fullScreen={false} />
+                                    </div>
+                                )}
                             </div>
                         }
-                    </>
-                )
-            }
+            </>
         </div>
     );
 }

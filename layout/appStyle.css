@@ -57,6 +57,23 @@
     color: white;
 }
 
+.layout-menuitem-icon {
+    flex-shrink: 0;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.layout-menuitem-vector-icon {
+    display: inline-block;
+    stroke-width: 1.8;
+    shape-rendering: geometricPrecision;
+}
+
+.layout-menuitem-vector-icon-root {
+    stroke-width: 1.9;
+}
+
 .menu-item-active {
     background-color: var(--primary-color);
     color: white;

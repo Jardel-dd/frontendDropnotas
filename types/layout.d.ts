@@ -158,7 +158,7 @@ export interface MenuProps {
 
 export interface MenuModel {
     label: string;
-    icon?: string;
+    icon?: string | React.ElementType;
     items?: MenuModel[];
     badge?: integer;
     to?: string;

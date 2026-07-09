@@ -2,6 +2,24 @@ import AppSubMenu from './AppSubMenu';
 import { useUserContext } from '@/app/routes/protected/userUserContext';
 import { filterVisibleMenuItems, hasPermissionAccess } from '@/app/routes/permissionRules';
 import { useMemo } from 'react';
+import {
+    Briefcase,
+    Buildings,
+    ChartBar,
+    ClipboardText,
+    CreditCard,
+    CurrencyDollar,
+    Folders,
+    GearSix,
+    House,
+    LockKey,
+    Palette,
+    Receipt,
+    User,
+    UsersThree,
+    Wallet,
+    Wrench
+} from 'phosphor-react';
 
 const AppMenu = () => {
     const { userConta } = useUserContext();
@@ -10,53 +28,53 @@ const AppMenu = () => {
         return filterVisibleMenuItems([
             {
                 label: 'Dashboard',
-                icon: 'pi pi-fw pi-home',
+                icon: House,
                 to: '/dashboard',
                 visible: hasPermissionAccess(userConta, 'dashboard')
             },
             {
                 label: 'Cadastros',
-                icon: 'pi pi-fw pi-plus',
+                icon: Folders,
                 items: [
                     {
                         label: 'Clientes e Fornecedores',
-                        icon: 'pi pi-users',
+                        icon: UsersThree,
                         to: '/cadastro/pessoas',
                         visible: hasPermissionAccess(userConta, 'pessoa')
                     },
                     {
                         label: 'Serviços',
-                        icon: 'pi pi-ticket',
+                        icon: Wrench,
                         to: '/cadastro/servicos',
                         visible: hasPermissionAccess(userConta, 'servico')
                     },
                     {
                         label: 'Vendedores',
-                        icon: 'pi pi-user',
+                        icon: User,
                         to: '/cadastro/vendedores',
                         visible: hasPermissionAccess(userConta, 'vendedor')
                     },
                     {
                         label: 'Usuários',
-                        icon: 'pi pi-users',
+                        icon: UsersThree,
                         to: '/cadastro/usuarios',
                         visible: hasPermissionAccess(userConta, 'usuarioConta')
                     },
                     {
                         label: 'Permissões',
-                        icon: 'pi pi-unlock',
+                        icon: LockKey,
                         to: '/cadastro/permissoes',
                         visible: hasPermissionAccess(userConta, 'perfilUsuario')
                     },
                     {
                         label: 'Forma de Pagamento',
-                        icon: 'pi pi-money-bill',
+                        icon: CurrencyDollar,
                         to: '/cadastro/formaPagamento',
                         visible: hasPermissionAccess(userConta, 'formaPagamento')
                     },
                     {
                         label: 'Categoria Contratos',
-                        icon: 'pi pi-folder',
+                        icon: Folders,
                         to: '/cadastro/categoriaContratos',
                         visible: hasPermissionAccess(userConta, 'categoriaContrato')
                     }
@@ -64,83 +82,83 @@ const AppMenu = () => {
             },
             {
                 label: 'Contratos',
-                icon: 'pi pi-briefcase',
+                icon: Briefcase,
                 to: '/contrato',
                 visible: hasPermissionAccess(userConta, 'contrato')
             },
             {
                 label: 'Ordens de Serviços',
-                icon: 'pi pi-wrench',
+                icon: Wrench,
                 to: '/ordemServicos',
                 visible: hasPermissionAccess(userConta, 'ordemServico')
             },
             {
                 label: 'NFS-e',
-                icon: 'pi pi-book',
+                icon: Receipt,
                 to: '/notaServico',
                 visible: hasPermissionAccess(userConta, 'nfse')
             },
 
             {
                 label: 'Finanças',
-                icon: 'pi pi-money-bill',
+                icon: Wallet,
                 to: '/financas',
                 visible: hasPermissionAccess(userConta, 'financeiro'),
                 items: [
                     {
                         label: 'Contas a Pagar',
-                        icon: 'pi pi-building',
+                        icon: Buildings,
                         to: '/financas/pagar'
                     },
                     {
                         label: 'Contas a Receber',
-                        icon: 'pi pi-palette',
+                        icon: Wallet,
                         to: '/financas/receber'
                     },
                     {
                         label: 'Comissões',
-                        icon: 'pi pi-dollar',
+                        icon: CurrencyDollar,
                         to: '/financas/comissoes'
                     }
                 ]
             },
             {
                 label: 'Relatório',
-                icon: 'pi pi-chart-bar',
+                icon: ChartBar,
                 items: [
                     {
                         label: 'Serviços',
-                        icon: 'pi pi-wrench',
+                        icon: ClipboardText,
                         to: '/relatorios/servicos'
                     },
                     {
                         label: 'Recebimentos',
-                        icon: 'pi pi-wallet',
+                        icon: Wallet,
                         to: '/relatorios/recebimentos'
                     }
                 ]
             },
             {
                 label: 'Assinaturas',
-                icon: 'pi pi-credit-card',
+                icon: CreditCard,
                 to: '/assinaturas',
                 visible: hasPermissionAccess(userConta, 'financeiro')
             },
             {
                 label: 'Configurações',
-                icon: 'pi pi-cog',
+                icon: GearSix,
                 to: '/configuracoes',
                 visible: hasPermissionAccess(userConta, 'empresa') || hasPermissionAccess(userConta, 'is_usuario_principal'),
                 items: [
                     {
                         label: 'Minhas Empresas',
-                        icon: 'pi pi-building',
+                        icon: Buildings,
                         to: '/configuracoes/empresas',
                         visible: hasPermissionAccess(userConta, 'empresa')
                     },
                     {
                         label: 'Temas',
-                        icon: 'pi pi-palette',
+                        icon: Palette,
                         to: '/configuracoes/geral'
                     }
                 ]
