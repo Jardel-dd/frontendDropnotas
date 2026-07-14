@@ -131,6 +131,7 @@ function Input({
                 </div>
                 {useRightButton && outlined && iconRight && !isIconOnly && (
                     <Button
+                        type="button"
                         icon={loading ? 'pi pi-spin pi-spinner' : iconRight}
                         outlined={outlined}
                         onClick={onClick ? onClick : handleSearchClick}

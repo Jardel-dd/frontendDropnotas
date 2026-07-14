@@ -26,8 +26,8 @@ export type ExportarPdfNfsePayload = {
     data_hora_fim?: string;
     referencias?: string[];
     status?: string[];
-    id_empresa?: number;
-    id_cliente?: number;
+    id_empresa?: number | null;
+    id_cliente?: number | null;
 };
 export interface NotaServicoFormProps {
     notaServico: NfsEntity;
@@ -127,6 +127,7 @@ export const createEmptyNfse = () =>
             nome_fantasia: '',
             telefone: 0,
             email: '',
+            regime_especial_tributacao:'',
             prestacao_sus: false,
             optante_simples_nacional: false,
             incentivo_fiscal: false,

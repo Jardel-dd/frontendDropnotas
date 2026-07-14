@@ -421,6 +421,29 @@
   box-shadow: none !important;
 }
 
+.nota-servico-authorized-dialog,
+.nota-servico-authorized-dialog .p-dialog-content,
+.nota-servico-authorized-dialog-content,
+.nota-servico-authorized-dialog-content .grid,
+.nota-servico-authorized-dialog-content .col-12,
+.nota-servico-authorized-dialog-content .md\:col-6,
+.nota-servico-authorized-dialog-card {
+  min-width: 0;
+}
+
+.nota-servico-authorized-dialog-card {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.nota-servico-authorized-dialog-value {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
 @media (max-width: 768px) {
   .nota-servico-authorized-dialog-footer {
     gap: 0.5rem;

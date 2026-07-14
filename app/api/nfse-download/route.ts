@@ -1,6 +1,6 @@
-export const dynamic = 'force-dynamic';
+import { BACKEND_BASE_URL } from '@/app/services/backendBaseUrl';
 
-const BACKEND_BASE_URL = 'https://backend.dropnotas.com';
+export const dynamic = 'force-dynamic';
 
 type DownloadKind = 'pdf' | 'xml' | 'arquivos';
 

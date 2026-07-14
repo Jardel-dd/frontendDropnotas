@@ -326,6 +326,7 @@ export class DetalPrestadorEntity {
     optante_simples_nacional!: boolean;
     incentivo_fiscal!: boolean;
     endereco!: EnderecoEntity;
+    regime_especial_tributacao!:string;
 
     constructor({
         cpf_cnpj,
@@ -338,6 +339,7 @@ export class DetalPrestadorEntity {
         optante_simples_nacional,
         incentivo_fiscal,
         endereco,
+        regime_especial_tributacao
     }: {
         cpf_cnpj: number;
         inscricao_municipal: string;
@@ -349,6 +351,7 @@ export class DetalPrestadorEntity {
         optante_simples_nacional: boolean;
         incentivo_fiscal: boolean;
         endereco: EnderecoEntity;
+        regime_especial_tributacao:string;
     }) {
         Object.assign(this, {
             cpf_cnpj,
@@ -361,6 +364,7 @@ export class DetalPrestadorEntity {
             optante_simples_nacional,
             incentivo_fiscal,
             endereco,
+            regime_especial_tributacao
         });
     }
 };

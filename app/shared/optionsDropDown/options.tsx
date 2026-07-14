@@ -246,6 +246,7 @@ export const tipo_rps = [
     { label: 'Nenhum', value: 'NENHUM ' }
 ];
 export const regimeEspecialTributarioOptionsCompany = [
+    { label: 'Nenhum', value: 'NENHUM' },
     { label: 'Microempresa Municipal', value: 'MICROEMPRESA_MUNICIPAL' },
     { label: 'Estimativa', value: 'ESTIMATIVA' },
     { label: 'Sociedade de Profissionais', value: 'SOCIEDADE_DE_PROFISSIONAIS' },

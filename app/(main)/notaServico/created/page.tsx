@@ -35,6 +35,7 @@ export default function CriarNotaServico() {
                 email: '',
                 prestacao_sus: false,
                 optante_simples_nacional: false,
+                regime_especial_tributacao:'',
                 incentivo_fiscal: false,
                 endereco: new EnderecoEntity({
                     cep: '',

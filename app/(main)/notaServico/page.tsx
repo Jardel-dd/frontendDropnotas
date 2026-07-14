@@ -232,6 +232,7 @@ const NotaServico: React.FC = () => {
                 nome_fantasia: '',
                 telefone: 0,
                 email: '',
+                regime_especial_tributacao:'',
                 prestacao_sus: false,
                 optante_simples_nacional: false,
                 incentivo_fiscal: false,
@@ -1362,6 +1363,7 @@ const NotaServico: React.FC = () => {
                 <Dialog
                     header="Nota fiscal emitida"
                     visible={showAuthorizedNotaDialog}
+                    className="nota-servico-authorized-dialog"
                     onHide={() => {
                         setShowAuthorizedNotaDialog(false);
                         setAuthorizedNota(null);
@@ -1422,7 +1424,7 @@ const NotaServico: React.FC = () => {
                         </div>
                     }
                 >
-                    <div className="flex flex-column gap-4 p-2">
+                    <div className="nota-servico-authorized-dialog-content flex flex-column gap-4 p-2">
                         <div className="flex align-items-center gap-3">
                             <i className="pi pi-check-circle text-green-500" style={{ fontSize: '2rem' }} />
                             <div className="flex flex-column gap-1">
@@ -1432,33 +1434,33 @@ const NotaServico: React.FC = () => {
                         </div>
                         <div className="grid">
                             <div className="col-12 md:col-6">
-                                <div className="border-1 border-200 border-round-xl p-3 surface-50 h-full">
+                                <div className="nota-servico-authorized-dialog-card border-1 border-200 border-round-xl p-3 surface-50 h-full">
                                     <span className="text-600 text-sm block mb-2">Nome da empresa</span>
-                                    <strong className="block">{authorizedNotaEmpresa}</strong>
+                                    <strong className="nota-servico-authorized-dialog-value block">{authorizedNotaEmpresa}</strong>
                                 </div>
                             </div>
                             <div className="col-12 md:col-6">
-                                <div className="border-1 border-200 border-round-xl p-3 surface-50 h-full">
+                                <div className="nota-servico-authorized-dialog-card border-1 border-200 border-round-xl p-3 surface-50 h-full">
                                     <span className="text-600 text-sm block mb-2">Nome do cliente</span>
-                                    <strong className="block">{authorizedNotaCliente}</strong>
+                                    <strong className="nota-servico-authorized-dialog-value block">{authorizedNotaCliente}</strong>
                                 </div>
                             </div>
                             <div className="col-12 md:col-6">
-                                <div className="border-1 border-200 border-round-xl p-3 surface-50 h-full">
+                                <div className="nota-servico-authorized-dialog-card border-1 border-200 border-round-xl p-3 surface-50 h-full">
                                     <span className="text-600 text-sm block mb-2">Data e hora de emissão</span>
-                                    <strong className="block">{formatAuthorizedNotaDateTime(authorizedNota?.data_emissao)}</strong>
+                                    <strong className="nota-servico-authorized-dialog-value block">{formatAuthorizedNotaDateTime(authorizedNota?.data_emissao)}</strong>
                                 </div>
                             </div>
                             <div className="col-12 md:col-6">
-                                <div className="border-1 border-200 border-round-xl p-3 surface-50 h-full">
+                                <div className="nota-servico-authorized-dialog-card border-1 border-200 border-round-xl p-3 surface-50 h-full">
                                     <span className="text-600 text-sm block mb-2">E-mail do tomador</span>
-                                    <strong className="block">{(authorizedNota?.tomador?.contato.email)}</strong>
+                                    <strong className="nota-servico-authorized-dialog-value block">{(authorizedNota?.tomador?.contato.email)}</strong>
                                 </div>
                             </div>
                             <div className="col-12">
-                                <div className="border-1 border-200 border-round-xl p-3 surface-50">
+                                <div className="nota-servico-authorized-dialog-card border-1 border-200 border-round-xl p-3 surface-50">
                                     <span className="text-600 text-sm block mb-2">Valor</span>
-                                    <strong className="block text-xl">{formatAuthorizedNotaValue(authorizedNota?.total_valor_servico)}</strong>
+                                    <strong className="nota-servico-authorized-dialog-value block text-xl">{formatAuthorizedNotaValue(authorizedNota?.total_valor_servico)}</strong>
                                 </div>
                             </div>
                         </div>

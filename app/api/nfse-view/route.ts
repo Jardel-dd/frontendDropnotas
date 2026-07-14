@@ -1,6 +1,7 @@
+import { BACKEND_BASE_URL } from '@/app/services/backendBaseUrl';
+
 export const dynamic = 'force-dynamic';
 
-const BACKEND_BASE_URL = 'https://backend.dropnotas.com';
 const PDF_CONTENT_TYPE = 'application/pdf';
 
 const sanitizeFileName = (value: string | null | undefined, fallback: string) => {

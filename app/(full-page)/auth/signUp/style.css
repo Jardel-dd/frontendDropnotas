@@ -49,6 +49,16 @@
     border-top: 1px solid var(--surface-border, rgba(148, 163, 184, 0.25));
 }
 
+.sign-up-commercial-link {
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+}
+
+.sign-up-commercial-link .p-button-label {
+    white-space: normal;
+}
+
 @media (max-width: 768px) {
     .sign-up-page-shell {
         align-items: stretch;

@@ -153,7 +153,7 @@ export function NotaServicoFields({
                 <div className="col-12 lg:col-3" >
                     <Dropdown
                         id="regime_especial_tributacao"
-                        value={gerarNfse.regime_especial_tributacao ?? ''}
+                        value={gerarNfse.prestador.regime_especial_tributacao ?? ''}
                         options={regimeEspecialTributarioOptionsCompany}
                         onChange={onDropdownChangeRegime}
                         label="Selecione o Regime Tributario"
