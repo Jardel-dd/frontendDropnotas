@@ -8,7 +8,6 @@ import { PrimeReactContext } from 'primereact/api';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { useContext, useEffect, useCallback, useState } from 'react';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
-import { InputSwitch } from 'primereact/inputswitch';
 import { updateStoredUserThemePreferences } from '@/app/utils/themePreferences';
 
 const AppConfig = () => {

@@ -835,15 +835,20 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
 };
 export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, msgs: React.RefObject<Messages | null>) => {
     try {
-        const filledPayload = Object.fromEntries(
-            Object.entries(payload).filter(([, value]) => {
-                if (Array.isArray(value)) {
-                    return value.length > 0;
-                }
-                return value !== undefined && value !== null && value !== '';
-            })
-        );
-        const response = await api.post('/nfse/exportar-pdf', filledPayload, {
+        const requestPayload = {
+            data_hora_inicio: payload.data_hora_inicio ?? '',
+            data_hora_fim: payload.data_hora_fim ?? '',
+            referencias: payload.referencias ?? [],
+            status: payload.status ?? [],
+            id_empresa: payload.id_empresa ?? null,
+            id_cliente: payload.id_cliente ?? null
+        };
+        console.log('[notaServico] Exportar PDF - payload enviado', {
+            endpoint: '/nfse/exportar-pdf',
+            originalPayload: payload,
+            requestPayload
+        });
+        const response = await api.post('/nfse/exportar-pdf', requestPayload, {
             responseType: 'blob'
         });
         const blob = new Blob([response.data], {

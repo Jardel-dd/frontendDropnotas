@@ -22,6 +22,9 @@ export type LoginResponse = {
     refreshToken?: string;
 };
 
+const COMMERCIAL_WHATSAPP_URL =
+    'https://api.whatsapp.com/send/?phone=5521971336076&text=Ol%C3%A1%21+Gostaria+de+um+atendimento.&type=phone_number&app_absent=0';
+
 function SignUp() {
     const router = useRouter();
     const msgs = useRef<Messages>(null);
@@ -120,6 +123,11 @@ function SignUp() {
 
     useEffect(() => {
         const cnpjNumeros = userConta.cnpj?.replace(/\D/g, '') || '';
+
+        if (cnpjNumeros.length < 14 && cnpjBuscado) {
+            setCnpjBuscado('');
+            return;
+        }
 
         if (cnpjNumeros.length === 14 && cnpjNumeros !== cnpjBuscado) {
             const buscarCnpj = async () => {
@@ -279,7 +287,7 @@ function SignUp() {
                         </div>
                     </div>
                      <div className='ml-2 mr-2'>
-                        {/* <Button
+                         {/* <Button
                             type="submit"
                             label={isLoadingBtnCreated ? 'Criando conta...' : 'Criar conta'}
                             icon={isLoadingBtnCreated ? 'pi pi-spin pi-spinner' : undefined}
@@ -294,7 +302,16 @@ function SignUp() {
                                 !userConta.senha ||
                                 !confirmPassword
                             }
-                        /> */}
+                        />  */}
+                        <Button
+                            type="button"
+                            label="Solicite seu periodo de teste com o Comercial!!"
+                            icon="pi pi-whatsapp"
+                            className="mb-4 w-full p-button-outlined p-button-success sign-up-commercial-link"
+                            onClick={() => {
+                                window.open(COMMERCIAL_WHATSAPP_URL, '_blank', 'noopener,noreferrer');
+                            }}
+                        />
                         <div className="text-center ">
                             Já tem uma conta? {'  '}
                             <Link href="/">

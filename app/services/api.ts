@@ -1,4 +1,5 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
+import { BACKEND_BASE_URL } from './backendBaseUrl';
 import { getToken, renewToken } from './token';
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
@@ -6,7 +7,7 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & {
 };
 
 const api = axios.create({
-    baseURL: 'https://backend.dropnotas.com',
+    baseURL: BACKEND_BASE_URL,
     headers: {
         'Content-Type': 'application/json'
     }

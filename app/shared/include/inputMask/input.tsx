@@ -164,6 +164,7 @@ export const InputMaskDrop: React.FC<InputMaskDropProps> = ({
                 </div>
                 {useRightButton && iconRight && (
                     <Button
+                        type="button"
                         icon={loading || isLoading ? 'pi pi-spin pi-spinner' : iconRight}
                         outlined={outlined}
                         onClick={handleSearchClick}
