@@ -103,7 +103,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
             setSelectedCodigoServico(codigoService);
             const updatedCodigoService = servico.copyWith({ item_lista_servico: selectedCodigo });
             setServico(updatedCodigoService);
-            console.log('[Cadastro/Servicos] Codigo do servico selecionado:', {
+            console.log('Codigo do servico selecionado:', {
                 selectedOption: codigoService,
                 item_lista_servico: selectedCodigo
             });
