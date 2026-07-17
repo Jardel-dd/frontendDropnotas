@@ -3,6 +3,7 @@ export class DetalServiceEntity {
     codigo?: string;
     codigo_cnae?: string;
     descricao!: string;
+    descricao_completa?: string;
     valores!: DetalPrestadorValoresEntity;
     iss_retido!: string;
     item_lista_servico!: string;
@@ -18,6 +19,7 @@ export class DetalServiceEntity {
     constructor({
         id_servico,
         descricao,
+        descricao_completa,
         codigo,
         codigo_municipio,
         iss_retido,
@@ -35,6 +37,7 @@ export class DetalServiceEntity {
     }: {
         descricao: string;
         id_servico: number;
+        descricao_completa?: string;
         codigo?: string;
         codigo_municipio?: string;
         iss_retido?: string;
@@ -52,6 +55,7 @@ export class DetalServiceEntity {
     }) {
         Object.assign(this, {
             descricao,
+            descricao_completa,
             id_servico,
             codigo,
             codigo_municipio,
@@ -71,6 +75,7 @@ export class DetalServiceEntity {
     }
     copyWith({
         descricao,
+        descricao_completa,
         id_servico,
         codigo,
         codigo_municipio,
@@ -89,6 +94,7 @@ export class DetalServiceEntity {
     }: {
         descricao?: string;
         id_servico?: number;
+        descricao_completa?: string;
         codigo?: string;
         codigo_municipio?: string;
         iss_retido?: string;
@@ -106,6 +112,7 @@ export class DetalServiceEntity {
     }): DetalServiceEntity {
         return new DetalServiceEntity({
             descricao: descricao ?? this.descricao,
+            descricao_completa: descricao_completa ?? this.descricao_completa,
             id_servico: id_servico ?? this.id_servico,
             codigo: codigo ?? this.codigo,
             codigo_municipio: codigo_municipio ?? this.codigo_municipio,
