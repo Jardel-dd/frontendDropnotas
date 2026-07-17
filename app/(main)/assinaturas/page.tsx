@@ -193,35 +193,6 @@ export default function AssinaturasPage() {
         previousStatusRef.current = activePayment.status;
     }, [activePayment?.status, activePayment?.statusMessage]);
 
-    const headerMessage = useMemo(() => {
-        if (!activePayment) {
-            return {
-                severity: 'info' as const,
-                text: billingReady
-                    ? 'Dados de cobranca confirmados. Agora escolha uma forma de pagamento para gerar a cobranca recorrente.'
-                    : 'Preencha os dados de cobranca para liberar as formas de pagamento.'
-            };
-        }
-
-        if (activePayment.status === 'pending') {
-            return {
-                severity: 'warn' as const,
-                text: 'Existe uma cobrança pendente. Aguarde a confirmação utomática ou cancele para gerar outra.'
-            };
-        }
-
-        if (activePayment.status === 'paid') {
-            return {
-                severity: 'success' as const,
-                text: 'Assinatura ativa. O status continuara sincronizado nesta tela.'
-            };
-        }
-
-        return {
-            severity: 'error' as const,
-            text: 'A cobranca foi cancelada. Revise a forma de pagamento e gere uma nova cobranca.'
-        };
-    }, [activePayment, billingReady]);
 
     const clearError = (field: keyof CheckoutFormErrors) => {
         setFormErrors((previousErrors) => {
@@ -445,8 +416,7 @@ export default function AssinaturasPage() {
             <div className="card styled-container-main-all-routes ">
                 <div className="subscription-layout-grid">
                     <div className="subscription-main-column">
-                        <div className="card subscription-form-card">
-                            <Message severity={headerMessage.severity} text={headerMessage.text} className="subscription-inline-message" />
+                        <div >
                             {cepError && <Message severity="error" text={cepError} className="subscription-inline-message" />}
                             <BillingDataForm
                                 value={billingForm}

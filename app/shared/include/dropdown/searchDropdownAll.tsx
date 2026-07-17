@@ -156,11 +156,18 @@ export const DropdownSearch = <T extends Record<string, any>>({
             try {
                 const data = await fetchAllItems();
                 if (!mounted || !Array.isArray(data)) return;
+                const limitedData = data.slice(0, maxResults);
+
+                setItems((prev) => ensureSelectedInList(
+                    limitedData.length > 0 ? limitedData : prev,
+                    selectedItemRef.current,
+                    optionValueRef.current
+                ));
+                setHasLoadedAllItems(true);
+                hasLoadedAllItemsRef.current = true;
+
                 if (data.length === 1) {
                     didAutoSelectRef.current = true;
-                    setItems(data);
-                    setHasLoadedAllItems(true);
-                    hasLoadedAllItemsRef.current = true;
                     onItemChangeRef.current?.(data[0]);
                 }
             } catch (error) {
@@ -176,7 +183,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
         return () => {
             mounted = false;
         };
-    }, [autoLoadAndSelectSingle, fetchAllItems]);
+    }, [autoLoadAndSelectSingle, fetchAllItems, maxResults]);
 
     const selectedValue = optionValue && selectedItem ? selectedItem[optionValue] ?? null : selectedItem ?? null;
     useEffect(() => {
@@ -296,7 +303,7 @@ export const DropdownSearch = <T extends Record<string, any>>({
         }
 
         void loadAllRef.current();
-    }, [loadOnMount]);
+    }, [fetchItemByValue, loadOnMount]);
 
     const loadAllIfNeeded = async () => {
         if (loadingRef.current) return;

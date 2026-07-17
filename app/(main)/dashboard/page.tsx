@@ -24,8 +24,6 @@ const ComponentDashboard: React.FC = () => {
     const isDesktop = useIsDesktop();
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(false);
-    const [reloadKeyPessoa, setReloadKeyPessoa] = useState(0);
-    const [reloadKeyEmpresa, setReloadKeyEmpresa] = useState(0);
     const [relatorio, setRelatorio] = useState<any | null>(null);
     const [filterType, setFilterType] = useState<string | null>(null);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -73,6 +71,20 @@ const ComponentDashboard: React.FC = () => {
             percentual_desconto_condicionado: 0
         })
     );
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        const lastSuccessfulLoginResponse = window.sessionStorage.getItem('lastSuccessfulLoginResponse');
+        if (!lastSuccessfulLoginResponse) {
+            return;
+        }
+        try {
+            console.log(' Payload de sucesso no login:', JSON.parse(lastSuccessfulLoginResponse));
+        } catch {
+        }
+    }, []);
+
     const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
         let value = event.target.value;
         if (event.target.type === 'checkbox' || event.target.type === 'switch') {

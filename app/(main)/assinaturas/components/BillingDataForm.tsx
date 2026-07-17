@@ -37,7 +37,7 @@ export default function BillingDataForm({
     const enderecoErrors = Object.fromEntries(Object.entries(errors).filter(([, error]) => typeof error === 'string')) as Record<string, string>;
 
     return (
-        <div className="subscription-billing-section">
+        <div className="card">
             <div className="subscription-section-header">
                 <h3>Dados de cobrança</h3>
                 <p>Defina quem será cobrado e complete o endereço usando a mesma base de CEP e localização do sistema.</p>

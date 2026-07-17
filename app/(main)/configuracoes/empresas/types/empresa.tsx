@@ -28,6 +28,7 @@ export interface EmpresaDropdownFieldProps {
     loadOnMount?: boolean;
     showAddButton?: boolean;
     autoLoadAndSelectSingle?: boolean;
+    reloadAllOnShow?: boolean;
 }
 
 export interface EmpresaFormProps {

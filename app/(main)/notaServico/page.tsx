@@ -1379,7 +1379,7 @@ const NotaServico: React.FC = () => {
                                     <>
                                         {downloadXmlButton(authorizedNota as NfsEntity, msgs, {
                                             label: 'XML',
-                                            className: 'p-button-outlined p-button-info nota-servico-authorized-dialog-button',
+                                            className: 'p-button-outlined p-button-info nota-servico-authorized-dialog-button nota-servico-authorized-dialog-download-button',
                                             style: {
                                                 width: 'auto',
                                                 height: 'auto',
@@ -1388,7 +1388,7 @@ const NotaServico: React.FC = () => {
                                         })}
                                         {downloadPdfButton(authorizedNota as NfsEntity, msgs, {
                                             label: 'PDF',
-                                            className: 'p-button-outlined nota-servico-authorized-dialog-button',
+                                            className: 'p-button-outlined nota-servico-authorized-dialog-button nota-servico-authorized-dialog-download-button',
                                             style: {
                                                 width: 'auto',
                                                 height: 'auto',
@@ -1396,8 +1396,8 @@ const NotaServico: React.FC = () => {
                                             }
                                         })}
                                         {downloadArquivosButton(authorizedNota as NfsEntity, msgs, {
-                                            label: 'PDF e XML',
-                                            className: 'p-button-outlined p-button-success nota-servico-authorized-dialog-button',
+                                            label: isMobile ? 'XML e PDF' : 'PDF e XML',
+                                            className: 'p-button-outlined p-button-success nota-servico-authorized-dialog-button nota-servico-authorized-dialog-download-button',
                                             style: {
                                                 width: 'auto',
                                                 height: 'auto',
@@ -1413,7 +1413,7 @@ const NotaServico: React.FC = () => {
                                 label="Fechar"
                                 outlined
                                 severity="secondary"
-                                className="nota-servico-authorized-dialog-button"
+                                className="nota-servico-authorized-dialog-button nota-servico-authorized-dialog-close-button"
                                 style={{ boxShadow: 'none' }}
                                 onClick={() => {
                                     setShowAuthorizedNotaDialog(false);
@@ -1496,6 +1496,7 @@ const NotaServico: React.FC = () => {
                                     <EmpresaDropdownField
                                         id="selectedEmpresa"
                                         reloadKey={reloadKeyEmpresa}
+                                        reloadAllOnShow={false}
                                         selectedEmpresa={selectedEmpresaDialog}
                                         onEmpresaChange={handleEmpresaChangeDialog}
                                         showAddButton
