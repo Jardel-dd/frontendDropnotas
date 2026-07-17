@@ -628,9 +628,9 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                     </div>
                     <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
                         {showBTNPGCreatedAll &&
-                         <BTNPGCreatedAll onClick={handleSubmit} label="Emitir Ordem" disabled={isSubmitDisabled} icon="pi pi-save" />}
+                         <BTNPGCreatedAll onClick={handleSubmit} label="Criar" disabled={isSubmitDisabled} icon="pi pi-save" />}
                         {showBTNPGCreatedDialog && 
-                        <BTNPGCreatedDialog onClick={handleSubmit} label="Emitir Ordem" disabled={isSubmitDisabled} icon="pi pi-save" onBackClick={onBackClick} onClose={onClose} />}
+                        <BTNPGCreatedDialog onClick={handleSubmit} label="Criar" disabled={isSubmitDisabled} icon="pi pi-save" onBackClick={onBackClick} onClose={onClose} />}
                     </div>
                 </div>
                 <DialogFilter

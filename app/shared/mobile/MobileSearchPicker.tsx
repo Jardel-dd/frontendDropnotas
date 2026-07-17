@@ -156,9 +156,10 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
                     return;
                 }
 
+                setOptions(data);
+
                 if (data.length === 1) {
                     onItemChangeRef.current(data[0]);
-                    setOptions(data);
                 }
             } catch (error) {
                 console.error('Erro ao verificar selecao automatica no seletor mobile:', error);

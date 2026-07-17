@@ -223,13 +223,6 @@
     font-weight: 600;
 }
 
-.subscription-billing-section {
-    margin-top: 1rem;
-    padding: 1rem;
-    border-radius: 22px;
-    background: linear-gradient(180deg, rgba(255, 247, 235, 0.55), rgba(255, 255, 255, 0.98));
-    border: 1px solid rgba(217, 138, 0, 0.14);
-}
 
 .subscription-toggle-group {
     display: inline-flex;

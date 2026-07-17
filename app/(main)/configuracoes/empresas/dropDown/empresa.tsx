@@ -23,6 +23,7 @@ export default function EmpresaDropdownField({
     loadOnMount = false,
     showAddButton = false,
     autoLoadAndSelectSingle = true,
+    reloadAllOnShow = true,
     onAddClick
 }: EmpresaDropdownFieldProps & { required?: boolean; }) {
     const queryClient = useQueryClient();
@@ -70,7 +71,7 @@ export default function EmpresaDropdownField({
             required={required}
             topLabel={topLabel}
             autoLoadAndSelectSingle={autoLoadAndSelectSingle}
-            reloadAllOnShow
+            reloadAllOnShow={reloadAllOnShow}
         />
     );
 }

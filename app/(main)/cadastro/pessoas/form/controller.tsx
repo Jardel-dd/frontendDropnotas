@@ -734,9 +734,9 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                 onDropdownChangeEndereco={handleDropdownChangeEndereco}
                                 getCitiesFromState={getCitiesFromState}
                                 loadingCep={loadingCep}
-                                 nomePaisObrigatorio
-    codigoPaisObrigatorio
-    codigoMunicipioObrigatorio
+                                nomePaisObrigatorio
+                                codigoPaisObrigatorio
+                                codigoMunicipioObrigatorio
                             />
                         </div>
                     </div>
