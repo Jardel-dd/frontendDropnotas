@@ -247,13 +247,19 @@ export const tipo_rps = [
 ];
 export const regimeEspecialTributarioOptionsCompany = [
     { label: 'Nenhum', value: 'NENHUM' },
+    { label: 'Simples Nacional', value: 'SIMPLES_NACIONAL' },
     { label: 'Microempresa Municipal', value: 'MICROEMPRESA_MUNICIPAL' },
     { label: 'Estimativa', value: 'ESTIMATIVA' },
     { label: 'Sociedade de Profissionais', value: 'SOCIEDADE_DE_PROFISSIONAIS' },
     { label: 'Cooperativa', value: 'COOPERATIVA' },
     { label: 'Micro Empresário Individual', value: 'MICROEMPRESARIO_INDIVIDUAL ' },
-    { label: 'Microempreendedor e Empresa de Pequeno Porte', value: 'MICROEMPRESARIO_E_EMPRESA_DE_PEQUENO_PORTE' },
-    { label: 'Numero 8', value: 'NUMERO_8' }
+    { label: 'Microempreendedor e Empresa de Pequeno Porte', value: 'MICROEMPRESARIO_EMPRESA_PP' },
+    { label: 'Lucro Real', value: 'LUCRO_REAL' },
+    { label: 'lucro Presumido', value: 'LUCRO_PRESUMIDO' },
+    { label: 'Empresa Individual Reli', value: 'EMPRESA_INDIVIDUAL_RELI' },
+    { label: 'Empresa Pequeno Porte', value: 'EMPRESA_PP' },
+    { label: 'MicroEmpresário', value: 'MICROEMPRESARIO' },
+    { label: 'Outros', value: 'OUTROS ' }
 ];
 export const filterOptions = [
     { label: 'Ambos', value: 'AMBOS' },

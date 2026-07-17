@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IconPorcentagem, IconReal } from '@/app/utils/icons/icons';
 import Input from '@/app/shared/include/input/input-all';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
@@ -6,10 +6,11 @@ import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { exigibilidadeISSServico, issRetido, responsavelRetencao, tributacaoISSQN } from '@/app/shared/optionsDropDown/options';
-import ServicoDropdownField from '@/app/(main)/cadastro/servicos/dropdown/servico';
 import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation';
 import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
+import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
+import { TableService } from '@/app/entity/TableServiceEntity';
 
 type Props = {
     nfseGerada: any;
@@ -20,9 +21,47 @@ type Props = {
 };
 
 export default function BlocoServico({ nfseGerada, handleNumberChange, handleDropdownChange, handleAllChanges, errors }: Props) {
-    const [selectedService, setSelectedService] = useState<ServiceEntity | null>(null);
+    const [selectedService, setSelectedService] = useState<TableService | null>(null);
     const [selectedCodigoNBS, setSelectedCodigoNBS] = useState<ServiceEntity | null>(null);
     const servicoErrors = getScopedErrors(errors, 'servico');
+    const selectedServiceCode = nfseGerada.servico?.item_lista_servico?.toString().trim() ?? '';
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const syncSelectedService = async () => {
+            if (!selectedServiceCode) {
+                setSelectedService(null);
+                return;
+            }
+
+            if (selectedService?.codigo === selectedServiceCode) {
+                return;
+            }
+
+            const serviceOptions = await fetchFilteredTabelaServico(selectedServiceCode);
+
+            if (!isMounted) {
+                return;
+            }
+
+            const matchedService =
+                serviceOptions.find((service) => service.codigo === selectedServiceCode) ??
+                new TableService({
+                    id: 0,
+                    codigo: selectedServiceCode,
+                    descricao: selectedServiceCode
+                });
+
+            setSelectedService(matchedService);
+        };
+
+        void syncSelectedService();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [selectedService?.codigo, selectedServiceCode]);
 
     return (
         <div className="grid formgrid ">
@@ -126,39 +165,33 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <ServicoDropdownField
-                    id="item_lista_servico"
-                    selectedService={selectedService}
-                    onServiceChange={(service) => {
-                        setSelectedService(service);
-                        handleAllChanges(
-                            {
-                                target: {
-                                    id: 'item_lista_servico',
-                                    value: service?.item_lista_servico ?? '',
-                                    type: 'text'
-                                }
-                            },
-                            'servico'
-                        );
-                        handleAllChanges(
-                            {
-                                target: {
-                                    id: 'codigo_cnae',
-                                    value: service?.codigo_cnae ?? '',
-                                    type: 'text'
-                                }
-                            },
-                            'servico'
-                        );
-                    }}
-                    placeholder="Selecione um Serviço"
-                    topLabel="Descrição da Atividade do Serviço:"
-                    showTopLabel
-                    required
-                    hasError={!!servicoErrors.item_lista_servico}
-                    errorMessage={servicoErrors.item_lista_servico}
-                />
+                 <DropdownSearch<TableService>
+                                    id="item_lista_servico"
+                                    selectedItem={selectedService}
+                                    onItemChange={(service) => {
+                                        setSelectedService(service);
+                                        handleAllChanges(
+                                            {
+                                                target: {
+                                                    id: 'item_lista_servico',
+                                                    value: service?.codigo ?? '',
+                                                    type: 'text'
+                                                }
+                                            },
+                                            'servico'
+                                        );
+                                    }}
+                                    fetchAllItems={fetchAllTabelaServico}
+                                    fetchFilteredItems={fetchFilteredTabelaServico}
+                                    optionValue="codigo"
+                                    optionLabel="descricao"
+                                    hasError={!!servicoErrors.item_lista_servico}
+                                    errorMessage={servicoErrors.item_lista_servico}
+                                    topLabel="Código do Serviço:"
+                                    showTopLabel
+                                    required
+                                />
+               
             </div>
             <div className="col-12 lg:col-3">
                 <Dropdown
@@ -197,7 +230,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     errorMessage={servicoErrors.codigo_tributacao_municipio}
                     topLabel="Código do Tributação Municipal:"
                     showTopLabel
-                    required
                 />
             </div>
             <div className="col-12 lg:col-3">
