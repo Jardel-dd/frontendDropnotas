@@ -7,6 +7,7 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
+import { Mandatory } from '../mandatory/InputMandatory';
 
 type MobileSearchPickerProps<T extends Record<string, any>> = {
     selectedItem: T | null;
@@ -21,6 +22,8 @@ type MobileSearchPickerProps<T extends Record<string, any>> = {
         items: T[];
         hasMore: boolean;
     }>;
+    showTopLabel?: boolean;
+    required?: boolean;
     optionLabel: keyof T;
     optionValue?: keyof T;
     dialogTitle: string;
@@ -83,6 +86,8 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
     onEditClick,
     dialogPosition,
     getOptionSubtitle,
+    required,
+    showTopLabel = true,
     autoLoadAndSelectSingle = false
 }: MobileSearchPickerProps<T>) {
     const isMobile = useIsMobile();
@@ -369,7 +374,12 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
         <>
             <div className="mobile-search-picker-field">
                 <div style={{ height: 'var(--form-label-height)', display: 'flex', alignItems: 'center' }}>
-                    <label className="filter-label">{topLabel}</label>
+                    {showTopLabel && topLabel ? (
+                        <label className="filter-label">
+                            {topLabel}
+                            {required && <Mandatory />}
+                        </label>
+                    ) : null}
                 </div>
                 <div className={`mobile-search-picker-trigger ${hasError ? 'mobile-search-picker-trigger--error' : ''}`}>
                     <button type="button" className="mobile-search-picker-trigger-button" onClick={handleOpen}>

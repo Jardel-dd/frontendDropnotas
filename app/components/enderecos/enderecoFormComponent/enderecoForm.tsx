@@ -1,5 +1,4 @@
 import '@/app/styles/styledGlobal.css';
-import { Divider } from 'primereact/divider';
 import { statesMaps } from '@/app/entity/maps';
 import Input from '@/app/shared/include/input/input-all';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
@@ -21,6 +20,7 @@ type Props = {
     nomePaisObrigatorio?: boolean;
     codigoPaisObrigatorio?: boolean;
     codigoMunicipioObrigatorio?: boolean;
+    compactSection?: boolean;
 };
 
 export default function EnderecoForm({
@@ -38,16 +38,14 @@ export default function EnderecoForm({
     telefoneObrigatorio = false,
     nomePaisObrigatorio = false,
     codigoPaisObrigatorio = false,
-    codigoMunicipioObrigatorio = false
+    codigoMunicipioObrigatorio = false,
+    compactSection = false
 }: Props) {
     const enderecoSafe = endereco || {};
 
     return (
         <>
-            <Divider align="center" className="form-divider">
-                <span>Endereço</span>
-            </Divider>
-            <div className="grid formgrid mt-3">
+            <div className={`grid formgrid ${compactSection ? '' : 'mt-3'}`}>
                 <div className="col-12  lg:col-3 ">
                     <InputMaskDrop
                         id="cep"

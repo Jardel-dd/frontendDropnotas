@@ -13,6 +13,7 @@ export function VendedorFields({
     errors,
     loadingCnpj,
     hasFocused,
+    compactSection = false,
     onFocusFirstField,
     onChange,
     onDropdownChange,
@@ -21,7 +22,7 @@ export function VendedorFields({
     onValidateTelefone
 }: VendedorFieldsProps) {
     return (
-        <div className="grid formgrid mt-3">
+        <div className={`grid formgrid ${compactSection ? '' : 'mt-3'}`}>
             <div className="col-12 lg:col-3 ">
                 <Dropdown
                     id="tipo_pessoa"
