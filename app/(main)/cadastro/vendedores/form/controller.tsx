@@ -17,6 +17,40 @@ import { validateFieldsVendedor } from '@/app/(main)/cadastro/vendedores/control
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import {createEmptyVendedor, FormCreatedVendedorProps, VendedorFormProps, VendedorFormRef} from '../types/vendedor';
 import { createdVendedor, fetchVendedor, updateVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
+import { SectionCard, SectionGrid } from '@/app/components/cardForm/SectionCard';
+import { useSectionCardFlow } from '@/app/components/cardForm/useSectionCardFlow';
+
+const vendedorSectionFlowConfig = [
+    {
+        id: 'informacoes-vendedor',
+        errorFields: [
+            'tipoPessoa',
+            'cnpj',
+            'cpf',
+            'rg',
+            'razao_social',
+            'percentual_comissao',
+            'telefone',
+            'documento_estrangeiro',
+            'documentoEstrangeiro',
+            'pais'
+        ]
+    },
+    {
+        id: 'endereco',
+        errorFields: [
+            'cep',
+            'logradouro',
+            'numero',
+            'bairro',
+            'uf',
+            'municipio',
+            'codigo_municipio',
+            'nome_pais',
+            'codigo_pais'
+        ]
+    }
+];
 
 export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormProps>(
     ({ initialId, preloadedVendedor, msgs, onVendedorChange, 
@@ -37,6 +71,14 @@ export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormPro
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [stateDisableBtnCreatedVendedor, setStateDisableBtnCreatedVendedor] = useState(false);
         const [vendedor, setVendedor] = useState<VendedorEntity>(createEmptyVendedor());
+        const {
+            isSectionExpanded,
+            toggleSection,
+            syncExpandedSectionWithErrors
+        } = useSectionCardFlow({
+            sections: vendedorSectionFlowConfig,
+            initialExpandedId: 'informacoes-vendedor'
+        });
         const handleAllChanges = (event: any) => {
             const id = event?.target?.id;
             const type = event?.target?.type;
@@ -159,15 +201,20 @@ export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormPro
             if (Object.values(touchedFields).some((touched) => touched)) {
                 validateFieldsVendedor(vendedor, setErrors, msgs);
             }
-        }, [vendedor]);
+        }, [msgs, touchedFields, vendedor]);
         useEffect(() => {
             onVendedorChangeRef.current?.(vendedor);
         }, [vendedor]);
         useEffect(() => {
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
+        useEffect(() => {
+            if (Object.keys(errors).length > 0) {
+                syncExpandedSectionWithErrors(errors);
+            }
+        }, [errors, syncExpandedSectionWithErrors]);
         if (isLoading && vendedorId) {
-            return <LoadingScreen loadingText="Carregando informacoes do Vendedor selecionado..." />;
+            return <LoadingScreen loadingText="Carregando informações do Vendedor selecionado..." />;
         }
         const isSubmitDisabled =
             stateDisableBtnCreatedVendedor ||
@@ -187,31 +234,53 @@ export const VendedorFormContainer = forwardRef<VendedorFormRef, VendedorFormPro
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="scrollable-container shared-form-content">
                     <div className="custom-flex-col">
-                        <VendedorFields
-                            vendedor={vendedor}
-                            errors={errors}
-                            loadingCnpj={loadingCnpj}
-                            hasFocused={hasFocused}
-                            onFocusFirstField={() => setHasFocused(true)}
-                            onChange={handleAllChanges}
-                            onDropdownChange={handleDropdownChange}
-                            onSearchCnpj={handleSearchVendedorCnpj}
-                            onValidateCnpj={handleValidateCnpj}
-                            onValidateTelefone={handleValidateTelefone}
-                        />
-                        <EnderecoForm
-                            endereco={vendedor?.endereco}
-                            telefone={vendedor?.telefone}
-                            errors={errors}
-                            onChange={handleAllChanges}
-                            onCepSearch={() => handleSearchCep(vendedor.endereco?.cep || '', setLoadingCep, setVendedor, setError, msgs)}
-                            onDropdownChange={handleDropdownChange}
-                            onDropdownChangeEndereco={handleDropdownChangeEndereco}
-                            getCitiesFromState={getCitiesFromState}
-                            loadingCep={loadingCep}
-                            exibirTelefone={false}
-                            nomePaisObrigatorio
-                        />
+                        <SectionCard
+                            icon={<i className="pi pi-user" />}
+                            title="Informações do Vendedor"
+                            collapsible
+                            expanded={isSectionExpanded('informacoes-vendedor')}
+                            onToggle={() => toggleSection('informacoes-vendedor')}
+                        >
+                            <SectionGrid minColumnWidth="220px">
+                                <VendedorFields
+                                    vendedor={vendedor}
+                                    errors={errors}
+                                    loadingCnpj={loadingCnpj}
+                                    hasFocused={hasFocused}
+                                    compactSection
+                                    onFocusFirstField={() => setHasFocused(true)}
+                                    onChange={handleAllChanges}
+                                    onDropdownChange={handleDropdownChange}
+                                    onSearchCnpj={handleSearchVendedorCnpj}
+                                    onValidateCnpj={handleValidateCnpj}
+                                    onValidateTelefone={handleValidateTelefone}
+                                />
+                            </SectionGrid>
+                        </SectionCard>
+                        <SectionCard
+                            icon={<i className="pi pi-map-marker" />}
+                            title="Endereco"
+                            collapsible
+                            expanded={isSectionExpanded('endereco')}
+                            onToggle={() => toggleSection('endereco')}
+                        >
+                            <SectionGrid minColumnWidth="220px">
+                                <EnderecoForm
+                                    endereco={vendedor?.endereco}
+                                    telefone={vendedor?.telefone}
+                                    errors={errors}
+                                    onChange={handleAllChanges}
+                                    onCepSearch={() => handleSearchCep(vendedor.endereco?.cep || '', setLoadingCep, setVendedor, setError, msgs)}
+                                    onDropdownChange={handleDropdownChange}
+                                    onDropdownChangeEndereco={handleDropdownChangeEndereco}
+                                    getCitiesFromState={getCitiesFromState}
+                                    loadingCep={loadingCep}
+                                    exibirTelefone={false}
+                                    nomePaisObrigatorio
+                                    compactSection
+                                />
+                            </SectionGrid>
+                        </SectionCard>
                     </div>
                 </div>
                 <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>

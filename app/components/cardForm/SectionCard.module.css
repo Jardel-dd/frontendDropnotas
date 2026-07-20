@@ -1,0 +1,184 @@
+.card {
+  --section-card-bg: var(--surface-card, var(--p-content-background, #ffffff));
+  --section-card-border: var(--surface-border, var(--p-content-border-color, #dfe7ef));
+  --section-card-text: var(--text-color, var(--p-text-color, #1f2937));
+  --section-card-icon-bg: rgba(16, 185, 129, 0.12);
+  --section-card-icon-color: var(--primary-color, #10b981);
+  --section-card-chevron-color: var(--text-color-secondary, #94a3b8);
+  --section-card-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+  background: var(--section-card-bg) !important;
+  border: 1px solid var(--section-card-border) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--section-card-shadow);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.card:global(.p-card) {
+  background: var(--section-card-bg) !important;
+  border: 1px solid var(--section-card-border) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--section-card-shadow) !important;
+}
+
+.cardCollapsed:global(.p-card) {
+  height: 60px;
+}
+
+.cardExpanded:global(.p-card) {
+  height: auto;
+}
+
+.card :global(.p-card-body),
+.card :global(.p-card-content),
+.card :global(.p-card-header) {
+  background: transparent !important;
+
+}
+
+.card :global(.p-card-body) {
+  padding: 0.95rem 1.25rem 1.15rem !important;
+
+}
+.cardCollapsed :global(.p-card-body) {
+  padding-top: 0.85rem !important;
+  padding-bottom: 0.85rem !important;
+}
+.card :global(.p-card-content) {
+  padding: 0 !important;
+}
+
+.cardCollapsible {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  margin-left: 0.5rem;
+  padding: 1rem;
+}
+
+.header,
+.headerButton {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  margin-left: 0.5rem;
+}
+
+.headerButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  height: 100%;
+  margin-left: 0.5rem;
+
+}
+
+.headerButtonCollapsed {
+  min-height: 1.95rem;
+  align-items: center;
+}
+
+.headerButtonExpanded {
+  align-items: flex-start;
+  max-width: 98%;
+}
+
+.headerMain {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  width: 80%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+
+}
+
+.iconWrap {
+  width: 2rem;
+  height: 2rem;
+  min-width: 1.78rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  background: var(--section-card-icon-bg);
+  color: var(--section-card-icon-color);
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.12);
+  
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--section-card-text);
+  margin-left: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+.chevron {
+  color: var(--section-card-chevron-color);
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.chevronCollapsed {
+  transform: rotate(-90deg);
+}
+
+.content {
+  overflow: hidden;
+}
+
+.contentExpanded {
+  padding-top: 0.3rem;
+  padding-left: 0.15rem;
+}
+
+.contentCollapsed {
+  display: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--min-col, 210px), 1fr));
+  gap: 0;
+}
+
+:global(.dark) .card,
+:global(.p-dark) .card,
+:global([data-theme="dark"]) .card {
+  --section-card-bg: linear-gradient(180deg, rgba(52, 73, 102, 0.42) 0%, rgba(43, 63, 90, 0.48) 100%);
+  --section-card-border: rgba(148, 163, 184, 0.16);
+  --section-card-text: var(--text-color, var(--p-text-color, #e5eef8));
+  --section-card-icon-bg: rgba(16, 185, 129, 0.14);
+  --section-card-icon-color: #8ee3c1;
+  --section-card-chevron-color: rgba(229, 238, 248, 0.72);
+  --section-card-shadow: 0 8px 20px rgba(3, 8, 20, 0.18);
+}
+
+:global(.dark) .iconWrap,
+:global(.p-dark) .iconWrap,
+:global([data-theme="dark"]) .iconWrap {
+  box-shadow: inset 0 0 0 1px rgba(142, 227, 193, 0.16);
+}
+
+@media (max-width: 480px) {
+  .card :global(.p-card-body) {
+    padding: 0 1rem !important;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

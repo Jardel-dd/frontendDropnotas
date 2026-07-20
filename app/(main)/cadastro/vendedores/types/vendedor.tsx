@@ -12,6 +12,7 @@ export interface VendedorFieldsProps {
     errors: Record<string, string>;
     loadingCnpj: boolean;
     hasFocused: boolean;
+    compactSection?: boolean;
     onFocusFirstField: () => void;
     onChange: (event: any) => void;
     onDropdownChange: (event: DropdownChangeEvent) => void;

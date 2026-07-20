@@ -38,7 +38,9 @@ export const validateFieldsContrato = (
     } else if (!contrato.valor_servico || String(contrato.valor_servico).trim().length < 1) {
         newErrors.valor_servico = 'Digite um valor valído.';
         valid = false;
- 
+          } else if (!contrato.periodicidade) {
+        newErrors.periodicidade = 'Selecione o periodo .';
+        valid = false;
     } else if (!hasSelectedCompany && !hasSavedCompanyId) {
         newErrors.selectedCompany = 'Selecione a Empresa.';
         valid = false;
@@ -51,9 +53,7 @@ export const validateFieldsContrato = (
     } else if (!hasSelectedFormaPagamento && !hasSavedFormaPagamentoId) {
         newErrors.selectedFormadePagamento = 'Selecione a forma de pagamento.';
         valid = false;
-    } else if (!contrato.periodicidade) {
-        newErrors.periodicidade = 'Selecione o periodo .';
-        valid = false;
+  
     } else if (!hasSelectedPessoa && !hasSavedPessoaIds) {
         newErrors.selectedPessoa = 'Selecione Cliente ou Fornecedor.';
         valid = false;

@@ -20,48 +20,21 @@ import FormaPagamentoDropdownField from '@/app/(main)/cadastro/formaPagamento/dr
 import { fetchFilteredPessoa, fetchPessoaMobilePage, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { fetchFilteredService, fetchServiceMobilePage, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { fetchFilteredVendedor, fetchVendedorMobilePage, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import {  fetchCompanyMobilePage, fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { fetchCompanyMobilePage, fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 export type { FormCreatedOrdemServicoProps, OrdemServicoFieldsProps, OrdemServicoFormProps, OrdemServicoFormRef } from '../types/ordemServico';
-import { fetchFilteredFormaPagamento,  fetchFormaPagamentoMobilePage,  listTheFormaPagamento } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
+import { fetchFilteredFormaPagamento, fetchFormaPagamentoMobilePage, listTheFormaPagamento } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
 
-export function OrdemServicoFields({
+export function OrdemServicoInformacoesFields({
     emitirOS,
     errors,
-    reloadKeyPessoa,
-    reloadKeyEmpresa,
-    reloadKeyServico,
-    reloadKeyVendedor,
-    reloadKeyFormaPagamento,
-    selectedCliente,
-    selectedEmpresa,
-    selectedServico,
-    selectedVendedor,
-    selectedFormaPagamento,
     onChange,
     onDateChange,
-    onEmpresaChange,
-    onPessoaChange,
-    onVendedorChange,
-    onFormaPagamentoChange,
-    onServicoChange,
-    onAddEmpresa,
-    onEditEmpresa,
-    onAddPessoa,
-    onEditPessoa,
-    onAddVendedor,
-    onEditVendedor,
-    onAddFormaPagamento,
-    onEditFormaPagamento,
-    onAddServico,
-    onEditServico,
     onValidateDescricao
-}: OrdemServicoFieldsProps) {
-    const isMobile = useIsMobile();
-    const isDesktop = useIsDesktop();
+}: Pick<OrdemServicoFieldsProps, 'emitirOS' | 'errors' | 'onChange' | 'onDateChange' | 'onValidateDescricao'>) {
     return (
         <>
-            <div className="grid formgrid">
-                <div className="col-12 lg:col-3">
+        <div className="grid formgrid w-full">
+  <div className="col-12 lg:col-2">
                     <Input
                         value={emitirOS.numero || ''}
                         onChange={onChange}
@@ -74,7 +47,10 @@ export function OrdemServicoFields({
                         topLabel="Número:"
                     />
                 </div>
-                <div className="col-12 lg:col-12 ">
+        </div>
+            <div className="grid formgrid w-full">
+              
+                <div className="col-12 lg:col-10 ">
                     <Input
                         value={emitirOS.descricao || ''}
                         onChange={onChange}
@@ -89,192 +65,7 @@ export function OrdemServicoFields({
                         onBlur={onValidateDescricao}
                     />
                 </div>
-                {isDesktop && (
-                    <>
-                        <div className="col-12 lg:col-4">
-                            <EmpresaDropdownField
-                                selectedEmpresa={selectedEmpresa}
-                                onEmpresaChange={onEmpresaChange}
-                                reloadKey={reloadKeyEmpresa}
-                                hasError={!!errors.selectedEmpresa}
-                                errorMessage={errors.selectedEmpresa}
-                                showAddButton
-                                onAddClick={onAddEmpresa}
-                                onEditClick={onEditEmpresa}
-                                autoSelectSingle
-                                required
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <ServicoDropdownField
-                                id="selectedService"
-                                selectedService={selectedServico}
-                                onServiceChange={onServicoChange}
-                                reloadKey={reloadKeyServico}
-                                fetchAllItems={listTheService}
-                                fetchFilteredItems={fetchFilteredService}
-                                placeholder="Selecione o Serviço"
-                                hasError={!!errors.selectedService}
-                                errorMessage={errors.selectedService}
-                                autoSelectSingle
-                                showAddButton
-                                onAddClick={onAddServico}
-                                onEditClick={onEditServico}
-                                showTopLabel
-                                required
-                                topLabel="Serviço:"
-                                autoLoadAndSelectSingle={false}
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <PessoaDropdownField
-                                id="selectedCliente"
-                                selectedPessoa={selectedCliente}
-                                onPessoaChange={onPessoaChange}
-                                reloadKey={reloadKeyPessoa}
-                                hasError={!!errors.selectedCliente}
-                                errorMessage={errors.selectedCliente}
-                                placeholder="Selecione o Cliente ou Fornecedor"
-                                autoSelectSingle
-                                showAddButton
-                                onAddClick={onAddPessoa}
-                                onEditClick={onEditPessoa}
-                                required
-                                topLabel="Cliente ou Fornecedor:"
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <FormaPagamentoDropdownField
-                                selectedFormaPagamento={selectedFormaPagamento}
-                                onFormaPagamentoChange={onFormaPagamentoChange}
-                                reloadKey={reloadKeyFormaPagamento}
-                                hasError={!!errors.selectedFormaPagamento}
-                                errorMessage={errors.selectedFormaPagamento}
-                                showAddButton
-                                onAddClick={onAddFormaPagamento}
-                                onEditClick={onEditFormaPagamento}
-                                autoLoadAndSelectSingle={false}
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <VendedorDropdownField
-                                selectedVendedor={selectedVendedor}
-                                reloadKey={reloadKeyVendedor}
-                                onVendedorChange={onVendedorChange}
-                                onAddClick={onAddVendedor}
-                                onEditClick={onEditVendedor}
-                                hasError={!!errors.selectedVendedor}
-                                errorMessage={errors.selectedVendedor}
-                                required
-                            />
-                        </div>
-                    </>
-                )}
-                {isMobile && (
-                    <>
-                        <div className="col-12 lg:col-4">
-                            <MobileSearchPicker<CompanyEntity>
-                                selectedItem={selectedEmpresa}
-                                onItemChange={onEmpresaChange}
-                                fetchAllItems={listTheEmpresa}
-                                fetchFilteredItems={fetchFilteredEmpresa}
-                                fetchItemsPage={fetchCompanyMobilePage}
-                                optionLabel="razao_social"
-                                optionValue="id"
-                                topLabel="Empresa:"
-                                loadMoreRows={20}
-                                placeholder="Selecione a Empresa"
-                                dialogTitle="Selecionar a Empresa"
-                                hasError={!!errors.selectedEmpresa}
-                                errorMessage={errors.selectedEmpresa}
-                                onAddClick={onAddEmpresa}
-                                onEditClick={onEditEmpresa}
-                                autoLoadAndSelectSingle
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <MobileSearchPicker<ServiceEntity>
-                                selectedItem={selectedServico}
-                                onItemChange={onServicoChange}
-                                fetchAllItems={listTheService}
-                                fetchFilteredItems={fetchFilteredService}
-                                fetchItemsPage={fetchServiceMobilePage}
-                                optionLabel="descricao"
-                                optionValue="id"
-                                topLabel="Serviço:"
-                                loadMoreRows={20}
-                                placeholder="Selecione o Serviço"
-                                dialogTitle="Selecionar o Serviço"
-                                hasError={!!errors.selectedService}
-                                errorMessage={errors.selectedService}
-                                onAddClick={onAddServico}
-                                onEditClick={onEditServico}
-                                autoLoadAndSelectSingle={false}
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <MobileSearchPicker<PessoaEntity>
-                                selectedItem={selectedCliente}
-                                onItemChange={onPessoaChange}
-                                fetchAllItems={listThePessoas}
-                                fetchFilteredItems={fetchFilteredPessoa}
-                                fetchItemsPage={fetchPessoaMobilePage}
-                                optionLabel="razao_social"
-                                optionValue="id"
-                                topLabel="Cliente ou Fornecedor:"
-                                loadMoreRows={20}
-                                placeholder="Selecione o Cliente ou Fornecedor"
-                                dialogTitle="Selecionar Cliente ou Fornecedor"
-                                hasError={!!errors.selectedCliente}
-                                errorMessage={errors.selectedCliente}
-                                onAddClick={onAddPessoa}
-                                onEditClick={onEditPessoa}
-                                autoLoadAndSelectSingle
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <MobileSearchPicker<FormaPagamentoEntity>
-                                selectedItem={selectedFormaPagamento}
-                                onItemChange={onFormaPagamentoChange}
-                                fetchAllItems={listTheFormaPagamento}
-                                fetchFilteredItems={fetchFilteredFormaPagamento}
-                                fetchItemsPage={fetchFormaPagamentoMobilePage}
-                                optionLabel="descricao"
-                                optionValue="id"
-                                topLabel="Forma de Pagamento:"
-                                loadMoreRows={20}
-                                placeholder="Selecione a Forma de Pagamento"
-                                dialogTitle="Selecionar a Forma de Pagamento"
-                                hasError={!!errors.selectedFormaPagamento}
-                                errorMessage={errors.selectedFormaPagamento}
-                                onAddClick={onAddFormaPagamento}
-                                onEditClick={onEditFormaPagamento}
-                                autoLoadAndSelectSingle={false}
-                            />
-                        </div>
-                        <div className="col-12 lg:col-4">
-                            <MobileSearchPicker<VendedorEntity>
-                                selectedItem={selectedVendedor}
-                                onItemChange={onVendedorChange}
-                                fetchAllItems={listTheVendedor}
-                                fetchFilteredItems={fetchFilteredVendedor}
-                                fetchItemsPage={fetchVendedorMobilePage}
-                                optionLabel="razao_social"
-                                optionValue="id"
-                                topLabel="Vendedor:"
-                                loadMoreRows={20}
-                                placeholder="Selecione o Vendedor"
-                                dialogTitle="Selecionar o Vendedor"
-                                hasError={!!errors.selectedVendedor}
-                                errorMessage={errors.selectedVendedor}
-                                onAddClick={onAddVendedor}
-                                onEditClick={onEditVendedor}
-                                autoLoadAndSelectSingle
-                            />
-                        </div>
-                    </>
-                )}
-                <div className="col-12 lg:col-2">
+                <div className="col-12 lg:col-2 ">
                     <Input
                         min={1}
                         value={emitirOS.servicos.quantidade || ''}
@@ -291,13 +82,13 @@ export function OrdemServicoFields({
             </div>
             <div className="grid formgrid w-full">
                 <div className="col-12 lg:col-4 ">
-                    <DatePicker value={emitirOS.data_hora_inicio ?? null} onChange={(date) => onDateChange('data_hora_inicio', date)} showTopLabel topLabel="Data início" />
+                    <DatePicker value={emitirOS.data_hora_inicio ?? null} onChange={(date) => onDateChange('data_hora_inicio', date)} showTopLabel topLabel="Data Início" />
                 </div>
                 <div className="col-12 lg:col-4 ">
-                    <DatePicker value={emitirOS.data_hora_prevista ?? null} onChange={(date) => onDateChange('data_hora_prevista', date)} showTopLabel topLabel="Data prevista" />
+                    <DatePicker value={emitirOS.data_hora_prevista ?? null} onChange={(date) => onDateChange('data_hora_prevista', date)} showTopLabel topLabel="Data Prevista" />
                 </div>
                 <div className="col-12 lg:col-4 ">
-                    <DatePicker value={emitirOS.data_hora_conclusao ?? null} onChange={(date) => onDateChange('data_hora_conclusao', date)} showTopLabel topLabel="Data conclusão" />
+                    <DatePicker value={emitirOS.data_hora_conclusao ?? null} onChange={(date) => onDateChange('data_hora_conclusao', date)} showTopLabel topLabel="Data Conclusão" />
                 </div>
             </div>
             <div className="grid formgrid w-full">
@@ -332,6 +123,242 @@ export function OrdemServicoFields({
                     </div>
                 </div>
             </div>
+        </>
+    );
+}
+
+export function OrdemServicoRelacaoFields({
+    errors,
+    reloadKeyPessoa,
+    reloadKeyEmpresa,
+    reloadKeyServico,
+    reloadKeyVendedor,
+    reloadKeyFormaPagamento,
+    selectedCliente,
+    selectedEmpresa,
+    selectedServico,
+    selectedVendedor,
+    selectedFormaPagamento,
+    onEmpresaChange,
+    onPessoaChange,
+    onVendedorChange,
+    onFormaPagamentoChange,
+    onServicoChange,
+    onAddEmpresa,
+    onEditEmpresa,
+    onAddPessoa,
+    onEditPessoa,
+    onAddVendedor,
+    onEditVendedor,
+    onAddFormaPagamento,
+    onEditFormaPagamento,
+    onAddServico,
+    onEditServico
+}: Omit<OrdemServicoFieldsProps, 'emitirOS' | 'onChange' | 'onDateChange' | 'onValidateDescricao'>) {
+    const isMobile = useIsMobile();
+    const isDesktop = useIsDesktop();
+
+    return (
+        <div className="grid formgrid">
+            {isDesktop && (
+                <>
+                    <div className="col-12 lg:col-4">
+                        <EmpresaDropdownField
+                            selectedEmpresa={selectedEmpresa}
+                            onEmpresaChange={onEmpresaChange}
+                            reloadKey={reloadKeyEmpresa}
+                            hasError={!!errors.selectedEmpresa}
+                            errorMessage={errors.selectedEmpresa}
+                            showAddButton
+                            onAddClick={onAddEmpresa}
+                            onEditClick={onEditEmpresa}
+                            autoSelectSingle
+                            required
+                        />
+                    </div>
+                     <div className="col-12 lg:col-4">
+                        <PessoaDropdownField
+                            id="selectedCliente"
+                            selectedPessoa={selectedCliente}
+                            onPessoaChange={onPessoaChange}
+                            reloadKey={reloadKeyPessoa}
+                            hasError={!!errors.selectedCliente}
+                            errorMessage={errors.selectedCliente}
+                            placeholder="Selecione o Cliente ou Fornecedor"
+                            autoSelectSingle
+                            showAddButton
+                            onAddClick={onAddPessoa}
+                            onEditClick={onEditPessoa}
+                            required
+                            topLabel="Cliente ou Fornecedor:"
+                        />
+                    </div>
+                    <div className="col-12 lg:col-4">
+                        <ServicoDropdownField
+                            id="selectedService"
+                            selectedService={selectedServico}
+                            onServiceChange={onServicoChange}
+                            reloadKey={reloadKeyServico}
+                            fetchAllItems={listTheService}
+                            fetchFilteredItems={fetchFilteredService}
+                            placeholder="Selecione o Serviço"
+                            hasError={!!errors.selectedService}
+                            errorMessage={errors.selectedService}
+                            autoSelectSingle
+                            showAddButton
+                            onAddClick={onAddServico}
+                            onEditClick={onEditServico}
+                            showTopLabel
+                            required
+                            topLabel="Serviço:"
+                            autoLoadAndSelectSingle={false}
+                        />
+                    </div>
+                   
+                    <div className="col-12 lg:col-4">
+                        <FormaPagamentoDropdownField
+                            selectedFormaPagamento={selectedFormaPagamento}
+                            onFormaPagamentoChange={onFormaPagamentoChange}
+                            reloadKey={reloadKeyFormaPagamento}
+                            hasError={!!errors.selectedFormaPagamento}
+                            errorMessage={errors.selectedFormaPagamento}
+                            showAddButton
+                            onAddClick={onAddFormaPagamento}
+                            onEditClick={onEditFormaPagamento}
+                            autoLoadAndSelectSingle={false}
+                        />
+                    </div>
+                    <div className="col-12 lg:col-4">
+                        <VendedorDropdownField
+                            selectedVendedor={selectedVendedor}
+                            reloadKey={reloadKeyVendedor}
+                            onVendedorChange={onVendedorChange}
+                            onAddClick={onAddVendedor}
+                            onEditClick={onEditVendedor}
+                            hasError={!!errors.selectedVendedor}
+                            errorMessage={errors.selectedVendedor}
+                            required
+                        />
+                    </div>
+                </>
+            )}
+            {isMobile && (
+                <>
+                    <div className="col-12 lg:col-4">
+                        <MobileSearchPicker<CompanyEntity>
+                            selectedItem={selectedEmpresa}
+                            onItemChange={onEmpresaChange}
+                            fetchAllItems={listTheEmpresa}
+                            fetchFilteredItems={fetchFilteredEmpresa}
+                            fetchItemsPage={fetchCompanyMobilePage}
+                            optionLabel="razao_social"
+                            optionValue="id"
+                            topLabel="Empresa:"
+                            loadMoreRows={20}
+                            placeholder="Selecione a Empresa"
+                            dialogTitle="Selecionar a Empresa"
+                            hasError={!!errors.selectedEmpresa}
+                            errorMessage={errors.selectedEmpresa}
+                            onAddClick={onAddEmpresa}
+                            onEditClick={onEditEmpresa}
+                            autoLoadAndSelectSingle
+                            required
+                        />
+                    </div>
+                    <div className="col-12 lg:col-4">
+                        <MobileSearchPicker<ServiceEntity>
+                            selectedItem={selectedServico}
+                            onItemChange={onServicoChange}
+                            fetchAllItems={listTheService}
+                            fetchFilteredItems={fetchFilteredService}
+                            fetchItemsPage={fetchServiceMobilePage}
+                            optionLabel="descricao"
+                            optionValue="id"
+                            topLabel="Serviço:"
+                            loadMoreRows={20}
+                            placeholder="Selecione o Serviço"
+                            dialogTitle="Selecionar o Serviço"
+                            hasError={!!errors.selectedService}
+                            errorMessage={errors.selectedService}
+                            onAddClick={onAddServico}
+                            onEditClick={onEditServico}
+                            autoLoadAndSelectSingle={false}
+                            required
+                        />
+                    </div>
+                    <div className="col-12 lg:col-4">
+                        <MobileSearchPicker<PessoaEntity>
+                            selectedItem={selectedCliente}
+                            onItemChange={onPessoaChange}
+                            fetchAllItems={listThePessoas}
+                            fetchFilteredItems={fetchFilteredPessoa}
+                            fetchItemsPage={fetchPessoaMobilePage}
+                            optionLabel="razao_social"
+                            optionValue="id"
+                            topLabel="Cliente ou Fornecedor:"
+                            loadMoreRows={20}
+                            placeholder="Selecione o Cliente ou Fornecedor"
+                            dialogTitle="Selecionar Cliente ou Fornecedor"
+                            hasError={!!errors.selectedCliente}
+                            errorMessage={errors.selectedCliente}
+                            onAddClick={onAddPessoa}
+                            onEditClick={onEditPessoa}
+                            autoLoadAndSelectSingle
+                            required
+                        />
+                    </div>
+                    <div className="col-12 lg:col-4">
+                        <MobileSearchPicker<FormaPagamentoEntity>
+                            selectedItem={selectedFormaPagamento}
+                            onItemChange={onFormaPagamentoChange}
+                            fetchAllItems={listTheFormaPagamento}
+                            fetchFilteredItems={fetchFilteredFormaPagamento}
+                            fetchItemsPage={fetchFormaPagamentoMobilePage}
+                            optionLabel="descricao"
+                            optionValue="id"
+                            topLabel="Forma de Pagamento:"
+                            loadMoreRows={20}
+                            placeholder="Selecione a Forma de Pagamento"
+                            dialogTitle="Selecionar a Forma de Pagamento"
+                            hasError={!!errors.selectedFormaPagamento}
+                            errorMessage={errors.selectedFormaPagamento}
+                            onAddClick={onAddFormaPagamento}
+                            onEditClick={onEditFormaPagamento}
+                            autoLoadAndSelectSingle={false}
+                            required
+                        />
+                    </div>
+                    <div className="col-12 lg:col-4">
+                        <MobileSearchPicker<VendedorEntity>
+                            selectedItem={selectedVendedor}
+                            onItemChange={onVendedorChange}
+                            fetchAllItems={listTheVendedor}
+                            fetchFilteredItems={fetchFilteredVendedor}
+                            fetchItemsPage={fetchVendedorMobilePage}
+                            optionLabel="razao_social"
+                            optionValue="id"
+                            topLabel="Vendedor:"
+                            loadMoreRows={20}
+                            placeholder="Selecione o Vendedor"
+                            dialogTitle="Selecionar o Vendedor"
+                            hasError={!!errors.selectedVendedor}
+                            errorMessage={errors.selectedVendedor}
+                            onAddClick={onAddVendedor}
+                            onEditClick={onEditVendedor}
+                            autoLoadAndSelectSingle
+                            required
+                        />
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+export function OrdemServicoFields(props: OrdemServicoFieldsProps) {
+    return (
+        <>
+            <OrdemServicoInformacoesFields {...props} />
+            <OrdemServicoRelacaoFields {...props} />
         </>
     );
 }

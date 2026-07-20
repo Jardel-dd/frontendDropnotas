@@ -2,7 +2,7 @@
 import 'primeicons/primeicons.css';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
-import { ContratoFields } from './contrato';
+import { ContratoFields, ContratoInformacoesFields, ContratoRelacionamentosFields } from './contrato';
 import { useRouter } from 'next/navigation';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
@@ -37,7 +37,29 @@ import type { PreloadedServicoData } from '@/app/(main)/cadastro/servicos/types/
 import { fetchServiceFormDataByID, fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { fetchFormaPagamentoByID } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
 import { fetchCategoriaContratoByID } from '@/app/(main)/cadastro/categoriaContratos/controller/controller';
+import { SectionCard, SectionGrid } from '@/app/components/cardForm/SectionCard';
+import { useSectionCardFlow } from '@/app/components/cardForm/useSectionCardFlow';
 export type { ContratoFieldsProps, ContratoFormProps, ContratoFormRef, FormContratoCreatedProps } from '../types/contratos';
+
+const contratoSectionFlowConfig = [
+    {
+        id: 'descricao-periodicidade',
+        errorFields: ['descricao', 'valor_servico', 'periodicidade']
+    },
+    {
+        id: 'relacoes-contrato',
+        errorFields: [
+            'selectedCompany',
+            'selectedService',
+            'selectedCategoriaContrato',
+            'selectedFormadePagamento',
+            'selectedPessoa',
+            'service',
+            'categoriaContrato',
+            'formaPagamento'
+        ]
+    }
+];
 const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
     (
         {
@@ -223,6 +245,14 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         const [selectedFormadePagamento, setSelectedFormadePagamento] = useState<FormaPagamentoEntity | null>(null);
         const [selectedCategoriaContrato, setSelectedCategoriaContrato] = useState<CategoryContratosEntity | null>(null);
         const [preloadedCategoriaContrato, setPreloadedCategoriaContrato] = useState<CategoryContratosEntity | null>(null);
+        const {
+            isSectionExpanded,
+            toggleSection,
+            syncExpandedSectionWithErrors
+        } = useSectionCardFlow({
+            sections: contratoSectionFlowConfig,
+            initialExpandedId: 'descricao-periodicidade'
+        });
         const clearErrors = (...keys: string[]) => {
             setErrors((prevErrors) => {
                 const newErrors = { ...prevErrors };
@@ -784,6 +814,11 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
         useEffect(() => {
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
+        useEffect(() => {
+            if (Object.keys(errors).length > 0) {
+                syncExpandedSectionWithErrors(errors);
+            }
+        }, [errors, syncExpandedSectionWithErrors]);
         if (isLoading && contratoId) {
             return <LoadingScreen loadingText="Carregando informações do Contrato selecionado..." />;
         }
@@ -799,49 +834,72 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
             (!selectedFormadePagamento && !contrato.id_forma_pagamento) ||
             (selectedPessoa.length === 0 && !(contrato.id_clientes_contrato?.length ?? 0)) ||
             !contrato.periodicidade;
+        const contratoFieldsProps = {
+            contrato,
+            errors,
+            selectedPessoa,
+            pessoaOptions: pessoa,
+            selectedCompany,
+            selectedService,
+            selectedCategoriaContrato,
+            selectedFormaPagamento: selectedFormadePagamento,
+            reloadKeyPessoa,
+            reloadKeyEmpresa,
+            reloadKeyServico,
+            reloadKeyCategoriaContrato,
+            reloadKeyFormaPagamento,
+            onChange: handleAllChanges,
+            onDropdownChange: handleDropdownChange,
+            onNumberChange: handleNumberChange,
+            onCompanyChange: handleCompanyChange,
+            onServiceChange: handleServicoChange,
+            onCategoriaContratoChange: handleCategoriaContratoChange,
+            onFormaPagamentoChange: handleFormaPagamentoChange,
+            onPessoaChange: handlePessoaChange,
+            onAddEmpresa: openCreateEmpresaDialog,
+            onEditEmpresa: openEditEmpresaDialog,
+            onAddServico: openCreateServicoDialog,
+            onEditServico: openEditServicoDialog,
+            onAddCategoriaContrato: openCreateCategoriaContratoDialog,
+            onEditCategoriaContrato: openEditCategoriaContratoDialog,
+            onAddFormaPagamento: openCreateFormaPagamentoDialog,
+            onEditFormaPagamento: openEditFormaPagamentoDialog,
+            onAddPessoa: openCreatePessoaDialog,
+            onEditPessoa: openEditPessoaDialog,
+            onValidateDescricao: () => {
+                setTouchedFields((prev) => ({ ...prev, descricao: true }));
+                validateContratoForm();
+            }
+        };
         return (
             <>
                 <div className={` shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
                     <Messages ref={msgs} className="custom-messages" />
                     <div className="scrollable-container shared-form-content">
-                        <ContratoFields
-                            contrato={contrato}
-                            errors={errors}
-                            selectedPessoa={selectedPessoa}
-                            pessoaOptions={pessoa}
-                            selectedCompany={selectedCompany}
-                            selectedService={selectedService}
-                            selectedCategoriaContrato={selectedCategoriaContrato}
-                            selectedFormaPagamento={selectedFormadePagamento}
-                            reloadKeyPessoa={reloadKeyPessoa}
-                            reloadKeyEmpresa={reloadKeyEmpresa}
-                            reloadKeyServico={reloadKeyServico}
-                            reloadKeyCategoriaContrato={reloadKeyCategoriaContrato}
-                            reloadKeyFormaPagamento={reloadKeyFormaPagamento}
-                            onChange={handleAllChanges}
-                            onDropdownChange={handleDropdownChange}
-                            onNumberChange={handleNumberChange}
-                            onCompanyChange={handleCompanyChange}
-                            onServiceChange={handleServicoChange}
-                            onCategoriaContratoChange={handleCategoriaContratoChange}
-                            onFormaPagamentoChange={handleFormaPagamentoChange}
-                            onPessoaChange={handlePessoaChange}
-                            onAddEmpresa={openCreateEmpresaDialog}
-                            onEditEmpresa={openEditEmpresaDialog}
-                            onAddServico={openCreateServicoDialog}
-                            onEditServico={openEditServicoDialog}
-                            onAddCategoriaContrato={openCreateCategoriaContratoDialog}
-                            onEditCategoriaContrato={openEditCategoriaContratoDialog}
-                            onAddFormaPagamento={openCreateFormaPagamentoDialog}
-                            onEditFormaPagamento={openEditFormaPagamentoDialog}
-                            onAddPessoa={openCreatePessoaDialog}
-                            onEditPessoa={openEditPessoaDialog}
-                            onValidateDescricao={() => {
-                                setTouchedFields((prev) => ({ ...prev, descricao: true }));
-                                validateContratoForm();
-                            }}
-                        />
-                        
+                        <div className="custom-flex-col">
+                            <SectionCard
+                                icon={<i className="pi pi-file-edit" />}
+                                title="Dados do Contrato"
+                                collapsible
+                                expanded={isSectionExpanded('descricao-periodicidade')}
+                                onToggle={() => toggleSection('descricao-periodicidade')}
+                            >
+                                <SectionGrid minColumnWidth="220px">
+                                    <ContratoInformacoesFields {...contratoFieldsProps} />
+                                </SectionGrid>
+                            </SectionCard>
+                            <SectionCard
+                                icon={<i className="pi pi-link" />}
+                                title="Relações"
+                                collapsible
+                                expanded={isSectionExpanded('relacoes-contrato')}
+                                onToggle={() => toggleSection('relacoes-contrato')}
+                            >
+                                <SectionGrid minColumnWidth="220px">
+                                    <ContratoRelacionamentosFields {...contratoFieldsProps} />
+                                </SectionGrid>
+                            </SectionCard>
+                        </div>
                     </div>
 
 
@@ -871,7 +929,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                     visible={showModalServico}
                     onHide={closeServicoDialog}
                     loading={isServicoDialogLoading}
-                    loadingText={editingServicoId ? 'Carregando informacoes do Servico...' : 'Abrindo cadastro de Servico...'}
+                    loadingText={editingServicoId ? 'Carregando informações do Serviço...' : 'Abrindo cadastro de Serviço...'}
                 >
                     <FormCreatedServico
                         key={`${editingServicoId ?? 'novo'}-${servicoDialogKey}`}
@@ -896,7 +954,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                     visible={showModalFormaPagamento}
                     onHide={closeFormaPagamentoDialog}
                     loading={isFormaPagamentoDialogLoading}
-                    loadingText={editingFormaPagamentoId ? 'Carregando informacoes da Forma de Pagamento...' : 'Abrindo cadastro de Forma de Pagamento...'}
+                    loadingText={editingFormaPagamentoId ? 'Carregando informações da Forma de Pagamento...' : 'Abrindo cadastro de Forma de Pagamento...'}
                 >
                     <FormCreatedFormaPagamento
                         key={`${editingFormaPagamentoId ?? 'novo'}-${formaPagamentoDialogKey}`}
@@ -921,7 +979,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                     visible={showModalCategoriaContrato}
                     onHide={closeCategoriaContratoDialog}
                     loading={isCategoriaContratoDialogLoading}
-                    loadingText={editingCategoriaContratoId ? 'Carregando informacoes da Categoria de Contratos...' : 'Abrindo cadastro de Categoria de Contratos...'}
+                    loadingText={editingCategoriaContratoId ? 'Carregando informações da Categoria de Contratos...' : 'Abrindo cadastro de Categoria de Contratos...'}
                 >
                     <FormCategoriaContratoCreated
                         key={`${editingCategoriaContratoId ?? 'novo'}-${categoriaContratoDialogKey}`}
@@ -946,7 +1004,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                     visible={showModalPessoa}
                     onHide={closePessoaDialog}
                     loading={isPessoaDialogLoading}
-                    loadingText={editingPessoaId ? 'Carregando informacoes do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
+                    loadingText={editingPessoaId ? 'Carregando informações do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
                 >
                     <FormCreatedPessoa
                         key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
@@ -971,7 +1029,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                     visible={showModalEmpresa}
                     onHide={closeEmpresaDialog}
                     loading={isEmpresaDialogLoading}
-                    loadingText={editingEmpresaId ? 'Carregando informacoes da Empresa...' : 'Abrindo cadastro de Empresa...'}
+                    loadingText={editingEmpresaId ? 'Carregando informações da Empresa...' : 'Abrindo cadastro de Empresa...'}
                 >
                     <FormEmpresaCreated
                         key={`${editingEmpresaId ?? 'novo'}-${empresaDialogKey}`}

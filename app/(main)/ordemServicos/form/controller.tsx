@@ -1,7 +1,7 @@
 'use client';
 import LoadingScreen from '@/app/loading';
 import { Messages } from '@/app/components/messages/GlobalMessages';
-import { OrdemServicoFields } from './ordemServico';
+import { OrdemServicoFields, OrdemServicoInformacoesFields, OrdemServicoRelacaoFields } from './ordemServico';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -30,6 +30,25 @@ import { fetchCompanyDropdownByID, fetchCompanyFormDataByID } from '@/app/(main)
 import { fetchFormaPagamentoByID } from '@/app/(main)/cadastro/formaPagamento/controller/controller';
 import { toFormaPagamentoEntity } from '@/app/(main)/cadastro/formaPagamento/types/formaPagamento';
 import { createEmptyEmpresa, createEmptyFormaPagamento, createEmptyOrdemServico, createEmptyPessoa, createEmptyServico, createEmptyVendedor, type FormCreatedOrdemServicoProps, type NestedFormRef, type OrdemServicoFieldsProps, type OrdemServicoFormProps, type OrdemServicoFormRef } from '../types/ordemServico';
+import { SectionCard } from '@/app/components/cardForm/SectionCard';
+import { useSectionCardFlow } from '@/app/components/cardForm/useSectionCardFlow';
+
+const ordemServicoSectionFlowConfig = [
+    {
+        id: 'informacoes-ordem-servico',
+        errorFields: ['descricao', 'servicos.quantidade']
+    },
+    {
+        id: 'relacao',
+        errorFields: [
+            'selectedEmpresa',
+            'selectedCliente',
+            'selectedService',
+            'selectedVendedor',
+            'selectedFormaPagamento'
+        ]
+    }
+];
 export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemServicoFormProps>(
     ({ initialId, msgs, onOrdemServicoChange, onErrorsChange, redirectAfterSave = true, onClose, onSaved, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
         const router = useRouter();
@@ -83,6 +102,14 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
         const [preloadedVendedor, setPreloadedVendedor] = useState<VendedorEntity | null>(null);
         const [preloadedFormaPagamento, setPreloadedFormaPagamento] = useState<FormaPagamentoEntity | null>(null);
         const [stateDisableBtnCreatedOrdemServico, setStateDisableBtnCreatedOrdemServico] = useState(false);
+        const {
+            isSectionExpanded,
+            toggleSection,
+            syncExpandedSectionWithErrors
+        } = useSectionCardFlow({
+            sections: ordemServicoSectionFlowConfig,
+            initialExpandedId: 'informacoes-ordem-servico'
+        });
         const clearFieldError = (field: string) => {
             setErrors((prev) => {
                 const next = { ...prev };
@@ -571,6 +598,11 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
         useEffect(() => {
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
+        useEffect(() => {
+            if (Object.keys(errors).length > 0) {
+                syncExpandedSectionWithErrors(errors);
+            }
+        }, [errors, syncExpandedSectionWithErrors]);
 
         if (isLoading && initialId) {
             return <LoadingScreen loadingText="Carregando dados para emissao da Ordem de Servico..." />;
@@ -587,44 +619,68 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
             !emitirOS.id_vendedor ||
             !emitirOS.id_forma_pagamento ||
             !emitirOS.servicos.quantidade;
+        const ordemServicoFieldsProps: OrdemServicoFieldsProps = {
+            emitirOS,
+            errors,
+            reloadKeyPessoa,
+            reloadKeyEmpresa,
+            reloadKeyServico,
+            reloadKeyVendedor,
+            reloadKeyFormaPagamento,
+            selectedCliente,
+            selectedEmpresa,
+            selectedServico,
+            selectedVendedor,
+            selectedFormaPagamento,
+            onChange: handleAllChanges,
+            onDateChange: handleDateChange,
+            onEmpresaChange: handleEmpresaChange,
+            onPessoaChange: handlePessoaChange,
+            onVendedorChange: handleVendedorChange,
+            onFormaPagamentoChange: handleFormaPagamentoChange,
+            onServicoChange: handleServicoChange,
+            onAddEmpresa: openCreateEmpresaDialog,
+            onEditEmpresa: openEditEmpresaDialog,
+            onAddPessoa: openCreatePessoaDialog,
+            onEditPessoa: openEditPessoaDialog,
+            onAddVendedor: openCreateVendedorDialog,
+            onEditVendedor: openEditVendedorDialog,
+            onAddFormaPagamento: openCreateFormaPagamentoDialog,
+            onEditFormaPagamento: openEditFormaPagamentoDialog,
+            onAddServico: openCreateServicoDialog,
+            onEditServico: openEditServicoDialog,
+            onValidateDescricao: handleValidateDescricao
+        };
 
         return (
             <>
                 <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
                     <Messages ref={msgs} className="custom-messages" />
                     <div className="scrollable-container shared-form-content">
-                        <OrdemServicoFields
-                            emitirOS={emitirOS}
-                            errors={errors}
-                            reloadKeyPessoa={reloadKeyPessoa}
-                            reloadKeyEmpresa={reloadKeyEmpresa}
-                            reloadKeyServico={reloadKeyServico}
-                            reloadKeyVendedor={reloadKeyVendedor}
-                            reloadKeyFormaPagamento={reloadKeyFormaPagamento}
-                            selectedCliente={selectedCliente}
-                            selectedEmpresa={selectedEmpresa}
-                            selectedServico={selectedServico}
-                            selectedVendedor={selectedVendedor}
-                            selectedFormaPagamento={selectedFormaPagamento}
-                            onChange={handleAllChanges}
-                            onDateChange={handleDateChange}
-                            onEmpresaChange={handleEmpresaChange}
-                            onPessoaChange={handlePessoaChange}
-                            onVendedorChange={handleVendedorChange}
-                            onFormaPagamentoChange={handleFormaPagamentoChange}
-                            onServicoChange={handleServicoChange}
-                            onAddEmpresa={openCreateEmpresaDialog}
-                            onEditEmpresa={openEditEmpresaDialog}
-                            onAddPessoa={openCreatePessoaDialog}
-                            onEditPessoa={openEditPessoaDialog}
-                            onAddVendedor={openCreateVendedorDialog}
-                            onEditVendedor={openEditVendedorDialog}
-                            onAddFormaPagamento={openCreateFormaPagamentoDialog}
-                            onEditFormaPagamento={openEditFormaPagamentoDialog}
-                            onAddServico={openCreateServicoDialog}
-                            onEditServico={openEditServicoDialog}
-                            onValidateDescricao={handleValidateDescricao}
-                        />
+                        <div className="custom-flex-col">
+                            <SectionCard
+                                icon={<i className="pi pi-file-edit" />}
+                                title="Informações da Ordem de Serviço"
+                                collapsible
+                                expanded={isSectionExpanded('informacoes-ordem-servico')}
+                                onToggle={() => toggleSection('informacoes-ordem-servico')}
+                            >
+                                <div className="w-full">
+                                    <OrdemServicoInformacoesFields {...ordemServicoFieldsProps} />
+                                </div>
+                            </SectionCard>
+                            <SectionCard
+                                icon={<i className="pi pi-link" />}
+                                title="Relação"
+                                collapsible
+                                expanded={isSectionExpanded('relacao')}
+                                onToggle={() => toggleSection('relacao')}
+                            >
+                                <div className="w-full">
+                                    <OrdemServicoRelacaoFields {...ordemServicoFieldsProps} />
+                                </div>
+                            </SectionCard>
+                        </div>
                     </div>
                     <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
                         {showBTNPGCreatedAll &&
@@ -638,7 +694,7 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                     visible={showModalEmpresa}
                     onHide={closeEmpresaDialog}
                     loading={isEmpresaDialogLoading}
-                    loadingText={editingEmpresaId ? 'Carregando informacoes da Empresa...' : 'Abrindo cadastro de Empresa...'}
+                    loadingText={editingEmpresaId ? 'Carregando informações da Empresa...' : 'Abrindo cadastro de Empresa...'}
                 >
                     <FormEmpresaCreated
                         key={`${editingEmpresaId ?? 'novo'}-${empresaDialogKey}`}
@@ -663,7 +719,7 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                     visible={showModalServico}
                     onHide={closeServicoDialog}
                     loading={isServicoDialogLoading}
-                    loadingText={editingServicoId ? 'Carregando informacoes do Servico...' : 'Abrindo cadastro de Servico...'}
+                    loadingText={editingServicoId ? 'Carregando informações do Serviço...' : 'Abrindo cadastro de Serviço...'}
                 >
                     <FormCreatedServico
                         key={`${editingServicoId ?? 'novo'}-${servicoDialogKey}`}
@@ -688,7 +744,7 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                     visible={showModalPessoa}
                     onHide={closePessoaDialog}
                     loading={isPessoaDialogLoading}
-                    loadingText={editingPessoaId ? 'Carregando informacoes do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
+                    loadingText={editingPessoaId ? 'Carregando informações do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
                 >
                     <FormCreatedPessoa
                         key={`${editingPessoaId ?? 'novo'}-${pessoaDialogKey}`}
@@ -713,7 +769,7 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                     visible={showModalFormaPagamento}
                     onHide={closeFormaPagamentoDialog}
                     loading={isFormaPagamentoDialogLoading}
-                    loadingText={editingFormaPagamentoId ? 'Carregando informacoes da Forma de Pagamento...' : 'Abrindo cadastro de Forma de Pagamento...'}
+                    loadingText={editingFormaPagamentoId ? 'Carregando informações da Forma de Pagamento...' : 'Abrindo cadastro de Forma de Pagamento...'}
                 >
                     <FormCreatedFormaPagamento
                         key={`${editingFormaPagamentoId ?? 'novo'}-${formaPagamentoDialogKey}`}
@@ -738,7 +794,7 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                     visible={showModalVendedor}
                     onHide={closeVendedorDialog}
                     loading={isVendedorDialogLoading}
-                    loadingText={editingVendedorId ? 'Carregando informacoes do Vendedor...' : 'Abrindo cadastro de Vendedor...'}
+                    loadingText={editingVendedorId ? 'Carregando informações do Vendedor...' : 'Abrindo cadastro de Vendedor...'}
                 >
                     <FormCreatedVendedor
                         key={`${editingVendedorId ?? 'novo'}-${vendedorDialogKey}`}

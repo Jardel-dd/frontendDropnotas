@@ -32,6 +32,8 @@ import { createdPessoa, fetchPessoasById, updatePessoa } from '@/app/(main)/cada
 import { FormPessoaCreatedProps, mapPessoaContatoToSelection, PessoaFormProps, PessoaFormRef } from '../types/pessoa';
 import { fetchFilteredVendedor, fetchVendedor, fetchVendedorMobilePage, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 import { fetchContratoByID, fetchContratoMobilePage, fetchContratosById, fetchFilteredContrato, listTheContrato } from '@/app/(main)/contrato/controller/controller';
+import { SectionCard, SectionGrid } from '@/app/components/cardForm/SectionCard';
+import { useSectionCardFlow } from '@/app/components/cardForm/useSectionCardFlow';
 
 const mapContatoSelectionToFlags = (selectedContato: string | null) => ({
     pessoa_cliente: selectedContato === 'AMBOS' || selectedContato === 'pessoa_cliente',
@@ -43,7 +45,6 @@ const buildContratoSelectionFromResumo = (contratoResumo: Partial<ContratoEntity
     if (!resolvedContratoId) {
         return null;
     }
-
     return new ContratoEntity({
         id: resolvedContratoId,
         descricao: contratoResumo?.descricao ?? '',
@@ -59,6 +60,49 @@ const buildContratoSelectionFromResumo = (contratoResumo: Partial<ContratoEntity
         id_clientes_contrato: contratoResumo?.id_clientes_contrato ?? [0]
     });
 };
+
+const pessoaSectionFlowConfig = [
+    {
+        id: 'dados-cliente',
+        errorFields: [
+            'tipoPessoa',
+            'cnpj',
+            'cpf',
+            'rg',
+            'razao_social',
+            'nome_fantasia',
+            'documento_estrangeiro',
+            'pais',
+            'selectedRegime',
+            'contribuinte',
+            'inscricao_estadual',
+            'inscricao_municipal',
+            'atividade_principal',
+            'cnae_fiscal',
+            'selectedContato',
+            'email'
+        ]
+    },
+    {
+        id: 'relacoes',
+        errorFields: ['selectedContrato', 'selectedVendedor']
+    },
+    {
+        id: 'endereco',
+        errorFields: [
+            'cep',
+            'logradouro',
+            'numero',
+            'bairro',
+            'uf',
+            'municipio',
+            'codigo_municipio',
+            'codigo_pais',
+            'nome_pais',
+            'telefone'
+        ]
+    }
+];
 const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
     (
         {
@@ -183,7 +227,14 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             () => validateFieldsPessoa(pessoa, setErrors, msgs),
             [msgs, pessoa]
         );
-      
+        const {
+            isSectionExpanded,
+            toggleSection,
+            syncExpandedSectionWithErrors
+        } = useSectionCardFlow({
+            sections: pessoaSectionFlowConfig,
+            initialExpandedId: 'dados-cliente'
+        });
         const resolveSelectedContrato = useCallback(async (
             contratoId?: number | null,
             contratoResumo?: Partial<ContratoEntity> | null,
@@ -601,6 +652,11 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             onErrorsChangeRef.current?.(errors);
         }, [errors]);
         useEffect(() => {
+            if (Object.keys(errors).length > 0) {
+                syncExpandedSectionWithErrors(errors);
+            }
+        }, [errors, syncExpandedSectionWithErrors]);
+        useEffect(() => {
             onLoadingChange?.(isLoading || isLoadingBtnCreated);
         }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
         useEffect(() => {
@@ -611,7 +667,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             });
         }, [showModalContrato, editingContratoId, isContratoDialogLoading]);
         if (isLoading && pessoaId) {
-            return <LoadingScreen loadingText="Carregando informacoes do Cliente ou Fornecedor selecionado..." />;
+            return <LoadingScreen loadingText="Carregando informações do Cliente ou Fornecedor selecionado..." />;
         }
         const isSubmitDisabled =
             stateDisableBtnCreatedClienteFornecedor ||
@@ -632,112 +688,143 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                     <Messages ref={msgs} className="custom-messages" />
                     <div className="scrollable-container shared-form-content">
                         <div className="custom-flex-col">
-                            <PessoaFields
-                                pessoa={pessoa}
-                                errors={errors}
-                                selectedContato={selectedContato}
-                                selectedCNAE={selectedCNAE}
-                                loadingCnpj={loadingCnpj}
-                                hasFocused={hasFocused}
-                                onFocusFirstField={() => setHasFocused(true)}
-                                onChange={handleAllChanges}
-                                onDropdownChange={handleDropdownChange}
-                                onContatoChange={handleContatoChange}
-                                onCNAEChange={handleCNAEChange}
-                                onSearchCnpj={handleSearchPessoaCnpj}
-                                onValidateCnpj={handleValidateCnpj}
-                                fetchAllCnae={fetchAllCnae}
-                                fetchFilteredCnae={fetchFilteredCnae}
-                            />
-                            <div className='grid formgrid p-0'>
-                                {isMobile ? (
-                                    <>
-                                      <div className="col-4 lg:col-4 w-full">
-                                        <MobileSearchPicker<ContratoEntity>
-                                            selectedItem={selectedContrato}
-                                            onItemChange={handleContratoChange}
-                                            fetchAllItems={listTheContrato}
-                                            fetchFilteredItems={fetchFilteredContrato}
-                                            fetchItemsPage={fetchContratoMobilePage}
-                                            optionLabel="descricao"
-                                            optionValue="id"
-                                            topLabel="Contrato:"
-                                            loadMoreRows={20}
-                                            placeholder="Selecione o Contrato"
-                                            dialogTitle="Selecionar o Contrato"
-                                            hasError={!!errors.selectedContrato}
-                                            errorMessage={errors.selectedContrato}
-                                            onAddClick={openCreateContratoDialog}
-                                            onEditClick={openEditContratoDialog}
-                                            autoLoadAndSelectSingle
-                                        />
+                            <SectionCard
+                                icon={<i className="pi pi-user" />}
+                                title="Dados do Cliente"
+                                collapsible
+                                expanded={isSectionExpanded('dados-cliente')}
+                                onToggle={() => toggleSection('dados-cliente')}
+                            >
+                                <SectionGrid minColumnWidth="220px">
+                                    <PessoaFields
+                                        pessoa={pessoa}
+                                        errors={errors}
+                                        selectedContato={selectedContato}
+                                        selectedCNAE={selectedCNAE}
+                                        loadingCnpj={loadingCnpj}
+                                        hasFocused={hasFocused}
+                                        onFocusFirstField={() => setHasFocused(true)}
+                                        onChange={handleAllChanges}
+                                        onDropdownChange={handleDropdownChange}
+                                        onContatoChange={handleContatoChange}
+                                        onCNAEChange={handleCNAEChange}
+                                        onSearchCnpj={handleSearchPessoaCnpj}
+                                        onValidateCnpj={handleValidateCnpj}
+                                        fetchAllCnae={fetchAllCnae}
+                                        fetchFilteredCnae={fetchFilteredCnae}
+                                    />
+                                </SectionGrid>
+                            </SectionCard>
+                            <SectionCard
+                                icon={<i className="pi pi-link" />}
+                                title="Relações"
+                                collapsible
+                                expanded={isSectionExpanded('relacoes')}
+                                onToggle={() => toggleSection('relacoes')}
+                            >
+                                <SectionGrid minColumnWidth="220px">
+                                    <div className='grid formgrid p-0'>
+                                        {isMobile ? (
+                                            <>
+                                                <div className="col-4 lg:col-4 w-full">
+                                                    <MobileSearchPicker<ContratoEntity>
+                                                        selectedItem={selectedContrato}
+                                                        onItemChange={handleContratoChange}
+                                                        fetchAllItems={listTheContrato}
+                                                        fetchFilteredItems={fetchFilteredContrato}
+                                                        fetchItemsPage={fetchContratoMobilePage}
+                                                        optionLabel="descricao"
+                                                        optionValue="id"
+                                                        topLabel="Contrato:"
+                                                        loadMoreRows={20}
+                                                        placeholder="Selecione o Contrato"
+                                                        dialogTitle="Selecionar o Contrato"
+                                                        hasError={!!errors.selectedContrato}
+                                                        errorMessage={errors.selectedContrato}
+                                                        onAddClick={openCreateContratoDialog}
+                                                        onEditClick={openEditContratoDialog}
+                                                        autoLoadAndSelectSingle
+                                                    />
+                                                </div>
+                                                <div className="col-4 lg:col-4 w-full">
+                                                    <MobileSearchPicker<VendedorEntity>
+                                                        selectedItem={selectedVendedor}
+                                                        onItemChange={handleVendedorChange}
+                                                        fetchAllItems={listTheVendedor}
+                                                        fetchFilteredItems={fetchFilteredVendedor}
+                                                        fetchItemsPage={fetchVendedorMobilePage}
+                                                        optionLabel="razao_social"
+                                                        optionValue="id"
+                                                        topLabel="Vendedor:"
+                                                        loadMoreRows={20}
+                                                        placeholder="Selecione o Vendedor"
+                                                        dialogTitle="Selecionar o Vendedor"
+                                                        hasError={!!errors.selectedVendedor}
+                                                        errorMessage={errors.selectedVendedor}
+                                                        onAddClick={openCreateVendedorDialog}
+                                                        onEditClick={openEditVendedorDialog}
+                                                        autoLoadAndSelectSingle
+                                                    />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="col-4 lg:col-4">
+                                                    <ContratoDropdownField
+                                                        selectedContrato={selectedContrato}
+                                                        selectedContratoId={pessoa.id_contrato ?? null}
+                                                        onContratoChange={handleContratoChange}
+                                                        reloadKey={reloadKeyContrato + reloadKeyContratoDropdown}
+                                                        hasError={!!errors.selectedContrato}
+                                                        errorMessage={errors.selectedContrato}
+                                                        showAddButton
+                                                        onAddClick={openCreateContratoDialog}
+                                                        onEditClick={openEditContratoDialog}
+                                                        autoSelectSingle={false}
+                                                    />
+                                                </div>
+                                                <div className="col-4 lg:col-4">
+                                                    <VendedorDropdownField
+                                                        selectedVendedor={selectedVendedor}
+                                                        selectedVendedorId={pessoa.id_vendedor_padrao ?? null}
+                                                        reloadKey={reloadKeyVendedor}
+                                                        onVendedorChange={handleVendedorChange}
+                                                        onAddClick={openCreateVendedorDialog}
+                                                        onEditClick={openEditVendedorDialog}
+                                                        hasError={!!errors.selectedVendedor}
+                                                        errorMessage={errors.selectedVendedor}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
-                                    <div className="col-4 lg:col-4 w-full">
-                                        <MobileSearchPicker<VendedorEntity>
-                                            selectedItem={selectedVendedor}
-                                            onItemChange={handleVendedorChange}
-                                            fetchAllItems={listTheVendedor}
-                                            fetchFilteredItems={fetchFilteredVendedor}
-                                            fetchItemsPage={fetchVendedorMobilePage}
-                                            optionLabel="razao_social"
-                                            optionValue="id"
-                                            topLabel="Vendedor:"
-                                            loadMoreRows={20}
-                                            placeholder="Selecione o Vendedor"
-                                            dialogTitle="Selecionar o Vendedor"
-                                            hasError={!!errors.selectedVendedor}
-                                            errorMessage={errors.selectedVendedor}
-                                            onAddClick={openCreateVendedorDialog}
-                                            onEditClick={openEditVendedorDialog}
-                                            autoLoadAndSelectSingle
-                                        />
-                                    </div>
-                                    </>
-                                ) : (
-                                    <>
-                                    <div className="col-4 lg:col-4">
-                                        <ContratoDropdownField
-                                            selectedContrato={selectedContrato}
-                                            selectedContratoId={pessoa.id_contrato ?? null}
-                                            onContratoChange={handleContratoChange}
-                                            reloadKey={reloadKeyContrato + reloadKeyContratoDropdown}
-                                            hasError={!!errors.selectedContrato}
-                                            errorMessage={errors.selectedContrato}
-                                            showAddButton
-                                            onAddClick={openCreateContratoDialog}
-                                            onEditClick={openEditContratoDialog}
-                                            autoSelectSingle={false}
-                                        />
-                                    </div>
-                                    <div className="col-4 lg:col-4">
-                                        <VendedorDropdownField
-                                            selectedVendedor={selectedVendedor}
-                                            selectedVendedorId={pessoa.id_vendedor_padrao ?? null}
-                                            reloadKey={reloadKeyVendedor}
-                                            onVendedorChange={handleVendedorChange}
-                                            onAddClick={openCreateVendedorDialog}
-                                            onEditClick={openEditVendedorDialog}
-                                            hasError={!!errors.selectedVendedor}
-                                            errorMessage={errors.selectedVendedor}
-                                        />
-                                    </div>
-                                    </>
-                                )}
-                            </div>
-                            <EnderecoForm
-                                endereco={pessoa?.endereco}
-                                telefone={pessoa?.endereco?.telefone}
-                                errors={errors}
-                                onChange={handleAllChanges}
-                                onCepSearch={() => handleSearchCep(pessoa.endereco?.cep || '', setLoadingCep, setPessoa, setError, msgs)}
-                                onDropdownChange={handleDropdownChange}
-                                onDropdownChangeEndereco={handleDropdownChangeEndereco}
-                                getCitiesFromState={getCitiesFromState}
-                                loadingCep={loadingCep}
-                                nomePaisObrigatorio
-                                codigoPaisObrigatorio
-                                codigoMunicipioObrigatorio
-                            />
+                                </SectionGrid>
+                            </SectionCard>
+                            <SectionCard
+                                icon={<i className="pi pi-map-marker" />}
+                                title="Endereço"
+                                collapsible
+                                expanded={isSectionExpanded('endereco')}
+                                onToggle={() => toggleSection('endereco')}
+                            >
+                                <SectionGrid minColumnWidth="220px">
+                                    <EnderecoForm
+                                        endereco={pessoa?.endereco}
+                                        telefone={pessoa?.endereco?.telefone}
+                                        errors={errors}
+                                        onChange={handleAllChanges}
+                                        onCepSearch={() => handleSearchCep(pessoa.endereco?.cep || '', setLoadingCep, setPessoa, setError, msgs)}
+                                        onDropdownChange={handleDropdownChange}
+                                        onDropdownChangeEndereco={handleDropdownChangeEndereco}
+                                        getCitiesFromState={getCitiesFromState}
+                                        loadingCep={loadingCep}
+                                        nomePaisObrigatorio
+                                        codigoPaisObrigatorio
+                                        codigoMunicipioObrigatorio
+                                        compactSection
+                                    />
+                                </SectionGrid>
+                            </SectionCard>
                         </div>
                     </div>
                     <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
