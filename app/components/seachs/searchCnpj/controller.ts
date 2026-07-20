@@ -8,9 +8,13 @@ const isEmptyValue = (value: unknown) =>
 const keepCurrentIfFilled = <T>(currentValue: T, fetchedValue: T) =>
   isEmptyValue(currentValue) ? fetchedValue : currentValue;
 
+const hasCopyWith = (value: unknown): value is { copyWith: (updates: Record<string, unknown>) => unknown } =>
+  Boolean(value && typeof (value as { copyWith?: unknown }).copyWith === 'function');
+
 export const handleSearchCNPJ = async <
   T extends {
-    cnpj: string| null;
+    cnpj: string | null;
+    cnae_fiscal?: string | null;
     endereco: {
       cep?: string;
       logradouro?: string;
@@ -22,8 +26,22 @@ export const handleSearchCNPJ = async <
       nome_pais?: string;
       codigo_pais?: string;
       numero?: string;
-    };
-    [key: string]: any;
+    } | null | undefined;
+    razao_social?: string;
+    nome_fantasia?: string;
+    atividade_principal?: string;
+    inscricao_municipal?: string | null;
+    codigo_regime_tributario?: string;
+    telefone?: string;
+    proximo_numero_rps?: number | null;
+    proximo_numero_lote?: number | null;
+    serie_emissao_nfse?: string;
+    aliquota_iss?: number | null;
+    regime_especial_tributacao?: string;
+    incentivo_fiscal?: boolean;
+    certificado_digital?: string | null;
+    prestacao_sus?: boolean;
+    numero?: string;
   }
 >(
   cnpj: string,
@@ -38,12 +56,13 @@ export const handleSearchCNPJ = async <
     const cnpjOnlyNumbers = cnpj.replace(/\D/g, '');
     const data = await searchByCNPJ(cnpjOnlyNumbers);
     if (data) {
-      setState((prevState) => ({
-        ...prevState,
+      setState((prevState) => {
+        const nextState = {
         cnpj: keepCurrentIfFilled(prevState.cnpj, data.cnpj || prevState.cnpj),
         razao_social: keepCurrentIfFilled(prevState.razao_social, data.razao_social || prevState.razao_social),
         nome_fantasia: keepCurrentIfFilled(prevState.nome_fantasia, data.nome_fantasia?.trim() || prevState.nome_fantasia),
         atividade_principal: keepCurrentIfFilled(prevState.atividade_principal, data.atividade_principal?.trim() || prevState.atividade_principal),
+        cnae_fiscal: keepCurrentIfFilled(prevState.cnae_fiscal, data.cnae_fiscal || prevState.cnae_fiscal),
         inscricao_municipal: keepCurrentIfFilled(prevState.inscricao_municipal, data.inscricao_municipal || prevState.inscricao_municipal),
         codigo_regime_tributario: keepCurrentIfFilled(prevState.codigo_regime_tributario, data.codigo_regime_tributario || prevState.codigo_regime_tributario),
         telefone: keepCurrentIfFilled(prevState.telefone, data.telefone || prevState.telefone),
@@ -69,8 +88,17 @@ export const handleSearchCNPJ = async <
           codigo_pais: keepCurrentIfFilled(prevState.endereco?.codigo_pais, data.endereco?.codigo_pais ?? prevState.endereco?.codigo_pais ?? ''),
           numero: keepCurrentIfFilled(prevState.endereco?.numero, data.endereco?.numero ?? prevState.endereco?.numero ?? ''),
         }
+      };
 
-      }));
+        if (hasCopyWith(prevState)) {
+          return prevState.copyWith(nextState) as T;
+        }
+
+        return {
+          ...prevState,
+          ...nextState
+        };
+      });
       if (setTouchedFields) {
         setTouchedFields(prev => ({
           ...prev,
@@ -85,6 +113,7 @@ export const handleSearchCNPJ = async <
           cnpj: data.cnpj || ''
         }, setErrors, msgs);
       }
+      return data;
     }
   } catch (error) {
     if (msgs?.current?.show) {
@@ -99,4 +128,6 @@ export const handleSearchCNPJ = async <
       error: 'Erro ao buscar CNPJ. Por favor, tente novamente.',
     }));
   }
+
+  return null;
 };

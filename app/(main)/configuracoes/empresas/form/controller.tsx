@@ -15,6 +15,7 @@ import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { handleSearchCep } from '@/app/components/seachs/searchCep/controller';
 import { handleSearchCNPJ } from '@/app/components/seachs/searchCnpj/controller';
+import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 import { createEmptyUserConta } from '@/app/(main)/cadastro/usuarios/types/usuario';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
@@ -341,7 +342,15 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         };
         const handleSearchEmpresaCnpj = async () => {
             setLoadingCnpj(true);
-            await handleSearchCNPJ(empresa?.cnpj ?? '', setEmpresa, setErrors, msgs, selectedUserConta);
+            const cnpjData = await handleSearchCNPJ(empresa?.cnpj ?? '', setEmpresa, setErrors, msgs, selectedUserConta);
+
+            if (cnpjData?.cnae_fiscal) {
+                const cnaeOptions = await fetchFilteredCnae(cnpjData.cnae_fiscal);
+                setSelectedCNAE(findCNAEByCodigo(cnpjData.cnae_fiscal, cnaeOptions));
+            } else {
+                setSelectedCNAE(null);
+            }
+
             setLoadingCnpj(false);
             setTouchedFields((prev) => ({ ...prev, cnpj: true }));
         };
@@ -584,4 +593,3 @@ export const FormEmpresaCreated = forwardRef<EmpresaFormRef, FormEmpresaCreatedP
 FormEmpresaCreated.displayName = 'FormEmpresaCreated';
 
 export default FormEmpresaCreated;
-
