@@ -604,6 +604,7 @@ export const prepararCorrecaoNotaServico = async (params: { referencia?: string 
 export const prepararNotaServico = async (prepararNfs: PrepararNfs, msgs: any) => {
     try {
         const response = await api.post('/nfse/preparar-emissao', prepararNfs);
+        console.log('[notaServico] Resposta do backend apos preparar nota:', response.data);
         return response.data;
     } catch (error) {
         console.error('Erro ao preparar NFS-e:', error);
@@ -647,6 +648,7 @@ export const createdNotaServico = async (nfs: NfsEntity, msgs: any, router: AppR
             }
         };
         const response = await api.post('/nfse', { nfse: dataNfse });
+        console.log('retorno:', response.data);
         const statusNota = extractNotaServicoStatus(response.data);
         const notaAutorizada = statusNota === 'AUTORIZADA' ? extractNotaServicoPayload(response.data) : null;
         if (statusNota === 'REJEITADA' && redirectAfterSave) {

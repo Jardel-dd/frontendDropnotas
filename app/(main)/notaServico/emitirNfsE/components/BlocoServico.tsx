@@ -132,7 +132,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     hasError={!!servicoErrors.tributacao_issqn}
                     errorMessage={servicoErrors.tributacao_issqn}
                     showTopLabel
-                    required
                     topLabel="Tributária ISSQN:"
                 />
             </div>

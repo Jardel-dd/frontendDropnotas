@@ -715,7 +715,33 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                     />
                                 </SectionGrid>
                             </SectionCard>
+                           
                             <SectionCard
+                                icon={<i className="pi pi-map-marker" />}
+                                title="Endereço"
+                                collapsible
+                                expanded={isSectionExpanded('endereco')}
+                                onToggle={() => toggleSection('endereco')}
+                            >
+                                <SectionGrid minColumnWidth="220px">
+                                    <EnderecoForm
+                                        endereco={pessoa?.endereco}
+                                        telefone={pessoa?.endereco?.telefone}
+                                        errors={errors}
+                                        onChange={handleAllChanges}
+                                        onCepSearch={() => handleSearchCep(pessoa.endereco?.cep || '', setLoadingCep, setPessoa, setError, msgs)}
+                                        onDropdownChange={handleDropdownChange}
+                                        onDropdownChangeEndereco={handleDropdownChangeEndereco}
+                                        getCitiesFromState={getCitiesFromState}
+                                        loadingCep={loadingCep}
+                                        nomePaisObrigatorio
+                                        codigoPaisObrigatorio
+                                        codigoMunicipioObrigatorio
+                                        compactSection
+                                    />
+                                </SectionGrid>
+                            </SectionCard>
+                             <SectionCard
                                 icon={<i className="pi pi-link" />}
                                 title="Relações"
                                 collapsible
@@ -798,31 +824,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                             </>
                                         )}
                                     </div>
-                                </SectionGrid>
-                            </SectionCard>
-                            <SectionCard
-                                icon={<i className="pi pi-map-marker" />}
-                                title="Endereço"
-                                collapsible
-                                expanded={isSectionExpanded('endereco')}
-                                onToggle={() => toggleSection('endereco')}
-                            >
-                                <SectionGrid minColumnWidth="220px">
-                                    <EnderecoForm
-                                        endereco={pessoa?.endereco}
-                                        telefone={pessoa?.endereco?.telefone}
-                                        errors={errors}
-                                        onChange={handleAllChanges}
-                                        onCepSearch={() => handleSearchCep(pessoa.endereco?.cep || '', setLoadingCep, setPessoa, setError, msgs)}
-                                        onDropdownChange={handleDropdownChange}
-                                        onDropdownChangeEndereco={handleDropdownChangeEndereco}
-                                        getCitiesFromState={getCitiesFromState}
-                                        loadingCep={loadingCep}
-                                        nomePaisObrigatorio
-                                        codigoPaisObrigatorio
-                                        codigoMunicipioObrigatorio
-                                        compactSection
-                                    />
                                 </SectionGrid>
                             </SectionCard>
                         </div>
