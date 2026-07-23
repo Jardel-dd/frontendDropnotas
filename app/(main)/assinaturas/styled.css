@@ -7,6 +7,10 @@
     --subscription-panel-border: rgba(15, 23, 42, 0.08);
     --subscription-panel-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
     --subscription-text-muted: #5f6b7a;
+    --subscription-surface-soft: rgba(248, 250, 252, 0.9);
+    --subscription-surface-strong: #ffffff;
+    --subscription-icon-soft: rgba(15, 23, 42, 0.06);
+    --subscription-icon-strong: #111827;
     min-height: 100%;
     padding: 1rem 0 2rem;
 }
@@ -283,7 +287,7 @@
     padding: 1rem;
     border-radius: 20px;
     border: 1px solid rgba(148, 163, 184, 0.18);
-    background: #fff;
+    background: var(--subscription-surface-strong);
     text-align: left;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
@@ -343,7 +347,7 @@
     margin-top: 1rem;
     padding: 1rem;
     border-radius: 22px;
-    background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.96));
+    background: linear-gradient(180deg, var(--subscription-surface-soft), var(--subscription-surface-strong));
     border: 1px solid rgba(148, 163, 184, 0.16);
 }
 
@@ -387,7 +391,7 @@
     padding: 1rem 1.1rem;
     border-radius: 20px;
     border: 1px dashed rgba(148, 163, 184, 0.4);
-    background: rgba(248, 250, 252, 0.88);
+    background: var(--subscription-surface-soft);
 }
 
 .subscription-gated-panel strong {
@@ -450,7 +454,7 @@
     gap: 0.65rem;
     padding: 0.95rem;
     border-radius: 18px;
-    background: rgba(248, 250, 252, 0.9);
+    background: var(--subscription-surface-soft);
     border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
@@ -503,7 +507,7 @@
     gap: 1rem;
     padding: 1rem;
     border-radius: 22px;
-    background: rgba(248, 250, 252, 0.92);
+    background: var(--subscription-surface-soft);
     border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
@@ -522,7 +526,7 @@
 .subscription-card-token-box {
     padding: 1rem;
     border-radius: 18px;
-    background: #fff;
+    background: var(--subscription-surface-strong);
     border: 1px dashed rgba(148, 163, 184, 0.42);
     font-size: 0.95rem;
     word-break: break-word;
@@ -539,18 +543,75 @@
     gap: 2px;
     padding: 0.8rem;
     border-radius: 24px;
-    background: #fff;
+    background: var(--subscription-surface-strong);
     border: 1px solid rgba(148, 163, 184, 0.18);
     aspect-ratio: 1;
 }
 
 .subscription-mock-qr span {
     border-radius: 2px;
-    background: rgba(15, 23, 42, 0.06);
+    background: var(--subscription-icon-soft);
 }
 
 .subscription-mock-qr span.is-filled {
-    background: #111827;
+    background: var(--subscription-icon-strong);
+}
+
+.layout-dark .subscription-page {
+    --subscription-panel-border: rgba(148, 163, 184, 0.18);
+    --subscription-panel-shadow: 0 24px 60px rgba(2, 6, 23, 0.32);
+    --subscription-text-muted: rgba(226, 232, 240, 0.72);
+    --subscription-surface-soft: rgba(15, 23, 42, 0.72);
+    --subscription-surface-strong: rgba(30, 41, 59, 0.92);
+    --subscription-icon-soft: rgba(148, 163, 184, 0.14);
+    --subscription-icon-strong: rgba(248, 250, 252, 0.92);
+}
+
+.layout-dark .subscription-method-card,
+.layout-dark .subscription-card-form,
+.layout-dark .subscription-gated-panel,
+.layout-dark .subscription-summary-item,
+.layout-dark .subscription-detail-grid > div,
+.layout-dark .subscription-artifact-qr-panel,
+.layout-dark .subscription-artifact-copy code,
+.layout-dark .subscription-card-token-box,
+.layout-dark .subscription-mock-qr {
+    border-color: rgba(148, 163, 184, 0.18);
+}
+
+.layout-dark .subscription-method-card:hover:not(:disabled),
+.layout-dark .subscription-method-card.is-selected {
+    box-shadow: 0 18px 32px rgba(2, 6, 23, 0.3);
+}
+
+.layout-dark .subscription-method-copy strong,
+.layout-dark .subscription-summary-item strong,
+.layout-dark .subscription-detail-grid strong,
+.layout-dark .subscription-card-token-box strong,
+.layout-dark .subscription-artifact-copy strong,
+.layout-dark .subscription-gated-panel strong,
+.layout-dark .subscription-card-title-row h2,
+.layout-dark .subscription-section-header h3 {
+    color: rgba(248, 250, 252, 0.96);
+}
+
+.layout-dark .subscription-card-token-box span,
+.layout-dark .subscription-card-token-box small,
+.layout-dark .subscription-artifact-copy code,
+.layout-dark .subscription-summary-item small,
+.layout-dark .subscription-detail-grid small {
+    color: rgba(226, 232, 240, 0.82);
+}
+
+.layout-dark .subscription-status-card .p-message {
+    background: rgba(217, 138, 0, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fde68a;
+}
+
+.layout-dark .subscription-status-card .p-message .p-message-icon,
+.layout-dark .subscription-status-card .p-message .p-message-text {
+    color: inherit;
 }
 
 .subscription-status-badge {

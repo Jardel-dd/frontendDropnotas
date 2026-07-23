@@ -37,6 +37,7 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
         const fileInputRef = useRef<HTMLInputElement>(null);
         const onUserContaChangeRef = useRef(onUserContaChange);
         const onErrorsChangeRef = useRef(onErrorsChange);
+        const confirmPasswordValidationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         const [isLoading, setIsLoading] = useState(true);
         const [isEditMode, setIsEditMode] = useState(false);
         const [empresa, setEmpresa] = useState<CompanyEntity>(createEmptyEmpresaUsuario());
@@ -140,7 +141,6 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
         const handleConfirmPasswordChange = (value: string) => {
             setConfirmPassword(value);
             setTouchedFields((prev) => ({ ...prev, confirmPassword: true }));
-            validatePasswordConfirmation(value);
         };
 
         const togglePasswordVisibility = () => {
@@ -296,7 +296,27 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
             if (Object.values(touchedFields).some(Boolean)) {
                 validateFieldsUserConta(userConta, confirmPassword, selectedPerfilUser, selectedEmpresa, setErrors, msgs, userContaID ?? undefined);
             }
-        }, [userConta, confirmPassword, selectedPerfilUser, selectedEmpresa, touchedFields, msgs, userContaID]);
+        }, [userConta, selectedPerfilUser, selectedEmpresa, touchedFields, msgs, userContaID]);
+
+        useEffect(() => {
+            if (!touchedFields.confirmPassword) {
+                return;
+            }
+
+            if (confirmPasswordValidationTimeoutRef.current) {
+                clearTimeout(confirmPasswordValidationTimeoutRef.current);
+            }
+
+            confirmPasswordValidationTimeoutRef.current = setTimeout(() => {
+                validatePasswordConfirmation();
+            }, 500);
+
+            return () => {
+                if (confirmPasswordValidationTimeoutRef.current) {
+                    clearTimeout(confirmPasswordValidationTimeoutRef.current);
+                }
+            };
+        }, [confirmPassword, userConta.senha, touchedFields.confirmPassword]);
 
         useEffect(() => {
             onUserContaChangeRef.current?.(userConta);
@@ -311,13 +331,21 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
         }
 
         const hasSelectedEmpresa = selectedEmpresa.length > 0 || (userConta.id_empresas_acesso?.length ?? 0) > 0;
+        const hasRequiredPassword =
+            Boolean(userContaID) || Boolean(userConta.senha?.trim());
+        const hasRequiredConfirmPassword =
+            Boolean(userContaID) || Boolean(confirmPassword.trim());
         const isDialogMode = Boolean(showBTNPGCreatedDialog || onClose || onBackClick);
-        // const isSubmitDisabled =
-        //     stateDisableBtnCreatedUserConta ||
-        //     isLoadingBtnCreated ||
-        //     Object.keys(errors).length > 0 ||
-        //     !userConta.nome?.trim() ||
-        //     !hasSelectedEmpresa;
+        const isSubmitDisabled =
+            stateDisableBtnCreatedUserConta ||
+            isLoadingBtnCreated ||
+            Object.keys(errors).length > 0 ||
+            !userConta.nome?.trim() ||
+            !userConta.email?.trim() ||
+            !hasRequiredPassword ||
+            !hasRequiredConfirmPassword ||
+            !selectedPerfilUser ||
+            !hasSelectedEmpresa;
 
         return (
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
@@ -355,8 +383,8 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
                     </div>
                 </div>
                 <div className={`StyleContainer-btn-Created shared-form-footer ${isDialogMode ? 'shared-form-dialog-footer' : ''}`}>
-                    {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Salvar" icon="pi pi-save" disabled={false}/>}
-                    {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Salvar" onBackClick={onBackClick} onClose={onClose} icon="pi pi-save" disabled={false}/>}
+                    {showBTNPGCreatedAll && <BTNPGCreatedAll onClick={handleSubmit} label="Salvar" icon="pi pi-save" disabled={isSubmitDisabled}/>}
+                    {showBTNPGCreatedDialog && <BTNPGCreatedDialog onClick={handleSubmit} label="Salvar" onBackClick={onBackClick} onClose={onClose} icon="pi pi-save" disabled={isSubmitDisabled}/>}
                 </div>
 
                 <DialogFilter

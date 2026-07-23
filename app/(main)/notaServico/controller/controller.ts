@@ -785,7 +785,7 @@ export const downloadArquivosNota = async (
     const clientName = sanitizeDownloadFileNamePart(
         nota.razao_social_cliente ?? (nota.tomador as any)?.razao_social ?? null
     );
-    const fileName = `PDFeXML-${clientName || `nfse-${nota.id}`}.zip`;
+    const fileName = `PDF / XML-${clientName || `nfse-${nota.id}`}.zip`;
 
     if (await startMobileNotaDownload({ notaId: nota.id, kind: 'arquivos', fileName, msgs })) {
         return;

@@ -282,7 +282,6 @@ export const activateEmpresa = async (
             ]);
         }
     }
-
 };
 export const deletarEmpresa = async (
     empresaId: number,
@@ -339,7 +338,7 @@ export const createdEmpresa = async (
         };
         const response = await api.post('/empresa', empresaData);
         const created = response?.data?.empresa ?? response?.data;
-        console.log("responde data created", response)
+        console.log("response data created", response);
         msgs.current?.show({
             severity: 'success',
             summary: 'Sucesso:',
@@ -347,11 +346,13 @@ export const createdEmpresa = async (
         });
         setEmpresa({});
         setSelectedUserConta([]);
+
         if (redirectAfterSave) {
             router.push('/configuracoes/empresas');
         }
         return created;
     } catch (error: any) {
+        console.log('ERRO COMPLETO:', error?.response);
         let detailMessage = 'Não foi possível concluir o cadastro da empresa.';
         if (error.response) {
             const statusCode = error.response.status;
@@ -360,38 +361,43 @@ export const createdEmpresa = async (
                 error.response.data?.error ||
                 error.response.data?.mensagem ||
                 error.response.data?.detail;
-            if (statusCode === 400) {
-                if (
-                    backendMessage?.toLowerCase().includes('cnpj')
-                ) {
+            let message = '';
+
+            if (typeof backendMessage === 'string') {
+                message = backendMessage.toLowerCase();
+            } else if (Array.isArray(backendMessage)) {
+                message = backendMessage.join(' ').toLowerCase();
+            } else if (backendMessage && typeof backendMessage === 'object') {
+                message = JSON.stringify(backendMessage).toLowerCase();
+            }
+
+            if (statusCode === 400 || statusCode === 409 || statusCode === 422) {
+
+                if (message.includes('cnpj') || message.includes('duplicate')) {
                     detailMessage =
                         'Já existe uma empresa cadastrada com este CNPJ, por favor verifique.';
-                }
-                else if (
-                    backendMessage?.toLowerCase().includes('cpf')
-                ) {
+                } else if (message.includes('cpf')) {
                     detailMessage =
                         'Já existe um cadastro utilizando este CPF. Confira os dados informados.';
-                }
-                else if (
-                    backendMessage?.toLowerCase().includes('senha do certificado')
-                ) {
+                } else if (message.includes('senha do certificado')) {
                     detailMessage =
                         'A senha do certificado digital está incorreta. Verifique e tente novamente.';
-                }
-                else if (backendMessage) {
-                    detailMessage = backendMessage;
+                } else if (backendMessage) {
+                    detailMessage =
+                        typeof backendMessage === 'string'
+                            ? backendMessage
+                            : 'Erro ao processar a requisição. Verifique os dados informados.';
                 }
             }
-        } else if (error.request) {
 
+        } else if (error.request) {
             detailMessage =
                 'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
         } else {
-
             detailMessage =
                 error.message || 'Ocorreu um erro inesperado.';
         }
+
         msgs.current?.show({
             severity: 'error',
             summary: 'Atenção:',
