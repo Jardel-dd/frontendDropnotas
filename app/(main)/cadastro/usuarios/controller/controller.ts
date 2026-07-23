@@ -252,21 +252,9 @@ export const handleActiveOrInativeUserConta = async (
 };
 export const fetchUserContaCreated = async (userContaID: string) => {
     try {
-        const { data: userConta } = await api.get(`/usuario-conta/${userContaID}`);
-        console.log("Dados do Usuário:", userConta);
-        const { data: perfilResponse } = await api.get("/perfil-usuario");
-        const perfisRaw = Array.isArray(perfilResponse?.content)
-            ? perfilResponse.content
-            : Array.isArray(perfilResponse)
-                ? perfilResponse
-                : [];
-        const perfilOptions = perfisRaw.map((p: any) => ({
-            id: p.id,
-            nome: p.nome || "Nome não disponível",
-        }));
-        const perfilIdDoUsuario = userConta?.id_perfil_usuario ?? userConta?.perfil_usuario?.id;
-        const perfilSelecionadoRaw =
-            perfisRaw.find((p: any) => p?.id === perfilIdDoUsuario) ?? null;
+        const { data } = await api.get(`/usuario-conta/${userContaID}`);
+        console.log("Dados do Usuário:", data);
+        const perfilIdDoUsuario = data?.id_perfil_usuario ?? data?.perfil_usuario?.id;
         const perfilDefault = new PerfilUser({
             ativo: true,
             id: 0,
@@ -325,11 +313,15 @@ export const fetchUserContaCreated = async (userContaID: string) => {
             formaPagamentoPesquisar: false,
             nfseTipoVisualizacao: ''
         });
+        const perfilSelecionadoRaw = data?.perfil_usuario ?? null;
         const perfilUser = perfilSelecionadoRaw
-            ? new PerfilUser({ ...perfilDefault, ...perfilSelecionadoRaw })
+            ? new PerfilUser({
+                ...perfilDefault,
+                ...perfilSelecionadoRaw,
+                id: perfilIdDoUsuario ?? perfilSelecionadoRaw.id ?? 0
+            })
             : perfilDefault;
-        const empresaListFormatada: CompanyEntity[] = [];
-        const selectedEmpresa: CompanyEntity[] = [];
+        const empresasAcessoRaw = Array.isArray(data?.empresas_acesso) ? data.empresas_acesso : [];
         const empresaDefault = new CompanyEntity({
             id: 0,
             id_usuarios_acesso: [0],
@@ -369,11 +361,28 @@ export const fetchUserContaCreated = async (userContaID: string) => {
             percentual_desconto_incondicionado: 0,
             percentual_desconto_condicionado: 0,
         });
+        const empresaListFormatada: CompanyEntity[] = empresasAcessoRaw.map((empresaItem: any) =>
+            new CompanyEntity({
+                ...empresaDefault,
+                ...empresaItem,
+                id: empresaItem?.id ?? 0,
+                id_usuarios_acesso: Array.isArray(empresaItem?.id_usuarios_acesso) ? empresaItem.id_usuarios_acesso : [],
+                endereco: empresaItem?.endereco ?? ({} as EnderecoEntity),
+                cnaes_secundarios: Array.isArray(empresaItem?.cnaes_secundarios) ? empresaItem.cnaes_secundarios : ['0'],
+            })
+        );
+        const selectedEmpresa: CompanyEntity[] = empresaListFormatada;
         const empresa = empresaDefault;
+        const userConta = {
+            ...data,
+            id_empresas_acesso: empresasAcessoRaw
+                .map((empresaItem: any) => empresaItem?.id)
+                .filter((id: any): id is number => typeof id === 'number'),
+        };
+
         return {
             userConta,
             perfilUser,
-            perfilOptions,
             empresa,
             empresaList: empresaListFormatada,
             selectedEmpresa,

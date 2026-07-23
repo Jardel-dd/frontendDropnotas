@@ -154,9 +154,6 @@ export function ListarEmpresas({
                 <p className="company-detail">
                     <strong className="company-label">CNPJ:</strong> {data.cnpj}
                 </p>
-                <p className="company-detail">
-                    <strong className="company-label">Telefone:</strong> {data.telefone}
-                </p>
             </div>
         );
     };

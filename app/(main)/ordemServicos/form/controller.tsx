@@ -671,7 +671,7 @@ export const OrdemServicoFormContainer = forwardRef<OrdemServicoFormRef, OrdemSe
                             </SectionCard>
                             <SectionCard
                                 icon={<i className="pi pi-link" />}
-                                title="Relação"
+                                title="Relações"
                                 collapsible
                                 expanded={isSectionExpanded('relacao')}
                                 onToggle={() => toggleSection('relacao')}

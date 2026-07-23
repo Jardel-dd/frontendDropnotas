@@ -26,7 +26,7 @@ import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn
 import VendedorDropdownField from '@/app/(main)/cadastro/vendedores/dropDown/DropdownVendedor';
 import { ContratoFormRef, PreloadedContratoData } from '@/app/(main)/contrato/types/contratos';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { fetchAllCnae, fetchFilteredCnae } from '@/app/components/fetchAll/listAllCnae/controller';
+import { fetchAllCnae, fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { createdPessoa, fetchPessoasById, updatePessoa } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { FormPessoaCreatedProps, mapPessoaContatoToSelection, PessoaFormProps, PessoaFormRef } from '../types/pessoa';
@@ -555,9 +555,28 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         };
         const handleSearchPessoaCnpj = async () => {
             setLoadingCnpj(true);
-            await handleSearchCNPJ(pessoa?.cnpj ?? '', setPessoa, setErrors, msgs);
-            setLoadingCnpj(false);
-            setTouchedFields((prev) => ({ ...prev, cnpj: true }));
+            try {
+                const cnpjData = await handleSearchCNPJ(pessoa?.cnpj ?? '', setPessoa, setErrors, msgs);
+
+                if (cnpjData?.cnae_fiscal) {
+                    const cnaeList = await fetchFilteredCnae(String(cnpjData.cnae_fiscal));
+                    const resolvedCnae = findCNAEByCodigo(cnpjData.cnae_fiscal, cnaeList);
+
+                    setSelectedCNAE(
+                        resolvedCnae ??
+                        new TableCNAEEntity({
+                            id: 0,
+                            codigo: String(cnpjData.cnae_fiscal),
+                            descricao: String(cnpjData.cnae_fiscal)
+                        })
+                    );
+                } else {
+                    setSelectedCNAE(null);
+                }
+            } finally {
+                setLoadingCnpj(false);
+                setTouchedFields((prev) => ({ ...prev, cnpj: true }));
+            }
         };
         const listagemPessoaID = useCallback(async (currentPessoaId: string) => {
             try {

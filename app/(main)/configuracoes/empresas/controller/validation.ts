@@ -146,12 +146,12 @@ export const validateFieldsEmpresas = (
     } else if (empresa.incentivo_fiscal === null || empresa.incentivo_fiscal === undefined) {
         newErrors.incentivo_fiscal = 'Selecione o Incentivo Fiscal.';
         valid = false;
-    } else if (!empresa.certificado_digital && !empresa.nome_certificado_digital) {
-        newErrors.certificado_digital = 'O certificado digital e obrigatorio.';
-        valid = false;
-    } else if (senhaCertificadoObrigatoria && (!empresa.senha_certificado_digital || empresa.senha_certificado_digital.length < 3)) {
-        newErrors.senha_certificado_digital = 'Campo deve ter no minimo 3 numeros.';
-        valid = false;
+    // } else if (!empresa.certificado_digital && !empresa.nome_certificado_digital) {
+    //     newErrors.certificado_digital = 'O certificado digital e obrigatorio.';
+    //     valid = false;
+    // } else if (senhaCertificadoObrigatoria && (!empresa.senha_certificado_digital || empresa.senha_certificado_digital.length < 3)) {
+    //     newErrors.senha_certificado_digital = 'Campo deve ter no minimo 3 numeros.';
+    //     valid = false;
     } else {
         valid = true;
     }

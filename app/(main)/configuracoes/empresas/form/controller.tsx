@@ -494,8 +494,8 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
             !empresa.regime_especial_tributacao ||
             typeof empresa.incentivo_fiscal !== 'boolean' ||
             !empresa.tipo_rps ||
-            (!empresa.certificado_digital && !empresa.nome_certificado_digital) ||
-            (shouldRequireCertificatePassword && !empresa.senha_certificado_digital) ||
+            // (!empresa.certificado_digital && !empresa.nome_certificado_digital) ||
+            // (shouldRequireCertificatePassword && !empresa.senha_certificado_digital) ||
             !hasValidUserContaSelection;
 
         return (
