@@ -420,7 +420,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
                     )}
                     {showDesktopToolbar && !isMobile && (
                         <div className="grid formgrid nota-fiscal-toolbar-desktop">
-                            <div style={{width:"150px", background:"red"}}>
+                            <div style={{width:"220px"}}>
                                 <DateRangePicker
                                     initialPeriodo={[todayRange[0]!.toDate(), todayRange[1]!.toDate()]}
                                     showTopLabel
