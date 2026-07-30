@@ -123,7 +123,7 @@ const AppMenu = () => {
                 ]
             },
             {
-                label: 'Relatório',
+                label: 'Relatórios',
                 icon: ChartBar,
                 items: [
                     {

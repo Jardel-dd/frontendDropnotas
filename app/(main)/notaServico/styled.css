@@ -212,6 +212,41 @@
     gap: 0.45rem;
 }
 
+.nota-servico-export-action {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nota-servico-export-progress {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 0.45rem);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 13rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 0.75rem;
+    background: var(--surface-card);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.nota-servico-export-progress-label {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    color: #6b7280;
+}
+
+.nota-servico-export-progress .p-progressbar {
+    height: 0.45rem;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
 .nota-servico-mobile-actions .ml-1rem {
     margin: 0 !important;
 
@@ -318,6 +353,12 @@
 
     .nota-servico-mobile-list-wrapper {
         padding-bottom: 0.25rem;
+    }
+
+    .nota-servico-export-progress {
+        right: 0;
+        min-width: 11rem;
+        max-width: min(16rem, 70vw);
     }
 }
 

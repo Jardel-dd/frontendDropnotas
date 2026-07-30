@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import './styledCalendar.css';
-import {  useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { Periodo, Props } from './types/types';
@@ -10,10 +10,19 @@ import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
 import type { Calendar as CalendarRef } from 'primereact/calendar';
 
-export const DateRangePicker = ({ onBuscar, onPeriodoChange, onClear, showTopLabel = false, topLabel, required = false, topRightElement }: Props) => {
+export const DateRangePicker = ({
+    onBuscar,
+    onPeriodoChange,
+    onClear,
+    initialPeriodo = null,
+    showTopLabel = false,
+    topLabel,
+    required = false,
+    topRightElement
+}: Props) => {
     const calendarRef = useRef<CalendarRef>(null);
     const { isDarkMode } = useTheme();
-    const [periodo, setPeriodo] = useState<Periodo>(null);
+    const [periodo, setPeriodo] = useState<Periodo>(initialPeriodo);
     const updatePeriodo = (nextPeriodo: Periodo) => {
         setPeriodo(nextPeriodo);
         onPeriodoChange?.(nextPeriodo);

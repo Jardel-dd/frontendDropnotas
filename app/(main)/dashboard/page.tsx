@@ -2,368 +2,491 @@
 import './styled.css';
 import dayjs from 'dayjs';
 import '@/app/styles/styledGlobal.css';
-import { fetchDashboard } from './controller';
-import { RelatorioDashboardParams } from './types';
+import { Chart } from 'primereact/chart';
+import LoadingScreen from '@/app/loading';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { PessoaEntity } from '@/app/entity/PessoaEntity';
-import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import React, { useEffect, useRef, useState } from 'react';
-import { EnderecoEntity } from '@/app/entity/enderecoEntity';
+import { CompanyEntity } from '@/app/entity/CompanyEntity';
+import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import PieChart from '@/app/components/chartsComponent/charts';
+import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
+import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
-import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
 import { fetchFilteredPessoa, listThePessoas } from '../cadastro/pessoas/controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { fetchFilteredService, listTheService } from '../cadastro/servicos/controller/controller';
 import { fetchFilteredEmpresa, listTheEmpresa } from '../configuracoes/empresas/controller/controller';
-const ComponentDashboard: React.FC = () => {
+import { countFormatter, EMPTY_DATE_RANGE, mapDateRangeToResumoParams, NotaFiscalResumo, ReportFilters, ValueChartItem } from './types/types';
+import { fetchRelatorioNotaFiscalResumo } from './controller/controller';
+
+const renderEmptyChartState = (icon: string, title: string, description: string) => (
+    <div className="nota-fiscal-empty-state">
+        <i className={icon} />
+        <strong>{title}</strong>
+        <span>{description}</span>
+    </div>
+);
+const NotaFiscalValueBarChart: React.FC<{
+    items: ValueChartItem[];
+    isDarkMode: boolean;
+}> = ({ items, isDarkMode }) => {
+const visibleItems = items.filter((item) => item.value > 0);
+    if (visibleItems.length === 0) {
+        return (
+            <div className="card nota-fiscal-chart-card nota-fiscal-chart-card-custom">
+                <div className="nota-fiscal-chart-header">
+                    <div>
+                        <span className="nota-fiscal-section-kicker">Valores</span>
+                        <h3>Comparativo financeiro</h3>
+                    </div>
+                    <p>Veja rapidamente quanto foi faturado, descontado e cancelado.</p>
+                </div>
+                {renderEmptyChartState(
+                    'pi pi-chart-bar',
+                    'Sem dados financeiros',
+                    'Aplique um periodo ou ajuste os filtros para carregar os valores.'
+                )}
+            </div>
+        );
+    }
+    const labelColor = isDarkMode ? '#cbd5e1' : '#475569';
+    const gridColor = isDarkMode ? 'rgba(148, 163, 184, 0.16)' : 'rgba(148, 163, 184, 0.24)';
+    return (
+        <div className="card nota-fiscal-chart-card nota-fiscal-chart-card-custom">
+            <div className="nota-fiscal-chart-header">
+                <div>
+                    <span className="nota-fiscal-section-kicker">Valores</span>
+                    <h3>Comparativo financeiro</h3>
+                </div>
+                <p>Veja rapidamente quanto foi faturado, descontado e cancelado.</p>
+            </div>
+
+            <div className="nota-fiscal-bar-chart-shell">
+                <Chart
+                    type="bar"
+                    plugins={[ChartDataLabels]}
+                    data={{
+                        labels: visibleItems.map((item) => item.label),
+                        datasets: [
+                            {
+                                data: visibleItems.map((item) => item.value),
+                                backgroundColor: visibleItems.map((item) => item.color),
+                                borderRadius: 999,
+                                borderSkipped: false,
+                                barThickness: 24
+                            }
+                        ]
+                    }}
+                    options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        animation: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context: any) => `${context.label}: ${formatCurrency(Number(context.parsed?.x ?? 0))}`
+                                }
+                            },
+                            datalabels: {
+                                color: labelColor,
+                                anchor: 'end',
+                                align: 'end',
+                                offset: 8,
+                                clamp: true,
+                                font: {
+                                    weight: 'bold'
+                                },
+                                formatter: (value: number) => formatCurrency(value)
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: gridColor
+                                },
+                                ticks: {
+                                    color: labelColor,
+                                    callback: (value: string | number) => {
+                                        const parsedValue = Number(value);
+                                        return Number.isFinite(parsedValue) ? formatCurrency(parsedValue) : value;
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: labelColor,
+                                    font: {
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        }
+                    }}
+                    style={{ height: '100%', width: '100%' }}
+                />
+            </div>
+        </div>
+    );
+};
+const RelatoriosNotaFiscal: React.FC = () => {
+    const { isDarkMode } = useTheme();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const showDesktopToolbar = isDesktop || !isMobile;
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(false);
-    const [relatorio, setRelatorio] = useState<any | null>(null);
-    const [filterType, setFilterType] = useState<string | null>(null);
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [relatorio, setRelatorio] = useState<NotaFiscalResumo | null>(null);
     const [dateRange, setDateRange] = useState<DateRangeValue>(todayRange);
-    const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedCompany, setSelectedCompany] = useState<CompanyEntity | null>(null);
-    const [empresa, setEmpresa] = useState<CompanyEntity>(
-        new CompanyEntity({
-            id: 0,
-            id_usuarios_acesso: [0],
-            cnpj: '',
-            razao_social: '',
-            nome_fantasia: '',
-            logo_empresa: '',
-            atividade_principal: '',
-            inscricao_estadual: '',
-            inscricao_municipal: '',
-            codigo_regime_tributario: '',
-            tipo_rps: '',
-            endereco: {} as EnderecoEntity,
-            cnaes_secundarios: ['0'],
-            certificado_digital: '',
-            data_vencimento_certificado_digital: '',
-            senha_certificado_digital: '',
-            nome_certificado_digital: '',
-            serie_emissao_nfse: '',
-            proximo_numero_rps: null,
-            proximo_numero_lote: null,
-            aliquota_iss: null,
-            cnae_fiscal: '',
-            prestacao_sus: false,
-            regime_especial_tributacao: '',
-            incentivo_fiscal: false,
-            email: '',
-            telefone: '',
-            ativo: true,
-            aliquota_pis: 0,
-            aliquota_cofins: 0,
-            aliquota_inss: 0,
-            aliquota_ir: 0,
-            aliquota_csll: 0,
-            aliquota_outras_retencoes: 0,
-            aliquota_deducoes: 0,
-            percentual_desconto_incondicionado: 0,
-            percentual_desconto_condicionado: 0
-        })
-    );
-    useEffect(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-        const lastSuccessfulLoginResponse = window.sessionStorage.getItem('lastSuccessfulLoginResponse');
-        if (!lastSuccessfulLoginResponse) {
-            return;
-        }
-        try {
-            console.log(' Payload de sucesso no login:', JSON.parse(lastSuccessfulLoginResponse));
-        } catch {
-        }
-    }, []);
+    const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
+    const [selectedServico, setSelectedServico] = useState<ServiceEntity | null>(null);
+    const [draftSelectedCompany, setDraftSelectedCompany] = useState<CompanyEntity | null>(null);
+    const [draftSelectedPessoa, setDraftSelectedPessoa] = useState<PessoaEntity | null>(null);
+    const [draftSelectedServico, setDraftSelectedServico] = useState<ServiceEntity | null>(null);
 
-    const handleAllChanges = (event: { target: { id: string; value: any; checked?: any; type: string } }) => {
-        let value = event.target.value;
-        if (event.target.type === 'checkbox' || event.target.type === 'switch') {
-            value = event.target.checked;
-        } else if (event.target.type === 'number') {
-            value = value === '' ? null : Number(value);
-        }
-        const _empresa = empresa!.copyWith({ [event.target.id]: value });
-        setEmpresa(_empresa);
-    };
-    const handleCompanyChange = (empresa: CompanyEntity | null) => {
-        setSelectedCompany(empresa);
-        if (empresa) {
-            handleAllChanges({
-                target: {
-                    id: 'id_empresa',
-                    value: empresa ? empresa.id : null,
-                    type: 'input'
-                }
-            });
-        }
-        setErrors((prevErrors) => {
-            const newErrors = { ...prevErrors };
-            delete newErrors.selectedCompany;
-            return newErrors;
-        });
-    };
-    const handlePessoaChange = (pessoa: PessoaEntity | null) => {
-        setSelectedPessoa(pessoa);
-        if (pessoa) {
-            handleAllChanges({
-                target: { id: 'id_pessoa', value: pessoa.id, type: 'input' }
-            });
-        }
-        setErrors((prevErrors) => {
-            const newErrors = { ...prevErrors };
-            delete newErrors.selectedPessoa;
-            return newErrors;
-        });
-    };
-    const handleClearFilters = () => {
-        setFilterType(null);
-        handleCompanyChange(null);
-        handlePessoaChange(null);
-    };
-    const search = async () => {
-        if (!dateRange) return;
-        const [inicio, fim] = dateRange;
-        if (!inicio || !fim) return;
+    const search = async (filters: ReportFilters) => {
         setLoading(true);
         try {
             msgs.current?.clear();
-            const { data_hora_inicio, data_hora_fim } = mapDateRangeToParams([inicio, fim]);
-            const params: RelatorioDashboardParams = {
-                idEmpresa: selectedCompany?.id ?? null,
-                idCliente: selectedPessoa?.id ?? null,
-                data_hora_inicio,
-                data_hora_fim
-            };
-            const resultado = await fetchDashboard(params);
+
+            const { dataInicio, dataFim } = mapDateRangeToResumoParams(filters.dateRange);
+            const resultado = await fetchRelatorioNotaFiscalResumo({
+                idEmpresa: filters.selectedCompany?.id ?? null,
+                idCliente: filters.selectedPessoa?.id ?? null,
+                idServico: filters.selectedServico?.id ?? null,
+                dataInicio,
+                dataFim
+            });
+
             setRelatorio(resultado);
         } catch (error) {
             setRelatorio(null);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Atenção:',
-                detail: error instanceof Error ? error.message : 'Não foi possível carregar os dados do dashboard.'
+                summary: 'Atencao:',
+                detail: error instanceof Error ? error.message : 'Nao foi possivel carregar o relatorio de NFS-e.'
             });
         } finally {
             setLoading(false);
         }
     };
+
     useEffect(() => {
-        search();
+        const loadInitialResumo = async () => {
+            setLoading(true);
+
+            try {
+                const { dataInicio, dataFim } = mapDateRangeToResumoParams(todayRange);
+                const resultado = await fetchRelatorioNotaFiscalResumo({
+                    dataInicio,
+                    dataFim
+                });
+                setRelatorio(resultado);
+            } catch (error) {
+                setRelatorio(null);
+                msgs.current?.show({
+                    severity: 'error',
+                    summary: 'Atencao:',
+                    detail: error instanceof Error ? error.message : 'Nao foi possivel carregar o relatorio de NFS-e.'
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        void loadInitialResumo();
     }, []);
+
+    const syncDraftFilters = () => {
+        setDraftSelectedCompany(selectedCompany);
+        setDraftSelectedPessoa(selectedPessoa);
+        setDraftSelectedServico(selectedServico);
+    };
+
+    const handleApplyFilters = () => {
+        const nextFilters: ReportFilters = {
+            dateRange,
+            selectedCompany: draftSelectedCompany,
+            selectedPessoa: draftSelectedPessoa,
+            selectedServico: draftSelectedServico
+        };
+
+        setSelectedCompany(draftSelectedCompany);
+        setSelectedPessoa(draftSelectedPessoa);
+        setSelectedServico(draftSelectedServico);
+        void search(nextFilters);
+    };
+
+    const handleClearFilters = () => {
+        const nextFilters: ReportFilters = {
+            dateRange,
+            selectedCompany: null,
+            selectedPessoa: null,
+            selectedServico: null
+        };
+
+        setSelectedCompany(null);
+        setSelectedPessoa(null);
+        setSelectedServico(null);
+        setDraftSelectedCompany(null);
+        setDraftSelectedPessoa(null);
+        setDraftSelectedServico(null);
+        void search(nextFilters);
+    };
+
+    const handleDateRangeSearch = (inicio: Date, fim: Date) => {
+        const nextDateRange: DateRangeValue = [dayjs(inicio), dayjs(fim)];
+
+        setDateRange(nextDateRange);
+        void search({
+            dateRange: nextDateRange,
+            selectedCompany,
+            selectedPessoa,
+            selectedServico
+        });
+    };
+    const handleDateRangeClear = () => {
+        setDateRange(EMPTY_DATE_RANGE);
+        void search({
+            dateRange: EMPTY_DATE_RANGE,
+            selectedCompany,
+            selectedPessoa,
+            selectedServico
+        });
+    };
+    const totalNotas = relatorio?.totalNotas ?? 0;
+    const valorTotal = relatorio?.valores.valorTotal ?? 0;
+    const valorDescontos = relatorio?.valores.descontos ?? 0;
+    const valorCancelado = relatorio?.valores.cancelados ?? 0;
+
+    const overviewCards = [
+        {
+            label: 'Total de notas',
+            value: countFormatter.format(totalNotas),
+            accent: '#0f172a'
+        },
+        {
+            label: 'Autorizadas',
+            value: countFormatter.format(relatorio?.status.autorizadas ?? 0),
+            accent: '#10b981'
+        },
+        {
+            label: 'Pendentes',
+            value: countFormatter.format(relatorio?.status.pendentes ?? 0),
+            accent: '#f59e0b'
+        },
+        {
+            label: 'Rejeitadas',
+            value: countFormatter.format(relatorio?.status.rejeitadas ?? 0),
+            accent: '#fb7185'
+        },
+        {
+            label: 'Canceladas',
+            value: countFormatter.format(relatorio?.status.canceladas ?? 0),
+            accent: '#ef4444'
+        },
+        {
+            label: 'Valor total',
+            value: formatCurrency(valorTotal),
+            accent: '#2563eb'
+        },
+        {
+            label: 'Valor cancelado',
+            value: formatCurrency(valorCancelado),
+            accent: '#e11d48'
+        },
+        {
+            label: 'Descontos',
+            value: formatCurrency(valorDescontos),
+            accent: '#06b6d4'
+        },
+        
+    ];
+    const valueChartItems: ValueChartItem[] = [
+        {
+            label: 'Valor total',
+            value: valorTotal,
+            color: '#2563eb'
+        },
+        {
+            label: 'Descontos',
+            value: valorDescontos,
+            color: '#06b6d4'
+        },
+        {
+            label: 'Cancelados',
+            value: valorCancelado,
+            color: '#e11d48'
+        }
+    ];
+    const filterOverlayContent = (
+        <div className="grid formgrid nota-fiscal-filter-overlay-content">
+            <div className="col-12">
+                <DropdownSearch<CompanyEntity>
+                    id="selectedEmpresa"
+                    selectedItem={draftSelectedCompany}
+                    onItemChange={setDraftSelectedCompany}
+                    fetchAllItems={listTheEmpresa}
+                    fetchFilteredItems={fetchFilteredEmpresa}
+                    optionLabel="razao_social"
+                    placeholder="Selecione a empresa"
+                    topLabel="Empresa:"
+                    showTopLabel
+                    autoLoadAndSelectSingle={false}
+                />
+            </div>
+
+            <div className="col-12">
+                <DropdownSearch<PessoaEntity>
+                    id="selectedPessoa"
+                    selectedItem={draftSelectedPessoa}
+                    onItemChange={setDraftSelectedPessoa}
+                    fetchAllItems={listThePessoas}
+                    fetchFilteredItems={fetchFilteredPessoa}
+                    optionLabel="razao_social"
+                    placeholder="Selecione o cliente"
+                    topLabel="Cliente:"
+                    showTopLabel
+                    autoLoadAndSelectSingle={false}
+                />
+            </div>
+
+            <div className="col-12">
+                <DropdownSearch<ServiceEntity>
+                    id="selectedServico"
+                    selectedItem={draftSelectedServico}
+                    onItemChange={setDraftSelectedServico}
+                    fetchAllItems={listTheService}
+                    fetchFilteredItems={fetchFilteredService}
+                    optionLabel="descricao"
+                    placeholder="Selecione o servico"
+                    topLabel="Servico:"
+                    showTopLabel
+                    autoLoadAndSelectSingle={false}
+                />
+            </div>
+        </div>
+    );
+
     return (
         <div className="p-fluid">
             <Messages ref={msgs} className="custom-messages" />
-            <div className="p-0">
-                {isMobile && (
-                    <>
-                        <div className="card styled-container-main-all-routes">
-                            <div className="scrollable-container">
-                                <div className="grid formgrid flex justify-content-between w-full" style={{ maxHeight: '74px' }}>
-                                    <div className="col-10 mb-0 lg:col-10">
-                                        <DateRangePicker
-                                            showTopLabel
-                                            topLabel="Filtar por Data:"
-                                            onBuscar={(inicio: Date, fim: Date) => {
-                                                setDateRange([dayjs(inicio), dayjs(fim)]);
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="col-2 mb-0 lg:col-2"  >
-                                        <div className="container-BTN-Filter-Created">
-                                            <FilterOverlay
-                                                onApply={search}
-                                                onClear={handleClearFilters}>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<CompanyEntity>
-                                                        id="selectedEmpresa"
-                                                        selectedItem={selectedCompany}
-                                                        onItemChange={handleCompanyChange}
-                                                        fetchAllItems={listTheEmpresa}
-                                                        fetchFilteredItems={fetchFilteredEmpresa}
-                                                        optionLabel="razao_social"
-                                                        placeholder="Selecione a Empresa"
-                                                        topLabel="Empresa:"
-                                                        showTopLabel
-                                                        autoLoadAndSelectSingle={false}
-                                                    />
-                                                </div>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<PessoaEntity>
-                                                        id="selectedPessoa"
-                                                        selectedItem={selectedPessoa}
-                                                        onItemChange={handlePessoaChange}
-                                                        fetchAllItems={listThePessoas}
-                                                        fetchFilteredItems={fetchFilteredPessoa}
-                                                        optionLabel="razao_social"
-                                                        placeholder="Selecione um cliente ou Fornecedor"
-                                                        topLabel="Cliente ou fornecedor:"
-                                                        showTopLabel
-                                                        autoLoadAndSelectSingle={false}
-                                                    />
-                                                </div>
-                                            </FilterOverlay>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="grid formgrid p-3">
-                                    <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
-                                        <PieChart
-                                            title="Status dos Serviços"
-                                            type="doughnut"
-                                            labels={['Abertas', 'Emitidas', 'Concluídas', 'Canceladas']}
-                                            values={[relatorio?.totalAberto || 0, relatorio?.totalEmitido || 0, relatorio?.totalConcluido || 0, relatorio?.totalCancelados || 0]}
-                                            legendPosition="bottom"
-                                            showPercentOnTooltip
-                                            percentDecimals={0}
-                                            disableAnimation
-                                            colors={['#3B82F6', '#10B981', '#6366F1', '#EF4444']}
-                                            hoverColors={['#60A5FA', '#34D399', '#818CF8', '#F97373']}
-                                        />
-                                    </div>
-                                    <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
-                                        <PieChart
-                                            title="Origem"
-                                            type="doughnut"
-                                            labels={['Ordem de Serviços', 'Notas Fiscais', 'Serviços']}
-                                            values={[relatorio?.totalOs || 0, relatorio?.totalNfse || 0, relatorio?.totalServicos || 0]}
-                                            legendPosition="bottom"
-                                            showPercentOnTooltip
-                                            percentDecimals={0}
-                                            disableAnimation
-                                            colors={['#3B82F6', '#10B981', '#6366F1']}
-                                            hoverColors={['#60A5FA', '#34D399', '#818CF8']}
-                                        />
-                                    </div>
+
+            <div className="card styled-container-main-all-routes w-full nota-fiscal-card-shell">
+                {loading && (
+                    <div className="nota-fiscal-loading-overlay">
+                        <LoadingScreen
+                            loadingText="Atualizando relatorio..."
+                            fullScreen={false}
+                            overlayOpacity={0.88}
+                        />
+                    </div>
+                )}
+
+                <div className="scrollable-container nota-fiscal-report-shell">
+                    {isMobile && (
+                        <div className="grid formgrid flex justify-content-between w-full nota-fiscal-toolbar-mobile">
+                            <div className="col-10 mb-0 lg:col-10">
+                                <DateRangePicker
+                                    initialPeriodo={[todayRange[0]!.toDate(), todayRange[1]!.toDate()]}
+                                    showTopLabel
+                                    topLabel="Filtrar por data:"
+                                    onClear={handleDateRangeClear}
+                                    onBuscar={handleDateRangeSearch}
+                                />
+                            </div>
+
+                            <div className="col-2 mb-0 lg:col-2">
+                                <div className="container-BTN-Filter-Created nota-fiscal-mobile-actions">
+                                    <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters}>
+                                        {filterOverlayContent}
+                                    </FilterOverlay>
                                 </div>
                             </div>
                         </div>
-                    </>
-                )}
-                {isDesktop && (
-                    <>
-                        <div className="card styled-container-main-all-routes">
-                            <div className="scrollable-container">
-                                <div className="p-0">
-                                    <div className="grid formgrid">
-                                        <div className="col-12 lg:col-3 container-input-search-all">
-                                            <DateRangePicker
-                                                showTopLabel
-                                                topLabel="Filtar por Data:"
-                                                onBuscar={(inicio: Date, fim: Date) => {
-                                                    setDateRange([dayjs(inicio), dayjs(fim)]);
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="Container-Btn-Filter-Desktop">
-                                            <FilterOverlay onApply={search} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
-                                                <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<CompanyEntity>
-                                                        id="selectedEmpresa"
-                                                        selectedItem={selectedCompany}
-                                                        onItemChange={handleCompanyChange}
-                                                        fetchAllItems={listTheEmpresa}
-                                                        fetchFilteredItems={fetchFilteredEmpresa}
-                                                        optionLabel="razao_social"
-                                                        placeholder="Selecione a Empresa"
-                                                        topLabel="Empresa:"
-                                                        showTopLabel
-                                                        autoLoadAndSelectSingle={false}
-                                                    />
-                                                </div>
-                                                <div className="col-12 lg:col-12 ">
-                                                    <DropdownSearch<PessoaEntity>
-                                                        id="selectedPessoa"
-                                                        selectedItem={selectedPessoa}
-                                                        onItemChange={handlePessoaChange}
-                                                        fetchAllItems={listThePessoas}
-                                                        fetchFilteredItems={fetchFilteredPessoa}
-                                                        optionLabel="razao_social"
-                                                        placeholder="Selecione um cliente ou Fornecedor"
-                                                        topLabel="Cliente ou fornecedor:"
-                                                        showTopLabel
-                                                        autoLoadAndSelectSingle={false}
-                                                    />
-                                                </div>
-                                            </FilterOverlay>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="grid formgrid relatorio-cards p-2">
-                                    <div className="card relatorio-card">
-                                        <span className="relatorio-card-title">Valor Bruto</span>
-                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalBruto)}</strong>
-                                    </div>
-                                    <div className="card relatorio-card">
-                                        <span className="relatorio-card-title">Descontos</span>
-                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalDescontos)}</strong>
-                                    </div>
-                                    <div className="card relatorio-card">
-                                        <span className="relatorio-card-title">Valor Líquido</span>
-                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalLiquido)}</strong>
-                                    </div>
-
-                                    <div className="card relatorio-card">
-                                        <span className="relatorio-card-title">Cancelados</span>
-                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalCancelados)}</strong>
-                                    </div>
-
-                                    <div className="card relatorio-card">
-                                        <span className="relatorio-card-title">Não Cancelados</span>
-                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalNaoCancelados)}</strong>
-                                    </div>
-                                </div>
-                                <div className="grid formgrid p-3">
-                                    <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
-                                        <PieChart
-                                            title="Status dos Serviços"
-                                            type="doughnut"
-                                            labels={['Abertas', 'Emitidas', 'Concluídas', 'Canceladas']}
-                                            values={[relatorio?.totalAberto || 0, relatorio?.totalEmitido || 0, relatorio?.totalConcluido || 0, relatorio?.totalCancelados || 0]}
-                                            legendPosition="bottom"
-                                            showPercentOnTooltip
-                                            percentDecimals={0}
-                                            disableAnimation
-                                            colors={['#3B82F6', '#10B981', '#6366F1', '#EF4444']}
-                                            hoverColors={['#60A5FA', '#34D399', '#818CF8', '#F97373']}
-                                        />
-                                    </div>
-                                    <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
-                                        <PieChart
-                                            title="Origem"
-                                            type="doughnut"
-                                            labels={['Ordem de Serviços', 'Notas Fiscais', 'Serviços']}
-                                            values={[relatorio?.totalOs || 0, relatorio?.totalNfse || 0, relatorio?.totalServicos || 0]}
-                                            legendPosition="bottom"
-                                            showPercentOnTooltip
-                                            percentDecimals={0}
-                                            disableAnimation
-                                            colors={['#3B82F6', '#10B981', '#6366F1']}
-                                            hoverColors={['#60A5FA', '#34D399', '#818CF8']}
-                                        />
-                                    </div>
-                                </div>
+                    )}
+                    {showDesktopToolbar && !isMobile && (
+                        <div className="grid formgrid nota-fiscal-toolbar-desktop">
+                            <div style={{width:"150px", background:"red"}}>
+                                <DateRangePicker
+                                    initialPeriodo={[todayRange[0]!.toDate(), todayRange[1]!.toDate()]}
+                                    showTopLabel
+                                    topLabel="Filtrar por data:"
+                                    onClear={handleDateRangeClear}
+                                    onBuscar={handleDateRangeSearch}
+                                />
                             </div>
 
+                            <div className="Container-Btn-Filter-Desktop nota-fiscal-filter-trigger-desktop">
+                                <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters}>
+                                    {filterOverlayContent}
+                                </FilterOverlay>
+                            </div>
                         </div>
-
-                    </>
-
-                )}
-
+                    )}
+                    <div className="nota-fiscal-content-wrapper">
+                        <section className="nota-fiscal-section">
+                            <div className="nota-fiscal-section-header">
+                                <div>
+                                    <h2>Indicadores principais</h2>
+                                </div>
+                            </div>
+                            <div className="nota-fiscal-metric-grid">
+                                {overviewCards.map((card) => (
+                                    <div
+                                        key={card.label}
+                                        className="card nota-fiscal-metric-card"
+                                        style={{ '--metric-accent': card.accent } as React.CSSProperties}>
+                                        <span className="nota-fiscal-metric-label">{card.label}</span>
+                                        <strong className="nota-fiscal-metric-value">{card.value}</strong>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                        <section className="nota-fiscal-section">
+                            <div className="nota-fiscal-chart-grid">
+                                <PieChart
+                                    title="Status NFS-e"
+                                    type="doughnut"
+                                    labels={['Autorizadas', 'Pendentes', 'Rejeitadas', 'Canceladas']}
+                                    values={[
+                                        relatorio?.status.autorizadas ?? 0,
+                                        relatorio?.status.pendentes ?? 0,
+                                        relatorio?.status.rejeitadas ?? 0,
+                                        relatorio?.status.canceladas ?? 0
+                                    ]}
+                                    legendPosition="bottom"
+                                    showPercentOnTooltip
+                                    percentDecimals={1}
+                                    disableAnimation
+                                    className="nota-fiscal-chart-card"
+                                    heightPx={320}
+                                    emptyState={renderEmptyChartState(
+                                        'pi pi-chart-pie',
+                                        'Sem dados de status',
+                                        'Tente ampliar o periodo ou limpar os filtros para visualizar a distribuicao.'
+                                    )}
+                                />
+                                <NotaFiscalValueBarChart items={valueChartItems} isDarkMode={isDarkMode} />
+                            </div>
+                        </section>
+                    </div>
+                </div>
             </div>
-
         </div>
     );
 };
-export default ComponentDashboard;
-
+export default RelatoriosNotaFiscal;

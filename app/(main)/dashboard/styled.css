@@ -1,171 +1,252 @@
-.search-actions-container {
+.nota-fiscal-report-shell {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  width: 100%;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.25rem;
 }
 
-.search-dates {
-  width: 100%;
-  max-width: 15rem;
-}
-
-.btn-clear-filter{
-height: 5px;
-max-width: 70px;
-display: flex;
-justify-content: center;
-}
-
-.search-buttons {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-}
-
-.date-range-input-wrapper {
+.nota-fiscal-card-shell {
   position: relative;
-  width: 100%;
-}
-
-.date-range-input {
-  width: 100%;
-}
-
-.date-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 0.75rem;
-  pointer-events: none;
-  font-size: inherit;
-}
-
-.date-overlay .part,
-.date-overlay .arrow {
-  pointer-events: auto;
-}
-
-.date-overlay .part {
-  flex: 1;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.date-overlay .part:not(.active):empty {
-  color: #9da5b4;
+.nota-fiscal-toolbar-mobile {
+  max-height: 74px;
 }
 
-.date-overlay .part.active {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
-  outline: 1px solid #409eff;
+.nota-fiscal-toolbar-desktop {
+  align-items: flex-start;
+  gap: 0.25rem;
 }
 
-.ant-picker,
-.ant-picker-range {
-  border: 1px solid #6c757d !important;
-  border-radius: 6px !important;
-  background: transparent !important;
-  height: 38px !important;
-  display: flex;
-  align-items: center;
+.nota-fiscal-filter-trigger-desktop {
+  margin-left: 0;
+}
+
+.nota-fiscal-filter-overlay-content {
+  min-width: min(100%, 18rem);
+}
+
+.nota-fiscal-mobile-actions {
   width: 100%;
+  margin-left: 0 !important;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 
-.ant-picker:hover,
-.ant-picker-focused {
-  border-color: #6c757d !important;
+.nota-fiscal-mobile-actions > div .p-button {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
   box-shadow: none !important;
 }
 
-.filtro-data.ant-picker {
-  box-shadow: none;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.filtro-data.ant-picker:hover,
-.filtro-data.ant-picker-focused {
-  box-shadow: 0 0 8px var(--primary-color);
-  border-color: var(--primary-color) !important;
-}
-
-.ant-picker-dropdown-range .ant-picker-panel-layout {
+.nota-fiscal-content-wrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 0.5rem;
 }
 
-
-
-.ant-picker-dropdown-range .ant-picker-presets {
-  order: 2;
-  width: 100%;
-  margin-top: 8px;
-  height: 100px
+.nota-fiscal-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: auto;
 }
 
-.ant-picker-dropdown-range .ant-picker-presets ul {
+.nota-fiscal-loading-overlay > .loading-container {
+  min-height: 100%;
+  height: 100%;
+}
+
+.nota-fiscal-section {
   display: flex;
-  width: 100%;
-  padding: 0;
-  height: 50px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.ant-picker-dropdown-range .ant-picker-presets li {
-  background: var(--primary-color);
-  color: white;
-  border-radius: 6px;
-  user-select: none;
-  width: 100%;
-  max-width: 30px;
-  height: 30px;
+.nota-fiscal-section-header {
   display: flex;
-  justify-content: center;
-
-}
-
-.ant-picker-dropdown-range .ant-picker-presets li:hover {
-  opacity: 0.85;
-}
-
-.ant-picker-dropdown .ant-picker-panel-container .ant-picker-presets {
-  max-width: 100% !important;
-}
-
-.ant-picker-dropdown .ant-picker-presets ul>li {
-  flex: 1 1 20%;
-  text-align: center;
-  max-width: 110px;
-  width: 100%;
-}
-
-.ant-picker-dropdown .ant-picker-presets ul {
-  width: 100%;
-  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
   flex-wrap: wrap;
-  gap: 6px;
-
 }
 
-.ant-picker-dropdown-range .ant-picker-presets ul {
-  width: 100%;
-  height: 150px;
+.nota-fiscal-section-kicker {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0.3rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2563eb;
+}
+
+.nota-fiscal-section-header h2,
+.nota-fiscal-chart-header h3 {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  color: var(--text-color, #0f172a);
+}
+
+.nota-fiscal-section-header p,
+.nota-fiscal-chart-header p {
+  margin: 0;
+  max-width: 34rem;
+  color: var(--text-color-secondary, #64748b);
+  line-height: 1.55;
+}
+
+.nota-fiscal-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.85rem;
+}
+
+.nota-fiscal-metric-card {
+  position: relative;
   display: flex;
-
+  flex-direction: column;
+  min-height: 10px;
+  padding: 0.9rem 0.95rem;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.05);
 }
 
-.ant-picker-dropdown .ant-picker-panel-container .ant-picker-presets ul li+li {
-  margin-top: 0 !important;
+.nota-fiscal-metric-grid > .card,
+.nota-fiscal-metric-grid > .card:last-child {
+  margin-bottom: 0 !important;
 }
 
-.ant-picker-dropdown-range .ant-picker-presets {
-  border-top: 1px solid #d1d5db;
-  padding-top: 8px;
-  margin-top: 8px;
+.nota-fiscal-metric-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: var(--metric-accent, #2563eb);
+}
+
+.nota-fiscal-metric-label {
+  font-size: 0.82rem;
+  color: var(--text-color-secondary, #64748b);
+}
+
+.nota-fiscal-metric-value {
+  margin-top: 0.45rem;
+  font-size: 1.25rem;
+  line-height: 1.15;
+  color: var(--text-color, #0f172a);
+}
+
+.nota-fiscal-metric-helper {
+  margin-top: auto;
+  padding-top: 0.7rem;
+  line-height: 1.35;
+  font-size: 0.78rem;
+  color: var(--text-color-secondary, #64748b);
+}
+
+.nota-fiscal-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.nota-fiscal-chart-card.card,
+.nota-fiscal-chart-card-custom {
+  height: 100%;
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.05);
+}
+
+.nota-fiscal-chart-card-custom {
+  display: flex;
+  flex-direction: column;
+  padding: 1.15rem;
+}
+
+.nota-fiscal-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.nota-fiscal-bar-chart-shell {
+  min-height: 320px;
+}
+
+.nota-fiscal-empty-state {
+  width: 100%;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  text-align: center;
+  color: var(--text-color-secondary, #64748b);
+}
+
+.nota-fiscal-empty-state i {
+  font-size: 2.9rem;
+  color: #94a3b8;
+}
+
+.nota-fiscal-empty-state strong {
+  font-size: 1.05rem;
+  color: var(--text-color, #0f172a);
+}
+
+.nota-fiscal-empty-state span {
+  max-width: 19rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 991px) {
+  .nota-fiscal-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nota-fiscal-bar-chart-shell {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 640px) {
+  .nota-fiscal-report-shell {
+    gap: 1rem;
+    padding: 0;
+  }
+
+  .nota-fiscal-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nota-fiscal-metric-card {
+    min-height: 104px;
+    margin-bottom: 0;
+  }
+
+  .nota-fiscal-chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .nota-fiscal-chart-card-custom {
+    padding: 1rem;
+  }
+
+  .nota-fiscal-bar-chart-shell {
+    min-height: 240px;
+  }
 }
