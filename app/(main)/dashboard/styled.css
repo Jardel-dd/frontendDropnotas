@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  padding: 0.25rem;
 }
 
 .nota-fiscal-card-shell {
@@ -229,13 +228,41 @@
     padding: 0;
   }
 
+  .nota-fiscal-content-wrapper {
+    gap: 0.9rem;
+  }
+
+  .nota-fiscal-section {
+    gap: 0.75rem;
+  }
+
+  .nota-fiscal-section-header h2 {
+    font-size: 1.15rem;
+  }
+
   .nota-fiscal-metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
   }
 
   .nota-fiscal-metric-card {
-    min-height: 104px;
+    padding: 0.7rem 0.8rem;
     margin-bottom: 0;
+  }
+
+  .nota-fiscal-metric-card::before {
+    height: 4px;
+  }
+
+  .nota-fiscal-metric-label {
+    font-size: 0.76rem;
+    line-height: 1.25;
+  }
+
+  .nota-fiscal-metric-value {
+    margin-top: 0.3rem;
+    font-size: 0.95rem;
+    line-height: 1.1;
   }
 
   .nota-fiscal-chart-grid {
