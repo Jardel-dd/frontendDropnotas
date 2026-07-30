@@ -835,7 +835,11 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
         });
     }
 };
-export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, msgs: React.RefObject<Messages | null>) => {
+export const exportarPdfNotasServico = async (
+    payload: ExportarPdfNfsePayload,
+    msgs: React.RefObject<Messages | null>,
+    onProgress?: (progress: number | null) => void
+) => {
     try {
         const requestPayload = {
             data_hora_inicio: payload.data_hora_inicio ?? '',
@@ -850,13 +854,28 @@ export const exportarPdfNotasServico = async (payload: ExportarPdfNfsePayload, m
             originalPayload: payload,
             requestPayload
         });
+        onProgress?.(0);
         const response = await api.post('/nfse/exportar-pdf', requestPayload, {
-            responseType: 'blob'
+            responseType: 'blob',
+            onDownloadProgress: (progressEvent) => {
+                if (!progressEvent.total || progressEvent.total <= 0) {
+                    onProgress?.(null);
+                    return;
+                }
+
+                const progress = Math.min(
+                    100,
+                    Math.max(0, Math.round((progressEvent.loaded / progressEvent.total) * 100))
+                );
+
+                onProgress?.(progress);
+            }
         });
         const blob = new Blob([response.data], {
             type: 'application/pdf'
         });
         triggerBlobDownload(blob, 'notas-servico.pdf');
+        onProgress?.(100);
     } catch (error) {
         console.error('Erro ao exportar PDF das notas:', error);
         if (axios.isAxiosError(error) && error.response?.status === 404) {

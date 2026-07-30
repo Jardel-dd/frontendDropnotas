@@ -1,8 +1,10 @@
 'use client';
+import 'react-image-crop/dist/ReactCrop.css';
 import { Toast } from 'primereact/toast';
 import { EmpresaFields } from './empresa';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
+import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
@@ -26,6 +28,7 @@ import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/
 import { FormCreatedUsuario, UsuarioFormRef } from '@/app/(main)/cadastro/usuarios/form/controller';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyFormDataByID, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { createCenteredLogoCrop, getCroppedImageDataUrl, readFileAsDataUrl } from './logoCropUtils';
 export type { EmpresaFieldsProps, EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
 
 const TELEFONE_OBRIGATORIO = true;
@@ -110,6 +113,11 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [isPasswordVisible, setIsPasswordVisible] = useState(false);
         const [showModalUserConta, setShowModalUserConta] = useState(false);
+        const [showLogoCropDialog, setShowLogoCropDialog] = useState(false);
+        const [logoCropSrc, setLogoCropSrc] = useState<string | null>(null);
+        const [logoCrop, setLogoCrop] = useState<Crop>();
+        const [completedLogoCrop, setCompletedLogoCrop] = useState<PixelCrop | null>(null);
+        const [isSavingCroppedLogo, setIsSavingCroppedLogo] = useState(false);
         const [editingUserContaId, setEditingUserContaId] = useState<string | null>(null);
         const [userConta, setUserConta] = useState<UsuarioContaEntity[]>([]);
         const [userContaForm, setUserContaForm] = useState<UsuarioContaEntity>(createEmptyUserConta());
@@ -118,6 +126,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [selectedUserConta, setSelectedUserConta] = useState<UsuarioContaEntity[]>([]);
         const [stateDisableBtnCreatedCompany, setStateDisableBtnCreatedCompany] = useState(false);
+        const logoCropImageRef = useRef<HTMLImageElement | null>(null);
         const hasExistingCertificate = Boolean(empresa.nome_certificado_digital);
         const hasNewCertificateUpload = Boolean(empresa.certificado_digital);
         const shouldRequireCertificatePassword = !isEditMode || hasNewCertificateUpload || !hasExistingCertificate;
@@ -319,9 +328,74 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         };
         const handleFileChangeLogo = (event: React.ChangeEvent<HTMLInputElement>) => {
             if (event.target.files && event.target.files.length > 0) {
-                const files = Array.from(event.target.files);
-                convertLogoToBase64(files, setEmpresa, toastRef, msgs);
+                const [file] = Array.from(event.target.files);
+
+                void (async () => {
+                    try {
+                        const imageSource = await readFileAsDataUrl(file);
+                        setLogoCropSrc(imageSource);
+                        setLogoCrop(undefined);
+                        setCompletedLogoCrop(null);
+                        setShowLogoCropDialog(true);
+                    } catch (error) {
+                        msgs.current?.show({
+                            severity: 'error',
+                            summary: 'Atencao:',
+                            detail: error instanceof Error ? error.message : 'Nao foi possivel abrir a imagem para edicao.'
+                        });
+                    } finally {
+                        event.target.value = '';
+                    }
+                })();
+            }
+        };
+        const handleLogoImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
+            const image = event.currentTarget;
+
+            logoCropImageRef.current = image;
+            setLogoCrop(createCenteredLogoCrop(image.width, image.height));
+        };
+        const resetLogoCropDialog = () => {
+            setShowLogoCropDialog(false);
+            setLogoCropSrc(null);
+            setLogoCrop(undefined);
+            setCompletedLogoCrop(null);
+            logoCropImageRef.current = null;
+            setIsSavingCroppedLogo(false);
+        };
+        const handleCancelLogoCrop = () => {
+            resetLogoCropDialog();
+        };
+        const handleConfirmLogoCrop = async () => {
+            if (!logoCropSrc || !logoCropImageRef.current || !completedLogoCrop?.width || !completedLogoCrop?.height) {
+                msgs.current?.show({
+                    severity: 'warn',
+                    summary: 'Atencao:',
+                    detail: 'Ajuste a logo antes de confirmar o recorte.'
+                });
+                return;
+            }
+
+            setIsSavingCroppedLogo(true);
+
+            try {
+                const croppedLogo = getCroppedImageDataUrl(logoCropImageRef.current, completedLogoCrop);
+
+                setEmpresa((prevEmpresa) => prevEmpresa.copyWith({ logo_empresa: croppedLogo }));
                 setLogoAlterada(true);
+                msgs.current?.show({
+                    severity: 'success',
+                    summary: 'Sucesso:',
+                    detail: 'Logo ajustado com sucesso!'
+                });
+                resetLogoCropDialog();
+            } catch (error) {
+                msgs.current?.show({
+                    severity: 'error',
+                    summary: 'Atencao:',
+                    detail: error instanceof Error ? error.message : 'Nao foi possivel confirmar o recorte da logo.'
+                });
+                setIsSavingCroppedLogo(false);
             }
         };
         const handleDeleteLogo = () => {
@@ -573,8 +647,50 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                             onClose={closeUserContaDialog}
                             onBackClick={closeUserContaDialog}
                         />
-                    </DialogFilter>
-            </div>
+	                    </DialogFilter>
+                <DialogFilter
+                    header="Ajustar logo da empresa"
+                    visible={showLogoCropDialog}
+                    onHide={handleCancelLogoCrop}
+                    onSave={handleConfirmLogoCrop}
+                    onCancel={handleCancelLogoCrop}
+                    saveLabel="Confirmar"
+                    cancelLabel="Cancelar"
+                    showSaveButton
+                    showCancelButton
+                    saveDisabled={!completedLogoCrop?.width || !completedLogoCrop?.height || isSavingCroppedLogo}
+                    cancelDisabled={isSavingCroppedLogo}
+                    loading={isSavingCroppedLogo}
+                    loadingText="Aplicando recorte da logo..."
+                    width="min(92vw, 720px)"
+                >
+                    <div className="empresa-logo-cropper-shell">
+                        <div className="empresa-logo-cropper-copy">
+                            <strong>Escolha o enquadramento da logo</strong>
+                            <span>Arraste e ajuste a area que deve aparecer na empresa.</span>
+                        </div>
+                        {logoCropSrc && (
+                            <div className="empresa-logo-cropper-stage">
+                                <ReactCrop
+                                    crop={logoCrop}
+                                    onChange={(nextCrop) => setLogoCrop(nextCrop)}
+                                    onComplete={(nextCrop) => setCompletedLogoCrop(nextCrop)}
+                                    aspect={1}
+                                    keepSelection
+                                    minWidth={80}
+                                >
+                                    <img
+                                        src={logoCropSrc}
+                                        alt="Logo selecionada para recorte"
+                                        onLoad={handleLogoImageLoad}
+                                        className="empresa-logo-cropper-image"
+                                    />
+                                </ReactCrop>
+                            </div>
+                        )}
+                    </div>
+                </DialogFilter>
+	            </div>
             
         );
     }

@@ -8,6 +8,7 @@ import LoadingScreen from '@/app/loading';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { ConfirmDialog } from 'primereact/confirmdialog';
+import { ProgressBar } from 'primereact/progressbar';
 import { useRouter } from 'next/navigation';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
@@ -50,11 +51,22 @@ import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '
 import { NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP, downloadArquivosButton, downloadPdfButton, downloadXmlButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 import { consumeNotaServicoFeedback, exportarPdfNotasServico, listNotaServico } from './controller/controller';
+import {
+    advanceExportPdfProgress,
+    finishExportPdfProgress,
+    getExportPdfProgressState,
+    resetExportPdfProgress,
+    startExportPdfProgress,
+    subscribeToExportPdfProgress,
+    updateExportPdfProgress
+} from './controller/exportPdfProgress';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
 import { buildEmptyNotaServicoPagination, createEmptyPessoa, formatAuthorizedNotaDateTime, formatAuthorizedNotaValue } from './types/notaServico';
 import { fetchFilteredPessoa, fetchPessoaMobilePage, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
 import { fetchFilteredService, fetchServiceFormDataByID, fetchServicesByID, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { mapDateRangeToResumoParams } from '../dashboard/types/types';
+import { fetchRelatorioNotaFiscalResumo } from '../dashboard/controller/controller';
 
 
 
@@ -88,6 +100,19 @@ const NOTA_SERVICO_ISSUED_COUNT_PATHS = [
 ];
 const NOTA_SERVICO_MOBILE_CARD_FALLBACK_HEIGHT = 224;
 const NOTA_SERVICO_MOBILE_CARD_GAP = 12;
+
+type NotaServicoFiltersState = {
+    dateRange: DateRangeValue;
+    selectedEmpresa: CompanyEntity | null;
+    selectedPessoa: PessoaEntity | null;
+    selectedVendedor: VendedorEntity | null;
+    selectedStatusNotaServico: string;
+};
+
+type NotaServicoSummaryState = {
+    totalValueDisplay: string;
+    issuedCountDisplay: string;
+};
 
 const getNestedValue = (source: Record<string, any> | null | undefined, path: string) =>
     path.split('.').reduce<any>((currentValue, key) => currentValue?.[key], source);
@@ -131,6 +156,78 @@ const buildNotaServicoSummary = (pagination: Record<string, any> | null | undefi
         issuedCountDisplay: new Intl.NumberFormat('pt-BR').format(issuedCount)
     };
 };
+const buildCurrentPageNotaServicoSummary = (pagination: Record<string, any> | null | undefined) => {
+    const totalValue = getSummaryNumberFromPaths(pagination, NOTA_SERVICO_TOTAL_VALUE_PATHS);
+    const currentPageCount = Array.isArray(pagination?.content) ? pagination.content.length : 0;
+
+    return {
+        totalValueDisplay: totalValue !== null ? formatAuthorizedNotaValue(totalValue) : '-',
+        issuedCountDisplay: new Intl.NumberFormat('pt-BR').format(currentPageCount)
+    };
+};
+const buildNotaServicoSummaryFromTotals = (
+    totalNotas: number,
+    valorTotal: number | null
+): NotaServicoSummaryState => ({
+    totalValueDisplay: valorTotal !== null ? formatAuthorizedNotaValue(valorTotal) : '-',
+    issuedCountDisplay: new Intl.NumberFormat('pt-BR').format(Math.max(0, totalNotas))
+});
+const extractNotaServicoTotalValue = (nota: Record<string, any> | null | undefined) =>
+    normalizeSummaryNumber(
+        nota?.total_valor_servico ??
+        nota?.valor_total ??
+        nota?.servico?.valores?.valor_servico ??
+        nota?.servico?.valor_total
+    ) ?? 0;
+const sumNotaServicoContentValues = (content: unknown) =>
+    Array.isArray(content)
+        ? content.reduce((accumulator, nota) => accumulator + extractNotaServicoTotalValue(nota), 0)
+        : 0;
+const hasActiveNotaServicoSummaryFilters = (
+    termo: string,
+    filters: NotaServicoFiltersState
+) => {
+    const [startDate, endDate] = filters.dateRange || [];
+
+    return Boolean(
+        termo.trim() ||
+        startDate ||
+        endDate ||
+        filters.selectedEmpresa?.id ||
+        filters.selectedPessoa?.id ||
+        filters.selectedVendedor?.id ||
+        filters.selectedStatusNotaServico
+    );
+};
+const canUseResumoEndpointForNotaServicoSummary = (
+    termo: string,
+    filters: NotaServicoFiltersState
+) => {
+    if (termo.trim() || filters.selectedVendedor?.id || filters.selectedStatusNotaServico) {
+        return false;
+    }
+
+    const [startDate, endDate] = filters.dateRange || [];
+
+    return Boolean(
+        startDate ||
+        endDate ||
+        filters.selectedEmpresa?.id ||
+        filters.selectedPessoa?.id
+    );
+};
+const buildNotaServicoSummarySignature = (
+    termo: string,
+    filters: NotaServicoFiltersState
+) => JSON.stringify({
+    termo: termo.trim(),
+    data_hora_inicio: filters.dateRange?.[0]?.toISOString?.() ?? null,
+    data_hora_fim: filters.dateRange?.[1]?.toISOString?.() ?? null,
+    id_empresa: filters.selectedEmpresa?.id ?? null,
+    id_cliente: filters.selectedPessoa?.id ?? null,
+    id_vendedor: filters.selectedVendedor?.id ?? null,
+    status: filters.selectedStatusNotaServico ?? ''
+});
 
 const NotaServico: React.FC = () => {
     const router = useRouter();
@@ -145,13 +242,11 @@ const NotaServico: React.FC = () => {
     const mobileListWrapperRef = useRef<HTMLDivElement | null>(null);
     const hasLoadedNotaServicoRef = useRef(false);
     const searchTermRef = useRef('');
-    const activeFiltersRef = useRef<{
-        dateRange: DateRangeValue;
-        selectedEmpresa: CompanyEntity | null;
-        selectedPessoa: PessoaEntity | null;
-        selectedVendedor: VendedorEntity | null;
-        selectedStatusNotaServico: string;
-    }>({
+    const exportPdfProgressIntervalRef = useRef<number | null>(null);
+    const exportPdfResetTimeoutRef = useRef<number | null>(null);
+    const activeSummarySignatureRef = useRef('');
+    const notaServicoSummaryRequestIdRef = useRef(0);
+    const activeFiltersRef = useRef<NotaServicoFiltersState>({
         dateRange: [null, null],
         selectedEmpresa: null,
         selectedPessoa: null,
@@ -175,12 +270,17 @@ const NotaServico: React.FC = () => {
     const [isPessoaDialogLoading, setIsPessoaDialogLoading] = useState(false);
     const [isEmpresaDialogLoading, setIsEmpresaDialogLoading] = useState(false);
     const [isServicoDialogLoading, setIsServicoDialogLoading] = useState(false);
-    const [loadingExportPdf, setLoadingExportPdf] = useState(false);
+    const [loadingExportPdf, setLoadingExportPdf] = useState(getExportPdfProgressState().loading);
+    const [exportPdfProgressValue, setExportPdfProgressValue] = useState(getExportPdfProgressState().progressValue);
+    const [exportPdfProgressIndeterminate, setExportPdfProgressIndeterminate] = useState(getExportPdfProgressState().indeterminate);
     const [loadingMore, setLoadingMore] = useState(false);
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showExportPdfDialog, setShowExportPdfDialog] = useState(false);
     const [showAuthorizedNotaDialog, setShowAuthorizedNotaDialog] = useState(false);
+    const [notaServicoSummary, setNotaServicoSummary] = useState<NotaServicoSummaryState>(
+        () => buildNotaServicoSummary(buildEmptyNotaServicoPagination(isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : Math.max(pageSize, 1)))
+    );
     const [authorizedNota, setAuthorizedNota] = useState<Partial<NfsEntity> | null>(null);
     const [pessoa, setPessoa] = useState<PessoaEntity>(createEmptyPessoa());
     const [showDialogPreparaNfs, setShowDialogPreparaNfs] = useState(false);
@@ -312,6 +412,95 @@ const NotaServico: React.FC = () => {
         selectedVendedor,
         selectedStatusNotaServico
     }), [dateRange, selectedEmpresa, selectedPessoa, selectedVendedor, selectedStatusNotaServico]);
+    const fetchAggregatedNotaServicoSummary = useCallback(async (
+        termo: string,
+        filters: NotaServicoFiltersState,
+        firstPageData: Record<string, any> | null | undefined
+    ) => {
+        const totalElements = normalizeSummaryNumber(firstPageData?.totalElements) ?? 0;
+        const totalPages = Math.max(1, normalizeSummaryNumber(firstPageData?.totalPages) ?? 1);
+        let totalValue = sumNotaServicoContentValues(firstPageData?.content);
+
+        for (let currentPage = 1; currentPage < totalPages; currentPage += 1) {
+            const pageData = await listNotaServico({
+                page: currentPage,
+                size: resolvedPageSize,
+                termo,
+                status: filters.selectedStatusNotaServico,
+                dateRange: filters.dateRange,
+                id_empresa: filters.selectedEmpresa?.id,
+                id_cliente: filters.selectedPessoa?.id,
+                id_vendedor: filters.selectedVendedor?.id
+            });
+
+            totalValue += sumNotaServicoContentValues(pageData?.content);
+        }
+
+        return buildNotaServicoSummaryFromTotals(totalElements, totalValue);
+    }, [resolvedPageSize]);
+    const loadNotaServicoSummary = useCallback(async (
+        termo: string,
+        filters: NotaServicoFiltersState,
+        firstPageData: Record<string, any> | null | undefined
+    ) => {
+        const requestId = ++notaServicoSummaryRequestIdRef.current;
+
+        if (!hasActiveNotaServicoSummaryFilters(termo, filters)) {
+            setNotaServicoSummary(buildCurrentPageNotaServicoSummary(firstPageData));
+            return;
+        }
+
+        const totalElements = normalizeSummaryNumber(firstPageData?.totalElements) ?? 0;
+
+        setNotaServicoSummary(buildNotaServicoSummaryFromTotals(totalElements, null));
+
+        if (canUseResumoEndpointForNotaServicoSummary(termo, filters)) {
+            try {
+                const dateParams = mapDateRangeToResumoParams(filters.dateRange);
+                const resumo = await fetchRelatorioNotaFiscalResumo({
+                    idEmpresa: filters.selectedEmpresa?.id,
+                    idCliente: filters.selectedPessoa?.id,
+                    dataInicio: dateParams.dataInicio,
+                    dataFim: dateParams.dataFim
+                });
+
+                if (requestId !== notaServicoSummaryRequestIdRef.current) {
+                    return;
+                }
+
+                setNotaServicoSummary(
+                    buildNotaServicoSummaryFromTotals(
+                        resumo.totalNotas,
+                        resumo.valores.valorTotal
+                    )
+                );
+                return;
+            } catch (error) {
+                console.warn('[notaServico] Falha ao buscar resumo agregado, usando consolidacao paginada.', error);
+            }
+        }
+
+        try {
+            const aggregatedSummary = await fetchAggregatedNotaServicoSummary(
+                termo,
+                filters,
+                firstPageData
+            );
+
+            if (requestId !== notaServicoSummaryRequestIdRef.current) {
+                return;
+            }
+
+            setNotaServicoSummary(aggregatedSummary);
+        } catch (error) {
+            if (requestId !== notaServicoSummaryRequestIdRef.current) {
+                return;
+            }
+
+            console.error('[notaServico] Nao foi possivel calcular o resumo total filtrado.', error);
+            setNotaServicoSummary(buildNotaServicoSummary(firstPageData));
+        }
+    }, [fetchAggregatedNotaServicoSummary]);
     const fetchNotaServicoPage = useCallback(async (
         pageNumber = 0,
         termo = searchTermRef.current,
@@ -353,6 +542,15 @@ const NotaServico: React.FC = () => {
 
         try {
             const data = await fetchNotaServicoPage(pageNumber, termo, filters);
+            const summarySignature = buildNotaServicoSummarySignature(termo, filters);
+            const shouldUseAggregatedSummary = hasActiveNotaServicoSummaryFilters(termo, filters);
+            const shouldRefreshSummary =
+                !append &&
+                (
+                    !shouldUseAggregatedSummary ||
+                    pageNumber === 0 ||
+                    activeSummarySignatureRef.current !== summarySignature
+                );
 
             setListPaginationNotaServico((current) => {
                 if (isMobile && append) {
@@ -361,17 +559,21 @@ const NotaServico: React.FC = () => {
 
                 return data ?? buildEmptyNotaServicoPagination(resolvedPageSize, pageNumber);
             });
+
+            if (shouldRefreshSummary) {
+                activeSummarySignatureRef.current = summarySignature;
+                void loadNotaServicoSummary(termo, filters, data);
+            }
         } finally {
             if (!append) {
                 setLoading(false);
             }
         }
-    }, [canSearchNotaServico, clearNotaServicoResults, fetchNotaServicoPage, isMobile, resolvedPageSize]);
+    }, [canSearchNotaServico, clearNotaServicoResults, fetchNotaServicoPage, isMobile, loadNotaServicoSummary, resolvedPageSize]);
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (!canSearchNotaServico) {
             return;
         }
-
         const value = event.target.value;
         setSearchTerm(value);
         debouncedSearch(value);
@@ -503,47 +705,101 @@ const NotaServico: React.FC = () => {
         if (loadingExportPdf) return;
         setShowExportPdfDialog(false);
     };
+    const clearExportPdfResetTimeout = useCallback(() => {
+        if (exportPdfResetTimeoutRef.current !== null) {
+            window.clearTimeout(exportPdfResetTimeoutRef.current);
+            exportPdfResetTimeoutRef.current = null;
+        }
+    }, []);
+    const stopExportPdfProgressSimulation = useCallback(() => {
+        if (exportPdfProgressIntervalRef.current !== null) {
+            window.clearInterval(exportPdfProgressIntervalRef.current);
+            exportPdfProgressIntervalRef.current = null;
+        }
+    }, []);
+    const resetExportPdfProgressState = useCallback(() => {
+        clearExportPdfResetTimeout();
+        stopExportPdfProgressSimulation();
+        resetExportPdfProgress();
+    }, [clearExportPdfResetTimeout, stopExportPdfProgressSimulation]);
+    const startExportPdfProgressSimulation = useCallback((initializeProgress = true) => {
+        clearExportPdfResetTimeout();
+        stopExportPdfProgressSimulation();
+        if (initializeProgress) {
+            startExportPdfProgress();
+        }
+        exportPdfProgressIntervalRef.current = window.setInterval(() => {
+            advanceExportPdfProgress();
+        }, 450);
+    }, [clearExportPdfResetTimeout, stopExportPdfProgressSimulation]);
+    const handleExportPdfProgress = useCallback((progress: number | null) => {
+        updateExportPdfProgress(progress);
+    }, []);
     const handleConfirmExportPdf = async () => {
         if (!canSearchNotaServico || loadingExportPdf) return;
         const activeFilters = getActiveFilters();
+        const dateParams = mapDateRangeToParams(activeFilters.dateRange);
+        const exportPayload: ExportarPdfNfsePayload = {
+            ...dateParams
+        };
+
+        if (activeFilters.selectedStatusNotaServico) {
+            exportPayload.status = [activeFilters.selectedStatusNotaServico];
+        }
+
+        if (activeFilters.selectedEmpresa?.id) {
+            exportPayload.id_empresa = activeFilters.selectedEmpresa.id;
+        }
+
+        if (activeFilters.selectedPessoa?.id) {
+            exportPayload.id_cliente = activeFilters.selectedPessoa.id;
+        }
+
+        if (!exportPayload.data_hora_inicio || !exportPayload.data_hora_fim) {
+            msgs.current?.show({
+                severity: 'warn',
+                summary: 'Periodo obrigatorio',
+                detail: 'Selecione uma data inicial e uma data final para exportar o PDF.',
+                life: 5000
+            });
+            return;
+        }
+
+        setShowExportPdfDialog(false);
         setLoadingExportPdf(true);
+        startExportPdfProgressSimulation();
+
         try {
-            const dateParams = mapDateRangeToParams(activeFilters.dateRange);
-            const exportPayload: ExportarPdfNfsePayload = {
-                ...dateParams
-            };
-
-            if (activeFilters.selectedStatusNotaServico) {
-                exportPayload.status = [activeFilters.selectedStatusNotaServico];
-            }
-
-            if (activeFilters.selectedEmpresa?.id) {
-                exportPayload.id_empresa = activeFilters.selectedEmpresa.id;
-            }
-
-            if (activeFilters.selectedPessoa?.id) {
-                exportPayload.id_cliente = activeFilters.selectedPessoa.id;
-            }
-
-            if (!exportPayload.data_hora_inicio || !exportPayload.data_hora_fim) {
-                msgs.current?.show({
-                    severity: 'warn',
-                    summary: 'Periodo obrigatorio',
-                    detail: 'Selecione uma data inicial e uma data final para exportar o PDF.',
-                    life: 5000
-                });
-                return;
-            }
-
             await exportarPdfNotasServico(
                 exportPayload,
-                msgs
+                msgs,
+                handleExportPdfProgress
             );
-            setShowExportPdfDialog(false);
+            stopExportPdfProgressSimulation();
+            finishExportPdfProgress();
         } finally {
-            setLoadingExportPdf(false);
+            exportPdfResetTimeoutRef.current = window.setTimeout(() => {
+                resetExportPdfProgressState();
+                exportPdfResetTimeoutRef.current = null;
+            }, 350);
         }
     };
+    useEffect(() => {
+        const unsubscribe = subscribeToExportPdfProgress((state) => {
+            setLoadingExportPdf(state.loading);
+            setExportPdfProgressValue(state.progressValue);
+            setExportPdfProgressIndeterminate(state.indeterminate);
+        });
+
+        if (getExportPdfProgressState().loading) {
+            startExportPdfProgressSimulation(false);
+        }
+
+        return () => {
+            unsubscribe();
+            stopExportPdfProgressSimulation();
+        };
+    }, [startExportPdfProgressSimulation, stopExportPdfProgressSimulation]);
     const handleClearFilters = () => {
         if (!canSearchNotaServico) {
             return;
@@ -1017,7 +1273,6 @@ const NotaServico: React.FC = () => {
         authorizedNota?.tomador?.razao_social ||
         '-';
     const canDownloadAuthorizedNota = Boolean(authorizedNota?.id);
-    const notaServicoSummary = buildNotaServicoSummary(listPaginationNotaServico);
     const renderNotaServicoSummaryFields = () => {
         if (!canSearchNotaServico) {
             return null;
@@ -1164,16 +1419,30 @@ const NotaServico: React.FC = () => {
                                             )}
                                             <div className="nota-servico-mobile-buttons">
                                                 {canSearchNotaServico && (
-                                                    <Button
-                                                        label=""
-                                                        icon="pi pi-file-pdf"
-                                                        severity="secondary"
-                                                        outlined
-                                                        tooltip="Exportar PDF"
-                                                        loading={loadingExportPdf}
-                                                        disabled={loadingExportPdf}
-                                                        onClick={handleOpenExportPdfDialog}
-                                                    />
+                                                    <div className="nota-servico-export-action">
+                                                        {loadingExportPdf && (
+                                                            <div className="nota-servico-export-progress" aria-live="polite">
+                                                                <span className="nota-servico-export-progress-label">
+                                                                    Gerando PDF para download...
+                                                                </span>
+                                                                <ProgressBar
+                                                                    value={exportPdfProgressIndeterminate ? undefined : exportPdfProgressValue}
+                                                                    mode={exportPdfProgressIndeterminate ? 'indeterminate' : 'determinate'}
+                                                                    showValue={false}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        <Button
+                                                            label=""
+                                                            icon="pi pi-file-pdf"
+                                                            severity="secondary"
+                                                            outlined
+                                                            tooltip="Exportar PDF"
+                                                            loading={loadingExportPdf}
+                                                            disabled={loadingExportPdf}
+                                                            onClick={handleOpenExportPdfDialog}
+                                                        />
+                                                    </div>
                                                 )}
                                                 {canCreateNotaServico && <Button label="" icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />}
                                             </div>
@@ -1307,7 +1576,19 @@ const NotaServico: React.FC = () => {
                                             {canUpdateNotaServico && selectedNotas.length > 0 && <Button label={`Emitir ${selectedNotas.length} Nota${selectedNotas.length > 1 ? 's' : ''}`} icon="pi pi-send" onClick={handleEmitirNotas} outlined />}
                                         </div>
                                         {canSearchNotaServico && (
-                                            <div className="p-2">
+                                            <div className="p-2 nota-servico-export-action">
+                                                {loadingExportPdf && (
+                                                    <div className="nota-servico-export-progress" aria-live="polite">
+                                                        <span className="nota-servico-export-progress-label">
+                                                            Gerando PDF para download...
+                                                        </span>
+                                                        <ProgressBar
+                                                            value={exportPdfProgressIndeterminate ? undefined : exportPdfProgressValue}
+                                                            mode={exportPdfProgressIndeterminate ? 'indeterminate' : 'determinate'}
+                                                            showValue={false}
+                                                        />
+                                                    </div>
+                                                )}
                                                 <Button
                                                     icon="pi pi-file-pdf"
                                                     severity="secondary"

@@ -2,28 +2,21 @@
 import './style.css';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
+import { useContext, useRef } from 'react';
 import { Button } from 'primereact/button';
+import { useRouter } from 'next/navigation';
 import { Checkbox } from 'primereact/checkbox';
 import { Skeleton } from 'primereact/skeleton';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { NfsEntity } from '@/app/entity/NfsEntity';
-import { useRouter } from 'next/navigation';
 import { StatusNota } from '../types/statusClassNfs';
+import { usePermissions } from '@/app/routes/permissoes';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
-import { useContext, useRef } from 'react';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { CancelarNfs } from '@/app/components/dataTableComponent/DataTableComponent';
-import {
-    DataTableSelectable,
-    downloadArquivosButton,
-    downloadPdfButton,
-    downloadXmlButton,
-    visualiarButton
-} from '@/app/components/dataTableComponent/dataTableSelectAll';
-import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { highlightSearchTerm } from '@/app/components/dataTableComponent/types/types';
-import { usePermissions } from '@/app/routes/permissoes';
-
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import {DataTableSelectable,downloadArquivosButton,downloadPdfButton,downloadXmlButton,visualiarButton} from '@/app/components/dataTableComponent/dataTableSelectAll';
 export function ListarNotaServico({
     listPaginationNotaServico,
     loading,
@@ -389,5 +382,4 @@ export function ListarNotaServico({
         </div>
     );
 }
-
 export default ListarNotaServico;
