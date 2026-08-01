@@ -195,3 +195,23 @@
     min-width: 11rem;
     box-shadow: none;
 }
+
+.nota-servico-company-cell {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: clamp(140px, 16vw, 220px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nota-servico-client-cell {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: clamp(140px, 16vw, 220px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

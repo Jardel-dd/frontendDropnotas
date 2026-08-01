@@ -97,6 +97,15 @@
     min-height: 0;
 }
 
+.datatable-actions-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
 @media (max-width: 768px) {
     .table-cell-truncate {
         max-width: min(44vw, 220px);

@@ -223,8 +223,12 @@ export function DataTableSelectable<T extends NfsEntity>({
                 {extraActionsTemplate && (
                     <Column
                         header="Ações"
-                        body={(rowData) => extraActionsTemplate(rowData)}
-                        style={{ textAlign: "center" }}
+                        body={(rowData) => (
+                            <div className="datatable-actions-inline">
+                                {extraActionsTemplate(rowData)}
+                            </div>
+                        )}
+                        style={{ textAlign: "center", whiteSpace: "nowrap", width: "1%" }}
                         headerStyle={{ background: isDarkMode ? "#162A41" : "#EFF3F8" }}
                     />
                 )}

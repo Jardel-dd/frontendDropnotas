@@ -305,7 +305,7 @@ function SignUp() {
                         />  */}
                        <Button
                             type="button"
-                            label="Solicite seu periodo de teste com o Comercial!!"
+                            label="Clique aqui e fale com nosso time comercial para garantir uma condição especial ao solicitar seu teste."
                             icon="pi pi-whatsapp"
                             className="mb-4 w-full p-button-outlined p-button-success sign-up-commercial-link"
                             onClick={() => {
