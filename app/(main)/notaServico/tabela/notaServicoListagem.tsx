@@ -182,11 +182,16 @@ export function ListarNotaServico({
                             {
                                 field: 'razao_social_cliente',
                                 header: 'Nome Cliente',
+                                style: { width: '18%' },
+                                headerStyle: { width: '18%' },
                                 body: (data) =>
                                     loading ? (
                                         <Skeleton />
                                     ) : (
-                                        <span>
+                                        <span
+                                            className="nota-servico-client-cell"
+                                            title={data.razao_social_cliente || '-'}
+                                        >
                                             {highlightSearchTerm(
                                                 limitarText(data.razao_social_cliente, 25),
                                                 searchTerm
@@ -197,11 +202,16 @@ export function ListarNotaServico({
                             {
                                 field: 'razao_social_empresa',
                                 header: 'Nome Empresa',
+                                style: { width: '18%' },
+                                headerStyle: { width: '18%' },
                                 body: (data) =>
                                     loading ? (
                                         <Skeleton />
                                     ) : (
-                                        <span>
+                                        <span
+                                            className="nota-servico-company-cell"
+                                            title={data.razao_social_empresa || '-'}
+                                        >
                                             {highlightSearchTerm(
                                                 limitarText(data.razao_social_empresa, 25),
                                                 searchTerm

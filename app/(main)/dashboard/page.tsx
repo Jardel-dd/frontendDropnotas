@@ -41,7 +41,6 @@ const visibleItems = items.filter((item) => item.value > 0);
             <div className="card nota-fiscal-chart-card nota-fiscal-chart-card-custom">
                 <div className="nota-fiscal-chart-header">
                     <div>
-                        <span className="nota-fiscal-section-kicker">Valores</span>
                         <h3>Comparativo financeiro</h3>
                     </div>
                     <p>Veja rapidamente quanto foi faturado, descontado e cancelado.</p>
@@ -60,7 +59,6 @@ const visibleItems = items.filter((item) => item.value > 0);
         <div className="card nota-fiscal-chart-card nota-fiscal-chart-card-custom">
             <div className="nota-fiscal-chart-header">
                 <div>
-                    <span className="nota-fiscal-section-kicker">Valores</span>
                     <h3>Comparativo financeiro</h3>
                 </div>
                 <p>Veja rapidamente quanto foi faturado, descontado e cancelado.</p>
