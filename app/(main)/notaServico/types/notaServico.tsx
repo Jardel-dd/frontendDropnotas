@@ -12,6 +12,7 @@ export type NotaServicoFeedback = {
     severity: 'success' | 'warn' | 'error';
     summary: string;
     detail: string;
+    displayMode?: 'toast' | 'inline';
     notaAutorizada?: Partial<NfsEntity> | null;
 };
 export type CreatedNotaServicoResult = {

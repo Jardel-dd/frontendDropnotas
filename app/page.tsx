@@ -69,7 +69,7 @@ const SignIn: React.FC = () => {
         }
     }, [touchedFields, userConta]);
     if (isLoggingIn) {
-        return <LoadingScreen loadingText={'Carregando Credenciais para acesso...'} />;
+        return <LoadingScreen loadingText={'Carregando credenciais para acesso...'} />;
     }
     return (
         <PrivateRoute redirectIfAuthenticated={true}>
@@ -174,4 +174,4 @@ const SignIn: React.FC = () => {
         </PrivateRoute>
     );
 };
-export default SignIn;
+export default SignIn; 

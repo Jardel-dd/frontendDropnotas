@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import PieChart from '@/app/components/chartsComponent/charts';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
@@ -20,17 +21,45 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import { fetchFilteredPessoa, listThePessoas } from '../cadastro/pessoas/controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { fetchFilteredService, listTheService } from '../cadastro/servicos/controller/controller';
-import { fetchFilteredEmpresa, listTheEmpresa } from '../configuracoes/empresas/controller/controller';
+import { fetchCompanyDropdownByID, fetchFilteredEmpresa, listTheEmpresa } from '../configuracoes/empresas/controller/controller';
 import { countFormatter, EMPTY_DATE_RANGE, mapDateRangeToResumoParams, NotaFiscalResumo, ReportFilters, ValueChartItem } from './types/types';
 import { fetchRelatorioNotaFiscalResumo } from './controller/controller';
 
-const renderEmptyChartState = (icon: string, title: string, description: string) => (
+const DASHBOARD_SELECTED_COMPANY_STORAGE_KEY = 'dashboard:selected-company-id';
+
+const renderEmptyChartState = (icon: string, title: string) => (
     <div className="nota-fiscal-empty-state">
         <i className={icon} />
         <strong>{title}</strong>
-        <span>{description}</span>
     </div>
 );
+const persistSelectedCompanyId = (company: CompanyEntity | null) => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    if (company?.id) {
+        window.localStorage.setItem(DASHBOARD_SELECTED_COMPANY_STORAGE_KEY, String(company.id));
+        return;
+    }
+
+    window.localStorage.removeItem(DASHBOARD_SELECTED_COMPANY_STORAGE_KEY);
+};
+
+const getStoredSelectedCompanyId = () => {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const rawCompanyId = window.localStorage.getItem(DASHBOARD_SELECTED_COMPANY_STORAGE_KEY);
+    if (!rawCompanyId) {
+        return null;
+    }
+
+    const parsedCompanyId = Number(rawCompanyId);
+    return Number.isFinite(parsedCompanyId) ? parsedCompanyId : null;
+};
+
 const NotaFiscalValueBarChart: React.FC<{
     items: ValueChartItem[];
     isDarkMode: boolean;
@@ -47,8 +76,7 @@ const visibleItems = items.filter((item) => item.value > 0);
                 </div>
                 {renderEmptyChartState(
                     'pi pi-chart-bar',
-                    'Sem dados financeiros',
-                    'Aplique um periodo ou ajuste os filtros para carregar os valores.'
+                    'Relatório sem Dados',
                 )}
             </div>
         );
@@ -184,15 +212,29 @@ const RelatoriosNotaFiscal: React.FC = () => {
 
     useEffect(() => {
         const loadInitialResumo = async () => {
-            setLoading(true);
-
             try {
-                const { dataInicio, dataFim } = mapDateRangeToResumoParams(todayRange);
-                const resultado = await fetchRelatorioNotaFiscalResumo({
-                    dataInicio,
-                    dataFim
+                const storedCompanyId = getStoredSelectedCompanyId();
+                let restoredCompany: CompanyEntity | null = null;
+
+                if (storedCompanyId !== null) {
+                    restoredCompany = await fetchCompanyDropdownByID(String(storedCompanyId));
+
+                    if (!restoredCompany) {
+                        persistSelectedCompanyId(null);
+                    }
+                }
+
+                if (restoredCompany) {
+                    setSelectedCompany(restoredCompany);
+                    setDraftSelectedCompany(restoredCompany);
+                }
+
+                await search({
+                    dateRange: todayRange,
+                    selectedCompany: restoredCompany,
+                    selectedPessoa: null,
+                    selectedServico: null
                 });
-                setRelatorio(resultado);
             } catch (error) {
                 setRelatorio(null);
                 msgs.current?.show({
@@ -200,8 +242,6 @@ const RelatoriosNotaFiscal: React.FC = () => {
                     summary: 'Atencao:',
                     detail: error instanceof Error ? error.message : 'Nao foi possivel carregar o relatorio de NFS-e.'
                 });
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -225,6 +265,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
         setSelectedCompany(draftSelectedCompany);
         setSelectedPessoa(draftSelectedPessoa);
         setSelectedServico(draftSelectedServico);
+        persistSelectedCompanyId(draftSelectedCompany);
         void search(nextFilters);
     };
 
@@ -241,6 +282,46 @@ const RelatoriosNotaFiscal: React.FC = () => {
         setSelectedServico(null);
         setDraftSelectedCompany(null);
         setDraftSelectedPessoa(null);
+        setDraftSelectedServico(null);
+        persistSelectedCompanyId(null);
+        void search(nextFilters);
+    };
+    const handleRemoveCompanyFilter = () => {
+        const nextFilters: ReportFilters = {
+            dateRange,
+            selectedCompany: null,
+            selectedPessoa,
+            selectedServico
+        };
+
+        setSelectedCompany(null);
+        setDraftSelectedCompany(null);
+        persistSelectedCompanyId(null);
+        void search(nextFilters);
+    };
+
+    const handleRemovePessoaFilter = () => {
+        const nextFilters: ReportFilters = {
+            dateRange,
+            selectedCompany,
+            selectedPessoa: null,
+            selectedServico
+        };
+
+        setSelectedPessoa(null);
+        setDraftSelectedPessoa(null);
+        void search(nextFilters);
+    };
+
+    const handleRemoveServicoFilter = () => {
+        const nextFilters: ReportFilters = {
+            dateRange,
+            selectedCompany,
+            selectedPessoa,
+            selectedServico: null
+        };
+
+        setSelectedServico(null);
         setDraftSelectedServico(null);
         void search(nextFilters);
     };
@@ -330,6 +411,28 @@ const RelatoriosNotaFiscal: React.FC = () => {
             color: '#e11d48'
         }
     ];
+    const appliedFilterItems = [
+        {
+            label: 'Empresa',
+            value: selectedCompany?.razao_social ?? null,
+            onRemove: handleRemoveCompanyFilter
+        },
+        {
+            label: 'Cliente',
+            value: selectedPessoa?.razao_social ?? null,
+            onRemove: handleRemovePessoaFilter
+        },
+        {
+            label: 'Servico',
+            value: selectedServico?.descricao ?? null,
+            onRemove: handleRemoveServicoFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
+    const selectedPeriodo =
+        dateRange?.[0] && dateRange?.[1]
+            ? [dateRange[0].toDate(), dateRange[1].toDate()] as [Date, Date]
+            : null;
     const filterOverlayContent = (
         <div className="grid formgrid nota-fiscal-filter-overlay-content">
             <div className="col-12">
@@ -399,6 +502,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
                         <div className="grid formgrid flex justify-content-between w-full nota-fiscal-toolbar-mobile">
                             <div className="col-10 mb-0 lg:col-10">
                                 <DateRangePicker
+                                    value={selectedPeriodo}
                                     initialPeriodo={[todayRange[0]!.toDate(), todayRange[1]!.toDate()]}
                                     showTopLabel
                                     topLabel="Filtrar por data:"
@@ -409,7 +513,11 @@ const RelatoriosNotaFiscal: React.FC = () => {
 
                             <div className="col-2 mb-0 lg:col-2">
                                 <div className="container-BTN-Filter-Created nota-fiscal-mobile-actions">
-                                    <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters}>
+                                    <FilterOverlay
+                                        onOpen={syncDraftFilters}
+                                        onApply={handleApplyFilters}
+                                        onClear={handleClearFilters}
+                                        activeFilterCount={activeFilterCount}>
                                         {filterOverlayContent}
                                     </FilterOverlay>
                                 </div>
@@ -420,6 +528,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
                         <div className="grid formgrid nota-fiscal-toolbar-desktop">
                             <div style={{width:"220px"}}>
                                 <DateRangePicker
+                                    value={selectedPeriodo}
                                     initialPeriodo={[todayRange[0]!.toDate(), todayRange[1]!.toDate()]}
                                     showTopLabel
                                     topLabel="Filtrar por data:"
@@ -429,12 +538,21 @@ const RelatoriosNotaFiscal: React.FC = () => {
                             </div>
 
                             <div className="Container-Btn-Filter-Desktop nota-fiscal-filter-trigger-desktop">
-                                <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters}>
+                                <FilterOverlay
+                                    onOpen={syncDraftFilters}
+                                    onApply={handleApplyFilters}
+                                    onClear={handleClearFilters}
+                                    activeFilterCount={activeFilterCount}>
                                     {filterOverlayContent}
                                 </FilterOverlay>
                             </div>
                         </div>
                     )}
+                    <AppliedFiltersSummary
+                        items={appliedFilterItems}
+                        onClear={handleClearFilters}
+                        className="nota-fiscal-applied-filters"
+                    />
                     <div className="nota-fiscal-content-wrapper">
                         <section className="nota-fiscal-section">
                             <div className="nota-fiscal-section-header">
@@ -467,6 +585,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
                                         relatorio?.status.canceladas ?? 0
                                     ]}
                                     legendPosition="bottom"
+                                    preserveLegendItems
                                     showPercentOnTooltip
                                     percentDecimals={1}
                                     disableAnimation
@@ -474,8 +593,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
                                     heightPx={320}
                                     emptyState={renderEmptyChartState(
                                         'pi pi-chart-pie',
-                                        'Sem dados de status',
-                                        'Tente ampliar o periodo ou limpar os filtros para visualizar a distribuicao.'
+                                        'Relatório sem dados',
                                     )}
                                 />
                                 <NotaFiscalValueBarChart items={valueChartItems} isDarkMode={isDarkMode} />

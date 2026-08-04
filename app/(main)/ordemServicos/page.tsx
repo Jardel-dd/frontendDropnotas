@@ -1,5 +1,6 @@
 'use client';
 import dayjs from 'dayjs';
+import './styles.css';
 import './fotter.css';
 import '@/app/styles/styledGlobal.css';
 import { Button } from 'primereact/button';
@@ -37,6 +38,7 @@ import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/t
 import { fetchFilteredPessoa, listThePessoas } from '../cadastro/pessoas/controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { fetchFilteredEmpresa, listTheEmpresa } from '../configuracoes/empresas/controller/controller';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 
 const buildEmptyOrdemServicoPagination = (pageSize: number, pageNumber = 0) => ({
     content: [],
@@ -384,6 +386,24 @@ const OrdemServicos: React.FC = () => {
         search(null, null, '');
         setVisible(false);
     };
+    const handleRemoveEmpresaFilter = () => {
+        setSelectedEmpresa(null);
+        setDraftSelectedEmpresa(null);
+        handleListOrdemServico(0, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
+        search(null, selectedPessoa, selectedStatusOrdemServico);
+    };
+    const handleRemovePessoaFilter = () => {
+        setSelectedPessoa(null);
+        setDraftSelectedPessoa(null);
+        handleListOrdemServico(0, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
+        search(selectedEmpresa, null, selectedStatusOrdemServico);
+    };
+    const handleRemoveStatusFilter = () => {
+        setSelectedStatusOrdemServico('');
+        setDraftSelectedStatusOrdemServico('');
+        handleListOrdemServico(0, searchTerm, listarInativos, '', dateRange);
+        search(selectedEmpresa, selectedPessoa, '');
+    };
     const search = async (
         empresa: CompanyEntity | null = selectedEmpresa,
         pessoa: PessoaEntity | null = selectedPessoa,
@@ -434,15 +454,33 @@ const OrdemServicos: React.FC = () => {
         hasLoadedInitialList.current = true;
         handleListOrdemServico(0, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
     }, [dateRange, handleListOrdemServico, listarInativos, searchTerm, selectedStatusOrdemServico]);
+    const appliedFilterItems = [
+        {
+            label: 'Empresa',
+            value: selectedEmpresa?.razao_social ?? null,
+            onRemove: handleRemoveEmpresaFilter
+        },
+        {
+            label: 'Cliente/Fornecedor',
+            value: selectedPessoa?.razao_social ?? null,
+            onRemove: handleRemovePessoaFilter
+        },
+        {
+            label: 'Status',
+            value: selectedStatusOrdemServico
+                ? DropDownFilterOrdemOrdemServico.find((option) => option.value === selectedStatusOrdemServico)?.label ?? selectedStatusOrdemServico
+                : null,
+            onRemove: handleRemoveStatusFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
     return (
-        <div className="w-full">
+        <div className="w-full ordem-servicos-page">
             <Messages ref={msgs} className="custom-messages" />
-            <div className="p-0">
-                {isMobile && (
-                    <>
-                        <div className="card styled-container-main-all-routes">
-                            <div style={{ padding: "8px" }}>
-                                <div className="grid formgrid" style={{ maxHeight: '74px' }}>
+            {isMobile && (
+                <>
+                    <div className="card styled-container-main-all-routes p-2">
+                        <div className="grid formgrid p-2">
                                     <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                         <Input
                                             label="Buscar"
@@ -458,13 +496,14 @@ const OrdemServicos: React.FC = () => {
                                             showTopLabel
                                         />
                                     </div>
-                                    <div className="col-4 mb-0 lg:col-2 p-0 " >
+                            <div className="col-4 mb-0 lg:col-2 p-0 ">
                                         <div className="container-BTN-Filter-Created">
                                             <FilterOverlay
                                                 onOpen={syncDraftFilters}
                                                 onApply={handleApplyFilters}
                                                 onClear={handleClearFilters}
-                                                buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                                buttonClassName="height-2-8rem-ml-1rem-mobile"
+                                                activeFilterCount={activeFilterCount}>
                                                 <div className="col-12 lg:col-12 ">
                                                     <DateRangePicker
                                                         showTopLabel
@@ -540,37 +579,36 @@ const OrdemServicos: React.FC = () => {
                                             )}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div
-                                className="ordem-servico-mobile-list-wrapper mt-3"
-                                style={{
-                                    display: 'flex',
-                                    flex: '1 1 auto',
-                                    minHeight: 0,
-                                    flexDirection: 'column'
-                                }}
-                            >
-                                <ListarOrdemServico
-                                    loading={loading}
-                                    listPaginationOrdemServico={listPaginationOrdemServico}
-                                    searchTerm={searchTerm}
-                                    listarInativos={listarInativos}
-                                    onDelete={handleDeleteOrdemServico}
-                                    mobileLoadMoreVisible={hasMoreMobileContent(listPaginationOrdemServico)}
-                                    mobileLoadMoreLoading={loadingMore}
-                                    onMobileLoadMore={handleLoadMoreOrdemServico}
-                                />
-                            </div>
                         </div>
-                    </>
-                )}
-                {isDesktop && (
-                    <>
-                        <div className="card styled-container-main-all-routes">
-                            <div className="scrollable-container">
-                                <div className="p-0">
-                                    <div className="grid formgrid">
+                        <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
+                        <div
+                            style={{
+                                display: 'flex',
+                                flex: '1 1 auto',
+                                minHeight: 0,
+                                flexDirection: 'column'
+                            }}
+                        >
+                            <ListarOrdemServico
+                                loading={loading}
+                                listPaginationOrdemServico={listPaginationOrdemServico}
+                                searchTerm={searchTerm}
+                                listarInativos={listarInativos}
+                                onDelete={handleDeleteOrdemServico}
+                                mobileLoadMoreVisible={hasMoreMobileContent(listPaginationOrdemServico)}
+                                mobileLoadMoreLoading={loadingMore}
+                                onMobileLoadMore={handleLoadMoreOrdemServico}
+                            />
+                        </div>
+                    </div>
+                </>
+            )}
+            {isDesktop && (
+                <>
+                    <div className="card styled-container-main-all-routes p-2">
+                        <div className="scrollable-container">
+                            <div className="p-0">
+                                <div className="grid formgrid">
                                         <div className="col-12 lg:col-3 container-input-search-all">
                                             <Input
                                                 label="Buscar"
@@ -594,7 +632,8 @@ const OrdemServicos: React.FC = () => {
                                                 onOpen={syncDraftFilters}
                                                 onApply={handleApplyFilters}
                                                 onClear={handleClearFilters}
-                                                buttonClassName="Btn-Filter-Desktop">
+                                                buttonClassName="Btn-Filter-Desktop"
+                                                activeFilterCount={activeFilterCount}>
                                                 <div className="grid formgrid">
                                                     <div className="col-12 lg:col-12 ">
                                                         <DropdownSearch<CompanyEntity>
@@ -662,30 +701,30 @@ const OrdemServicos: React.FC = () => {
                                                 />
                                             </div>
                                         )}
-                                    </div>
-                                    <div className="mt-3">
-                                        <ListarOrdemServico
-                                            loading={loading}
-                                            listPaginationOrdemServico={listPaginationOrdemServico}
-                                            searchTerm={searchTerm}
-                                            listarInativos={listarInativos}
-                                            onDelete={handleDeleteOrdemServico}
-                                        />
-                                    </div>
+                                </div>
+                                <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
+                                <div className="mt-3">
+                                    <ListarOrdemServico
+                                        loading={loading}
+                                        listPaginationOrdemServico={listPaginationOrdemServico}
+                                        searchTerm={searchTerm}
+                                        listarInativos={listarInativos}
+                                        onDelete={handleDeleteOrdemServico}
+                                    />
                                 </div>
                             </div>
-                            <div style={{ marginTop: 'auto' }}>
-                                <CustomPaginator
-                                    first={safePageable.pageNumber * safePageable.pageSize}
-                                    rows={resolvedPageSize}
-                                    totalRecords={safePagination.totalElements}
-                                    onPageChange={onPageChange}
-                                />
                             </div>
                         </div>
-                    </>
-                )}
-            </div>
+                        <div style={{ marginTop: 'auto' }}>
+                            <CustomPaginator
+                                first={safePageable.pageNumber * safePageable.pageSize}
+                                rows={resolvedPageSize}
+                                totalRecords={safePagination.totalElements}
+                                onPageChange={onPageChange}
+                            />
+                        </div>
+                </>
+            )}
         </div>
     );
 };

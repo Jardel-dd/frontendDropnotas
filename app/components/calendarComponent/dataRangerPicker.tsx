@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import './styledCalendar.css';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { Periodo, Props } from './types/types';
@@ -15,6 +15,7 @@ export const DateRangePicker = ({
     onPeriodoChange,
     onClear,
     initialPeriodo = null,
+    value,
     showTopLabel = false,
     topLabel,
     required = false,
@@ -22,9 +23,20 @@ export const DateRangePicker = ({
 }: Props) => {
     const calendarRef = useRef<CalendarRef>(null);
     const { isDarkMode } = useTheme();
-    const [periodo, setPeriodo] = useState<Periodo>(initialPeriodo);
+    const isControlled = value !== undefined;
+    const [internalPeriodo, setInternalPeriodo] = useState<Periodo>(initialPeriodo);
+    const periodo = isControlled ? value : internalPeriodo;
+
+    useEffect(() => {
+        if (!isControlled) {
+            setInternalPeriodo(initialPeriodo);
+        }
+    }, [initialPeriodo, isControlled]);
+
     const updatePeriodo = (nextPeriodo: Periodo) => {
-        setPeriodo(nextPeriodo);
+        if (!isControlled) {
+            setInternalPeriodo(nextPeriodo);
+        }
         onPeriodoChange?.(nextPeriodo);
     };
 

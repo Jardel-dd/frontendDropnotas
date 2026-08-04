@@ -1,4 +1,5 @@
 'use client';
+import './styles.css';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
@@ -19,6 +20,7 @@ import { ativarUsuario, deletarUsuario, listUsuario } from './controller/control
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 
 const createInitialPagination = (pageSize: number) => ({
     content: [],
@@ -73,6 +75,7 @@ const Usuarios: React.FC = () => {
         })
     );
     const [listarInativos, setListarInativos] = useState<boolean>(false);
+    const [draftListarInativos, setDraftListarInativos] = useState(false);
     const [listPaginationUsersConta, setListPaginationUsersConta] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
     const safePagination = listPaginationUsersConta ?? createInitialPagination(resolvedPageSize);
     const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
@@ -216,32 +219,47 @@ const Usuarios: React.FC = () => {
     };
 
     const handleSalvarFiltro = () => {
-        handleListUsersConta(0, searchTerm, listarInativos);
+        setListarInativos(draftListarInativos);
+        handleListUsersConta(0, searchTerm, draftListarInativos);
         setVisible(false);
     };
 
     const handleClearFilters = () => {
         setListarInativos(false);
+        setDraftListarInativos(false);
         handleListUsersConta(0, '', false);
         setVisible(false);
     };
 
+    const handleRemoveInativosFilter = () => {
+        setListarInativos(false);
+        setDraftListarInativos(false);
+        handleListUsersConta(0, searchTerm, false);
+    };
+
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        setListarInativos(e.checked ?? false);
+        setDraftListarInativos(e.checked ?? false);
     };
 
     const handleApplyFilters = () => {
-        handleListUsersConta(0, searchTerm, listarInativos);
+        setListarInativos(draftListarInativos);
+        handleListUsersConta(0, searchTerm, draftListarInativos);
         setVisible(false);
     };
 
     useEffect(() => {
         handleListUsersConta();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
+    const appliedFilterItems = [
+        {
+            label: 'Situação',
+            value: listarInativos ? 'Listando inativos' : null,
+            onRemove: handleRemoveInativosFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
     return (
-        <div className="w-full">
+        <div className="w-full cadastro-usuarios-page">
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <>
@@ -264,11 +282,16 @@ const Usuarios: React.FC = () => {
                             </div>
                             <div className="col-4 mb-0 lg:col-3 lg:mb-0">
                                 <div className="container-BTN-Filter-Created">
-                                    <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                    <FilterOverlay
+                                        onOpen={() => setDraftListarInativos(listarInativos)}
+                                        onApply={handleApplyFilters}
+                                        onClear={handleClearFilters}
+                                        buttonClassName="height-2-8rem-ml-1rem-mobile"
+                                        activeFilterCount={activeFilterCount}>
                                         <CheckBoxField
                                             inputId="listarInativos"
                                             label="Listar Desativadas"
-                                            checked={listarInativos}
+                                            checked={draftListarInativos}
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
@@ -278,6 +301,7 @@ const Usuarios: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                        <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                         <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarUserConta
                                 loading={loading}
@@ -299,56 +323,57 @@ const Usuarios: React.FC = () => {
             {isDesktop && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                        <div className="scrollable-container">
-                            <div className="p-0">
-                                <div className="grid formgrid">
-                                    <div className="col-12 lg:col-3 container-input-search-all">
-                                        <Input
-                                            label="Pesquisar Nome"
-                                            outlined={true}
-                                            useRightButton={true}
-                                            iconRight={'pi pi-search'}
-                                            id="nome"
-                                            onChange={handleSearchChange}
-                                            value={searchTerm}
-                                            loading={loading}
-                                            onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Pesquisar:"
-                                            showTopLabel
-                                        />
-                                    </div>
-                                    <div className="Container-Btn-Filter-Desktop">
-                                        <FilterOverlay
-                                            onApply={handleSalvarFiltro}
-                                            onClear={handleClearFilters}
-                                            buttonClassName="Btn-Filter-Desktop">
-                                            <CheckBoxField
-                                                inputId="listarInativos"
-                                                label="Listar Desativadas"
-                                                checked={listarInativos}
-                                                onChange={handleCheckboxChange}
-                                            />
-                                        </FilterOverlay>
-                                    </div>
-                                    {permissaoUsuarioConta.create && (
-                                        <div className="container-button-primary-novo">
-                                            <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="mt-3">
-                                    <ListarUserConta
+                        <div className="p-0">
+                            <div className="grid formgrid">
+                                <div className="col-12 lg:col-3 container-input-search-all">
+                                    <Input
+                                        label="Pesquisar Nome"
+                                        outlined={true}
+                                        useRightButton={true}
+                                        iconRight={'pi pi-search'}
+                                        id="nome"
+                                        onChange={handleSearchChange}
+                                        value={searchTerm}
                                         loading={loading}
-                                        listPaginationUserConta={listPaginationUsersConta}
-                                        setLoading={setLoading}
-                                        searchTerm={searchTerm}
-                                        listarInativos={listarInativos}
-                                        setListPaginationUserConta={setListPaginationUsersConta}
-                                        deletar={handleDeleteUsuario}
-                                        ativar={handleAtivarUsuario}
+                                        onClickSearch={() => searchNow(searchTerm)}
+                                        topLabel="Pesquisar:"
+                                        showTopLabel
                                     />
                                 </div>
+                                <div className="Container-Btn-Filter-Desktop">
+                                    <FilterOverlay
+                                        onOpen={() => setDraftListarInativos(listarInativos)}
+                                        onApply={handleSalvarFiltro}
+                                        onClear={handleClearFilters}
+                                        buttonClassName="Btn-Filter-Desktop"
+                                        activeFilterCount={activeFilterCount}>
+                                        <CheckBoxField
+                                            inputId="listarInativos"
+                                            label="Listar Desativadas"
+                                            checked={draftListarInativos}
+                                            onChange={handleCheckboxChange}
+                                        />
+                                    </FilterOverlay>
+                                </div>
+                                {permissaoUsuarioConta.create && (
+                                    <div className="container-button-primary-novo">
+                                        <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
+                                    </div>
+                                )}
                             </div>
+                            <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
+                        </div>
+                        <div>
+                            <ListarUserConta
+                                loading={loading}
+                                listPaginationUserConta={listPaginationUsersConta}
+                                setLoading={setLoading}
+                                searchTerm={searchTerm}
+                                listarInativos={listarInativos}
+                                setListPaginationUserConta={setListPaginationUsersConta}
+                                deletar={handleDeleteUsuario}
+                                ativar={handleAtivarUsuario}
+                            />
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <CustomPaginator

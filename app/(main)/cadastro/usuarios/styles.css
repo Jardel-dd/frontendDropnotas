@@ -1,0 +1,13 @@
+.cadastro-usuarios-page {
+  min-height: 0;
+}
+
+.cadastro-usuarios-page .applied-filters-summary {
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .cadastro-usuarios-page .applied-filters-summary {
+    margin-bottom: 0.25rem;
+  }
+}

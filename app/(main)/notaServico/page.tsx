@@ -47,6 +47,7 @@ import type { PreloadedPessoaData } from '../cadastro/pessoas/types/pessoa';
 import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
 import { createEmptyEmpresa, createEmptyServico } from '../ordemServicos/types/ordemServico';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP, downloadArquivosButton, downloadPdfButton, downloadXmlButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
@@ -278,6 +279,13 @@ const NotaServico: React.FC = () => {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showExportPdfDialog, setShowExportPdfDialog] = useState(false);
     const [showAuthorizedNotaDialog, setShowAuthorizedNotaDialog] = useState(false);
+    const [pendingNotaServicoFeedback, setPendingNotaServicoFeedback] = useState<{
+        displayMode?: 'toast' | 'inline';
+        severity: 'success' | 'warn' | 'error';
+        summary: string;
+        detail: string;
+        notaAutorizada?: Partial<NfsEntity> | null;
+    } | null>(null);
     const [notaServicoSummary, setNotaServicoSummary] = useState<NotaServicoSummaryState>(
         () => buildNotaServicoSummary(buildEmptyNotaServicoPagination(isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : Math.max(pageSize, 1)))
     );
@@ -826,6 +834,91 @@ const NotaServico: React.FC = () => {
         });
         setVisible(false);
     };
+    const handleRemoveDateRangeFilter = () => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
+        const nextFilters = {
+            dateRange: [null, null] as DateRangeValue,
+            selectedEmpresa,
+            selectedPessoa,
+            selectedVendedor,
+            selectedStatusNotaServico
+        };
+
+        setDateRange(nextFilters.dateRange);
+        setDraftDateRange(nextFilters.dateRange);
+        search(nextFilters);
+    };
+    const handleRemoveEmpresaFilter = () => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
+        const nextFilters = {
+            dateRange,
+            selectedEmpresa: null,
+            selectedPessoa,
+            selectedVendedor,
+            selectedStatusNotaServico
+        };
+
+        setSelectedEmpresa(null);
+        setDraftSelectedEmpresa(null);
+        search(nextFilters);
+    };
+    const handleRemovePessoaFilter = () => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
+        const nextFilters = {
+            dateRange,
+            selectedEmpresa,
+            selectedPessoa: null,
+            selectedVendedor,
+            selectedStatusNotaServico
+        };
+
+        setSelectedPessoa(null);
+        setDraftSelectedPessoa(null);
+        search(nextFilters);
+    };
+    const handleRemoveVendedorFilter = () => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
+        const nextFilters = {
+            dateRange,
+            selectedEmpresa,
+            selectedPessoa,
+            selectedVendedor: null,
+            selectedStatusNotaServico
+        };
+
+        setSelectedVendedor(null);
+        setDraftSelectedVendedor(null);
+        search(nextFilters);
+    };
+    const handleRemoveStatusFilter = () => {
+        if (!canSearchNotaServico) {
+            return;
+        }
+
+        const nextFilters = {
+            dateRange,
+            selectedEmpresa,
+            selectedPessoa,
+            selectedVendedor,
+            selectedStatusNotaServico: ''
+        };
+
+        setSelectedStatusNotaServico('');
+        setDraftSelectedStatusNotaServico('');
+        search(nextFilters);
+    };
     const syncDraftFilters = () => {
         setDraftDateRange(dateRange);
         setDraftSelectedEmpresa(selectedEmpresa);
@@ -1244,7 +1337,24 @@ const NotaServico: React.FC = () => {
             return;
         }
 
-        const { notaAutorizada, ...messageFeedback } = feedback;
+        setPendingNotaServicoFeedback(feedback);
+    }, []);
+    useEffect(() => {
+        if (loading || !pendingNotaServicoFeedback) {
+            return;
+        }
+
+        const { notaAutorizada, displayMode, ...messageFeedback } = pendingNotaServicoFeedback;
+
+        if (displayMode === 'inline') {
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Erro:',
+                detail: 'NFS-e Rejeitada, verifique os dados e efetue a correção!'
+            });
+            setPendingNotaServicoFeedback(null);
+            return;
+        }
 
         msgs.current?.show({
             ...messageFeedback,
@@ -1255,7 +1365,39 @@ const NotaServico: React.FC = () => {
             setAuthorizedNota(notaAutorizada);
             setShowAuthorizedNotaDialog(true);
         }
-    }, []);
+        setPendingNotaServicoFeedback(null);
+    }, [loading, pendingNotaServicoFeedback]);
+    const hasSelectedDateRange = Boolean(dateRange?.[0] && dateRange?.[1]);
+    const appliedFilterItems = [
+        {
+            label: 'Periodo',
+            value: hasSelectedDateRange ? `${formatExportDate(dateRange[0])} ate ${formatExportDate(dateRange[1])}` : null,
+            onRemove: handleRemoveDateRangeFilter
+        },
+        {
+            label: 'Empresa',
+            value: selectedEmpresa?.razao_social ?? null,
+            onRemove: handleRemoveEmpresaFilter
+        },
+        {
+            label: 'Cliente/Fornecedor',
+            value: selectedPessoa?.razao_social ?? null,
+            onRemove: handleRemovePessoaFilter
+        },
+        {
+            label: 'Vendedor',
+            value: selectedVendedor?.razao_social ?? null,
+            onRemove: handleRemoveVendedorFilter
+        },
+        {
+            label: 'Status',
+            value: selectedStatusNotaServico
+                ? DropDownFilterNotaServico.find((option) => option.value === selectedStatusNotaServico)?.label ?? selectedStatusNotaServico
+                : null,
+            onRemove: handleRemoveStatusFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
     if (loadingPrepararNfs) {
         return <LoadingScreen loadingText={'Preparando NFS-E...'} />;
     }
@@ -1309,9 +1451,8 @@ const NotaServico: React.FC = () => {
             <div className="p-0">
                 {isMobile && (
                     <>
-                        <div className="card styled-container-main-all-routes">
-                            <div style={{ marginTop: '8px', marginLeft: '8px', width: '100%' }}>
-                                <div className="grid formgrid w-full" style={{ maxHeight: '74px' }}>
+                        <div className="card styled-container-main-all-routes p-2">
+                            <div className="grid formgrid p-2 w-full" style={{ maxHeight: '74px' }}>
                                     {canSearchNotaServico && (
                                         <div className="col-7 mb-0 lg:col-4  ">
                                             <Input
@@ -1351,7 +1492,7 @@ const NotaServico: React.FC = () => {
                                         </div>
                                         <div className="container-BTN-Filter-Created nota-servico-mobile-actions">
                                             {canSearchNotaServico && (
-                                                <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                                <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile" activeFilterCount={activeFilterCount}>
                                                     <div className="col-12 lg:col-12 ">
                                                         <DateRangePicker
                                                             showTopLabel
@@ -1448,8 +1589,8 @@ const NotaServico: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
                             </div>
+                            <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                             <div ref={mobileListWrapperRef} className="nota-servico-mobile-list-wrapper mt-3">
                                 {canSearchNotaServico ? (
                                     <ListarNotaServico
@@ -1472,8 +1613,9 @@ const NotaServico: React.FC = () => {
                 )}
                 {isDesktop && (
                     <>
-                        <div className="card styled-container-main-all-routes">
-                            <div style={{ padding: '0.5rem' }}>
+                        <div className="card styled-container-main-all-routes p-2">
+                            <div className="scrollable-container">
+                                <div className="p-0">
                                 <div className="grid formgrid">
                                     {canSearchNotaServico && (
                                         <div className="col-12 lg:col-3 container-input-search-all">
@@ -1506,7 +1648,7 @@ const NotaServico: React.FC = () => {
                                     )}
                                     {canSearchNotaServico && (
                                         <div className="Container-Btn-Filter-Desktop">
-                                            <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop">
+                                            <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="Btn-Filter-Desktop" activeFilterCount={activeFilterCount}>
                                                 <div className="grid formgrid">
                                                     <div className="col-12 lg:col-12 ">
                                                         <DropdownSearch<CompanyEntity>
@@ -1609,8 +1751,8 @@ const NotaServico: React.FC = () => {
                                         )}
                                     </div>
                                 </div>
-                            </div>
-                            <div>
+                                <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
+                                <div className="mt-3 w-full" >
                                 {canSearchNotaServico ? (
                                     <ListarNotaServico
                                         loading={loading}
@@ -1621,23 +1763,25 @@ const NotaServico: React.FC = () => {
                                     />
                                 ) : (
                                     <div className="p-3">Sem permissao para pesquisar notas fiscais.</div>
-                                )}
-                            </div>
-                            {canSearchNotaServico && (
-                                <div className="nota-servico-list-footer">
-                                    <div className="nota-servico-list-footer-paginator">
-                                        <CustomPaginator
-                                            first={safeNotaPageable.pageNumber * safeNotaPageable.pageSize}
-                                            rows={safeNotaPageable.pageSize}
-                                            totalRecords={safeNotaPagination.totalElements}
-                                            onPageChange={onPageChange}
-                                        />
-                                    </div>
-                                    <div className="nota-servico-list-footer-summary">
-                                        {renderNotaServicoSummaryFields()}
-                                    </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
+                        </div>
+                        {canSearchNotaServico && (
+                            <div className="nota-servico-list-footer">
+                                <div className="nota-servico-list-footer-paginator">
+                                    <CustomPaginator
+                                        first={safeNotaPageable.pageNumber * safeNotaPageable.pageSize}
+                                        rows={safeNotaPageable.pageSize}
+                                        totalRecords={safeNotaPagination.totalElements}
+                                        onPageChange={onPageChange}
+                                    />
+                                </div>
+                                <div className="nota-servico-list-footer-summary">
+                                    {renderNotaServicoSummaryFields()}
+                                </div>
+                            </div>
+                        )}
                         </div>
                     </>
                 )}

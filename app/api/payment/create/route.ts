@@ -108,33 +108,33 @@ export async function POST(request: Request) {
     }
 
     if (!body.customerEmail?.trim() || !isValidEmail(body.customerEmail)) {
-        return jsonNoStore({ message: 'Informe um e-mail valido para a cobranca.' }, 400);
+        return jsonNoStore({ message: 'Informe um e-mail valido para a cobrança.' }, 400);
     }
 
     if (!isKnownDocumentType(body.billingDocumentType)) {
-        return jsonNoStore({ message: 'Tipo de documento invalido para cobranca.' }, 400);
+        return jsonNoStore({ message: 'Tipo de documento invalido para cobrança.' }, 400);
     }
 
     if (
         !body.billingDocument?.trim() ||
         !(body.billingDocumentType === 'cpf' ? isValidCpf(body.billingDocument) : isValidCnpj(body.billingDocument))
     ) {
-        return jsonNoStore({ message: body.billingDocumentType === 'cpf' ? 'Informe um CPF valido.' : 'Informe um CNPJ valido.' }, 400);
+        return jsonNoStore({ message: body.billingDocumentType === 'cpf' ? 'Informe um CPF valído.' : 'Informe um CNPJ valído.' }, 400);
     }
 
     if (!body.billingDisplayName?.trim() || body.billingDisplayName.trim().length < 3) {
         return jsonNoStore(
-            { message: body.billingDocumentType === 'cpf' ? 'Informe o nome completo do pagador.' : 'Informe a razao social da cobranca.' },
+            { message: body.billingDocumentType === 'cpf' ? 'Informe o nome completo do pagador.' : 'Informe a razão social da cobrança.' },
             400
         );
     }
 
     if (!body.billingZipCode?.trim() || digitsOnly(body.billingZipCode).length !== 8) {
-        return jsonNoStore({ message: 'Informe um CEP valido para a cobranca.' }, 400);
+        return jsonNoStore({ message: 'Informe um CEP valído para a cobrança.' }, 400);
     }
 
     if (!body.billingAddress || typeof body.billingAddress !== 'object') {
-        return jsonNoStore({ message: 'Endereco de cobranca invalido.' }, 400);
+        return jsonNoStore({ message: 'Endereço de cobrança invalido.' }, 400);
     }
 
     if (
@@ -147,23 +147,23 @@ export async function POST(request: Request) {
         !body.billingAddress.codigo_pais?.trim() ||
         !body.billingAddress.nome_pais?.trim()
     ) {
-        return jsonNoStore({ message: 'Preencha o endereco de cobranca completo.' }, 400);
+        return jsonNoStore({ message: 'Preencha o enderecço de cobrança completo.' }, 400);
     }
 
     if (!body.idempotencyKey?.trim() || body.idempotencyKey.trim().length < 12) {
-        return jsonNoStore({ message: 'Chave de idempotencia invalida.' }, 400);
+        return jsonNoStore({ message: 'Chave  invalida.' }, 400);
     }
 
     if (!isKnownPaymentMethod(body.paymentMethod)) {
-        return jsonNoStore({ message: 'Forma de pagamento invalida.' }, 400);
+        return jsonNoStore({ message: 'Forma de pagamento inválida.' }, 400);
     }
 
     if (body.paymentMethod === 'credit_card') {
         if (!isValidCardToken(body.card ?? null)) {
-            return jsonNoStore({ message: 'Nao foi possivel validar o token do cartao.' }, 400);
+            return jsonNoStore({ message: 'Nao foi possível validar o token do cartão.' }, 400);
         }
     } else if (body.card) {
-        return jsonNoStore({ message: 'Dados de cartao nao sao aceitos para esta forma de pagamento.' }, 400);
+        return jsonNoStore({ message: 'Dados de cartão nao sao aceitos para esta forma de pagamento.' }, 400);
     }
 
     const payment = createMockPayment({

@@ -21,6 +21,7 @@ type PieChartProps = {
   loading?: boolean;
   emptyState?: React.ReactNode;
   titleStyle?: React.CSSProperties;
+  preserveLegendItems?: boolean;
 };
 const normalizeStatus = (raw: string): string => {
   const s = raw.trim().toUpperCase();
@@ -86,6 +87,7 @@ export default function PieChart({
   disableAnimation = false,
   loading = false,
   emptyState,
+  preserveLegendItems = false,
 }: PieChartProps) {
   const [chartData, setChartData] = useState<any>({});
   const [chartOptions, setChartOptions] = useState<any>({});
@@ -159,6 +161,14 @@ export default function PieChart({
       total,
     };
   }, [labels, values, palette]);
+  const legendItems = useMemo(
+    () =>
+      labels.map((label, index) => ({
+        label,
+        color: palette.base[index % palette.base.length],
+      })),
+    [labels, palette]
+  );
   const isEmpty = !filteredData.values.length || filteredData.total === 0;
   useEffect(() => {
     const datasets = [
@@ -176,7 +186,7 @@ export default function PieChart({
       animation: disableAnimation ? false : undefined,
       plugins: {
         legend: {
-          display: showLegend,
+          display: preserveLegendItems ? false : showLegend,
           position: legendPosition,
           labels: { usePointStyle: true },
         },
@@ -222,6 +232,7 @@ export default function PieChart({
     type,
     disableAnimation,
     optionsOverride,
+    preserveLegendItems,
   ]);
 
   if (loading) {
@@ -255,6 +266,19 @@ export default function PieChart({
           <div className="chart-title">
             <i className="pi pi-folder-open" style={{ fontSize: '60px' }} />
             <span>Sem dados para exibir</span>
+          </div>
+        )}
+        {showLegend && preserveLegendItems && legendItems.length > 0 && (
+          <div className="pie-chart-custom-legend">
+            {legendItems.map((item) => (
+              <div key={item.label} className="pie-chart-custom-legend-item">
+                <span
+                  className="pie-chart-custom-legend-swatch"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span>{item.label}</span>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -295,6 +319,19 @@ export default function PieChart({
           style={{ width: '100%', height: '100%' }}
         />
       </div>
+      {showLegend && preserveLegendItems && legendItems.length > 0 && (
+        <div className="pie-chart-custom-legend">
+          {legendItems.map((item) => (
+            <div key={item.label} className="pie-chart-custom-legend-item">
+              <span
+                className="pie-chart-custom-legend-swatch"
+                style={{ backgroundColor: item.color }}
+              />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

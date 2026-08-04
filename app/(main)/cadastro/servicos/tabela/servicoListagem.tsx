@@ -185,7 +185,7 @@ export function ListarServicos(
                             />
                             {loading && (
                                 <div style={listLoadingOverlayStyle}>
-                                    <LoadingScreen loadingText="Carregando Servicos..." fullScreen={false} />
+                                    <LoadingScreen loadingText="Carregando Serviços..." fullScreen={false} />
                                 </div>
                             )}
                         </div>

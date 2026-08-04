@@ -1,4 +1,5 @@
 'use client';
+import './styles.css';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
@@ -20,6 +21,7 @@ import { activateVendedor, deletarVendedor, listVendedor } from './controller/co
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 
 const createInitialPagination = (pageSize: number) => ({
     content: [],
@@ -86,6 +88,7 @@ const Vendedores: React.FC = () => {
         })
     );
     const [listarInativos, setListarInativos] = useState<boolean>(false);
+    const [draftListarInativos, setDraftListarInativos] = useState(false);
     const [isVendedoresCreated, setIsVendedoresCreated] = useState(false);
     const [listPaginationVendedores, setListPaginationVendedores] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
     const safePagination = listPaginationVendedores ?? createInitialPagination(resolvedPageSize);
@@ -226,26 +229,41 @@ const Vendedores: React.FC = () => {
     };
     const handleClearFilters = () => {
         setListarInativos(false);
+        setDraftListarInativos(false);
         handleListVendedores(0, '', false);
         setVisible(false);
     };
+    const handleRemoveInativosFilter = () => {
+        setListarInativos(false);
+        setDraftListarInativos(false);
+        handleListVendedores(0, searchTerm, false);
+    };
     const handleApplyFilters = () => {
-        handleListVendedores(0, searchTerm, listarInativos);
+        setListarInativos(draftListarInativos);
+        handleListVendedores(0, searchTerm, draftListarInativos);
         setVisible(false);
     };
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        setListarInativos(e.checked ?? false);
+        setDraftListarInativos(e.checked ?? false);
     };
     const handleSalvarFiltro = () => {
-        handleListVendedores(0, searchTerm, listarInativos);
+        setListarInativos(draftListarInativos);
+        handleListVendedores(0, searchTerm, draftListarInativos);
         setVisible(false);
     };
     useEffect(() => {
         handleListVendedores();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    const appliedFilterItems = [
+        {
+            label: 'Situação',
+            value: listarInativos ? 'Listando inativos' : null,
+            onRemove: handleRemoveInativosFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
     return (
-        <div className="w-full">
+        <div className="w-full cadastro-vendedores-page">
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <>
@@ -268,11 +286,16 @@ const Vendedores: React.FC = () => {
                             </div>
                             <div className="col-4 mb-0 lg:col-3 lg:mb-0">
                                 <div className="container-BTN-Filter-Created">
-                                    <FilterOverlay onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                    <FilterOverlay
+                                        onOpen={() => setDraftListarInativos(listarInativos)}
+                                        onApply={handleApplyFilters}
+                                        onClear={handleClearFilters}
+                                        buttonClassName="height-2-8rem-ml-1rem-mobile"
+                                        activeFilterCount={activeFilterCount}>
                                         <CheckBoxField
                                             inputId="listarInativos"
                                             label="Listar Desativadas"
-                                            checked={listarInativos}
+                                            checked={draftListarInativos}
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
@@ -282,6 +305,7 @@ const Vendedores: React.FC = () => {
                                     </div>
                             </div>
                         </div>
+                        <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                         <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarVendedores
                                 loading={loading}
@@ -323,13 +347,15 @@ const Vendedores: React.FC = () => {
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
                                         <FilterOverlay
+                                            onOpen={() => setDraftListarInativos(listarInativos)}
                                             onApply={handleSalvarFiltro}
                                             onClear={handleClearFilters}
-                                            buttonClassName="Btn-Filter-Desktop">
+                                            buttonClassName="Btn-Filter-Desktop"
+                                            activeFilterCount={activeFilterCount}>
                                             <CheckBoxField
                                                 inputId="listarInativos"
                                                 label="Listar Desativadas"
-                                                checked={listarInativos}
+                                                checked={draftListarInativos}
                                                 onChange={handleCheckboxChange}
                                             />
 
@@ -341,8 +367,7 @@ const Vendedores: React.FC = () => {
                                     </div>
                                      )}
                                 </div>
-                            </div>
-                            <div>
+                                <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                                 <ListarVendedores
                                     loading={loading}
                                     listPaginationVendedores={listPaginationVendedores}
@@ -365,4 +390,3 @@ const Vendedores: React.FC = () => {
     );
 };
 export default Vendedores;
-

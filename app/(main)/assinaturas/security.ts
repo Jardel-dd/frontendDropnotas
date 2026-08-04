@@ -203,7 +203,7 @@ export const validateCheckoutForm = ({
     }
 
     if (!billing.displayName.trim() || billing.displayName.trim().length < 3) {
-        nextErrors.billingDisplayName = billing.documentType === 'cpf' ? 'Informe o nome completo do pagador.' : 'Informe a razao social da cobranca.';
+        nextErrors.billingDisplayName = billing.documentType === 'cpf' ? 'Informe o nome completo do pagador.' : 'Informe a razão social da cobrança.';
     }
 
     if (!isValidZipCode(billing.endereco?.cep ?? '')) {

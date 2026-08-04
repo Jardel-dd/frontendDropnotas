@@ -1,4 +1,5 @@
 'use client';
+import './styles.css';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
@@ -22,6 +23,7 @@ import { ativarPessoa, deletarPessoa, listPessoa } from './controller/controller
 import { DropDownFilterClienteFornecedor } from '@/app/shared/optionsDropDown/options';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 
 const buildEmptyPessoaPagination = (pageSize: number) => ({
     content: [],
@@ -54,6 +56,26 @@ const defaultClienteFornecedorFilter: ClienteFornecedorFilter = {
     fornecedor: true
 };
 
+const isDefaultClienteFornecedorFilter = (filter: ClienteFornecedorFilter) =>
+    filter.cliente === defaultClienteFornecedorFilter.cliente &&
+    filter.fornecedor === defaultClienteFornecedorFilter.fornecedor;
+
+const getClienteFornecedorFilterLabel = (filter: ClienteFornecedorFilter) => {
+    if (filter.cliente && filter.fornecedor) {
+        return null;
+    }
+
+    if (filter.cliente) {
+        return 'Clientes';
+    }
+
+    if (filter.fornecedor) {
+        return 'Fornecedores';
+    }
+
+    return 'Nenhum tipo selecionado';
+};
+
 const ClientesFornecedores: React.FC = () => {
     const router = useRouter();
     const pageSize = usePageSize();
@@ -71,6 +93,7 @@ const ClientesFornecedores: React.FC = () => {
     const [selectedClienteFornecedor, setSelectedClienteFornecedor] = useState<ClienteFornecedorFilter>(defaultClienteFornecedorFilter);
     const [draftClienteFornecedor, setDraftClienteFornecedor] = useState<ClienteFornecedorFilter>(defaultClienteFornecedorFilter);
     const [listarInativos, setListarInativos] = useState(false);
+    const [draftListarInativos, setDraftListarInativos] = useState(false);
     const { cliente, fornecedor } = selectedClienteFornecedor;
     const [listPaginationClientesFornecedores, setListPaginationClientesFornecedores] = useState<Record<string, any>>(() =>
         buildEmptyPessoaPagination(resolvedPageSize)
@@ -229,7 +252,7 @@ const ClientesFornecedores: React.FC = () => {
     });
 
     const handleCheckboxChange = (event: CheckboxChangeEvent) => {
-        setListarInativos(event.checked ?? false);
+        setDraftListarInativos(event.checked ?? false);
     };
 
     const onPageChange = (event: PaginatorPageChangeEvent) => {
@@ -258,29 +281,56 @@ const ClientesFornecedores: React.FC = () => {
 
     const syncDraftFilters = () => {
         setDraftClienteFornecedor(selectedClienteFornecedor);
+        setDraftListarInativos(listarInativos);
     };
 
     const handleClearFilters = () => {
         setSelectedClienteFornecedor(defaultClienteFornecedorFilter);
         setDraftClienteFornecedor(defaultClienteFornecedorFilter);
         setListarInativos(false);
+        setDraftListarInativos(false);
         void handleListClientesFornecedores(0, '', defaultClienteFornecedorFilter, false);
+    };
+
+    const handleRemoveTipoFilter = () => {
+        setSelectedClienteFornecedor(defaultClienteFornecedorFilter);
+        setDraftClienteFornecedor(defaultClienteFornecedorFilter);
+        void handleListClientesFornecedores(0, searchTerm, defaultClienteFornecedorFilter, listarInativos);
+    };
+
+    const handleRemoveInativosFilter = () => {
+        setListarInativos(false);
+        setDraftListarInativos(false);
+        void handleListClientesFornecedores(0, searchTerm, selectedClienteFornecedor, false);
     };
 
     const handleApplyFilters = () => {
         const firstPage = 0;
         setSelectedClienteFornecedor(draftClienteFornecedor);
-        void handleListClientesFornecedores(firstPage, searchTerm, draftClienteFornecedor, listarInativos);
+        setListarInativos(draftListarInativos);
+        void handleListClientesFornecedores(firstPage, searchTerm, draftClienteFornecedor, draftListarInativos);
     };
 
+    const appliedFilterItems = [
+        {
+            label: 'Tipo',
+            value: getClienteFornecedorFilterLabel(selectedClienteFornecedor),
+            onRemove: handleRemoveTipoFilter
+        },
+        {
+            label: 'Situação',
+            value: listarInativos ? 'Listando inativos' : null,
+            onRemove: handleRemoveInativosFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
     useEffect(() => {
         if (hasLoadedInitialListRef.current) {
             return;
         }
-
         hasLoadedInitialListRef.current = true;
         void handleListClientesFornecedores();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        
     }, []);
 
     const listProps = {
@@ -297,14 +347,14 @@ const ClientesFornecedores: React.FC = () => {
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full cadastro-pessoas-page">
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <div className="card styled-container-main-all-routes p-2">
                     <div className="grid formgrid p-2">
                         <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0">
                             <Input
-                                label="Pesquisar Razao Social/CNPJ"
+                                label="Pesquisar Razão Social/CNPJ"
                                 outlined
                                 id="razao_social"
                                 useRightButton
@@ -324,6 +374,7 @@ const ClientesFornecedores: React.FC = () => {
                                     onApply={handleApplyFilters}
                                     onClear={handleClearFilters}
                                     buttonClassName="height-2-8rem-ml-1rem-mobile"
+                                    activeFilterCount={activeFilterCount}
                                 >
                                     <Dropdown
                                         value={draftClienteFornecedor}
@@ -334,12 +385,12 @@ const ClientesFornecedores: React.FC = () => {
                                         showTopLabel
                                         label=""
                                     />
-                                    <CheckBoxField
-                                        inputId="listarInativos"
-                                        label="Listar Desativadas"
-                                        checked={listarInativos}
-                                        onChange={handleCheckboxChange}
-                                    />
+                                        <CheckBoxField
+                                            inputId="listarInativos"
+                                            label="Listar Desativadas"
+                                            checked={draftListarInativos}
+                                            onChange={handleCheckboxChange}
+                                        />
                                 </FilterOverlay>
                                 {permissaoPessoa.create && (
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
@@ -347,6 +398,7 @@ const ClientesFornecedores: React.FC = () => {
                             </div>
                         </div>
                     </div>
+                    <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                     <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                         <ListarPessoa
                             {...listProps}
@@ -364,7 +416,7 @@ const ClientesFornecedores: React.FC = () => {
                             <div className="grid formgrid">
                                 <div className="col-12 lg:col-12 container-input-search-all">
                                     <Input
-                                        label="Pesquisar Razao Social/CNPJ"
+                                        label="Pesquisar Razão Social/CNPJ"
                                         outlined
                                         id="razao_social"
                                         useRightButton
@@ -383,6 +435,7 @@ const ClientesFornecedores: React.FC = () => {
                                         onApply={handleApplyFilters}
                                         onClear={handleClearFilters}
                                         buttonClassName="Btn-Filter-Desktop"
+                                        activeFilterCount={activeFilterCount}
                                     >
                                         <div className="grid formgrid">
                                             <div className="col-12 lg:col-12 ">
@@ -398,7 +451,7 @@ const ClientesFornecedores: React.FC = () => {
                                                 <CheckBoxField
                                                     inputId="listarInativos"
                                                     label="Listar Desativadas"
-                                                    checked={listarInativos}
+                                                    checked={draftListarInativos}
                                                     onChange={handleCheckboxChange}
                                                 />
                                             </div>
@@ -411,6 +464,7 @@ const ClientesFornecedores: React.FC = () => {
                                     </div>
                                 )}
                             </div>
+                            <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                             <div>
                                 <ListarPessoa {...listProps} />
                             </div>

@@ -263,7 +263,7 @@ export const editButton = <T extends { id?: number | string }>(
 ) => {
     return (
         <span ref={buttonWrapperRef}>
-            <Button icon="pi pi-pencil" tooltip="Alterar" className="p-button-text p-button-warning bottom-All-plus-datatableDetails" onClick={() => handleEdit(entity, basePath, router)} />
+            <Button icon="pi pi-pencil" tooltip="Alterar" className="p-button-text p-button-secondary bottom-All-plus-datatableDetails" onClick={() => handleEdit(entity, basePath, router)} />
         </span>
     );
 };

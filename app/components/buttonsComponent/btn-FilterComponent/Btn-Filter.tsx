@@ -4,15 +4,26 @@ import { useRef, useState } from 'react';
 import "@/app/styles/styledGlobal.css";
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
+import { useMediaQuery } from 'react-responsive';
 import { FilterOverlayProps } from "./types/types";
 import { OverlayPanel } from 'primereact/overlaypanel';
-import { useIsDesktop, useIsMobile } from "../../responsiveCelular/responsive";
 
-export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply, onClear, onOpen, width = '300px', mobileBreakpoint = 768, buttonLabel = 'Filtros', buttonIcon = 'pi pi-filter', buttonClassName = '' }) => {
+export const FilterOverlay: React.FC<FilterOverlayProps> = ({
+    children,
+    onApply,
+    onClear,
+    onOpen,
+    width = '350px',
+    mobileBreakpoint = 768,
+    buttonLabel = 'Filtros',
+    buttonIcon = 'pi pi-filter',
+    buttonClassName = '',
+    activeFilterCount = 0
+}) => {
     const op = useRef<OverlayPanel>(null);
     const [mobileVisible, setMobileVisible] = useState(false);
-    const isMobile = useIsMobile();
-    const isDesktop = useIsDesktop();
+    const isMobile = useMediaQuery({ query: `(max-width: ${mobileBreakpoint}px)` });
+    const showFilterBadge = activeFilterCount > 0;
     const toggle = (e?: any) => {
         if (isMobile) setMobileVisible(true);
         else op.current?.toggle(e);
@@ -31,18 +42,23 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
     };
     return (
         <>
-            {!isDesktop && (
+            {isMobile && (
                 <>
-                <div >
-                    <Button
-                        type="button"
-                        label={isMobile ? undefined : buttonLabel}
-                        icon={buttonIcon}
-                        outlined
-                        onClick={toggle}
-                        style={{ boxShadow: "none",height: "40px" }}
-                    />
+                <div>
+                    <div className="filter-overlay-trigger">
+                        <Button
+                            type="button"
+                            label={undefined}
+                            icon={buttonIcon}
+                            outlined
+                            onClick={toggle}
+                            style={{ boxShadow: "none",height: "40px" }}
+                        />
+                        {showFilterBadge && (
+                            <span className="filter-overlay-trigger__badge">{activeFilterCount}</span>
+                        )}
                     </div>
+                </div>
                 <Dialog header="Filtros" visible={mobileVisible} onHide={hide} onShow={onOpen} modal
                     style={{ width: '90vw', maxWidth: '420px' }}
                     contentStyle={{ paddingBottom: '1rem' }}>
@@ -77,19 +93,30 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({ children, onApply,
                 </Dialog>
                 </>
             )}
-             {!isMobile && (
+            {!isMobile && (
                 <>
                 <div style={{ height: "38px"}}>
-                    <Button
-                        type="button"
-                        label={isMobile ? undefined : buttonLabel}
-                        icon={buttonIcon}
-                        outlined
-                        onClick={toggle}
-                        style={{ boxShadow: "none", height:"38px", borderRadius:23 }}
-                    />
+                    <div className="filter-overlay-trigger">
+                        <Button
+                            type="button"
+                            label={buttonLabel}
+                            icon={buttonIcon}
+                            outlined
+                            onClick={toggle}
+                            style={{ boxShadow: "none", height:"38px", borderRadius:23 }}
+                        />
+                        {showFilterBadge && (
+                            <span className="filter-overlay-trigger__badge">{activeFilterCount}</span>
+                        )}
                     </div>
-                    <OverlayPanel ref={op} dismissable className="filter-overlay" onShow={onOpen}>
+                    </div>
+                    <OverlayPanel
+                        ref={op}
+                        dismissable
+                        className="filter-overlay"
+                        onShow={onOpen}
+                        style={{ width, minWidth: width }}
+                    >
                         <div className="flex flex-column">
                             {children}
                             <div className="flex justify-content-between  p-2 gap-3">

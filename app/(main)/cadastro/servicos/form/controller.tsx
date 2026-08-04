@@ -304,7 +304,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
 
         if (isLoading && initialId) {
-            return <LoadingScreen loadingText="Carregando informaÃ§Ãµes do ServiÃ§o selecionado..." />;
+            return <LoadingScreen loadingText="Carregando informações do serviço selecionado..." />;
         }
 
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
