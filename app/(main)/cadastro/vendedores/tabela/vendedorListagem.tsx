@@ -76,7 +76,7 @@ export function ListarVendedores(
         <div style={{ marginTop: '0' }}>
             <Messages ref={msgs} className="custom-messages" />
             <>
-                        {isMobile &&
+                        {isMobile &&(
                             <div style={listLoadingShellStyle}>
                                 <DataTableComponent
                                     value={listPaginationVendedores?.content as VendedorEntity[]}
@@ -97,7 +97,7 @@ export function ListarVendedores(
                                     showExpandButton={false}
                                     columns={[
                                         {
-                                            field: "razaoSocial",
+                                            field: "razao_social",
                                             header: "Nome",
                                             body: (data) => {
                                                 const isStatusInactive = data.ativo === false;
@@ -123,8 +123,8 @@ export function ListarVendedores(
                                     </div>
                                 )}
                             </div>
-                        }
-                        {isDesktop &&
+                        )}
+                        {isDesktop && (
                             <div style={listLoadingShellStyle}>
                                 <DataTableComponent
                                     value={listPaginationVendedores?.content as VendedorEntity[]}
@@ -145,7 +145,7 @@ export function ListarVendedores(
                                     showExpandButton={false}
                                     columns={[
                                         {
-                                            field: "razaoSocial",
+                                            field: "razao_social",
                                             header: "Nome",
                                             body: (data) => {
                                                 const isStatusInactive = data.ativo === false;
@@ -182,7 +182,7 @@ export function ListarVendedores(
                                     </div>
                                 )}
                             </div>
-                        }
+                        )}
             </>
         </div>
     );

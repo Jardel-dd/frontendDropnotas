@@ -103,7 +103,7 @@ export function ListarClientesFornecedores(
                                 columns={[
                                     {
                                         field: 'razao_social',
-                                        header: 'Razao Social',
+                                        header: 'Razão Social',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (
@@ -160,7 +160,7 @@ export function ListarClientesFornecedores(
                                 columns={[
                                     {
                                         field: 'razao_social',
-                                        header: 'Razao Social',
+                                        header: 'Razão Social',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (

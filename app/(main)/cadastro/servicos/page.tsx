@@ -1,4 +1,5 @@
 'use client';
+import './styles.css';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
@@ -19,6 +20,7 @@ import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { ativarServico, deletarServico, listServico } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 
 const createInitialPagination = (pageSize: number) => ({
     pageable: {
@@ -95,6 +97,7 @@ function Servicos() {
         })
     );
     const [listarInativos, setListarInativos] = useState<boolean>(false);
+    const [draftListarInativos, setDraftListarInativos] = useState(false);
     const [listPaginationServicos, setListPaginationServicos] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
     const safePagination = listPaginationServicos ?? createInitialPagination(resolvedPageSize);
     const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
@@ -226,25 +229,39 @@ function Servicos() {
     };
 
     const handleSalvarFiltro = () => {
-        handleListServicos(0, searchTerm, listarInativos);
+        setListarInativos(draftListarInativos);
+        handleListServicos(0, searchTerm, draftListarInativos);
     };
 
     const handleClearFilters = () => {
         setListarInativos(false);
-        handleListServicos(0, ' ', false);
+        setDraftListarInativos(false);
+        handleListServicos(0, '', false);
     };
 
+    const handleRemoveInativosFilter = () => {
+        setListarInativos(false);
+        setDraftListarInativos(false);
+        handleListServicos(0, searchTerm, false);
+    };
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        setListarInativos(e.checked ?? false);
+        setDraftListarInativos(e.checked ?? false);
     };
-
     useEffect(() => {
         handleListServicos();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const appliedFilterItems = [
+        {
+            label: 'Situação',
+            value: listarInativos ? 'Listando inativos' : null,
+            onRemove: handleRemoveInativosFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
+
     return (
-        <div className="w-full">
+        <div className="w-full cadastro-servicos-page">
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <div className="card styled-container-main-all-routes p-2">
@@ -267,13 +284,15 @@ function Servicos() {
                         <div className="col-4 mb-0 lg:col-3 lg:mb-0 ">
                             <div className="container-BTN-Filter-Created">
                                 <FilterOverlay
+                                    onOpen={() => setDraftListarInativos(listarInativos)}
                                     onApply={handleSalvarFiltro}
                                     onClear={handleClearFilters}
-                                    buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                    buttonClassName="height-2-8rem-ml-1rem-mobile"
+                                    activeFilterCount={activeFilterCount}>
                                     <CheckBoxField
                                         inputId="listarInativos"
                                         label="Listar Desativadas"
-                                        checked={listarInativos}
+                                        checked={draftListarInativos}
                                         onChange={handleCheckboxChange}
                                     />
                                 </FilterOverlay>
@@ -283,6 +302,7 @@ function Servicos() {
                             </div>
                         </div>
                     </div>
+                    <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                     <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                         <ListarServicos
                             loading={loading}
@@ -322,13 +342,15 @@ function Servicos() {
                                 </div>
                                 <div className="Container-Btn-Filter-Desktop">
                                     <FilterOverlay
+                                        onOpen={() => setDraftListarInativos(listarInativos)}
                                         onApply={handleSalvarFiltro}
                                         onClear={handleClearFilters}
-                                        buttonClassName="Btn-Filter-Desktop">
+                                        buttonClassName="Btn-Filter-Desktop"
+                                        activeFilterCount={activeFilterCount}>
                                         <CheckBoxField
                                             inputId="listarInativos"
                                             label="Listar Desativadas"
-                                            checked={listarInativos}
+                                            checked={draftListarInativos}
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
@@ -339,6 +361,7 @@ function Servicos() {
                                     </div>
                                 )}
                             </div>
+                            <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                             <div className="mt-3">
                                 <ListarServicos
                                     loading={loading}

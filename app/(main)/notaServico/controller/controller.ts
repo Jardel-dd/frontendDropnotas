@@ -654,8 +654,8 @@ export const createdNotaServico = async (nfs: NfsEntity, msgs: any, router: AppR
         if (statusNota === 'REJEITADA' && redirectAfterSave) {
             persistNotaServicoFeedback({
                 severity: 'error',
-                summary: 'Atenção',
-                detail: 'Não foi possivel emitir o Nota Fiscal no momento, efetue a correção ou a emissao de uma nova Nota.'
+                summary: 'Nota Rejeitada',
+                detail: 'Será necessario verificar dos dados e realizar a correção da NFS-e.',
             });
             router.push('/notaServico');
             return {

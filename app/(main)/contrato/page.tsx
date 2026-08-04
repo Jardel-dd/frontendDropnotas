@@ -1,4 +1,5 @@
 'use client';
+import './styles.css';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
@@ -19,6 +20,7 @@ import CustomPaginator from '@/app/components/paginator/customPaginator';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import { usePermissions } from '@/app/routes/permissoes';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 
 const createInitialPagination = (pageSize: number) => ({
     content: [],
@@ -81,6 +83,7 @@ const Contratos: React.FC = () => {
     );
     const [isContratosCreated, setIsContratosCreated] = useState(false);
     const [listarInativos, setListarInativos] = useState<boolean>(false);
+    const [draftListarInativos, setDraftListarInativos] = useState(false);
     const [listPaginationContratos, setListPaginationContratos] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
     const safePagination = listPaginationContratos ?? createInitialPagination(resolvedPageSize);
     const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
@@ -219,10 +222,7 @@ const Contratos: React.FC = () => {
     };
 
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        const newValue = e.checked ?? false;
-        setListarInativos(newValue);
-        handleListContratos(0, searchTerm, newValue);
-        setVisible(false);
+        setDraftListarInativos(e.checked ?? false);
     };
 
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -232,13 +232,15 @@ const Contratos: React.FC = () => {
     };
 
     const handleSalvarFiltro = () => {
-        handleListContratos(0, searchTerm, listarInativos);
+        setListarInativos(draftListarInativos);
+        handleListContratos(0, searchTerm, draftListarInativos);
         setVisible(false);
     };
 
     const handleClearFilters = () => {
         setSearchTerm('');
         setListarInativos(false);
+        setDraftListarInativos(false);
         setContrato(
             new ContratoEntity({
                 ativo: true,
@@ -260,13 +262,28 @@ const Contratos: React.FC = () => {
         setVisible(false);
     };
 
+    const handleRemoveInativosFilter = () => {
+        setListarInativos(false);
+        setDraftListarInativos(false);
+        handleListContratos(0, searchTerm, false);
+    };
+
     useEffect(() => {
         handleListContratos();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const appliedFilterItems = [
+        {
+            label: 'Situação',
+            value: listarInativos ? 'Listando inativos' : null,
+            onRemove: handleRemoveInativosFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
+
     return (
-        <div className="p-fluid">
+        <div className="p-fluid contrato-page">
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <>
@@ -275,7 +292,7 @@ const Contratos: React.FC = () => {
                             <div className="grid formgrid" style={{ maxHeight: '74px' }}>
                                 <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                     <Input
-                                        label="Pesquisar Descrição/Razao Social"
+                                        label="Pesquisar Descrição/Razão Social"
                                         outlined={true}
                                         id="descricao"
                                         useRightButton={true}
@@ -290,11 +307,16 @@ const Contratos: React.FC = () => {
                                 </div>
                                 <div className="col-4 mb-0 lg:col-2 p-0 ">
                                     <div className="container-BTN-Filter-Created">
-                                        <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile">
+                                        <FilterOverlay
+                                            onOpen={() => setDraftListarInativos(listarInativos)}
+                                            onApply={handleSalvarFiltro}
+                                            onClear={handleClearFilters}
+                                            buttonClassName="height-2-8rem-ml-1rem-mobile"
+                                            activeFilterCount={activeFilterCount}>
                                             <CheckBoxField
                                                 inputId="listarInativos"
                                                 label="Listar Desativadas"
-                                                checked={listarInativos}
+                                                checked={draftListarInativos}
                                                 onChange={handleCheckboxChange}
                                             />
                                         </FilterOverlay>
@@ -305,6 +327,7 @@ const Contratos: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                        <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                         <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }} className="mt-1">
                             <ListarContratos
                                 loading={loading}
@@ -331,7 +354,7 @@ const Contratos: React.FC = () => {
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input
-                                            label="Pesquisar Descrição/Razao Social"
+                                            label="Pesquisar Descrição/Razão Social"
                                             outlined={true}
                                             id="descricao"
                                             useRightButton={true}
@@ -346,13 +369,15 @@ const Contratos: React.FC = () => {
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
                                         <FilterOverlay
+                                            onOpen={() => setDraftListarInativos(listarInativos)}
                                             onApply={handleSalvarFiltro}
                                             onClear={handleClearFilters}
-                                            buttonClassName="Btn-Filter-Desktop">
+                                            buttonClassName="Btn-Filter-Desktop"
+                                            activeFilterCount={activeFilterCount}>
                                             <CheckBoxField
                                                 inputId="listarInativos"
                                                 label="Listar Desativadas"
-                                                checked={listarInativos}
+                                                checked={draftListarInativos}
                                                 onChange={handleCheckboxChange}
                                             />
                                         </FilterOverlay>
@@ -363,18 +388,19 @@ const Contratos: React.FC = () => {
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                            <div>
-                                <ListarContratos
-                                    loading={loading}
-                                    listPaginationContratos={listPaginationContratos}
-                                    setLoading={setLoading}
-                                    searchTerm={searchTerm}
-                                    listarInativos={listarInativos}
-                                    setListPaginationContratos={setListPaginationContratos}
-                                    deletar={handleDeleteContrato}
-                                    ativar={handleAtivarContrato}
-                                />
+                                <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
+                                <div className="mt-3">
+                                    <ListarContratos
+                                        loading={loading}
+                                        listPaginationContratos={listPaginationContratos}
+                                        setLoading={setLoading}
+                                        searchTerm={searchTerm}
+                                        listarInativos={listarInativos}
+                                        setListPaginationContratos={setListPaginationContratos}
+                                        deletar={handleDeleteContrato}
+                                        ativar={handleAtivarContrato}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>

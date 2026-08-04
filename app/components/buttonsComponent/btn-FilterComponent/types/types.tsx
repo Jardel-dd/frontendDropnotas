@@ -10,4 +10,5 @@ export type FilterOverlayProps = {
     buttonLabel?: string;
     buttonIcon?: string;
     buttonClassName?: string;
+    activeFilterCount?: number;
 };

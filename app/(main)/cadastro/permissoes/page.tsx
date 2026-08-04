@@ -1,4 +1,5 @@
 'use client';
+import './styles.css';
 import '@/app/styles/styledGlobal.css';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
@@ -19,6 +20,7 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import { ativarPerfilUser, deletarPerfilUser, listPerfilUser } from './controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 
 const createInitialPagination = (pageSize: number) => ({
     content: [],
@@ -120,6 +122,7 @@ const PerfilUsuarios: React.FC = () => {
         })
     );
     const [listarInativos, setListarInativos] = useState<boolean>(false);
+    const [draftListarInativos, setDraftListarInativos] = useState(false);
     const [isPerfilUsuarioCreated, setIsPerfilUsuarioCreated] = useState(false);
     const [selectedPerfilUser, setSelectedPerfilUser] = useState<PerfilUser | null>(null);
     const [listPaginationPerfilUser, setListPaginationPerfilUser] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
@@ -266,18 +269,26 @@ const PerfilUsuarios: React.FC = () => {
     };
 
     const handleSalvarFiltro = () => {
-        handleListPerfilUser(0, searchTerm, listarInativos);
+        setListarInativos(draftListarInativos);
+        handleListPerfilUser(0, searchTerm, draftListarInativos);
         setVisible(false);
     };
 
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
-        setListarInativos(e.checked ?? false);
+        setDraftListarInativos(e.checked ?? false);
     };
 
     const handleClearFilters = () => {
         setListarInativos(false);
+        setDraftListarInativos(false);
         handleListPerfilUser(0, '', false);
         setVisible(false);
+    };
+
+    const handleRemoveInativosFilter = () => {
+        setListarInativos(false);
+        setDraftListarInativos(false);
+        handleListPerfilUser(0, searchTerm, false);
     };
 
     useEffect(() => {
@@ -285,8 +296,17 @@ const PerfilUsuarios: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const appliedFilterItems = [
+        {
+            label: 'Situação',
+            value: listarInativos ? 'Listando inativos' : null,
+            onRemove: handleRemoveInativosFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
+
     return (
-        <div className="w-full">
+        <div className="w-full cadastro-permissoes-page">
             <Messages ref={msgs} className="custom-messages" />
             {isMobile && (
                 <>
@@ -310,13 +330,15 @@ const PerfilUsuarios: React.FC = () => {
                             <div className="col-4 mb-0 lg:col-2">
                                 <div className="container-BTN-Filter-Created  ">
                                     <FilterOverlay
+                                        onOpen={() => setDraftListarInativos(listarInativos)}
                                         onApply={handleSalvarFiltro}
                                         onClear={handleClearFilters}
-                                        buttonClassName="height-2-8rem-ml-1rem">
+                                        buttonClassName="height-2-8rem-ml-1rem"
+                                        activeFilterCount={activeFilterCount}>
                                         <CheckBoxField
                                             inputId="listarInativos"
                                             label="Listar Desativadas"
-                                            checked={listarInativos}
+                                            checked={draftListarInativos}
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
@@ -324,6 +346,7 @@ const PerfilUsuarios: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                        <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                         <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarPerfilUsers
                                 loading={loading}
@@ -347,8 +370,9 @@ const PerfilUsuarios: React.FC = () => {
             {isDesktop && (
                 <>
                     <div className="card styled-container-main-all-routes p-2">
-                        <div className="p-0">
-                            <div className="grid formgrid p-2">
+                        <div className="scrollable-container">
+                            <div className="p-0">
+                                <div className="grid formgrid">
                                 <div className="col-12 lg:col-3 container-input-search-all">
                                     <Input
                                         label="Pesquisar Descrição"
@@ -366,13 +390,15 @@ const PerfilUsuarios: React.FC = () => {
                                 </div>
                                 <div className="Container-Btn-Filter-Desktop">
                                     <FilterOverlay
+                                        onOpen={() => setDraftListarInativos(listarInativos)}
                                         onApply={handleSalvarFiltro}
                                         onClear={handleClearFilters}
-                                        buttonClassName="Btn-Filter-Desktop">
+                                        buttonClassName="Btn-Filter-Desktop"
+                                        activeFilterCount={activeFilterCount}>
                                         <CheckBoxField
                                             inputId="listarInativos"
                                             label="Listar Desativadas"
-                                            checked={listarInativos}
+                                            checked={draftListarInativos}
                                             onChange={handleCheckboxChange}
                                         />
                                     </FilterOverlay>
@@ -383,20 +409,22 @@ const PerfilUsuarios: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                        </div>
-                        <div>
-                            <ListarPerfilUsers
-                                loading={loading}
-                                listPaginationPerfilUser={listPaginationPerfilUser}
-                                deletar={handleDeletePerfilUser}
-                                ativar={handleAtivarPerfilUser}
-                                setSelectedPerfilUser={setSelectedPerfilUser}
-                                selectedPerfil={selectedPerfilUser}
-                                setLoading={setLoading}
-                                searchTerm={searchTerm}
-                                setListPaginationPerfilUser={setListPaginationPerfilUser}
-                                listarInativos={listarInativos}
-                            />
+                                <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
+                                <div className="mt-3">
+                                    <ListarPerfilUsers
+                                        loading={loading}
+                                        listPaginationPerfilUser={listPaginationPerfilUser}
+                                        deletar={handleDeletePerfilUser}
+                                        ativar={handleAtivarPerfilUser}
+                                        setSelectedPerfilUser={setSelectedPerfilUser}
+                                        selectedPerfil={selectedPerfilUser}
+                                        setLoading={setLoading}
+                                        searchTerm={searchTerm}
+                                        setListPaginationPerfilUser={setListPaginationPerfilUser}
+                                        listarInativos={listarInativos}
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <div style={{ marginTop: 'auto' }}>
                             <CustomPaginator

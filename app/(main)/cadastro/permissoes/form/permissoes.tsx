@@ -22,7 +22,7 @@ export function PermissoesFields({ perfilUser, errors, selectedKeys, allPermissi
                     errorMessage={errors.nome}
                     onBlur={onValidateNome}
                     autoFocus
-                    topLabel="Descrição da Permissão:"
+                    topLabel="Descrição:"
                     showTopLabel
                     required
                 />

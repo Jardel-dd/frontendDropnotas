@@ -140,7 +140,7 @@ export function DataTableSelectable<T extends NfsEntity>({
             <DataTable
                 value={data}
                 dataKey={dataKey as string}
-                tableStyle={{ minWidth }}
+                tableStyle={{ width: "100%", minWidth }}
                 loading={false}
                 className={className}
                 expandedRows={rowExpansionTemplate ? expandedRows : undefined}

@@ -1,9 +1,8 @@
-
-'user client'
+'use client'
 import { useMediaQuery } from 'react-responsive';
 
 export const useIsMobile = () => {
-    return useMediaQuery({ query: '(max-width: 868px)' });
+    return useMediaQuery({ query: '(max-width: 968px)' });
 };
 
 export const useIsDesktop = () => {

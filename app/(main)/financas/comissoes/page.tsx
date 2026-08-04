@@ -303,7 +303,7 @@ const Comissoes: React.FC = () => {
                                                 checked={filtrarComissaoFechada}
                                             />
                                             <label htmlFor="comissaoFechada">
-                                                Comissao Fechada
+                                                Comissão Fechada
                                             </label>
                                         </div>
                                     </FilterOverlay>

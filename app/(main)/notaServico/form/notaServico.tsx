@@ -140,7 +140,7 @@ export function NotaServicoFields({
         <div className="shared-form-tabbed-layout">
 
             <div className="grid formgrid">
-                <div className="col-12 lg:col-3">
+                <div className="col-12 md:col-4 lg:col-3">
                     <DatePicker
                         value={dateRange ? dateRange[0] : new Date()}
                         onChange={onDateChange}
@@ -150,7 +150,7 @@ export function NotaServicoFields({
                         required
                     />
                 </div>
-                <div className="col-12 lg:col-3" >
+                <div className="col-12 md:col-4 lg:col-3" >
                     <Dropdown
                         id="regime_especial_tributacao"
                         value={gerarNfse.prestador.regime_especial_tributacao ?? ''}
@@ -162,7 +162,7 @@ export function NotaServicoFields({
                     />
                 </div>
                 {mensagemRetornoCorrecao && (
-                    <div className="col-12 lg:col-6 nota-servico-return-message-row">
+                    <div className="col-12 md:col-4 lg:col-6 nota-servico-return-message-row">
                         <Message
                             severity="error"
                             text={mensagemRetornoCorrecao}

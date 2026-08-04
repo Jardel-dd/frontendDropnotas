@@ -143,7 +143,7 @@ export function ListarCategoriaContrato({
                                         <Button
                                             icon="pi pi-pencil"
                                             tooltip="Alterar"
-                                            className="p-button-text p-button-warning bottom-All-plus-datatableDetails"
+                                            className="p-button-text p-button-secondary bottom-All-plus-datatableDetails"
                                             onClick={() => {
                                                 onCategoriaClick?.(rowData);
                                             }}

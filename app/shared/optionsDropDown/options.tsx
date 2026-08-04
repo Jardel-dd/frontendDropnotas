@@ -318,7 +318,7 @@ export const OptionsPeriodicidade = [
     { label: 'Mensal', value: 'MENSAL' },
     { label: 'Trimestral', value: 'TRIMESTRAL' },
     { label: 'Semestral', value: 'SEMESTRAL' },
-    { label: 'Anaul', value: 'ANUAL ' }
+    { label: 'Anual', value: 'ANUAL' }
 ];
 export const OptionsSituacao = [
     { label: 'Ativo', value: 'ATIVO' },

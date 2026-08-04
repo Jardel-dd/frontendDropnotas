@@ -1,0 +1,61 @@
+.cadastro-vendedores-page {
+  min-height: 0;
+}
+
+.cadastro-vendedores-page > .card.styled-container-main-all-routes {
+  min-height: 0;
+}
+
+.cadastro-vendedores-page .scrollable-container {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.cadastro-vendedores-page .scrollable-container > .p-0 {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.cadastro-vendedores-page .scrollable-container > .p-0 > .grid.formgrid {
+  flex-shrink: 0;
+}
+
+.cadastro-vendedores-page .scrollable-container > .p-0 > .applied-filters-summary {
+  flex-shrink: 0;
+  margin-bottom: 0.5rem;
+}
+
+.cadastro-vendedores-page .scrollable-container > .p-0 > .applied-filters-summary + div,
+.cadastro-vendedores-page .scrollable-container > .p-0 > div:last-child {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  margin-top: 0 !important;
+}
+
+.cadastro-vendedores-page > .card.styled-container-main-all-routes > .applied-filters-summary {
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+.cadastro-vendedores-page > .card.styled-container-main-all-routes > .applied-filters-summary + div {
+  min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .cadastro-vendedores-page > .card.styled-container-main-all-routes {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .cadastro-vendedores-page > .card.styled-container-main-all-routes > div[style*='flex-direction: column'] {
+    min-height: 0;
+  }
+
+  .cadastro-vendedores-page > .card.styled-container-main-all-routes > .applied-filters-summary {
+    margin-bottom: 0.25rem;
+  }
+}

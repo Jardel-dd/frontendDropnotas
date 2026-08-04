@@ -125,11 +125,11 @@ export function ListarNotaServico({
             }
             return (
                 <Button
-                    label="CORRECAO"
+                    label="Correção"
                     icon="pi pi-pencil"
                     outlined
-                    severity="warning"
-                    tooltip="Correcao"
+                    severity="danger"
+                    tooltip="Correção"
                     className={compact ? 'nota-servico-btn-correcao' : 'nota-servico-btn-correcao'}
                     style={{
                         boxShadow: 'none'
@@ -151,9 +151,9 @@ export function ListarNotaServico({
     };
 
     return (
-        <div style={{ marginTop: '0' }}>
+        <div style={{ marginTop: '0' ,width:"100%"}}>
             <Messages ref={msgs} className="custom-messages" />
-            <div>
+            <div style={{width:"100%"}}>
                 {isDesktop && (
                     <DataTableSelectable<NfsEntity>
                         data={notas}
@@ -221,7 +221,7 @@ export function ListarNotaServico({
                             },
                             {
                                 field: 'data_emissao',
-                                header: 'Data de Emissao',
+                                header: 'Data de Emissão ',
                                 body: (data) => {
                                     const dataEmissao = formatarDataEmissao(data.data_emissao);
 
@@ -308,7 +308,7 @@ export function ListarNotaServico({
                                                             </span>
                                                         </div>
                                                         <div className="nota-servico-mobile-card-detail">
-                                                            <span className="nota-servico-mobile-card-label">Data Emissao</span>
+                                                            <span className="nota-servico-mobile-card-label">Data Emissão</span>
                                                             <span className="nota-servico-mobile-card-meta-value">
                                                                 {formatarDataEmissao(nota.data_emissao)}
                                                             </span>

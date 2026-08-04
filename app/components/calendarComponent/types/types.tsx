@@ -9,6 +9,7 @@ export type Props = {
     onPeriodoChange?: (periodo: Date[] | null) => void;
     onClear?: () => void;
     initialPeriodo?: Periodo;
+    value?: Periodo;
     showTopLabel?: boolean;
     topLabel?: string;
     required?: boolean;
