@@ -69,7 +69,8 @@ import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredEmpres
 import { mapDateRangeToResumoParams } from '../dashboard/types/types';
 import { fetchRelatorioNotaFiscalResumo } from '../dashboard/controller/controller';
 
-
+const NOTA_SERVICO_EMPRESA_STORAGE_KEY = 'notaServico.selectedEmpresaId';
+const NOTA_SERVICO_REDIRECT_FEEDBACK_MASK_HIDE_DELAY_MS = 120;
 
 const NOTA_SERVICO_TOTAL_VALUE_PATHS = [
     'valorTotalNotas',
@@ -242,9 +243,11 @@ const NotaServico: React.FC = () => {
     const msgs = useRef<Messages | null>(null);
     const mobileListWrapperRef = useRef<HTMLDivElement | null>(null);
     const hasLoadedNotaServicoRef = useRef(false);
+    const hasRestoredEmpresaFilterRef = useRef(false);
     const searchTermRef = useRef('');
     const exportPdfProgressIntervalRef = useRef<number | null>(null);
     const exportPdfResetTimeoutRef = useRef<number | null>(null);
+    const redirectFeedbackMaskTimeoutRef = useRef<number | null>(null);
     const activeSummarySignatureRef = useRef('');
     const notaServicoSummaryRequestIdRef = useRef(0);
     const activeFiltersRef = useRef<NotaServicoFiltersState>({
@@ -286,6 +289,7 @@ const NotaServico: React.FC = () => {
         detail: string;
         notaAutorizada?: Partial<NfsEntity> | null;
     } | null>(null);
+    const [showRedirectFeedbackMask, setShowRedirectFeedbackMask] = useState(false);
     const [notaServicoSummary, setNotaServicoSummary] = useState<NotaServicoSummaryState>(
         () => buildNotaServicoSummary(buildEmptyNotaServicoPagination(isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : Math.max(pageSize, 1)))
     );
@@ -293,6 +297,7 @@ const NotaServico: React.FC = () => {
     const [pessoa, setPessoa] = useState<PessoaEntity>(createEmptyPessoa());
     const [showDialogPreparaNfs, setShowDialogPreparaNfs] = useState(false);
     const [isMobileKeyboardOpen, setIsMobileKeyboardOpen] = useState(false);
+    const [empresaFilterReady, setEmpresaFilterReady] = useState(false);
     const [dateRange, setDateRange] = useState<DateRangeValue>([null, null]);
     const [empresa, setEmpresa] = useState<CompanyEntity>(createEmptyEmpresa());
     const [servico, setServico] = useState<ServiceEntity>(createEmptyServico());
@@ -971,7 +976,7 @@ const NotaServico: React.FC = () => {
             setPessoaDialogKey((current) => current + 1);
             setShowModalPessoa(true);
         } catch (error) {
-            console.error('Erro ao prÃ©-carregar cliente/fornecedor para ediÃ§Ã£o:', error);
+            console.error('Erro ao pré-carregar cliente/fornecedor para edição:', error);
             setIsPessoaDialogLoading(false);
         }
     };
@@ -1107,7 +1112,7 @@ const NotaServico: React.FC = () => {
             setEmpresaDialogKey((current) => current + 1);
             setShowModalEmpresa(true);
         } catch (error) {
-            console.error('Erro ao prÃ©-carregar empresa para ediÃ§Ã£o:', error);
+            console.error('Erro ao pré-carregar empresa para edição:', error);
             setIsEmpresaDialogLoading(false);
         } finally {
         }
@@ -1157,7 +1162,7 @@ const NotaServico: React.FC = () => {
             setServicoDialogKey((current) => current + 1);
             setShowModalServico(true);
         } catch (error) {
-            console.error('Erro ao prÃ©-carregar serviÃ§o para ediÃ§Ã£o:', error);
+            console.error('Erro ao pré-carregar serviço para edição:', error);
             setIsServicoDialogLoading(false);
         }
     };
@@ -1187,6 +1192,50 @@ const NotaServico: React.FC = () => {
             closeServicoDialog();
         }
     };
+    useEffect(() => {
+        if (hasRestoredEmpresaFilterRef.current) {
+            return;
+        }
+
+        hasRestoredEmpresaFilterRef.current = true;
+
+        const restoreSelectedEmpresa = async () => {
+            const storedEmpresaId = window.localStorage.getItem(NOTA_SERVICO_EMPRESA_STORAGE_KEY);
+
+            if (!storedEmpresaId) {
+                setEmpresaFilterReady(true);
+                return;
+            }
+
+            const restoredEmpresa = await fetchCompanyDropdownByID(storedEmpresaId);
+
+            if (restoredEmpresa) {
+                setSelectedEmpresa(restoredEmpresa);
+                setDraftSelectedEmpresa(restoredEmpresa);
+            } else {
+                window.localStorage.removeItem(NOTA_SERVICO_EMPRESA_STORAGE_KEY);
+            }
+
+            setEmpresaFilterReady(true);
+        };
+
+        void restoreSelectedEmpresa();
+    }, []);
+    useEffect(() => {
+        if (!empresaFilterReady) {
+            return;
+        }
+
+        if (selectedEmpresa?.id) {
+            window.localStorage.setItem(
+                NOTA_SERVICO_EMPRESA_STORAGE_KEY,
+                String(selectedEmpresa.id)
+            );
+            return;
+        }
+
+        window.localStorage.removeItem(NOTA_SERVICO_EMPRESA_STORAGE_KEY);
+    }, [empresaFilterReady, selectedEmpresa]);
     useEffect(() => {
         searchTermRef.current = searchTerm;
     }, [searchTerm]);
@@ -1305,6 +1354,10 @@ const NotaServico: React.FC = () => {
         };
     }, [isMobile, pageSize, listPaginationNotaServico?.content?.length]);
     useEffect(() => {
+        if (!empresaFilterReady) {
+            return;
+        }
+
         if (isMobile && !mobilePageSizeReady) {
             return;
         }
@@ -1330,13 +1383,14 @@ const NotaServico: React.FC = () => {
         handleListNotaServico(0, termo, activeFilters).finally(() => {
             hasLoadedNotaServicoRef.current = true;
         });
-    }, [canSearchNotaServico, handleListNotaServico, isMobile, mobilePageSizeReady, resolvedPageSize]);
+    }, [canSearchNotaServico, empresaFilterReady, handleListNotaServico, isMobile, mobilePageSizeReady, resolvedPageSize]);
     useEffect(() => {
         const feedback = consumeNotaServicoFeedback();
         if (!feedback) {
             return;
         }
 
+        setShowRedirectFeedbackMask(true);
         setPendingNotaServicoFeedback(feedback);
     }, []);
     useEffect(() => {
@@ -1344,22 +1398,22 @@ const NotaServico: React.FC = () => {
             return;
         }
 
-        const { notaAutorizada, displayMode, ...messageFeedback } = pendingNotaServicoFeedback;
-
-        if (displayMode === 'inline') {
-            msgs.current?.show({
-                severity: 'error',
-                summary: 'Erro:',
-                detail: 'NFS-e Rejeitada, verifique os dados e efetue a correção!'
-            });
-            setPendingNotaServicoFeedback(null);
-            return;
+        if (redirectFeedbackMaskTimeoutRef.current !== null) {
+            window.clearTimeout(redirectFeedbackMaskTimeoutRef.current);
         }
+
+        const { notaAutorizada, displayMode: _displayMode, ...messageFeedback } = pendingNotaServicoFeedback;
 
         msgs.current?.show({
             ...messageFeedback,
             life: 7000
         });
+
+        redirectFeedbackMaskTimeoutRef.current = window.setTimeout(() => {
+            setShowRedirectFeedbackMask(false);
+            redirectFeedbackMaskTimeoutRef.current = null;
+        }, NOTA_SERVICO_REDIRECT_FEEDBACK_MASK_HIDE_DELAY_MS);
+
 
         if (notaAutorizada) {
             setAuthorizedNota(notaAutorizada);
@@ -1367,6 +1421,13 @@ const NotaServico: React.FC = () => {
         }
         setPendingNotaServicoFeedback(null);
     }, [loading, pendingNotaServicoFeedback]);
+    useEffect(() => {
+        return () => {
+            if (redirectFeedbackMaskTimeoutRef.current !== null) {
+                window.clearTimeout(redirectFeedbackMaskTimeoutRef.current);
+            }
+        };
+    }, []);
     const hasSelectedDateRange = Boolean(dateRange?.[0] && dateRange?.[1]);
     const appliedFilterItems = [
         {
@@ -1448,6 +1509,12 @@ const NotaServico: React.FC = () => {
         <div className="w-full nota-servico-page-shell">
             <ConfirmDialog group={NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP} draggable={false} />
             <Messages ref={msgs} className="custom-messages" />
+            {showRedirectFeedbackMask && (
+                <LoadingScreen
+                    loadingText="Carregando NFS-e..."
+                    overlayOpacity={1}
+                />
+            )}
             <div className="p-0">
                 {isMobile && (
                     <>
@@ -2144,3 +2211,4 @@ const NotaServico: React.FC = () => {
     );
 };
 export default NotaServico;
+

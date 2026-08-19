@@ -5,6 +5,10 @@ import { DropdownChangeEvent } from "primereact/dropdown";
 import { ContratoEntity } from "@/app/entity/ContratoEntity";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
 import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
+import { MultiSelectChangeEvent } from "primereact/multiselect";
+
+const normalizeBooleanFlag = (value: boolean | string | number | null | undefined): boolean =>
+    value === true || value === 'true' || value === 1 || value === '1';
 
 export interface PessoaFormProps {
     pessoa?: PessoaEntity;
@@ -34,14 +38,14 @@ export type ClienteFornecedorFilter = {
 export interface PessoaFieldsProps {
     pessoa: PessoaEntity;
     errors: Record<string, string>;
-    selectedContato: string | null;
+    selectedContato: string[];
     selectedCNAE: TableCNAEEntity | null;
     loadingCnpj: boolean;
     hasFocused: boolean;
     onFocusFirstField: () => void;
     onChange: (event: any) => void;
     onDropdownChange: (event: DropdownChangeEvent) => void;
-    onContatoChange: (event: DropdownChangeEvent) => void;
+    onContatoChange: (event: MultiSelectChangeEvent) => void;
     onCNAEChange: (cnae: TableCNAEEntity | null) => void;
     onSearchCnpj: () => Promise<void>;
     onValidateCnpj: () => void;
@@ -71,11 +75,17 @@ export interface PreloadedPessoaData {
     selectedVendedor: VendedorEntity | null;
     selectedContrato: ContratoEntity | null;
 }
-export const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string | null => {
-    if (pessoa.pessoa_cliente && pessoa.pessoa_fornecedor) return 'AMBOS';
-    if (pessoa.pessoa_cliente) return 'pessoa_cliente';
-    if (pessoa.pessoa_fornecedor) return 'pessoa_fornecedor';
-    return null;
+export const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string[] => {
+    const selectedContato: string[] = [];
+    if (normalizeBooleanFlag(pessoa.pessoa_cliente)) {
+        selectedContato.push('pessoa_cliente');
+    }
+
+    if (normalizeBooleanFlag(pessoa.pessoa_fornecedor)) {
+        selectedContato.push('pessoa_fornecedor');
+    }
+
+    return selectedContato;
 };
 export const nullableString = (value?: string | null) => {
     if (value === undefined || value === null) return null;
@@ -83,6 +93,8 @@ export const nullableString = (value?: string | null) => {
 };
 export const buildPessoaPayload = (pessoa: PessoaEntity) => ({
     ...pessoa,
+    pessoa_cliente: normalizeBooleanFlag(pessoa.pessoa_cliente),
+    pessoa_fornecedor: normalizeBooleanFlag(pessoa.pessoa_fornecedor),
     cnpj: pessoa.cnpj && pessoa.cnpj.replace(/\D/g, '').length > 0 ? pessoa.cnpj : null,
     cpf: pessoa.cpf && pessoa.cpf.replace(/\D/g, '').length > 0 ? pessoa.cpf : null,
     email: (pessoa.email ?? '').trim(),

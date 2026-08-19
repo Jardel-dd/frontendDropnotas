@@ -50,6 +50,7 @@ export function EmpresaFields({
     onNumberChange,
     onUserChange,
     onOpenUserContaModal,
+    onOpenSearchCertificadoDialog,
     onEditUserConta,
     onCNAEChange,
     onSearchCnpj,
@@ -148,7 +149,7 @@ export function EmpresaFields({
                                 </div>
                             )}
                             <div className="grid formgrid">
-                                <div className="col-12 lg:col-4 ">
+                                <div className="col-12 lg:col-3">
                                     <InputMaskDrop
                                         id="cnpj"
                                         value={empresa.cnpj || ''}
@@ -178,7 +179,15 @@ export function EmpresaFields({
                                         required
                                     />
                                 </div>
-                                <div className="col-12  lg:col-8  ">
+                                <div className="col-12 lg:col-1"style={{marginTop:25}}>
+                                        <Button
+                                            type="button"
+                                            icon="pi pi-id-card"
+                                            onClick={onOpenSearchCertificadoDialog}
+                                            className="w-full"
+                                        />
+                                </div>
+                                <div className="col-12  lg:col-8">
                                     <Input value={empresa.razao_social || ''} onChange={onChange} label="Razão Social" id="razao_social" hasError={!!errors.razao_social} errorMessage={errors.razao_social} topLabel="Razão Social:" showTopLabel required />
                                 </div>
                                 <div className="col-12  lg:col-6  ">
@@ -392,10 +401,10 @@ export function EmpresaFields({
                                 </div>
                                 {empresaId && (
                                     <>
-                                <div className="col-12  lg:col-2 lg:mb-0">
+                                <div className="col-12  lg:col-4 lg:mb-0">
                                     <Input value={empresa.data_vencimento_certificado_digital || ''} onChange={onChange} label="" id="data_vencimento_certificado_digital" useRightButton outlined readOnly topLabel="Data vencimento Certificado:" showTopLabel />
                                 </div>
-                                <div className="col-12 lg:col-2"style={{marginTop:25.5}}>
+                                <div className="col-12 lg:col-4"style={{marginTop:24}}>
                                     <div className="flex align-items-center justify-content-between p-2 border-round-lg"
                                         style={{
                                             background: empresa.status_certificado_digital?.toUpperCase() === 'EXPIRADO'

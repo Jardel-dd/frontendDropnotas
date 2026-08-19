@@ -446,13 +446,25 @@ export const convertCertificadoToBase64 = (
 ) => {
     const file = files[0];
     if (!file) return;
+    const fileName = file.name;
 
     const reader = new FileReader();
     reader.onload = () => {
         const base64String = reader.result as string;
         const base64Data = base64String.split(',')[1];
+
+        console.group('Certificado digital convertido');
+        console.log('Nome do arquivo:', fileName);
+        console.log('Tipo MIME:', file.type || 'nao informado');
+        console.log('Tamanho do arquivo (bytes):', file.size);
+        console.log('Certificado digital Base64:', base64Data);
+        console.groupEnd();
+
         setEmpresa((prevEmpresa) => {
-            const updated = prevEmpresa.copyWith({ certificado_digital: base64Data });
+            const updated = prevEmpresa.copyWith({
+                certificado_digital: base64Data,
+                nome_certificado_digital: fileName
+            });
             callback?.(updated);
             return updated;
         });

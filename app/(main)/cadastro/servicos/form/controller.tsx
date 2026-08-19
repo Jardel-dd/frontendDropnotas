@@ -1,62 +1,28 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
-import { ServicoDescricaoFields, ServicoFields, ServicoTributacaoAvancadaFields, ServicoTributacaoFields } from './servico';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { Messages } from '@/app/components/messages/GlobalMessages';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
-import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
-import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
-import { getServicoValidationErrors, validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
-import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { createServico, fetchServiceFormDataByID, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
-import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
-import { createEmptyServico, FormCreatedServicoProps, ServiceFormProps, ServiceFormRef } from '../types/servico';
-import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
-import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
 import { TableService } from '@/app/entity/TableServiceEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
+import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
+import { Messages } from '@/app/components/messages/GlobalMessages';
+import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { SectionCard, SectionGrid } from '@/app/components/cardForm/SectionCard';
 import { useSectionCardFlow } from '@/app/components/cardForm/useSectionCardFlow';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
+import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
+import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
+import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import { getServicoValidationErrors, validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
+import { ServicoDescricaoFields, ServicoFields, ServicoTributacaoAvancadaFields, ServicoTributacaoFields } from './servico';
+import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
+import { createServico, fetchServiceFormDataByID, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
+import { createEmptyServico, FormCreatedServicoProps, ServiceFormProps, ServiceFormRef, servicoSectionFlowConfig } from '../types/servico';
+import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
 
-const servicoSectionFlowConfig = [
-    {
-        id: 'dados-servico',
-        errorFields: ['descricao', 'valor_servico', 'descricao_completa']
-    },
-    {
-        id: 'tributacoes',
-        errorFields: [
-            'item_lista_servico',
-            'codigo_cnae',
-            'codigo_nbs',
-            'codigo_situacao_tributaria',
-            'codigo_classificacao_tributaria',
-            'codigo_situacao_tributaria_regular',
-            'iss_retido',
-            'exigibilidade_iss',
-            'responsavel_retencao',
-            'codigo_indicador_operacao',
-            'indicador_destinatario'
-        ]
-    },
-    {
-        id: 'informacoes-tributarias-avancadas',
-        errorFields: [
-            'aliquota_deducoes',
-            'percentual_diferencial_uf',
-            'percentual_diferencial_municipal',
-            'percentual_diferencial_cbs',
-            'codigo_credito_presumido',
-            'codigo_municipio',
-            'numero_processo'
-        ]
-    }
-];
 
 export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>(
     ({ initialId, preloadedServico, msgs, onServicoChange, onErrorsChange, redirectAfterSave, onClose, onSaved, onLoadingChange, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
@@ -302,11 +268,9 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         useEffect(() => {
             onLoadingChange?.(isLoading || isLoadingBtnCreated);
         }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
-
         if (isLoading && initialId) {
             return <LoadingScreen loadingText="Carregando informações do serviço selecionado..." />;
         }
-
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
         const isSubmitDisabledByValidation = Object.keys(getServicoValidationErrors(servico)).length > 0;
         const isSubmitDisabled =
@@ -338,7 +302,6 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
             fetchFilteredCodigoNBS,
             selectedCodigoServico
         };
-
         return (
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
                 <Messages ref={msgs} className="custom-messages" />
@@ -409,7 +372,6 @@ ServicoFormContainer.displayName = 'ServicoFormContainer';
 function isServiceFormProps(props: FormCreatedServicoProps): props is ServiceFormProps {
     return 'msgs' in props;
 }
-
 export const FormCreatedServico = forwardRef<ServiceFormRef, FormCreatedServicoProps>((props, ref) => {
     if (isServiceFormProps(props)) {
         return <ServicoFormContainer {...props} ref={ref} />;

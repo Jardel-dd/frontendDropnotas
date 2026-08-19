@@ -10,6 +10,7 @@ import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
+import { MultiSelectChangeEvent } from 'primereact/multiselect';
 import { VendedorFormRef } from '../../vendedores/types/vendedor';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { FormCreatedVendedor } from '../../vendedores/form/controller';
@@ -35,9 +36,9 @@ import { fetchContratoByID, fetchContratoMobilePage, fetchContratosById, fetchFi
 import { SectionCard, SectionGrid } from '@/app/components/cardForm/SectionCard';
 import { useSectionCardFlow } from '@/app/components/cardForm/useSectionCardFlow';
 
-const mapContatoSelectionToFlags = (selectedContato: string | null) => ({
-    pessoa_cliente: selectedContato === 'AMBOS' || selectedContato === 'pessoa_cliente',
-    pessoa_fornecedor: selectedContato === 'AMBOS' || selectedContato === 'pessoa_fornecedor'
+const mapContatoSelectionToFlags = (selectedContato: string[]) => ({
+    pessoa_cliente: selectedContato.includes('pessoa_cliente'),
+    pessoa_fornecedor: selectedContato.includes('pessoa_fornecedor')
 });
 const buildContratoSelectionFromResumo = (contratoResumo: Partial<ContratoEntity> | null | undefined, contratoId?: number | null) => {
     const resolvedContratoId = contratoResumo?.id ?? contratoId ?? null;
@@ -166,7 +167,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const [showModalVendedor, setShowModalVendedor] = useState(false);
         const [showModalContrato, setShowModalContrato] = useState(false);
         const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
-        const [selectedContato, setSelectedContato] = useState<string | null>(null);
         const [isVendedorDialogLoading, setIsVendedorDialogLoading] = useState(true);
         const [isContratoDialogLoading, setIsContratoDialogLoading] = useState(true);
         const [reloadKeyContratoDropdown, setReloadKeyContratoDropdown] = useState(0);
@@ -223,6 +223,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 pais: ''
             })
         );
+        const selectedContato = mapPessoaContatoToSelection(pessoa);
         const validatePessoaForm = useCallback(
             () => validateFieldsPessoa(pessoa, setErrors, msgs),
             [msgs, pessoa]
@@ -333,7 +334,11 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             if (event) event.preventDefault();
             msgs.current?.clear();
             if (isLoadingBtnCreated) return;
-            const isValid = validatePessoaForm();
+            const pessoaToSubmit = pessoa.copyWith(
+                mapContatoSelectionToFlags(mapPessoaContatoToSelection(pessoa))
+            );
+            setPessoa(pessoaToSubmit);
+            const isValid = validateFieldsPessoa(pessoaToSubmit, setErrors, msgs);
             if (!isValid) {
                 setTouchedFields((prev) => ({ ...prev, submit: true }));
                 return;
@@ -341,7 +346,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setIsLoadingBtnCreated(true);
             try {
                 if (isEditMode && pessoaId) {
-                    const updated = await updatePessoa(pessoaId, pessoa, setErrors, msgs, router, setPessoa, redirectAfterSave ?? true);
+                    const updated = await updatePessoa(pessoaId, pessoaToSubmit, setErrors, msgs, router, setPessoa, redirectAfterSave ?? true);
                     if (updated) {
                         await onSaved?.(updated);
                         if (!onSaved) {
@@ -349,7 +354,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                         }
                     }
                 } else {
-                    const created = await createdPessoa(pessoa, setErrors, msgs, router, setPessoa, redirectAfterSave ?? true);
+                    const created = await createdPessoa(pessoaToSubmit, setErrors, msgs, router, setPessoa, redirectAfterSave ?? true);
                     if (created) {
                         await onSaved?.(created);
                         if (!onSaved) {
@@ -515,12 +520,19 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 return newErrors;
             });
         };
-        const handleContatoChange = (event: DropdownChangeEvent) => {
-            const selected = (event.value as string | null) ?? null;
-            setSelectedContato(selected);
+        const handleContatoChange = (event: MultiSelectChangeEvent) => {
+            const selected = (event.value as string[] | null) ?? [];
             const updatedPessoa = pessoa.copyWith(mapContatoSelectionToFlags(selected));
             setPessoa(updatedPessoa);
-            validateFieldsPessoa(updatedPessoa, setErrors, msgs);
+            setErrors((prevErrors) => {
+                const newErrors = { ...prevErrors };
+                delete newErrors.selectedContato;
+                return newErrors;
+            });
+
+            if (Object.values(touchedFields).some((touched) => touched)) {
+                validateFieldsPessoa(updatedPessoa, setErrors, msgs);
+            }
         };
         const handleCNAEChange = (cnae: TableCNAEEntity | null) => {
             setSelectedCNAE(cnae);
@@ -584,7 +596,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 const { dataPessoa, selectedContrato: selectedContratoPrecarregado } = await fetchPessoasById(currentPessoaId);
                 const pessoaEntity = new PessoaEntity(dataPessoa);
                 setPessoa(pessoaEntity);
-                setSelectedContato(mapPessoaContatoToSelection(dataPessoa));
                 await resolveSelectedContrato(
                     dataPessoa.id_contrato ?? null,
                     selectedContratoPrecarregado ?? (dataPessoa as PessoaEntity & { contrato?: Partial<ContratoEntity> }).contrato ?? null,
@@ -627,7 +638,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                         );
 
                     setPessoa(pessoaPrecarregada);
-                    setSelectedContato(mapPessoaContatoToSelection(preloadedPessoa.dataPessoa));
                     setSelectedContrato(contratoPrecarregado);
                     setSelectedCNAE(
                         preloadedPessoa.dataPessoa.cnae_fiscal

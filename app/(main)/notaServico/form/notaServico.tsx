@@ -1,20 +1,20 @@
 'use client';
 import '../styled.css';
 import { Toast } from 'primereact/toast';
-import { Message } from 'primereact/message';
 import LoadingScreen from '@/app/loading';
-import { Messages } from '@/app/components/messages/GlobalMessages';
+import { Message } from 'primereact/message';
 import { getCitiesFromState } from '@/app/entity/maps';
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
+import { DetalServiceEntity } from '@/app/entity/ServiceEntity';
+import { DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
 import NotaServico from '@/app/(main)/notaServico/emitirNfsE/nfse';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 import { DatePicker } from '@/app/components/calendarComponent/datePicker';
-import { ContatoEntity, DetalTomadorEntity, PessoaEntity } from '@/app/entity/PessoaEntity';
-import { DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
-import { CompanyEntity, DetalPrestadorEntity } from '@/app/entity/CompanyEntity';
+import { ContatoEntity, DetalTomadorEntity} from '@/app/entity/PessoaEntity';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { validateFieldsNotaServico } from '@/app/(main)/notaServico/controller/validation';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
@@ -138,7 +138,6 @@ export function NotaServicoFields({
 }: NotaServicoFieldsProps) {
     return (
         <div className="shared-form-tabbed-layout">
-
             <div className="grid formgrid">
                 <div className="col-12 md:col-4 lg:col-3">
                     <DatePicker
@@ -156,13 +155,13 @@ export function NotaServicoFields({
                         value={gerarNfse.prestador.regime_especial_tributacao ?? ''}
                         options={regimeEspecialTributarioOptionsCompany}
                         onChange={onDropdownChangeRegime}
-                        label="Selecione o Regime Tributario"
+                        label="Selecione o Regime Tributário"
                         showTopLabel
                         topLabel="Regime Especial Tributário:"
                     />
                 </div>
                 {mensagemRetornoCorrecao && (
-                    <div className="col-12 md:col-4 lg:col-6 nota-servico-return-message-row">
+                   <div className="col-12 md:col-6 lg:col-6 nota-servico-return-message-wrapper">
                         <Message
                             severity="error"
                             text={mensagemRetornoCorrecao}
@@ -170,7 +169,6 @@ export function NotaServicoFields({
                         />
                     </div>
                 )}
-
             </div>
             <div className="shared-form-tabbed-body">
                 <NotaServico

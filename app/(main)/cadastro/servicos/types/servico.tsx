@@ -139,3 +139,37 @@ export const normalizeEmptyValuesToNull = <T,>(value: T): T => {
 };
 export type FormCreatedServicoProps = ServicoFieldsProps | ServiceFormProps;
 export const SERVICE_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;
+export const servicoSectionFlowConfig = [
+    {
+        id: 'dados-servico',
+        errorFields: ['descricao', 'valor_servico', 'descricao_completa']
+    },
+    {
+        id: 'tributacoes',
+        errorFields: [
+            'item_lista_servico',
+            'codigo_cnae',
+            'codigo_nbs',
+            'codigo_situacao_tributaria',
+            'codigo_classificacao_tributaria',
+            'codigo_situacao_tributaria_regular',
+            'iss_retido',
+            'exigibilidade_iss',
+            'responsavel_retencao',
+            'codigo_indicador_operacao',
+            'indicador_destinatario'
+        ]
+    },
+    {
+        id: 'informacoes-tributarias-avancadas',
+        errorFields: [
+            'aliquota_deducoes',
+            'percentual_diferencial_uf',
+            'percentual_diferencial_municipal',
+            'percentual_diferencial_cbs',
+            'codigo_credito_presumido',
+            'codigo_municipio',
+            'numero_processo'
+        ]
+    }
+];

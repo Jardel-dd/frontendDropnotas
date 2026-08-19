@@ -37,8 +37,10 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
 import { fetchFilteredPessoa, listThePessoas } from '../cadastro/pessoas/controller/controller';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
-import { fetchFilteredEmpresa, listTheEmpresa } from '../configuracoes/empresas/controller/controller';
+import { fetchCompanyDropdownByID, fetchFilteredEmpresa, listTheEmpresa } from '../configuracoes/empresas/controller/controller';
 import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
+
+const ORDEM_SERVICOS_EMPRESA_STORAGE_KEY = 'ordemServicos.selectedEmpresaId';
 
 const buildEmptyOrdemServicoPagination = (pageSize: number, pageNumber = 0) => ({
     content: [],
@@ -77,8 +79,10 @@ const OrdemServicos: React.FC = () => {
     const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const msgs = useRef<Messages | null>(null);
     const hasLoadedInitialList = useRef(false);
+    const hasRestoredEmpresaFilter = useRef(false);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
+    const [empresaFilterReady, setEmpresaFilterReady] = useState(false);
     const { permissaoOrdemServico } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [visible, setVisible] = useState<boolean>(false);
@@ -450,10 +454,62 @@ const OrdemServicos: React.FC = () => {
         handleListOrdemServico(selectedPage, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
     };
     useEffect(() => {
-        if (hasLoadedInitialList.current) return;
+        if (hasRestoredEmpresaFilter.current) {
+            return;
+        }
+
+        hasRestoredEmpresaFilter.current = true;
+
+        const restoreSelectedEmpresa = async () => {
+            const storedEmpresaId = window.localStorage.getItem(ORDEM_SERVICOS_EMPRESA_STORAGE_KEY);
+
+            if (!storedEmpresaId) {
+                setEmpresaFilterReady(true);
+                return;
+            }
+
+            const restoredEmpresa = await fetchCompanyDropdownByID(storedEmpresaId);
+
+            if (restoredEmpresa) {
+                setSelectedEmpresa(restoredEmpresa);
+                setDraftSelectedEmpresa(restoredEmpresa);
+                handleAllChanges({
+                    target: {
+                        id: 'id_empresa',
+                        value: restoredEmpresa.id ?? null,
+                        type: 'input'
+                    }
+                });
+            } else {
+                window.localStorage.removeItem(ORDEM_SERVICOS_EMPRESA_STORAGE_KEY);
+            }
+
+            setEmpresaFilterReady(true);
+        };
+
+        void restoreSelectedEmpresa();
+    }, []);
+    useEffect(() => {
+        if (!empresaFilterReady) {
+            return;
+        }
+
+        if (selectedEmpresa?.id) {
+            window.localStorage.setItem(
+                ORDEM_SERVICOS_EMPRESA_STORAGE_KEY,
+                String(selectedEmpresa.id)
+            );
+            return;
+        }
+
+        window.localStorage.removeItem(ORDEM_SERVICOS_EMPRESA_STORAGE_KEY);
+    }, [empresaFilterReady, selectedEmpresa]);
+    useEffect(() => {
+        if (!empresaFilterReady || hasLoadedInitialList.current) return;
+
         hasLoadedInitialList.current = true;
         handleListOrdemServico(0, searchTerm, listarInativos, selectedStatusOrdemServico, dateRange);
-    }, [dateRange, handleListOrdemServico, listarInativos, searchTerm, selectedStatusOrdemServico]);
+    }, [dateRange, empresaFilterReady, handleListOrdemServico, listarInativos, searchTerm, selectedStatusOrdemServico]);
     const appliedFilterItems = [
         {
             label: 'Empresa',
@@ -729,4 +785,3 @@ const OrdemServicos: React.FC = () => {
     );
 };
 export default OrdemServicos;
-
