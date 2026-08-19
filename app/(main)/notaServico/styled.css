@@ -391,10 +391,23 @@
 .nota-servico-return-message-row {
     display: flex;
     align-items: flex-start;
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+.nota-servico-return-message-wrapper {
+    margin-top: 0;
+
 }
 
 .nota-servico-return-message {
-  width: 100%;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+  .nota-servico-return-message-wrapper {
+    margin-top: 25px;
+  }
 }
 
 .nota-servico-preparar-dialog {
@@ -578,6 +591,14 @@
 
 .nota-servico-page-shell {
     min-height: 0;
+    position: relative;
+}
+
+.nota-servico-feedback-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483646;
+    background: var(--surface-ground, #f8fafc);
 }
 
 .nota-servico-page-shell > .p-0 {

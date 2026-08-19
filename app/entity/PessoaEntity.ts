@@ -1,5 +1,8 @@
 import { EnderecoEntity } from "./enderecoEntity";
 
+const normalizeBooleanFlag = (value: boolean | string | number | null | undefined): boolean =>
+    value === true || value === 'true' || value === 1 || value === '1';
+
 export class DetalTomadorEntity {
     cpf_cnpj!: number;
     razao_social!: string;
@@ -113,8 +116,8 @@ export class PessoaEntity {
         atividade_principal?: string;
         cnae_fiscal?: string | null;
         data_fundacao?: string;
-        pessoa_cliente?: boolean;
-        pessoa_fornecedor?: boolean;
+        pessoa_cliente?: boolean | string | number | null;
+        pessoa_fornecedor?: boolean | string | number | null;
         codigo_regime_tributario?: string;
         tipo_pessoa?: string;
         contribuinte?: string;
@@ -141,8 +144,8 @@ export class PessoaEntity {
             cnae_fiscal,
             id_contrato,
             data_fundacao,
-            pessoa_cliente,
-            pessoa_fornecedor,
+            pessoa_cliente: normalizeBooleanFlag(pessoa_cliente),
+            pessoa_fornecedor: normalizeBooleanFlag(pessoa_fornecedor),
             codigo_regime_tributario,
             tipo_pessoa,
             contribuinte,
@@ -194,8 +197,8 @@ export class PessoaEntity {
         atividade_principal?: string;
         cnae_fiscal?: string | null;
         data_fundacao?: string;
-        pessoa_cliente?: boolean;
-        pessoa_fornecedor?: boolean;
+        pessoa_cliente?: boolean | string | number | null;
+        pessoa_fornecedor?: boolean | string | number | null;
         codigo_regime_tributario?: string;
         tipo_pessoa?: string;
         contribuinte?: string;
@@ -222,8 +225,14 @@ export class PessoaEntity {
             atividade_principal: atividade_principal ?? this.atividade_principal,
             cnae_fiscal: cnae_fiscal === '' ? null : (cnae_fiscal ?? this.cnae_fiscal),
             data_fundacao: data_fundacao ?? this.data_fundacao,
-            pessoa_cliente: pessoa_cliente ?? this.pessoa_cliente,
-            pessoa_fornecedor: pessoa_fornecedor ?? this.pessoa_fornecedor,
+            pessoa_cliente:
+                pessoa_cliente !== undefined
+                    ? normalizeBooleanFlag(pessoa_cliente)
+                    : this.pessoa_cliente,
+            pessoa_fornecedor:
+                pessoa_fornecedor !== undefined
+                    ? normalizeBooleanFlag(pessoa_fornecedor)
+                    : this.pessoa_fornecedor,
             codigo_regime_tributario: codigo_regime_tributario ?? this.codigo_regime_tributario,
             tipo_pessoa: tipo_pessoa ?? this.tipo_pessoa,
             contribuinte: contribuinte ?? this.contribuinte,

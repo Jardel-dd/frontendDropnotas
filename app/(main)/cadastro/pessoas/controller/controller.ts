@@ -52,6 +52,7 @@ export const updatePessoa = async (
 ) => {
     try {
         const pessoaDataToUpdate = buildPessoaPayload(pessoa);
+        console.log('enviado:', pessoaDataToUpdate);
         const response = await api.put(`/pessoa`, pessoaDataToUpdate);
         const responseData = response?.data;
         const responsePessoa =
@@ -180,6 +181,7 @@ export const createdPessoa = async (
 ) => {
     try {
         const pessoaData = buildPessoaPayload(pessoa);
+        console.log('[Pessoa][createdPessoa] payload enviado ao backend:', pessoaData);
         const response = await api.post('/pessoa', pessoaData);
         const created = new PessoaEntity(response.data?.pessoa ?? response.data);
 

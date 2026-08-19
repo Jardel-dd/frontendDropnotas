@@ -131,9 +131,8 @@
   margin-left: auto;
   transition: transform 0.2s ease;
 }
-
-.chevronCollapsed {
-  transform: rotate(-90deg);
+.chevronExpanded {
+  transform: rotate(180deg);
 }
 
 .content {

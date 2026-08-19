@@ -40,10 +40,10 @@ export function SectionCard({
       aria-expanded={expanded}
     >
       {headerMain}
-      <span
-        className={`${styles.chevron} ${!expanded ? styles.chevronCollapsed : ""}`}
-        aria-hidden="true"
-      >
+  <span
+  className={`${styles.chevron} ${expanded ? styles.chevronExpanded : ""}`}
+  aria-hidden="true"
+>
         <i className="pi pi-chevron-down" />
       </span>
     </button>

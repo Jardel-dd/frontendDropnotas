@@ -16,12 +16,13 @@ import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { handleSearchCep } from '@/app/components/seachs/searchCep/controller';
-import { handleSearchCNPJ } from '@/app/components/seachs/searchCnpj/controller';
+import { handleSearchCNPJ, handleSearchCertificate } from '@/app/components/seachs/searchCnpj/controller';
 import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 import { createEmptyUserConta } from '@/app/(main)/cadastro/usuarios/types/usuario';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
+import Input from '@/app/shared/include/input/input-all';
 import type {  EmpresaFormProps, EmpresaFormRef, FormEmpresaCreatedProps } from '../types/empresa';
 import { validateFieldsEmpresas } from '@/app/(main)/configuracoes/empresas/controller/validation';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
@@ -29,6 +30,7 @@ import { FormCreatedUsuario, UsuarioFormRef } from '@/app/(main)/cadastro/usuari
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { convertCertificadoToBase64, convertLogoToBase64, createdEmpresa, fetchCompanyFormDataByID, updateEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { createCenteredLogoCrop, getCroppedImageDataUrl, readFileAsDataUrl } from './logoCropUtils';
+import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
 export type { EmpresaFieldsProps, EmpresaFormProps, EmpresaFormRef } from '../types/empresa';
 
 const TELEFONE_OBRIGATORIO = true;
@@ -108,11 +110,13 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         );
         const [loadingCep, setLoadingCep] = useState(false);
         const [loadingCnpj, setLoadingCnpj] = useState(false);
+        const [loadingCertificateSearch, setLoadingCertificateSearch] = useState(false);
         const [logoAlterada, setLogoAlterada] = useState(false);
         const [reloadKeyUserConta, setReloadKeyUserConta] = useState(0);
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [isPasswordVisible, setIsPasswordVisible] = useState(false);
         const [showModalUserConta, setShowModalUserConta] = useState(false);
+        const [showCertificateSearchDialog, setShowCertificateSearchDialog] = useState(false);
         const [showLogoCropDialog, setShowLogoCropDialog] = useState(false);
         const [logoCropSrc, setLogoCropSrc] = useState<string | null>(null);
         const [logoCrop, setLogoCrop] = useState<Crop>();
@@ -260,6 +264,16 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                 convertCertificadoToBase64(event.files as File[], setEmpresa, toastRef, msgs, () => {
                     validateEmpresaForm();
                 });
+            }
+        };
+        const handleFileChangeCertificadoSearch = (event: FileUploadSelectEvent) => {
+            if (event.files && event.files.length > 0) {
+                setErrors((prev) => ({
+                    ...prev,
+                    certificado_digital: '',
+                    senha_certificado_digital: ''
+                }));
+                convertCertificadoToBase64(event.files as File[], setEmpresa, toastRef, msgs);
             }
         };
         const handleClearCertificado = () => {
@@ -410,23 +424,60 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         const handleTogglePasswordVisibility = () => {
             setIsPasswordVisible((prev) => !prev);
         };
+        const handleOpenCertificateSearchDialog = () => {
+            setErrors((prev) => ({
+                ...prev,
+                certificado_digital: '',
+                senha_certificado_digital: ''
+            }));
+            setShowCertificateSearchDialog(true);
+        };
+        const handleCloseCertificateSearchDialog = () => {
+            setShowCertificateSearchDialog(false);
+        };
+        const syncSelectedCNAE = async (cnaeFiscal?: string | null) => {
+            if (cnaeFiscal) {
+                const cnaeOptions = await fetchFilteredCnae(cnaeFiscal);
+                setSelectedCNAE(findCNAEByCodigo(cnaeFiscal, cnaeOptions));
+                return;
+            }
+
+            setSelectedCNAE(null);
+        };
         const handleValidateCnpj = () => {
             setTouchedFields((prev) => ({ ...prev, cnpj: true }));
             validateEmpresaForm();
         };
         const handleSearchEmpresaCnpj = async () => {
             setLoadingCnpj(true);
-            const cnpjData = await handleSearchCNPJ(empresa?.cnpj ?? '', setEmpresa, setErrors, msgs, selectedUserConta);
-
-            if (cnpjData?.cnae_fiscal) {
-                const cnaeOptions = await fetchFilteredCnae(cnpjData.cnae_fiscal);
-                setSelectedCNAE(findCNAEByCodigo(cnpjData.cnae_fiscal, cnaeOptions));
-            } else {
-                setSelectedCNAE(null);
+            try {
+                const cnpjData = await handleSearchCNPJ(empresa?.cnpj ?? '', setEmpresa, setErrors, msgs, selectedUserConta, setTouchedFields);
+                await syncSelectedCNAE(cnpjData?.cnae_fiscal);
+            } finally {
+                setLoadingCnpj(false);
+                setTouchedFields((prev) => ({ ...prev, cnpj: true }));
             }
+        };
+        const handleSearchEmpresaCertificado = async () => {
+            setLoadingCertificateSearch(true);
 
-            setLoadingCnpj(false);
-            setTouchedFields((prev) => ({ ...prev, cnpj: true }));
+            try {
+                const certificadoData = await handleSearchCertificate(
+                    empresa?.certificado_digital ?? '',
+                    empresa?.senha_certificado_digital ?? '',
+                    setEmpresa,
+                    setErrors,
+                    msgs,
+                    setTouchedFields
+                );
+
+                if (certificadoData) {
+                    await syncSelectedCNAE(certificadoData.cnae_fiscal);
+                    setShowCertificateSearchDialog(false);
+                }
+            } finally {
+                setLoadingCertificateSearch(false);
+            }
         };
         const handleSubmit = async (event?: React.FormEvent) => {
             if (event) event.preventDefault();
@@ -599,6 +650,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                     onNumberChange={handleNumberChange}
                     onUserChange={handleUserChange}
                     onOpenUserContaModal={openCreateUserContaDialog}
+                    onOpenSearchCertificadoDialog={handleOpenCertificateSearchDialog}
                     onEditUserConta={openEditUserContaDialog}
                     onCNAEChange={handleCNAEChange}
                     onSearchCnpj={handleSearchEmpresaCnpj}
@@ -648,6 +700,61 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
                             onBackClick={closeUserContaDialog}
                         />
 	                    </DialogFilter>
+                <DialogFilter
+                    header="Buscar Empresa por Certificado A1"
+                    visible={showCertificateSearchDialog}
+                    onHide={handleCloseCertificateSearchDialog}
+                    onSave={handleSearchEmpresaCertificado}
+                    onCancel={handleCloseCertificateSearchDialog}
+                    saveLabel="Buscar"
+                    cancelLabel="Cancelar"
+                    showSaveButton
+                    showCancelButton
+                    saveDisabled={loadingCertificateSearch || !empresa.certificado_digital || !empresa.senha_certificado_digital?.trim()}
+                    loading={loadingCertificateSearch}
+                    loadingText="Consultando dados da empresa..."
+                    width="36rem"
+                    breakpoints={{ '960px': '90vw', '640px': '96vw' }}
+                >
+                    <div className="grid formgrid pt-2">
+                        <div className="col-12">
+                            <label className="filter-label">
+                                Certificado Digital:<Mandatory/>
+                            </label>
+                            <div className="file-upload-container mt-1" style={{ display: 'flex', alignItems: 'center' }}>
+                                <FileUpload
+                                    name="file"
+                                    url="./upload"
+                                    id="certificado_digital_busca"
+                                    customUpload
+                                    chooseLabel={empresa.nome_certificado_digital || 'Upload Certificado A1'}
+                                    mode="basic"
+                                    disabled={loadingCertificateSearch}
+                                    accept=".pfx,.p12,.cer,.crt,.cert"
+                                    onSelect={handleFileChangeCertificadoSearch}
+                                    onClear={handleClearCertificado}
+                                    className={`p-fileupload-basic w-full ${isDarkMode ? 'dark-mode' : 'light-mode'} ${errors.certificado_digital ? 'p-invalid' : ''}`}
+                                    withCredentials={false}
+                                />
+                            </div>
+                            {errors.certificado_digital && <small className="p-error">{errors.certificado_digital}</small>}
+                        </div>
+                        <div className="col-12">
+                            <Input
+                                value={empresa.senha_certificado_digital || ''}
+                                onChange={handleAllChanges}
+                                label="Senha do Certificado"
+                                id="senha_certificado_digital"
+                                type={isPasswordVisible ? 'text' : 'password'}
+                                hasError={!!errors.senha_certificado_digital}
+                                errorMessage={errors.senha_certificado_digital}
+                                topLabel="Senha do Certificado:"
+                                showTopLabel
+                                required
+                            />
+                        </div>
+                    </div>
+                </DialogFilter>
                 <DialogFilter
                     header="Ajustar logo da empresa"
                     visible={showLogoCropDialog}

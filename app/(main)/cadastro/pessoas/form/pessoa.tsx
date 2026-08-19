@@ -7,6 +7,7 @@ import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import {contribuinteOptions, DropDownTipoPessoa, OptionsTipoContrato,regimeTributarioPessoaOptions} from '@/app/shared/optionsDropDown/options';
+import MultiSelect from '../dropDown/multSelect/multSlect';
 export function PessoaFields({
     pessoa,
     errors,
@@ -24,6 +25,7 @@ export function PessoaFields({
     fetchAllCnae,
     fetchFilteredCnae
 }: PessoaFieldsProps) {
+    
     return (
         <div className="grid formgrid">
             <div className="col-12 lg:col-3">
@@ -336,21 +338,20 @@ export function PessoaFields({
                 />
             </div>
             <div className="col-12 lg:col-4 ">
-                <Dropdown
-                    id="selectedContato"
-                    value={selectedContato}
-                    onChange={onContatoChange}
-                    options={OptionsTipoContrato}
-                    optionLabel="label"
-                    optionValue="value"
-                    label=""
-                    placeholder="Selecione o Contato"
-                    hasError={!!errors.selectedContato}
-                    errorMessage={errors.selectedContato}
-                    showTopLabel
-                    required
-                    topLabel="Tipo de contato:"
-                />
+<MultiSelect
+    id="selectedContato"
+    value={selectedContato}
+    onChange={onContatoChange}
+    options={OptionsTipoContrato}
+    optionLabel="label"
+    optionValue="value"
+    placeholder="Selecione os contatos"
+    showTopLabel
+    required
+    topLabel="Tipo de contato:"
+    hasError={!!errors.selectedContato}
+    errorMessage={errors.selectedContato}
+/>
             </div>
             <div className="col-12 lg:col-8">
                 <Input

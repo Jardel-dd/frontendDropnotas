@@ -84,6 +84,7 @@ export interface EmpresaFieldsProps {
     onNumberChange: (event: InputNumberValueChangeEvent) => void;
     onUserChange: (event: MultiSelectChangeEvent) => void;
     onOpenUserContaModal: () => void;
+    onOpenSearchCertificadoDialog: () => void;
     onEditUserConta: (userConta: UsuarioContaEntity) => void;
     onCNAEChange: (cnae: TableCNAEEntity | null) => void;
     onSearchCnpj: () => Promise<void>;
