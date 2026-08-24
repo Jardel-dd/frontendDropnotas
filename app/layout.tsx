@@ -6,6 +6,7 @@ import '../styles/layout/layout.scss';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/primereact.min.css';
 import AppProviders from './providers';
+import FacebookPixel from '@/app/components/facebookPixel.tsx/facebookPixel';
 import { DEFAULT_COLOR_SCHEME, DEFAULT_COMPONENT_THEME, THEME_PREFERENCES_STORAGE_KEY, getThemeHref, getThemePreferencesFromCookieValue } from './utils/themePreferences';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <link id="theme-link" href={getThemeHref(initialThemePreferences.colorScheme, initialThemePreferences.componentTheme)} rel="stylesheet" suppressHydrationWarning />
             </head>
             <body style={{ overflow: 'hidden' }}>
+                <FacebookPixel />
                 <AppProviders>{children}</AppProviders>
             </body>
             
