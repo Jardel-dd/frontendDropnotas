@@ -82,7 +82,8 @@ export function EmpresaFields({
         'municipio',
         'codigo_municipio',
         'codigo_pais',
-        'telefone'
+        'telefone',
+        'email'
     ]);
     const hasNotaFiscalErrors = hasAnyTabError([
         'serie_emissao_nfse',
@@ -229,6 +230,22 @@ export function EmpresaFields({
                                 )}
                             </div>
                         )}
+                    </div>
+                    <div className="grid formgrid mt-3">
+                        <div className="col-12 lg:col-6">
+                            <Input
+                                id="email"
+                                type="email"
+                                value={empresa.email || ''}
+                                onChange={onChange}
+                                label="E-mail"
+                                topLabel="E-mail:"
+                                showTopLabel
+                                required
+                                hasError={!!errors.email}
+                                errorMessage={errors.email}
+                            />
+                        </div>
                     </div>
                     <EnderecoForm
                         endereco={empresa.endereco}

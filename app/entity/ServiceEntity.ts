@@ -301,6 +301,8 @@ export class ServiceEntity {
     descricao!: string;
     descricao_completa?: string;
     codigo!: string;
+    id_perfil_tributario?: number | null;
+    id_empresas?: number[];
     item_lista_servico!: string;
     exigibilidade_iss!: string;
     iss_retido!: string;
@@ -336,6 +338,8 @@ export class ServiceEntity {
         descricao,
         descricao_completa,
         codigo,
+        id_perfil_tributario,
+        id_empresas,
         item_lista_servico,
         exigibilidade_iss,
         iss_retido,
@@ -371,6 +375,8 @@ export class ServiceEntity {
         descricao: string;
         descricao_completa?: string;
         codigo: string;
+        id_perfil_tributario?: number | null;
+        id_empresas?: number[];
         item_lista_servico: string;
 
         exigibilidade_iss?: string;
@@ -415,6 +421,8 @@ export class ServiceEntity {
             descricao,
             descricao_completa,
             codigo,
+            id_perfil_tributario,
+            id_empresas,
             item_lista_servico,
             exigibilidade_iss,
             iss_retido,
@@ -452,6 +460,8 @@ export class ServiceEntity {
         descricao,
         descricao_completa,
         codigo,
+        id_perfil_tributario,
+        id_empresas,
         item_lista_servico,
         exigibilidade_iss,
         iss_retido,
@@ -487,6 +497,8 @@ export class ServiceEntity {
         aliquota_deducoes?: number;
         descricao_completa?: string;
         codigo?: string;
+        id_perfil_tributario?: number | null;
+        id_empresas?: number[];
         item_lista_servico?: string;
         exigibilidade_iss?: string;
         iss_retido?: string;
@@ -521,6 +533,8 @@ export class ServiceEntity {
             descricao: descricao ?? this.descricao,
             descricao_completa: descricao_completa ?? this.descricao_completa,
             codigo: codigo ?? this.codigo,
+            id_perfil_tributario: id_perfil_tributario ?? this.id_perfil_tributario,
+            id_empresas: id_empresas ?? this.id_empresas,
             aliquota_deducoes: aliquota_deducoes ?? this.aliquota_deducoes,
             item_lista_servico: item_lista_servico ?? this.item_lista_servico,
             exigibilidade_iss: exigibilidade_iss ?? this.exigibilidade_iss,

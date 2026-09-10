@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { IconPorcentagem, IconReal } from '@/app/utils/icons/icons';
 import Input from '@/app/shared/include/input/input-all';
-import { ServiceEntity } from '@/app/entity/ServiceEntity';
+import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
 import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { exigibilidadeISSServico, issRetido, responsavelRetencao, tributacaoISSQN } from '@/app/shared/optionsDropDown/options';
 import { getScopedErrors } from '@/app/(main)/notaServico/controller/validation';
-import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import { fetchAllCodigoNBS, fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
 import InputTextarea from '@/app/shared/include/inputTextArea/InputTextarea';
 import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
 import { TableService } from '@/app/entity/TableServiceEntity';
@@ -20,11 +20,15 @@ type Props = {
     handleDropdownChange: (e: any, bloco?: 'prestador' | 'tomador' | 'servico', index?: number) => void;
 };
 
+const fetchFilteredTabelaServicoNfse = (searchTerm: string) =>
+    fetchFilteredTabelaServico(searchTerm, true);
+
 export default function BlocoServico({ nfseGerada, handleNumberChange, handleDropdownChange, handleAllChanges, errors }: Props) {
     const [selectedService, setSelectedService] = useState<TableService | null>(null);
-    const [selectedCodigoNBS, setSelectedCodigoNBS] = useState<ServiceEntity | null>(null);
+    const [selectedCodigoNBS, setSelectedCodigoNBS] = useState<TableCodigoNBSEntity | null>(null);
     const servicoErrors = getScopedErrors(errors, 'servico');
     const selectedServiceCode = nfseGerada.servico?.item_lista_servico?.toString().trim() ?? '';
+    const selectedNBSCode = nfseGerada.servico?.codigo_nbs?.toString().trim() ?? '';
 
     useEffect(() => {
         let isMounted = true;
@@ -39,7 +43,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 return;
             }
 
-            const serviceOptions = await fetchFilteredTabelaServico(selectedServiceCode);
+            const serviceOptions = await fetchFilteredTabelaServicoNfse(selectedServiceCode);
 
             if (!isMounted) {
                 return;
@@ -62,6 +66,43 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
             isMounted = false;
         };
     }, [selectedService?.codigo, selectedServiceCode]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const syncSelectedCodigoNBS = async () => {
+            if (!selectedNBSCode) {
+                setSelectedCodigoNBS(null);
+                return;
+            }
+
+            if (selectedCodigoNBS && findCodigoNBS(selectedNBSCode, [selectedCodigoNBS])) {
+                return;
+            }
+
+            const codigoNBSOptions = await fetchFilteredCodigoNBS(selectedNBSCode);
+
+            if (!isMounted) {
+                return;
+            }
+
+            const matchedCodigoNBS =
+                findCodigoNBS(selectedNBSCode, codigoNBSOptions) ??
+                new TableCodigoNBSEntity({
+                    id: 0,
+                    codigo: selectedNBSCode,
+                    descricao: selectedNBSCode
+                });
+
+            setSelectedCodigoNBS(matchedCodigoNBS);
+        };
+
+        void syncSelectedCodigoNBS();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [selectedCodigoNBS, selectedNBSCode]);
 
     return (
         <div className="grid formgrid ">
@@ -136,7 +177,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 />
             </div>
             <div className="col-12 lg:col-3">
-                <DropdownSearch<ServiceEntity>
+                <DropdownSearch<TableCodigoNBSEntity>
                     id="codigo_nbs"
                     selectedItem={selectedCodigoNBS}
                     onItemChange={(service) => {
@@ -145,7 +186,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                             {
                                 target: {
                                     id: 'codigo_nbs',
-                                    value: service?.codigo_nbs ?? '',
+                                    value: service?.codigo ?? '',
                                     type: 'text'
                                 }
                             },
@@ -154,7 +195,8 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     }}
                     fetchAllItems={fetchAllCodigoNBS}
                     fetchFilteredItems={fetchFilteredCodigoNBS}
-                    optionLabel={'descricao' as keyof ServiceEntity}
+                    optionValue="codigo"
+                    optionLabel="descricao"
                     placeholder="Selecione Código NBS"
                     hasError={!!servicoErrors.codigo_nbs}
                     errorMessage={servicoErrors.codigo_nbs}
@@ -181,7 +223,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                                         );
                                     }}
                                     fetchAllItems={fetchAllTabelaServico}
-                                    fetchFilteredItems={fetchFilteredTabelaServico}
+                                    fetchFilteredItems={fetchFilteredTabelaServicoNfse}
                                     optionValue="codigo"
                                     optionLabel="descricao"
                                     hasError={!!servicoErrors.item_lista_servico}
@@ -202,7 +244,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     hasError={!!servicoErrors.responsavel_retencao}
                     errorMessage={servicoErrors.responsavel_retencao}
                     showTopLabel
-                    required
                     topLabel="Responsavel Retenção:"
                 />
             </div>
@@ -219,6 +260,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     required
                 />
             </div>
+            {/*
             <div className="col-12 lg:col-3">
                 <Input
                     id="codigo_tributacao_municipio"
@@ -231,6 +273,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     showTopLabel
                 />
             </div>
+            */}
             <div className="col-12 lg:col-3">
                    <CustomInputNumber
                     id="valor_servico"
@@ -248,6 +291,7 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                 />
                 
             </div>
+            {/*
             <div className="col-12 lg:col-3">
                 <CustomInputNumber
                     id="aliquota_iss"
@@ -255,7 +299,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Alíquota ISS"
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
-                    required
                     topLabel="Alíquota ISS:"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
@@ -267,7 +310,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Alíquota Deduções"
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
-                    required
                     topLabel="Alíquota Deduções:"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
@@ -279,7 +321,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Alíquota PIS"
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
-                    required
                     topLabel="Alíquota PIS:"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
@@ -291,7 +332,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Alíquota COFINS"
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
-                    required
                     topLabel="Alíquota COFINS:"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
@@ -303,7 +343,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Alíquota INSS"
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
-                    required
                     topLabel="Alíquota INSS:"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
@@ -315,7 +354,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Alíquota IR"
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
-                    required
                     topLabel="Alíquota IR:"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
@@ -327,7 +365,6 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Alíquota CSLL"
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
-                    required
                     topLabel="Alíquota CSLL:"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
@@ -339,11 +376,11 @@ export default function BlocoServico({ nfseGerada, handleNumberChange, handleDro
                     label="Alíquota outras Retenções"
                     onChange={(e) => handleNumberChange(e, 'servico')}
                     showTopLabel
-                    required
                     topLabel="Alíquota outras Retenções:"
                     iconLeft={<IconPorcentagem isDarkMode={false} />}
                 />
             </div>
+            */}
             <div className="col-12 lg:col-3">
                 <CustomInputNumber
                     id="percentual_desconto_incondicionado"

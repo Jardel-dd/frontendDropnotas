@@ -12,6 +12,7 @@ interface SectionCardProps {
   collapsible?: boolean;
   expanded?: boolean;
   onToggle?: () => void;
+  disabled?: boolean;
 }
 
 export function SectionCard({
@@ -21,8 +22,10 @@ export function SectionCard({
   className = "",
   collapsible = false,
   expanded = true,
-  onToggle
+  onToggle,
+  disabled = false
 }: SectionCardProps) {
+  const isExpanded = !disabled && expanded;
   const headerMain = (
     <div className={styles.headerMain}>
       <span className={styles.iconWrap} aria-hidden="true">
@@ -35,13 +38,15 @@ export function SectionCard({
   const header = collapsible ? (
     <button
       type="button"
-      className={`${styles.headerButton} ${expanded ? styles.headerButtonExpanded : styles.headerButtonCollapsed}`}
+      className={`${styles.headerButton} ${isExpanded ? styles.headerButtonExpanded : styles.headerButtonCollapsed}`}
       onClick={onToggle}
-      aria-expanded={expanded}
+      aria-expanded={isExpanded}
+      disabled={disabled}
+      aria-disabled={disabled}
     >
       {headerMain}
   <span
-  className={`${styles.chevron} ${expanded ? styles.chevronExpanded : ""}`}
+  className={`${styles.chevron} ${isExpanded ? styles.chevronExpanded : ""}`}
   aria-hidden="true"
 >
         <i className="pi pi-chevron-down" />
@@ -53,11 +58,11 @@ export function SectionCard({
 
   return (
     <Card
-      className={`${styles.card} ${className} ${collapsible ? styles.cardCollapsible : ""} ${expanded ? styles.cardExpanded : styles.cardCollapsed}`}
+      className={`${styles.card} ${className} ${collapsible ? styles.cardCollapsible : ""} ${disabled ? styles.cardDisabled : ""} ${isExpanded ? styles.cardExpanded : styles.cardCollapsed}`}
       header={header}
       pt={{ body: { style: { padding: 0 } }, content: { style: { padding: 0 } } }}
     >
-      <div className={`${styles.content} ${expanded ? styles.contentExpanded : ""} ${collapsible && !expanded ? styles.contentCollapsed : ""}`}>
+      <div className={`${styles.content} ${isExpanded ? styles.contentExpanded : ""} ${collapsible && !isExpanded ? styles.contentCollapsed : ""}`}>
         {children}
       </div>
     </Card>

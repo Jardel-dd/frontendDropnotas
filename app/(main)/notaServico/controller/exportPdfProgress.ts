@@ -1,4 +1,5 @@
 type ExportPdfProgressState = {
+    formato: 'PDF' | 'XML';
     loading: boolean;
     progressValue: number;
     indeterminate: boolean;
@@ -7,6 +8,7 @@ type ExportPdfProgressState = {
 type ExportPdfProgressListener = (state: ExportPdfProgressState) => void;
 
 const initialState: ExportPdfProgressState = {
+    formato: 'PDF',
     loading: false,
     progressValue: 0,
     indeterminate: false
@@ -39,8 +41,9 @@ export const subscribeToExportPdfProgress = (listener: ExportPdfProgressListener
     };
 };
 
-export const startExportPdfProgress = () => {
+export const startExportPdfProgress = (formato: 'PDF' | 'XML' = 'PDF') => {
     setState({
+        formato,
         loading: true,
         progressValue: 8,
         indeterminate: false

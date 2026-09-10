@@ -1,0 +1,88 @@
+import { useCallback, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ServiceEntity } from "@/app/entity/ServiceEntity";
+import { SERVICE_DROPDOWN_CACHE_TIME_MS, ServicoDropdownFieldProps } from "@/app/(main)/cadastro/servicos/types/servico";
+import { DropdownSearch } from "@/app/shared/include/dropdown/searchDropdownAll";
+import { fetchFilteredService, fetchServicesByID, listTheService } from "@/app/(main)/cadastro/servicos/controller/controller";
+
+
+export default function ServicoDropdownField({
+    selectedService,
+    selectedServiceId,
+    onServiceChange,
+    onEditClick,
+    reloadKey = 0,
+    id = "selectedService",
+    hasError,
+    errorMessage,
+    placeholder = "Selecione o Serviço",
+    topLabel = "Serviço:",
+    showTopLabel = true,
+    required = false,
+    showAddButton = false,
+    onAddClick,
+    autoSelectSingle = false,
+    loadOnMount = false,
+    useCachedAllItems = false,
+    fetchAllItems = listTheService,
+    fetchFilteredItems = fetchFilteredService,
+    autoLoadAndSelectSingle = true
+}: ServicoDropdownFieldProps) {
+    const queryClient = useQueryClient();
+    const serviceDropdownQueryKey = useMemo(
+        () => ["dropdown", "servico", "all", reloadKey] as const,
+        [reloadKey]
+    );
+    const resolveAllItems = useCallback(() => {
+        if (!useCachedAllItems) {
+            return fetchAllItems();
+        }
+
+        return queryClient.fetchQuery({
+            queryKey: serviceDropdownQueryKey,
+            queryFn: fetchAllItems,
+            staleTime: SERVICE_DROPDOWN_CACHE_TIME_MS,
+            gcTime: SERVICE_DROPDOWN_CACHE_TIME_MS
+        });
+    }, [fetchAllItems, queryClient, serviceDropdownQueryKey, useCachedAllItems]);
+    const resolveItemByValue = useCallback(async (value: string | number) => {
+        const response = await fetchServicesByID(String(value));
+        return response.servico ?? null;
+    }, []);
+
+    useQuery({
+        queryKey: serviceDropdownQueryKey,
+        queryFn: fetchAllItems,
+        enabled: useCachedAllItems && loadOnMount,
+        staleTime: SERVICE_DROPDOWN_CACHE_TIME_MS,
+        gcTime: SERVICE_DROPDOWN_CACHE_TIME_MS
+    });
+
+    return (
+        <DropdownSearch<ServiceEntity>
+            id={id}
+            key={reloadKey}
+            selectedItem={selectedService}
+            onItemChange={onServiceChange}
+            fetchAllItems={resolveAllItems}
+            fetchFilteredItems={fetchFilteredItems}
+            fetchItemByValue={resolveItemByValue}
+            optionLabel="descricao"
+            optionValue="id"
+            initialOptionValue={selectedServiceId ?? null}
+            placeholder={placeholder}
+            hasError={hasError}
+            errorMessage={errorMessage}
+            autoSelectSingle={autoSelectSingle}
+            loadOnMount={loadOnMount}
+            showAddButton={showAddButton}
+            onAddClick={onAddClick}
+            onEditClick={onEditClick}
+            topLabel={topLabel}
+            showTopLabel={showTopLabel}
+            required={required}
+            autoLoadAndSelectSingle={autoLoadAndSelectSingle}
+            reloadAllOnShow={useCachedAllItems}
+        />
+    );
+}

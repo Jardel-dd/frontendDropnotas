@@ -202,8 +202,8 @@ const RelatoriosNotaFiscal: React.FC = () => {
             setRelatorio(null);
             msgs.current?.show({
                 severity: 'error',
-                summary: 'Atencao:',
-                detail: error instanceof Error ? error.message : 'Nao foi possivel carregar o relatorio de NFS-e.'
+                summary: 'Atenção:',
+                detail: error instanceof Error ? error.message : 'Nao foi possivel carregar o relatório.'
             });
         } finally {
             setLoading(false);
@@ -239,8 +239,8 @@ const RelatoriosNotaFiscal: React.FC = () => {
                 setRelatorio(null);
                 msgs.current?.show({
                     severity: 'error',
-                    summary: 'Atencao:',
-                    detail: error instanceof Error ? error.message : 'Nao foi possivel carregar o relatorio de NFS-e.'
+                    summary: 'Atenção:',
+                    detail: error instanceof Error ? error.message : 'Nao foi possivel carregar o relatório.'
                 });
             }
         };
@@ -473,8 +473,8 @@ const RelatoriosNotaFiscal: React.FC = () => {
                     fetchAllItems={listTheService}
                     fetchFilteredItems={fetchFilteredService}
                     optionLabel="descricao"
-                    placeholder="Selecione o servico"
-                    topLabel="Servico:"
+                    placeholder="Selecione o serviço"
+                    topLabel="Serviço:"
                     showTopLabel
                     autoLoadAndSelectSingle={false}
                 />
@@ -490,7 +490,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
                 {loading && (
                     <div className="nota-fiscal-loading-overlay">
                         <LoadingScreen
-                            loadingText="Atualizando relatorio..."
+                            loadingText="Atualizando relatório ..."
                             fullScreen={false}
                             overlayOpacity={0.88}
                         />

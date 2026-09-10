@@ -51,7 +51,7 @@ import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/Ap
 import { DetalPrestadorValoresEntity, DetalServiceEntity, ServiceEntity } from '@/app/entity/ServiceEntity';
 import { NOTA_SERVICO_DOWNLOAD_CONFIRM_GROUP, downloadArquivosButton, downloadPdfButton, downloadXmlButton } from '@/app/components/dataTableComponent/dataTableSelectAll';
 import { fetchFilteredVendedor, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
-import { consumeNotaServicoFeedback, exportarPdfNotasServico, listNotaServico } from './controller/controller';
+import { consumeNotaServicoFeedback, exportarPdfNotasServico, exportarXmlNotasServico, listNotaServico } from './controller/controller';
 import {
     advanceExportPdfProgress,
     finishExportPdfProgress,
@@ -281,6 +281,7 @@ const NotaServico: React.FC = () => {
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showExportPdfDialog, setShowExportPdfDialog] = useState(false);
+    const [exportFormat, setExportFormat] = useState<'PDF' | 'XML'>(getExportPdfProgressState().formato);
     const [showAuthorizedNotaDialog, setShowAuthorizedNotaDialog] = useState(false);
     const [pendingNotaServicoFeedback, setPendingNotaServicoFeedback] = useState<{
         displayMode?: 'toast' | 'inline';
@@ -687,6 +688,7 @@ const NotaServico: React.FC = () => {
                 summary: 'Sucesso:',
                 detail: `Foram enviadas ${notaReferencias.length} nota${notaReferencias.length > 1 ? 's' : ''} para emissão.`
             });
+             router.push('/notaServico');
         } catch (error) {
             msgs.current?.show({
                 severity: 'error',
@@ -710,8 +712,9 @@ const NotaServico: React.FC = () => {
         const parsedDate = dayjs(value as dayjs.ConfigType);
         return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY') : '-';
     };
-    const handleOpenExportPdfDialog = () => {
+    const handleOpenExportPdfDialog = (formato: 'PDF' | 'XML') => {
         if (!canSearchNotaServico || loadingExportPdf) return;
+        setExportFormat(formato);
         setShowExportPdfDialog(true);
     };
     const handleCloseExportPdfDialog = () => {
@@ -735,11 +738,11 @@ const NotaServico: React.FC = () => {
         stopExportPdfProgressSimulation();
         resetExportPdfProgress();
     }, [clearExportPdfResetTimeout, stopExportPdfProgressSimulation]);
-    const startExportPdfProgressSimulation = useCallback((initializeProgress = true) => {
+    const startExportPdfProgressSimulation = useCallback((initializeProgress = true, formato: 'PDF' | 'XML' = 'PDF') => {
         clearExportPdfResetTimeout();
         stopExportPdfProgressSimulation();
         if (initializeProgress) {
-            startExportPdfProgress();
+            startExportPdfProgress(formato);
         }
         exportPdfProgressIntervalRef.current = window.setInterval(() => {
             advanceExportPdfProgress();
@@ -772,7 +775,7 @@ const NotaServico: React.FC = () => {
             msgs.current?.show({
                 severity: 'warn',
                 summary: 'Periodo obrigatorio',
-                detail: 'Selecione uma data inicial e uma data final para exportar o PDF.',
+                detail: `Selecione uma data inicial e uma data final para exportar o ${exportFormat}.`,
                 life: 5000
             });
             return;
@@ -780,10 +783,11 @@ const NotaServico: React.FC = () => {
 
         setShowExportPdfDialog(false);
         setLoadingExportPdf(true);
-        startExportPdfProgressSimulation();
+        startExportPdfProgressSimulation(true, exportFormat);
 
         try {
-            await exportarPdfNotasServico(
+            const exportar = exportFormat === 'XML' ? exportarXmlNotasServico : exportarPdfNotasServico;
+            await exportar(
                 exportPayload,
                 msgs,
                 handleExportPdfProgress
@@ -799,6 +803,7 @@ const NotaServico: React.FC = () => {
     };
     useEffect(() => {
         const unsubscribe = subscribeToExportPdfProgress((state) => {
+            if (state.loading) setExportFormat(state.formato);
             setLoadingExportPdf(state.loading);
             setExportPdfProgressValue(state.progressValue);
             setExportPdfProgressIndeterminate(state.indeterminate);
@@ -1627,11 +1632,11 @@ const NotaServico: React.FC = () => {
                                             )}
                                             <div className="nota-servico-mobile-buttons">
                                                 {canSearchNotaServico && (
-                                                    <div className="nota-servico-export-action">
+                                                    <div className="nota-servico-export-action gap-2">
                                                         {loadingExportPdf && (
                                                             <div className="nota-servico-export-progress" aria-live="polite">
                                                                 <span className="nota-servico-export-progress-label">
-                                                                    Gerando PDF para download...
+                                                                    Gerando {exportFormat} para download...
                                                                 </span>
                                                                 <ProgressBar
                                                                     value={exportPdfProgressIndeterminate ? undefined : exportPdfProgressValue}
@@ -1646,9 +1651,20 @@ const NotaServico: React.FC = () => {
                                                             severity="secondary"
                                                             outlined
                                                             tooltip="Exportar PDF"
-                                                            loading={loadingExportPdf}
+                                                            aria-label="Exportar PDF"
+                                                            loading={loadingExportPdf && exportFormat === 'PDF'}
                                                             disabled={loadingExportPdf}
-                                                            onClick={handleOpenExportPdfDialog}
+                                                            onClick={() => handleOpenExportPdfDialog('PDF')}
+                                                        />
+                                                        <Button
+                                                            icon="pi pi-code"
+                                                            severity="secondary"
+                                                            outlined
+                                                            tooltip="Exportar XML"
+                                                            aria-label="Exportar XML"
+                                                            loading={loadingExportPdf && exportFormat === 'XML'}
+                                                            disabled={loadingExportPdf}
+                                                            onClick={() => handleOpenExportPdfDialog('XML')}
                                                         />
                                                     </div>
                                                 )}
@@ -1785,11 +1801,11 @@ const NotaServico: React.FC = () => {
                                             {canUpdateNotaServico && selectedNotas.length > 0 && <Button label={`Emitir ${selectedNotas.length} Nota${selectedNotas.length > 1 ? 's' : ''}`} icon="pi pi-send" onClick={handleEmitirNotas} outlined />}
                                         </div>
                                         {canSearchNotaServico && (
-                                            <div className="p-2 nota-servico-export-action">
+                                            <div className="p-2 nota-servico-export-action gap-2">
                                                 {loadingExportPdf && (
                                                     <div className="nota-servico-export-progress" aria-live="polite">
                                                         <span className="nota-servico-export-progress-label">
-                                                            Gerando PDF para download...
+                                                            Gerando {exportFormat} para download...
                                                         </span>
                                                         <ProgressBar
                                                             value={exportPdfProgressIndeterminate ? undefined : exportPdfProgressValue}
@@ -1804,10 +1820,21 @@ const NotaServico: React.FC = () => {
                                                     outlined
                                                     tooltip="Exportar PDF"
                                                     aria-label="Exportar PDF"
-                                                    loading={loadingExportPdf}
+                                                    loading={loadingExportPdf && exportFormat === 'PDF'}
                                                     disabled={loadingExportPdf}
                                                     style={{ width: '2.8rem', height: '38px', boxShadow: 'none' }}
-                                                    onClick={handleOpenExportPdfDialog}
+                                                    onClick={() => handleOpenExportPdfDialog('PDF')}
+                                                />
+                                                <Button
+                                                    icon="pi pi-code"
+                                                    severity="secondary"
+                                                    outlined
+                                                    tooltip="Exportar XML"
+                                                    aria-label="Exportar XML"
+                                                    loading={loadingExportPdf && exportFormat === 'XML'}
+                                                    disabled={loadingExportPdf}
+                                                    style={{ width: '2.8rem', height: '38px', boxShadow: 'none' }}
+                                                    onClick={() => handleOpenExportPdfDialog('XML')}
                                                 />
                                             </div>
                                         )}
@@ -2099,7 +2126,7 @@ const NotaServico: React.FC = () => {
                     </div>
                 </Dialog>
                 <DialogFilter
-                    header="Confirmar exportação PDF"
+                    header={`Confirmar exportação ${exportFormat}`}
                     visible={showExportPdfDialog}
                     onHide={handleCloseExportPdfDialog}
                     onSave={handleConfirmExportPdf}
@@ -2114,9 +2141,9 @@ const NotaServico: React.FC = () => {
                 >
                     <div className="flex flex-column gap-4 p-4">
                         <div className="flex align-items-center gap-2">
-                            <i className="pi pi-file-pdf text-red-500" style={{ fontSize: '2rem' }} />
+                            <i className={exportFormat === 'PDF' ? 'pi pi-file-pdf text-red-500' : 'pi pi-code text-blue-500'} style={{ fontSize: '2rem' }} />
                             <div className="flex flex-column">
-                                <span className="text-xl font-semibold">Exportação de PDF</span>
+                                <span className="text-xl font-semibold">Exportação de {exportFormat}</span>
                                 <span className="text-600 text-sm">Confirme o período que será utilizado na exportação.</span>
                             </div>
                         </div>

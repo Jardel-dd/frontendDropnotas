@@ -184,7 +184,8 @@ export const situacaoTributaria = [
 export const responsavelRetencao = [
     { label: 'Prestador', value: 'PRESTADOR' },
     { label: 'Tomador', value: 'TOMADOR' },
-    { label: 'Intermediário ', value: 'INTERMEDIARIO ' }
+    { label: 'Intermediário ', value: 'INTERMEDIARIO ' },
+    { label: 'Nenhum', value: 'NENHUM' }
 ];
 export const codigoIndicadorOperacao = [
   { label: 'Operação Bem Imóvel', value: 'OPERACAO_BEM_IMOVEL' },

@@ -453,11 +453,13 @@ export const convertCertificadoToBase64 = (
         const base64String = reader.result as string;
         const base64Data = base64String.split(',')[1];
 
-        console.group('Certificado digital convertido');
+        console.group('[Busca Certificado A1] Certificado convertido');
         console.log('Nome do arquivo:', fileName);
         console.log('Tipo MIME:', file.type || 'nao informado');
         console.log('Tamanho do arquivo (bytes):', file.size);
-        console.log('Certificado digital Base64:', base64Data);
+        console.log('Tamanho do Base64 (caracteres):', base64Data.length);
+        console.log('certificado_digital (Base64 completo para o Swagger):');
+        console.log(base64Data);
         console.groupEnd();
 
         setEmpresa((prevEmpresa) => {

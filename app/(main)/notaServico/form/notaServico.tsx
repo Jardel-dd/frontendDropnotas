@@ -316,20 +316,18 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
         });
     };
     const handleDropdownChange = (e: DropdownChangeEvent, bloco: 'prestador' | 'tomador' | 'servico' = 'prestador') => {
-        const { id, value } = e.target;
-        setGerarNfse((prev) =>
-            prev.copyWith({
-                [bloco]: {
-                    ...prev[bloco],
-                    [id]: value
-                }
-            })
-        );
+        handleAllChanges(e, bloco);
     };
     const handleDropdownChangeRegime = (e: DropdownChangeEvent) => {
+        const regimeEspecialTributacao = e.value ?? '';
+
         setGerarNfse((prev) =>
             prev.copyWith({
-                [e.target.id]: e.value
+                regime_especial_tributacao: regimeEspecialTributacao,
+                prestador: new DetalPrestadorEntity({
+                    ...prev.prestador,
+                    regime_especial_tributacao: regimeEspecialTributacao
+                })
             })
         );
     };

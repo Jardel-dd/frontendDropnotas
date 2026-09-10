@@ -20,7 +20,6 @@ const logRequest = (request: InternalAxiosRequestConfig) => {
 };
 api.interceptors.request.use(async (request) => {
     logRequest(request);
-
     if (request.url === '/refresh-token') {
         return request;
     }

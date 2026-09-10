@@ -1,12 +1,9 @@
-import { Messages } from "primereact/messages";
-import { DropdownChangeEvent } from "primereact/dropdown";
-import { ServiceEntity } from "@/app/entity/ServiceEntity";
-import { Dispatch, RefObject, SetStateAction } from "react";
-import { TableService } from "@/app/entity/TableServiceEntity";
-import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
-import { TableCodigoNBSEntity } from "@/app/entity/TableCodigoNBS";
-import { InputNumberValueChangeEvent } from "primereact/inputnumber";
-import { TableClassificacaoTributariaEntity } from "@/app/entity/TableClassificacaoTributariaEntity";
+import { Messages } from 'primereact/messages';
+import { Dispatch, RefObject, SetStateAction } from 'react';
+import { ServiceEntity } from '@/app/entity/ServiceEntity';
+import { CompanyEntity } from '@/app/entity/CompanyEntity';
+import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
+import { PerfilTributarioEntity } from '@/app/entity/perfilTributarioEntity';
 
 export const createEmptyServico = () =>
     new ServiceEntity({
@@ -15,6 +12,8 @@ export const createEmptyServico = () =>
         descricao: '',
         descricao_completa: '',
         codigo: '',
+        id_perfil_tributario: null,
+        id_empresas: [],
         item_lista_servico: '',
         exigibilidade_iss: '',
         iss_retido: '',
@@ -42,7 +41,8 @@ export const createEmptyServico = () =>
         valor_servico: null,
         valor_desconto: 0,
         aliquota_deducoes: 0
-});
+    });
+
 export interface ServiceFormProps {
     servico: ServiceEntity;
     initialId?: string | null;
@@ -59,35 +59,25 @@ export interface ServiceFormProps {
     showBTNPGCreatedAll?: boolean;
     onBackClick?: () => void;
 }
+
 export interface ServiceFormRef {
     handleSave: () => Promise<void>;
 }
+
 export interface ServicoFieldsProps {
     servico: ServiceEntity;
     errors: Record<string, string>;
-    selectedService: ServiceEntity | null;
-    selectedCodigoCNAE: TableCNAEEntity | null;
-    selectedCodigoNBS: TableCodigoNBSEntity | null;
-    selectedCodigoServico: TableService | null;
-    selectedClassificacaoTributaria: TableClassificacaoTributariaEntity | null;
+    selectedPerfilTributario: PerfilTributarioEntity | null;
+    selectedEmpresas: CompanyEntity[];
     onChange: (event: any) => void;
-    onDropdownChange: (event: DropdownChangeEvent) => void;
     onNumberChange: (event: InputNumberValueChangeEvent) => void;
-    onCodigoServicoChange: (service: TableService  | null) => void;
-    onServicoChange: (service: ServiceEntity | null) => void;
-    onCodigoNBSChange: (codigoNBS: TableCodigoNBSEntity | null) => void;
-    onCodigoCNAEChange: (codigoCNAE: TableCNAEEntity | null) => void;
-    onClassificacaoTributariaChange: (classificacaoTributaria: TableClassificacaoTributariaEntity | null) => void;
+    onPerfilTributarioChange: (perfilTributario: PerfilTributarioEntity | null) => void;
+    onCompanyChange: (event: any) => void;
     onDescriptionBlur: () => void;
-    fetchServiceTable: (...args: any[]) => any;
-    fetchAllClassificacaoTributaria: (...args: any[]) => any;
-    fetchFilteredClassificacaoTributaria: (...args: any[]) => any;
-    fetchAllCodigoNBS: (...args: any[]) => any;
-    fetchFilteredCodigoNBS: (...args: any[]) => any;
-    fetchAllCodigoServico: (...args: any[]) => any;
-    fetchFilteredCodigoServico: (...args: any[]) => any;
-
+    fetchAllPerfilTributario: (...args: any[]) => any;
+    fetchFilteredPerfilTributario: (...args: any[]) => any;
 }
+
 export interface ServicoDropdownFieldProps {
     selectedService: ServiceEntity | null;
     selectedServiceId?: number | null;
@@ -110,13 +100,13 @@ export interface ServicoDropdownFieldProps {
     useCachedAllItems?: boolean;
     autoLoadAndSelectSingle?: boolean;
 }
+
 export interface PreloadedServicoData {
     servico: ServiceEntity;
-    selectedCodigoCNAE: TableCNAEEntity | null;
-    selectedCodigoNBS: TableCodigoNBSEntity | null;
-    selectedCodigoServico: TableService | null;
-    selectedClassificacaoTributaria: TableClassificacaoTributariaEntity | null;
+    selectedPerfilTributario: PerfilTributarioEntity | null;
+    selectedEmpresas: CompanyEntity[];
 }
+
 export const normalizeEmptyValuesToNull = <T,>(value: T): T => {
     if (Array.isArray(value)) {
         return value.map((item) => normalizeEmptyValuesToNull(item)) as T;
@@ -137,39 +127,18 @@ export const normalizeEmptyValuesToNull = <T,>(value: T): T => {
 
     return value;
 };
+
 export type FormCreatedServicoProps = ServicoFieldsProps | ServiceFormProps;
+
 export const SERVICE_DROPDOWN_CACHE_TIME_MS = 5 * 60 * 1000;
+
 export const servicoSectionFlowConfig = [
     {
         id: 'dados-servico',
-        errorFields: ['descricao', 'valor_servico', 'descricao_completa']
+        errorFields: ['descricao', 'valor_servico']
     },
     {
-        id: 'tributacoes',
-        errorFields: [
-            'item_lista_servico',
-            'codigo_cnae',
-            'codigo_nbs',
-            'codigo_situacao_tributaria',
-            'codigo_classificacao_tributaria',
-            'codigo_situacao_tributaria_regular',
-            'iss_retido',
-            'exigibilidade_iss',
-            'responsavel_retencao',
-            'codigo_indicador_operacao',
-            'indicador_destinatario'
-        ]
-    },
-    {
-        id: 'informacoes-tributarias-avancadas',
-        errorFields: [
-            'aliquota_deducoes',
-            'percentual_diferencial_uf',
-            'percentual_diferencial_municipal',
-            'percentual_diferencial_cbs',
-            'codigo_credito_presumido',
-            'codigo_municipio',
-            'numero_processo'
-        ]
+        id: 'vinculos',
+        errorFields: ['id_perfil_tributario', 'id_empresas']
     }
 ];
