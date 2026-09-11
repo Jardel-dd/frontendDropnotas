@@ -5,10 +5,8 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { Messages } from '@/app/components/messages/GlobalMessages';
-import ListarServicos from './tabela/servicoListagem';
 import { usePermissions } from '@/app/routes/permissoes';
 import Input from '@/app/shared/include/input/input-all';
-import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { PaginatorPageChangeEvent } from 'primereact/paginator';
 import { usePageSize } from '@/app/components/pageSize/pageSize';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
@@ -17,11 +15,12 @@ import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent, rebuildLoadedMobilePages } from '@/app/components/paginator/mobileLoadMore';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
-import { ativarServico, deletarServico, listServico } from './controller/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
-import { createEmptyServico } from './types/servico';
+import { PerfilTributarioEntity } from '@/app/entity/perfilTributarioEntity';
+import { ativarPerfilTributario, deletarPerfilTributario, listPerfilTributario } from './controller/controller';
+import ListarPerfilTributario from './tabela/perfilTributarioListagem';
 
 const createInitialPagination = (pageSize: number) => ({
     pageable: {
@@ -51,27 +50,57 @@ const createInitialPagination = (pageSize: number) => ({
     empty: false
 });
 
-function Servicos() {
+function PerfilTributario() {
     const router = useRouter();
     const pageSize = usePageSize();
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
-    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const { permissaoServico } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
-    const [service, setService] = useState<ServiceEntity>(createEmptyServico());
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
+
+    const [perfilTributario, setPerfilTributario] = useState<PerfilTributarioEntity>(
+        new PerfilTributarioEntity({
+            ativo: true,
+            id: 0,
+            nome: '',
+            item_lista_servico: '',
+            exigibilidade_iss: '',
+            iss_retido: '',
+            observacoes: '',
+            codigo_municipio: '',
+            numero_processo: '',
+            responsavel_retencao: '',
+            codigo_cnae: '',
+            codigo_nbs: '',
+            codigo_inter_contr: '',
+            codigo_indicador_operacao: '',
+            tipo_operacao: '',
+            finalidade_nfse: 0,
+            indicador_finalidade: 0,
+            indicador_destinatario: '',
+            codigo_situacao_tributaria: '',
+            codigo_classificacao_tributaria: '',
+            codigo_situacao_tributaria_regular: '',
+            codigo_classificacao_tributaria_regular: '',
+            codigo_credito_presumido: '',
+            percentual_diferencial_uf: 0,
+            percentual_diferencial_municipal: 0,
+            percentual_diferencial_cbs: 0,
+        })
+    );
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [draftListarInativos, setDraftListarInativos] = useState(false);
-    const [listPaginationServicos, setListPaginationServicos] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
-    const safePagination = listPaginationServicos ?? createInitialPagination(resolvedPageSize);
+    const [listPaginationPerfilTributario, setListPaginationPerfilTributario] = useState<Record<string, any>>(createInitialPagination(resolvedPageSize));
+    const safePagination = listPaginationPerfilTributario ?? createInitialPagination(resolvedPageSize);
     const safePageable = safePagination.pageable ?? createInitialPagination(resolvedPageSize).pageable;
 
-    const fetchServicosPage = async (pageNumber = 0, term = searchTerm, inactive = listarInativos) => {
-        const servicos = await listServico(
+    const fetchPerfilTributarioPage = async (pageNumber = 0, term = searchTerm, inactive = listarInativos) => {
+        const servicos = await listPerfilTributario(
             {
                 ...safePagination,
                 pageable: {
@@ -89,17 +118,17 @@ function Servicos() {
     };
 
     const handleNavigate = () => {
-        router.push('/cadastro/servicos/created');
+        router.push('/cadastro/perfilTributario/created');
     };
 
-    const handleListServicos = async (pageNumber = 0, term = searchTerm, inactive = listarInativos, append = false) => {
+    const handleListPerfilTributario = async (pageNumber = 0, term = searchTerm, inactive = listarInativos, append = false) => {
         if (!append) {
             setLoading(true);
         }
 
         try {
-            const servicos = await fetchServicosPage(pageNumber, term, inactive);
-            setListPaginationServicos((current) => {
+            const servicos = await fetchPerfilTributarioPage(pageNumber, term, inactive);
+            setListPaginationPerfilTributario((current) => {
                 if (isMobile && append) {
                     return mergePaginatedContent(current, servicos, pageNumber) ?? createInitialPagination(resolvedPageSize);
                 }
@@ -109,8 +138,8 @@ function Servicos() {
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Atencao:',
-                detail: 'Falha ao buscar Servicos',
+                summary: 'Atenção:',
+                detail: 'Falha ao buscar Perfil Tributário',
                 life: 3000
             });
         } finally {
@@ -120,28 +149,38 @@ function Servicos() {
         }
     };
 
-    const refreshVisibleServicos = async (term = searchTerm, inactive = listarInativos) => {
+    const refreshVisiblePerfilTributario = async (term = searchTerm, inactive = listarInativos) => {
         setLoading(true);
         try {
             const currentPage = safePageable.pageNumber ?? 0;
-
             if (isMobile && currentPage > 0) {
                 const rebuilt = await rebuildLoadedMobilePages({
                     lastLoadedPage: currentPage,
-                    fetchPage: (page) => fetchServicosPage(page, term, inactive)
+                    fetchPage: (page) => fetchPerfilTributarioPage(page, term, inactive)
                 });
 
-                setListPaginationServicos(rebuilt ?? createInitialPagination(resolvedPageSize));
+                setListPaginationPerfilTributario(rebuilt ?? createInitialPagination(resolvedPageSize));
                 return;
             }
+            let servicos = await fetchPerfilTributarioPage(isMobile ? 0 : currentPage, term, inactive);
 
-            const servicos = await fetchServicosPage(isMobile ? 0 : currentPage, term, inactive);
-            setListPaginationServicos(servicos ?? createInitialPagination(resolvedPageSize));
+            const isEmptyDesktopPageWithRemainingRecords =
+                !isMobile &&
+                currentPage > 0 &&
+                Array.isArray(servicos.content) &&
+                servicos.content.length === 0 &&
+                (servicos.totalElements ?? 0) > 0;
+
+            if (isEmptyDesktopPageWithRemainingRecords) {
+                servicos = await fetchPerfilTributarioPage(currentPage - 1, term, inactive);
+            }
+
+            setListPaginationPerfilTributario(servicos ?? createInitialPagination(resolvedPageSize));
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Atencao:',
-                detail: 'Falha ao atualizar Servicos',
+                detail: 'Falha ao atualizar Perfil Tributário',
                 life: 3000
             });
         } finally {
@@ -149,45 +188,44 @@ function Servicos() {
         }
     };
 
-    const handleDeleteServico = async (id: number) => {
-        await deletarServico(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
-        await refreshVisibleServicos(searchTerm, listarInativos);
+    const handleDeletePerfilTributario = async (id: number) => {
+        await deletarPerfilTributario(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisiblePerfilTributario(searchTerm, listarInativos);
     };
 
-    const handleAtivarServico = async (id: number) => {
-        await ativarServico(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
-        await refreshVisibleServicos(searchTerm, listarInativos);
+    const handleAtivarPerfilTributario = async (id: number) => {
+        await ativarPerfilTributario(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
+        await refreshVisiblePerfilTributario(searchTerm, listarInativos);
     };
 
-    const handleLoadMoreServicos = async () => {
-        if (loading || loadingMore || !hasMoreMobileContent(listPaginationServicos)) {
+    const handleLoadMorePerfilTributario = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationPerfilTributario)) {
             return;
         }
-
         setLoadingMore(true);
         try {
-            await handleListServicos((safePageable.pageNumber ?? 0) + 1, searchTerm, listarInativos, true);
+            await handleListPerfilTributario((safePageable.pageNumber ?? 0) + 1, searchTerm, listarInativos, true);
         } finally {
             setLoadingMore(false);
         }
     };
 
     const { debouncedSearch, searchNow } = useGenericSearch({
-        setter: setService,
-        field: 'descricao',
-        onSearch: (value) => handleListServicos(0, value, listarInativos)
+        setter: setPerfilTributario,
+        field: 'nome',
+        onSearch: (value) => handleListPerfilTributario(0, value, listarInativos)
     });
 
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         const selectedPage = event.page;
-        setListPaginationServicos((prev) => ({
+        setListPaginationPerfilTributario((prev) => ({
             ...(prev ?? createInitialPagination(resolvedPageSize)),
             pageable: {
                 ...(prev?.pageable ?? createInitialPagination(resolvedPageSize).pageable),
                 pageNumber: selectedPage
             }
         }));
-        handleListServicos(selectedPage, searchTerm, listarInativos);
+        handleListPerfilTributario(selectedPage, searchTerm, listarInativos);
     };
 
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -198,25 +236,25 @@ function Servicos() {
 
     const handleSalvarFiltro = () => {
         setListarInativos(draftListarInativos);
-        handleListServicos(0, searchTerm, draftListarInativos);
+        handleListPerfilTributario(0, searchTerm, draftListarInativos);
     };
 
     const handleClearFilters = () => {
         setListarInativos(false);
         setDraftListarInativos(false);
-        handleListServicos(0, '', false);
+        handleListPerfilTributario(0, '', false);
     };
 
     const handleRemoveInativosFilter = () => {
         setListarInativos(false);
         setDraftListarInativos(false);
-        handleListServicos(0, searchTerm, false);
+        handleListPerfilTributario(0, searchTerm, false);
     };
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         setDraftListarInativos(e.checked ?? false);
     };
     useEffect(() => {
-        handleListServicos();
+        handleListPerfilTributario();
     }, []);
 
     const appliedFilterItems = [
@@ -272,18 +310,18 @@ function Servicos() {
                     </div>
                     <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                     <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
-                        <ListarServicos
+                        <ListarPerfilTributario
                             loading={loading}
                             setLoading={setLoading}
                             searchTerm={searchTerm}
                             listarInativos={listarInativos}
-                            listPaginationServicos={listPaginationServicos}
-                            setListPaginationServicos={setListPaginationServicos}
-                            deletar={handleDeleteServico}
-                            ativar={handleAtivarServico}
-                            mobileLoadMoreVisible={hasMoreMobileContent(listPaginationServicos)}
+                            listPaginationPerfilTributario={listPaginationPerfilTributario}
+                            setListPaginationPerfilTributario={setListPaginationPerfilTributario}
+                            deletar={handleDeletePerfilTributario}
+                            ativar={handleAtivarPerfilTributario}
+                            mobileLoadMoreVisible={hasMoreMobileContent(listPaginationPerfilTributario)}
                             mobileLoadMoreLoading={loadingMore}
-                            onMobileLoadMore={handleLoadMoreServicos}
+                            onMobileLoadMore={handleLoadMorePerfilTributario}
                         />
                     </div>
                 </div>
@@ -331,15 +369,15 @@ function Servicos() {
                             </div>
                             <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                             <div className="mt-3">
-                                <ListarServicos
+                                <ListarPerfilTributario
                                     loading={loading}
                                     setLoading={setLoading}
                                     searchTerm={searchTerm}
                                     listarInativos={listarInativos}
-                                    listPaginationServicos={listPaginationServicos}
-                                    setListPaginationServicos={setListPaginationServicos}
-                                    deletar={handleDeleteServico}
-                                    ativar={handleAtivarServico}
+                                    listPaginationPerfilTributario={listPaginationPerfilTributario}
+                                    setListPaginationPerfilTributario={setListPaginationPerfilTributario}
+                                    deletar={handleDeletePerfilTributario}
+                                    ativar={handleAtivarPerfilTributario}
                                 />
                             </div>
                         </div>
@@ -358,4 +396,4 @@ function Servicos() {
     );
 }
 
-export default Servicos;
+export default PerfilTributario;

@@ -2,10 +2,17 @@ import { TableService } from "@/app/entity/TableServiceEntity";
 import api from "@/app/services/api";
 
 export const fetchFilteredTabelaServico = async (
-  searchTerm: string
+  searchTerm: string,
+  listarTodos = false
 ): Promise<TableService[]> => {
   try {
-    const response = await api.get(`/tabela-servico/buscar?termo=${searchTerm}`);
+    const searchParams = new URLSearchParams({ termo: searchTerm });
+
+    if (listarTodos) {
+      searchParams.set('listar_todos', 'true');
+    }
+
+    const response = await api.get(`/tabela-servico/buscar?${searchParams.toString()}`);
 
     if (Array.isArray(response.data.content)) {
       return response.data.content.map((item: any) =>

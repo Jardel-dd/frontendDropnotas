@@ -268,9 +268,7 @@ export const handleSearchCNPJ = async <
   return null;
 };
 
-export const handleSearchCertificate = async <
-  T extends SearchCompanyState
->(
+export const handleSearchCertificate = async <T extends SearchCompanyState>(
   certificado_digital: string,
   senha_certificado_digital: string,
   setState: React.Dispatch<React.SetStateAction<T>>,
@@ -280,7 +278,6 @@ export const handleSearchCertificate = async <
 ) => {
   if (!certificado_digital?.trim()) {
     const detail = 'Selecione um certificado digital antes de pesquisar.';
-
     if (msgs?.current?.show) {
       msgs.current.show({
         severity: 'warn',

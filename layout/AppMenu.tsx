@@ -14,6 +14,7 @@ import {
     House,
     LockKey,
     Palette,
+    Percent,
     Receipt,
     User,
     UsersThree,
@@ -30,7 +31,6 @@ const AppMenu = () => {
                 label: 'Dashboard',
                 icon: House,
                 to: '/dashboard',
-                visible: hasPermissionAccess(userConta, 'dashboard')
             },
             {
                 label: 'Cadastros',
@@ -47,6 +47,12 @@ const AppMenu = () => {
                         icon: Wrench,
                         to: '/cadastro/servicos',
                         visible: hasPermissionAccess(userConta, 'servico')
+                    },
+                     {
+                        label: 'Perfil Tributário',
+                        icon: Percent,
+                        to: '/cadastro/perfilTributario',
+                        visible: hasPermissionAccess(userConta, 'pessoa')
                     },
                     {
                         label: 'Vendedores',

@@ -2,11 +2,8 @@
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { DropdownChangeEvent } from 'primereact/dropdown';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import { TableService } from '@/app/entity/TableServiceEntity';
-import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
-import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
+import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { SectionCard, SectionGrid } from '@/app/components/cardForm/SectionCard';
@@ -14,15 +11,12 @@ import { useSectionCardFlow } from '@/app/components/cardForm/useSectionCardFlow
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
-import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
-import { fetchAllCodigoNBS, fetchFilteredCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
+import { fetchAllPerfilTributario, fetchFilteredPerfilTributario } from '@/app/(main)/cadastro/perfilTributario/controller/controller';
 import { getServicoValidationErrors, validateFieldsServicos } from '@/app/(main)/cadastro/servicos/controller/validation';
-import { ServicoDescricaoFields, ServicoFields, ServicoTributacaoAvancadaFields, ServicoTributacaoFields } from './servico';
-import { fetchAllTabelaServico, fetchFilteredTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
+import { ServicoDescricaoFields, ServicoFields, ServicoVinculosFields } from './servico';
 import { createServico, fetchServiceFormDataByID, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { createEmptyServico, FormCreatedServicoProps, ServiceFormProps, ServiceFormRef, servicoSectionFlowConfig } from '../types/servico';
-import { fetchAllClassificacaoTributaria, fetchFilteredClassificacaoTributaria } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
-
+import { PerfilTributarioEntity } from '@/app/entity/perfilTributarioEntity';
 
 export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>(
     ({ initialId, preloadedServico, msgs, onServicoChange, onErrorsChange, redirectAfterSave, onClose, onSaved, onLoadingChange, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
@@ -35,13 +29,10 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         const [servico, setServico] = useState<ServiceEntity>(createEmptyServico());
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
-        const [selectedService, setSelectedService] = useState<ServiceEntity | null>(null);
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [stateDisableBtnCreatedService, setStateDisableBtnCreatedService] = useState(false);
-        const [selectedCodigoServico, setSelectedCodigoServico] = useState<TableService | null>(null);
-        const [selectedCodigoNBS, setSelectedCodigoNBS] = useState<TableCodigoNBSEntity | null>(null);
-        const [selectedCodigoCNAE, setSelectedCodigoCNAE] = useState<TableCNAEEntity | null>(null);
-        const [selectedClassificacaoTributaria, setSelectedClassificacaoTributaria] = useState<TableClassificacaoTributariaEntity | null>(null);
+        const [selectedPerfilTributario, setSelectedPerfilTributario] = useState<PerfilTributarioEntity | null>(null);
+        const [selectedEmpresas, setSelectedEmpresas] = useState<CompanyEntity[]>([]);
         const {
             isSectionExpanded,
             toggleSection,
@@ -93,69 +84,42 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                 value = value === '' ? null : Number(value);
             }
 
-            setServico(servico.copyWith({ [event.target.id]: value }));
+            setServico((prev) => prev.copyWith({ [event.target.id]: value }));
         };
 
-        const handleClassificacaoTributariaChange = (classificacaoTributaria: TableClassificacaoTributariaEntity | null) => {
-            setSelectedClassificacaoTributaria(classificacaoTributaria);
-            const updatedClassificacaoTributaria = servico.copyWith({ codigo_classificacao_tributaria: classificacaoTributaria?.codigo || '' });
-            setServico(updatedClassificacaoTributaria);
+        const handlePerfilTributarioChange = (perfilTributario: PerfilTributarioEntity | null) => {
+            setSelectedPerfilTributario(perfilTributario);
+            const updatedServico = servico.copyWith({ id_perfil_tributario: perfilTributario?.id ?? null });
+            setServico(updatedServico);
             setErrors((prevErrors) => {
                 const newErrors = { ...prevErrors };
-                delete newErrors.codigo_classificacao_tributaria;
-                return newErrors;
-            });
-        };
-
-        const handleCodigoServiceChange = (codigoService: TableService | null) => {
-            const selectedCodigo =
-                codigoService?.codigo ||
-                codigoService?.descricao?.split(' - ')[0]?.trim() ||
-                '';
-
-            setSelectedCodigoServico(codigoService);
-            const updatedCodigoService = servico.copyWith({ item_lista_servico: selectedCodigo });
-            setServico(updatedCodigoService);
-            console.log('Codigo do servico selecionado:', {
-                selectedOption: codigoService,
-                item_lista_servico: selectedCodigo
-            });
-            setErrors((prevErrors) => {
-                const newErrors = { ...prevErrors };
-                delete newErrors.item_lista_servico;
+                delete newErrors.id_perfil_tributario;
                 return newErrors;
             });
             setTouchedFields((prev) => ({
                 ...prev,
-                item_lista_servico: true
+                id_perfil_tributario: true
             }));
         };
 
-        const handleCodigoNBSChange = (codigoNBS: TableCodigoNBSEntity | null) => {
-            setSelectedCodigoNBS(codigoNBS);
-            const updatedCodigoNBS = servico.copyWith({ codigo_nbs: codigoNBS?.codigo || '' });
-            setServico(updatedCodigoNBS);
+        const handleCompanyChange = (event: { value: CompanyEntity[] }) => {
+            const companies = Array.isArray(event.value) ? event.value : [];
+            const companyIds = companies
+                .map((company) => Number(company.id))
+                .filter((companyId) => Number.isFinite(companyId) && companyId > 0);
+
+            setSelectedEmpresas(companies);
+            const updatedServico = servico.copyWith({ id_empresas: companyIds });
+            setServico(updatedServico);
             setErrors((prevErrors) => {
                 const newErrors = { ...prevErrors };
-                delete newErrors.codigo_nbs;
+                delete newErrors.id_empresas;
                 return newErrors;
             });
-        };
-
-        const handleCodigoCNAEChange = (codigoCNAE: TableCNAEEntity | null) => {
-            setSelectedCodigoCNAE(codigoCNAE);
-            const updatedCodigoCNAE = servico.copyWith({ codigo_cnae: codigoCNAE?.codigo || '' });
-            setServico(updatedCodigoCNAE);
-            setErrors((prevErrors) => {
-                const newErrors = { ...prevErrors };
-                delete newErrors.codigo_cnae;
-                return newErrors;
-            });
-        };
-
-        const handleDropdownChange = (event: DropdownChangeEvent) => {
-            const updatedService = servico.copyWith({ [event.target.id]: event.value });
-            setServico(updatedService);
+            setTouchedFields((prev) => ({
+                ...prev,
+                id_empresas: true
+            }));
         };
 
         const handleNumberChange = (event: InputNumberValueChangeEvent) => {
@@ -163,33 +127,6 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
             setServico(updatedServico);
             setTouchedFields((prev) => ({ ...prev, [event.target.id]: true }));
             validateFieldsServicos(updatedServico, setErrors, msgs);
-        };
-
-        const handleServicoChange = (service: ServiceEntity | null) => {
-            if (!service) {
-                setSelectedService(null);
-                return;
-            }
-
-            setSelectedService(service);
-            setServico((prev) => {
-                const updated = {
-                    ...prev,
-                    item_lista_servico: service.codigo || '',
-                    descricao: prev.descricao && prev.descricao.trim() !== '' ? prev.descricao : service.descricao || prev.descricao
-                };
-                return new ServiceEntity(updated);
-            });
-
-            setErrors((prev) => {
-                const newErrors = { ...prev };
-                delete newErrors.item_lista_servico;
-                return newErrors;
-            });
-            setTouchedFields((prev) => ({
-                ...prev,
-                item_lista_servico: true
-            }));
         };
 
         const handleDescriptionBlur = () => {
@@ -202,10 +139,8 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                 setIsLoading(true);
                 const serviceFormData = await fetchServiceFormDataByID(id);
                 setServico(serviceFormData.servico);
-                setSelectedCodigoNBS(serviceFormData.selectedCodigoNBS);
-                setSelectedCodigoCNAE(serviceFormData.selectedCodigoCNAE);
-                setSelectedClassificacaoTributaria(serviceFormData.selectedClassificacaoTributaria);
-                setSelectedCodigoServico(serviceFormData.selectedCodigoServico);
+                setSelectedPerfilTributario(serviceFormData.selectedPerfilTributario);
+                setSelectedEmpresas(serviceFormData.selectedEmpresas);
             } finally {
                 setIsLoading(false);
             }
@@ -229,10 +164,8 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
 
                 if (preloadedServico?.servico?.id && String(preloadedServico.servico.id) === String(initialId)) {
                     setServico(preloadedServico.servico);
-                    setSelectedCodigoNBS(preloadedServico.selectedCodigoNBS);
-                    setSelectedCodigoCNAE(preloadedServico.selectedCodigoCNAE);
-                    setSelectedClassificacaoTributaria(preloadedServico.selectedClassificacaoTributaria);
-                    setSelectedCodigoServico(preloadedServico.selectedCodigoServico);
+                    setSelectedPerfilTributario(preloadedServico.selectedPerfilTributario);
+                    setSelectedEmpresas(preloadedServico.selectedEmpresas);
                     setIsLoading(false);
                     return;
                 }
@@ -242,6 +175,8 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
             }
 
             setIsEditMode(false);
+            setSelectedPerfilTributario(null);
+            setSelectedEmpresas([]);
             setIsLoading(false);
         }, [initialId, preloadedServico]);
 
@@ -268,9 +203,11 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         useEffect(() => {
             onLoadingChange?.(isLoading || isLoadingBtnCreated);
         }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
+
         if (isLoading && initialId) {
-            return <LoadingScreen loadingText="Carregando informações do serviço selecionado..." />;
+            return <LoadingScreen loadingText="Carregando informacoes do servico selecionado..." />;
         }
+
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
         const isSubmitDisabledByValidation = Object.keys(getServicoValidationErrors(servico)).length > 0;
         const isSubmitDisabled =
@@ -280,28 +217,17 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         const servicoFieldsProps = {
             servico,
             errors,
-            selectedService,
-            selectedCodigoCNAE,
-            selectedCodigoNBS,
-            selectedClassificacaoTributaria,
+            selectedPerfilTributario,
+            selectedEmpresas,
             onChange: handleAllChanges,
-            onDropdownChange: handleDropdownChange,
             onNumberChange: handleNumberChange,
-            onServicoChange: handleServicoChange,
-            onClassificacaoTributariaChange: handleClassificacaoTributariaChange,
-            onCodigoCNAEChange: handleCodigoCNAEChange,
+            onPerfilTributarioChange: handlePerfilTributarioChange,
+            onCompanyChange: handleCompanyChange,
             onDescriptionBlur: handleDescriptionBlur,
-            fetchServiceTable: fetchAllTabelaServico,
-            fetchAllClassificacaoTributaria,
-            fetchFilteredClassificacaoTributaria,
-            onCodigoServicoChange: handleCodigoServiceChange,
-            onCodigoNBSChange: handleCodigoNBSChange,
-            fetchAllCodigoServico: fetchAllTabelaServico,
-            fetchFilteredCodigoServico: fetchFilteredTabelaServico,
-            fetchAllCodigoNBS,
-            fetchFilteredCodigoNBS,
-            selectedCodigoServico
+            fetchAllPerfilTributario,
+            fetchFilteredPerfilTributario
         };
+
         return (
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
                 <Messages ref={msgs} className="custom-messages" />
@@ -309,7 +235,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                     <div className="custom-flex-col">
                         <SectionCard
                             icon={<i className="pi pi-file-edit" />}
-                            title="Descrição e Valor"
+                            title="Dados do Serviço"
                             collapsible
                             expanded={isSectionExpanded('dados-servico')}
                             onToggle={() => toggleSection('dados-servico')}
@@ -319,25 +245,14 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                             </SectionGrid>
                         </SectionCard>
                         <SectionCard
-                            icon={<i className="pi pi-percentage" />}
-                            title="Tributações"
+                            icon={<i className="pi pi-link" />}
+                            title="Vínculos"
                             collapsible
-                            expanded={isSectionExpanded('tributacoes')}
-                            onToggle={() => toggleSection('tributacoes')}
+                            expanded={isSectionExpanded('vinculos')}
+                            onToggle={() => toggleSection('vinculos')}
                         >
                             <SectionGrid minColumnWidth="220px">
-                                <ServicoTributacaoFields {...servicoFieldsProps} />
-                            </SectionGrid>
-                        </SectionCard>
-                        <SectionCard
-                            icon={<i className="pi pi-calculator" />}
-                            title="Informações Tributárias Avançadas"
-                            collapsible
-                            expanded={isSectionExpanded('informacoes-tributarias-avancadas')}
-                            onToggle={() => toggleSection('informacoes-tributarias-avancadas')}
-                        >
-                            <SectionGrid minColumnWidth="220px">
-                                <ServicoTributacaoAvancadaFields {...servicoFieldsProps} />
+                                <ServicoVinculosFields {...servicoFieldsProps} />
                             </SectionGrid>
                         </SectionCard>
                     </div>
@@ -372,6 +287,7 @@ ServicoFormContainer.displayName = 'ServicoFormContainer';
 function isServiceFormProps(props: FormCreatedServicoProps): props is ServiceFormProps {
     return 'msgs' in props;
 }
+
 export const FormCreatedServico = forwardRef<ServiceFormRef, FormCreatedServicoProps>((props, ref) => {
     if (isServiceFormProps(props)) {
         return <ServicoFormContainer {...props} ref={ref} />;

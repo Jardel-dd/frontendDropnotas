@@ -1,6 +1,12 @@
 import { UsuarioContaEntity } from "@/app/entity/UsuarioContaEntity";
 import { CompanyEntity } from "../../../../entity/CompanyEntity";
 
+export const getEmpresaEmailError = (email?: string): string | null => {
+    if (!email?.trim()) return 'Informe o e-mail da empresa.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Informe um e-mail válido.';
+    return null;
+};
+
 export const validateFieldsEmpresas = (
     empresa: CompanyEntity,
     selectedUserConta: UsuarioContaEntity | null,
@@ -31,9 +37,16 @@ export const validateFieldsEmpresas = (
     } else if (!empresa.inscricao_municipal || empresa.inscricao_municipal.length < 2) {
         newErrors.inscricao_municipal = 'Campo deve ter no minimo 2 caracteres.';
         valid = false;
+     } else if (!empresa.inscricao_municipal || empresa.inscricao_municipal.length < 2) {
+        newErrors.inscricao_municipal = 'Campo deve ter no minimo 2 caracteres.';
+        valid = false;
     } else if (!empresa.codigo_regime_tributario) {
         newErrors.selectedRegime = 'Selecione o Regime Tributário.';
         valid = false;
+
+ } else if (!empresa.email || getEmpresaEmailError(empresa.email)) {
+    newErrors.email = getEmpresaEmailError(empresa.email) || 'Informe um e-mail válido.';
+    valid = false;
     } else if (!empresa.endereco?.cep || empresa.endereco.cep.replace(/\D/g, '').length < 8) {
         newErrors.cep = 'Campo deve ter no minimo 8 digitos.';
         valid = false;
@@ -156,8 +169,8 @@ export const validateFieldsEmpresas = (
         valid = true;
     }
 
+   
     setErrors(newErrors);
-
     if (msgs.current && errorMessages.length > 0) {
         msgs.current.show({ severity: 'error', summary: 'Atenção:', detail: errorMessages[0] });
     }

@@ -17,7 +17,7 @@ export const validateFieldsContasReceber = (
     msgs.current?.clear();
 
     if (!contasReceber.descricao || contasReceber.descricao.trim().length < 2) {
-        newErrors = { descricao: 'A descricao deve ter pelo menos 2 caracteres.' };
+        newErrors = { descricao: 'A descrição deve ter pelo menos 2 caracteres.' };
     } else if (!selectedCliente && !contasReceber.id_cliente) {
         newErrors = { selectedCliente: 'Selecione o cliente.' };
     } else if (!selectedVendedor && !contasReceber.id_vendedor) {
@@ -25,7 +25,7 @@ export const validateFieldsContasReceber = (
     } else if (!selectedFormaPagamento && !contasReceber.id_forma_pagamento) {
         newErrors = { selectedFormaPagamento: 'Selecione a forma de pagamento.' };
     } else if (!contasReceber.valor_original || Number(contasReceber.valor_original) <= 0) {
-        newErrors = { valor_original: 'Informe um valor original maior que zero.' };
+        newErrors = { valor_original: 'Informe um valor maior que zero.' };
     } else if (!contasReceber.data_vencimento) {
         newErrors = { data_vencimento: 'Informe a data de vencimento.' };
     } 

@@ -249,7 +249,13 @@ export const DataTableComponent = <T extends Identifiable>({
         </div>
     );
 };
-export const handleEdit = <T extends { id?: number | string }>(entity: T, basePath: string, router: ReturnType<typeof useRouter>) => {
+export const handleEdit = <T extends { id?: number | string }>(
+    entity: T,
+    basePath: string,
+    router: ReturnType<typeof useRouter>,
+    onEditClick?: (entity: T) => void
+) => {
+    onEditClick?.(entity);
     const queryParams = new URLSearchParams({
         id: entity.id?.toString() ?? ''
     }).toString();
@@ -259,11 +265,12 @@ export const editButton = <T extends { id?: number | string }>(
     entity: T,
     basePath: string,
     router: ReturnType<typeof useRouter>,
-    buttonWrapperRef?: React.Ref<HTMLSpanElement>
+    buttonWrapperRef?: React.Ref<HTMLSpanElement>,
+    onEditClick?: (entity: T) => void
 ) => {
     return (
         <span ref={buttonWrapperRef}>
-            <Button icon="pi pi-pencil" tooltip="Alterar" className="p-button-text p-button-secondary bottom-All-plus-datatableDetails" onClick={() => handleEdit(entity, basePath, router)} />
+            <Button icon="pi pi-pencil" tooltip="Alterar" className="p-button-text p-button-secondary bottom-All-plus-datatableDetails" onClick={() => handleEdit(entity, basePath, router, onEditClick)} />
         </span>
     );
 };

@@ -13,11 +13,11 @@ export const validateFieldsContasPagar = (
     msgs.current?.clear();
 
     if (!contasPagar.descricao || contasPagar.descricao.trim().length < 2) {
-        newErrors = { descricao: 'A descricao deve ter pelo menos 2 caracteres.' };
+        newErrors = { descricao: 'A descrição deve ter pelo menos 2 caracteres.' };
     } else if (!selectedCliente && !contasPagar.id_fornecedor) {
         newErrors = { selectedCliente: 'Selecione o fornecedor.' };
     } else if (!contasPagar.valor_original || Number(contasPagar.valor_original) <= 0) {
-        newErrors = { valor_original: 'Informe um valor original maior que zero.' };
+        newErrors = { valor_original: 'Informe um valor maior que zero.' };
     } else if (!contasPagar.valor_total || Number(contasPagar.valor_total) <= 0) {
         newErrors = { valor_total: 'Informe um valor total maior que zero.' };
     } else if (!contasPagar.data_vencimento) {

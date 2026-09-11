@@ -301,7 +301,7 @@ function CustomMultiSelect({
     const canEditSelected = Boolean(onEditClick && Array.isArray(selectedItems) && selectedItems.length === 1);
     const showHeaderButtons = showAddButton || canEditSelected || hasSelectedValues;
     return (
-        <div ref={wrapperRef} className="p-field" style={{ width: '100%', height: '85px', maxHeight: "85px" }}>
+        <div ref={wrapperRef} className="p-field" style={{ width: '100%', minHeight: '85px' }}>
             {showTopLabel && topLabel && (
                 <div style={{ height: 25, display: "flex", alignItems: "center" }}>
                     <label className="filter-label">

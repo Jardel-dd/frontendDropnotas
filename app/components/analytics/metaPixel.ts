@@ -1,0 +1,22 @@
+declare global {
+    interface Window {
+        fbq?: (...args: unknown[]) => void;
+    }
+}
+
+export function trackMetaEvent(eventName: string, params?: Record<string, unknown>) {
+    if (typeof window === 'undefined' || typeof window.fbq !== 'function') {
+        return;
+    }
+
+    if (params) {
+        window.fbq('track', eventName, params);
+        return;
+    }
+
+    window.fbq('track', eventName);
+}
+
+export function trackLead(params?: Record<string, unknown>) {
+    trackMetaEvent('Lead', params);
+}

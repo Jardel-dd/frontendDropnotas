@@ -5,6 +5,7 @@ export const usePermissions = () => {
     const { userConta } = useUser();
 
     return {
+        permissaoPerfilTributario: getPermissionFlags(userConta, 'perfilUsuario'),
         permissaoPerfilUsuario: getPermissionFlags(userConta, 'perfilUsuario'),
         permissaoUsuarioConta: getPermissionFlags(userConta, 'usuarioConta'),
         permissaoEmpresa: getPermissionFlags(userConta, 'empresa'),

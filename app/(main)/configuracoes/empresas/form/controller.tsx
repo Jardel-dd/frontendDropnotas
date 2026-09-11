@@ -24,7 +24,7 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import Input from '@/app/shared/include/input/input-all';
 import type {  EmpresaFormProps, EmpresaFormRef, FormEmpresaCreatedProps } from '../types/empresa';
-import { validateFieldsEmpresas } from '@/app/(main)/configuracoes/empresas/controller/validation';
+import { getEmpresaEmailError, validateFieldsEmpresas } from '@/app/(main)/configuracoes/empresas/controller/validation';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
 import { FormCreatedUsuario, UsuarioFormRef } from '@/app/(main)/cadastro/usuarios/form/controller';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type Dispatch, type SetStateAction } from 'react';
@@ -147,6 +147,16 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
             const { id, value, checked, type } = event.target;
             let newValue = type === 'checkbox' || type === 'switch' ? checked : value;
             const numericFields = ['inscricao_estadual', 'inscricao_municipal'];
+
+            if (id === 'email') {
+                const emailError = getEmpresaEmailError(String(newValue ?? ''));
+                setErrors((prev) => {
+                    const next = { ...prev };
+                    if (emailError) next.email = emailError;
+                    else delete next.email;
+                    return next;
+                });
+            }
 
             if (numericFields.includes(id)) {
                 newValue = String(newValue).replace(/\D/g, '');
@@ -460,7 +470,6 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
         };
         const handleSearchEmpresaCertificado = async () => {
             setLoadingCertificateSearch(true);
-
             try {
                 const certificadoData = await handleSearchCertificate(
                     empresa?.certificado_digital ?? '',
@@ -485,10 +494,16 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
 
             if (isLoadingBtnCreated) return;
 
+            const emailError = getEmpresaEmailError(empresa.email);
+            if (emailError) {
+                setErrors((prev) => ({ ...prev, email: emailError }));
+                return;
+            }
+
             setIsLoadingBtnCreated(true);
 
             try {
-                const data = { ...empresa };
+                const data = { ...empresa, email: empresa.email?.trim() ?? '' };
 
                 if (data.cnpj) {
                     data.cnpj = data.cnpj.replace(/\D/g, '');
@@ -608,6 +623,7 @@ const EmpresaFormContainer = forwardRef<EmpresaFormRef, EmpresaFormProps>(
             !empresa.inscricao_municipal ||
             !empresa.codigo_regime_tributario ||
             (TELEFONE_OBRIGATORIO && !empresa.telefone) ||
+            !empresa.email?.trim() ||
             !empresa.endereco ||
             !empresa.serie_emissao_nfse ||
             !empresa.proximo_numero_rps ||

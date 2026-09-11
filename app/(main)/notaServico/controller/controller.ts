@@ -20,6 +20,22 @@ type PendingDownloadTarget = {
     cleanup: () => void;
 };
 
+const logNfseEmissionBackendError = (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+        console.error('[notaServico] Falha do backend ao emitir NFS-e:', {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            method: error.config?.method?.toUpperCase(),
+            url: error.config?.url,
+            response: error.response?.data,
+            message: error.message
+        });
+        return;
+    }
+
+    console.error('[notaServico] Falha inesperada ao emitir NFS-e:', error);
+};
+
 
 const extractBackendErrorMessage = (data: any, fallback: string): string => {
     if (!data) {
@@ -642,15 +658,20 @@ export const createdNotaServico = async (nfs: NfsEntity, msgs: any, router: AppR
             ...nfs,
             servico: {
                 ...nfs.servico,
+                codigo_nbs: nfs.servico?.codigo_nbs?.replace(/\D/g, ''),
                 valores: valoresNormalizados.copyWith({
                     valor_servico: valorServicoNormalizado
                 })
             }
         };
+        console.log(' enviado para emitir NFS-e:', { nfse: dataNfse });
         const response = await api.post('/nfse', { nfse: dataNfse });
         console.log('retorno:', response.data);
         const statusNota = extractNotaServicoStatus(response.data);
         const notaAutorizada = statusNota === 'AUTORIZADA' ? extractNotaServicoPayload(response.data) : null;
+        if (statusNota === 'REJEITADA') {
+            console.error('[notaServico] NFS-e rejeitada pelo backend:', response.data);
+        }
         if (statusNota === 'REJEITADA' && redirectAfterSave) {
             persistNotaServicoFeedback({
                 severity: 'error',
@@ -698,6 +719,7 @@ export const createdNotaServico = async (nfs: NfsEntity, msgs: any, router: AppR
             redirected: false
         };
     } catch (error: any) {
+        logNfseEmissionBackendError(error);
         let detailMessage = 'Ocorreu um erro ao cadastrar a NFS-e.';
         if (error.response) {
             detailMessage = extractBackendErrorMessage(error.response.data, 'Ocorreu um erro ao cadastrar a NFS-e.');
@@ -835,7 +857,8 @@ export const visualizarPdfNota = async (nota: NfsEntity, msgs: React.RefObject<M
         });
     }
 };
-export const exportarPdfNotasServico = async (
+const exportarNotasServico = async (
+    formato: 'pdf' | 'xml',
     payload: ExportarPdfNfsePayload,
     msgs: React.RefObject<Messages | null>,
     onProgress?: (progress: number | null) => void
@@ -849,13 +872,14 @@ export const exportarPdfNotasServico = async (
             id_empresa: payload.id_empresa ?? null,
             id_cliente: payload.id_cliente ?? null
         };
-        console.log('[notaServico] Exportar PDF - payload enviado', {
-            endpoint: '/nfse/exportar-pdf',
+        const endpoint = `/nfse/exportar-${formato}`;
+        console.log(`[notaServico] Exportar ${formato.toUpperCase()} - payload enviado`, {
+            endpoint,
             originalPayload: payload,
             requestPayload
         });
         onProgress?.(0);
-        const response = await api.post('/nfse/exportar-pdf', requestPayload, {
+        const response = await api.post(endpoint, requestPayload, {
             responseType: 'blob',
             onDownloadProgress: (progressEvent) => {
                 if (!progressEvent.total || progressEvent.total <= 0) {
@@ -872,12 +896,13 @@ export const exportarPdfNotasServico = async (
             }
         });
         const blob = new Blob([response.data], {
-            type: 'application/pdf'
+            type: formato === 'pdf' ? 'application/pdf' : response.headers['content-type'] || 'application/xml'
         });
-        triggerBlobDownload(blob, 'notas-servico.pdf');
+        const extensao = formato === 'xml' && blob.type.includes('zip') ? 'zip' : formato;
+        triggerBlobDownload(blob, `notas-servico.${extensao}`);
         onProgress?.(100);
     } catch (error) {
-        console.error('Erro ao exportar PDF das notas:', error);
+        console.error(`Erro ao exportar ${formato.toUpperCase()} das notas:`, error);
         if (axios.isAxiosError(error) && error.response?.status === 404) {
             msgs.current?.show({
                 severity: 'warn',
@@ -889,7 +914,7 @@ export const exportarPdfNotasServico = async (
         if (axios.isAxiosError(error) && error.response?.status === 400) {
             const detailMessage = await extractAxiosBlobErrorMessage(
                 error,
-                'Nao foi possivel exportar o PDF com os filtros informados.'
+                `Nao foi possivel exportar o ${formato.toUpperCase()} com os filtros informados.`
             );
             msgs.current?.show({
                 severity: 'warn',
@@ -903,8 +928,19 @@ export const exportarPdfNotasServico = async (
         msgs.current?.show({
             severity: 'error',
             summary: 'Atenção:',
-            detail: 'Ocorreu um erro inesperado ao gerar o PDF. Tente novamente.',
+            detail: `Ocorreu um erro inesperado ao gerar o ${formato.toUpperCase()}. Tente novamente.`,
             life: 5000
         });
     }
 };
+export const exportarPdfNotasServico = (
+    payload: ExportarPdfNfsePayload,
+    msgs: React.RefObject<Messages | null>,
+    onProgress?: (progress: number | null) => void
+) => exportarNotasServico('pdf', payload, msgs, onProgress);
+
+export const exportarXmlNotasServico = (
+    payload: ExportarPdfNfsePayload,
+    msgs: React.RefObject<Messages | null>,
+    onProgress?: (progress: number | null) => void
+) => exportarNotasServico('xml', payload, msgs, onProgress);
