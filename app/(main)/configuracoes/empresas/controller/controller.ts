@@ -1,13 +1,14 @@
+'use client';
 import api from '@/app/services/api';
 import '@/app/styles/styledGlobal.css';
 import { getToken } from '@/app/services/token';
 import type { PreloadedEmpresaData } from '../types/empresa';
 import { CompanyEntity } from '../../../../entity/CompanyEntity';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
 import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
 import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 const BASE64_IMAGE_DATA_URL_REGEX = /^data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/i;
 const IMAGE_URL_REGEX = /^(https?:\/\/|blob:|\/)/i;
 const RAW_BASE64_REGEX = /^[A-Za-z0-9+/=\s]+$/;

@@ -472,14 +472,15 @@ function CustomMultiSelect({
                                         key={itemKey ?? JSON.stringify(item)}
                                         label={truncatedLabel}
                                         removable
-                                        onRemove={() =>
+                                        onRemove={() => {
                                             onChange({
                                                 value: selectedItems.filter((i: any) => {
                                                     const currentKey = dataKey ? i?.[dataKey] : i?.id;
                                                     return (currentKey ?? JSON.stringify(i)) !== (itemKey ?? JSON.stringify(item));
                                                 })
-                                            })
-                                        }
+                                            });
+                                            return true;
+                                        }}
                                         className="selected-chip mt-2"
                                     />
                                 );

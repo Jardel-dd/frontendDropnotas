@@ -9,9 +9,9 @@ import { VendedorEntity } from '@/app/entity/VendedorEntity';
 import { FormaPagamentoEntity, Formas_recebimento } from '@/app/entity/FormaPagamento';
 import { ServiceOrderEntity } from '@/app/entity/ServiceOrderEntity';
 import { OrdemServicoParams } from '../types/ordemServico';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 const getEmptyOrdemServicoList = (pageNumber = 0, pageSize = 10) => ({
     content: [],

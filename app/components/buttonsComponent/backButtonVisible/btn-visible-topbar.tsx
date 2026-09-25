@@ -28,7 +28,7 @@ const BackButtonVisib: React.FC = () => {
         '/ordemServicos': 'Ordens de Serviços',
         '/contrato/created': 'Novo Contrato',
         '/ordemServicos/created': 'Ordens de Serviços',
-        '/notaServico': 'Notas de Serviços',
+        '/notaServico': 'NFS-e',
         '/notaServico/created': 'Emitir Nota de Serviço',
         '/relatorios/servicos': 'Relatório de Serviços',
         '/relatorios/recebimentos': 'Relatório de Recebimentos',

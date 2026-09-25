@@ -145,7 +145,7 @@ export function ListarNotaServico({
                 {downloadXmlButton(rowData, msgs)}
                 {downloadPdfButton(rowData, msgs)}
                 {downloadArquivosButton(rowData, msgs)}
-                {/* {canCancelNota && <CancelarNfs nota={rowData} msgs={msgs} />} */}
+                {canCancelNota && <CancelarNfs nota={rowData} msgs={msgs} />} 
             </>
         );
     };

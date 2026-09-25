@@ -7,9 +7,9 @@ import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { ContratoEntity } from '@/app/entity/ContratoEntity';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
 import { FormaPagamentoEntity } from '@/app/entity/FormaPagamento';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 export const listContrato = async (
     listPaginationContratos: Record<string, any>,
     listarInativos: boolean,

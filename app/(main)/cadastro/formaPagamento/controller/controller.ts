@@ -2,9 +2,9 @@
 import axios from "axios";
 import api from "@/app/services/api";
 import { FormaPagamentoEntity } from "@/app/entity/FormaPagamento";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
 import { remocaoCaractereFiltro } from "@/app/shared/removeCaracter/controller";
 import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export const listFormaPagamento = async (
     listPaginationFormaPagamento: Record<string, any>,

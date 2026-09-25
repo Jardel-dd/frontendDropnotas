@@ -25,6 +25,7 @@ export class CompanyEntity {
     proximo_numero_rps!: number | null;
     proximo_numero_lote!: number | null;
     aliquota_iss!: number | null;
+    percentual_tributos_simples_nacional?: number | null;
     cnae_fiscal!: string;
     prestacao_sus!: boolean;
     regime_especial_tributacao!: string;
@@ -71,6 +72,7 @@ export class CompanyEntity {
         proximo_numero_rps,
         proximo_numero_lote,
         aliquota_iss,
+        percentual_tributos_simples_nacional,
         cnae_fiscal,
         prestacao_sus,
         regime_especial_tributacao,
@@ -117,6 +119,7 @@ export class CompanyEntity {
         proximo_numero_rps: number | null;
         proximo_numero_lote: number | null;
         aliquota_iss: number | null;
+        percentual_tributos_simples_nacional?: number | null;
         cnae_fiscal: string;
         prestacao_sus: boolean;
         regime_especial_tributacao: string;
@@ -158,6 +161,7 @@ export class CompanyEntity {
             proximo_numero_rps,
             proximo_numero_lote,
             aliquota_iss,
+            percentual_tributos_simples_nacional,
             cnae_fiscal,
             prestacao_sus,
             regime_especial_tributacao,
@@ -204,6 +208,7 @@ export class CompanyEntity {
         proximo_numero_rps,
         proximo_numero_lote,
         aliquota_iss,
+        percentual_tributos_simples_nacional,
         cnae_fiscal,
         prestacao_sus,
         regime_especial_tributacao,
@@ -251,6 +256,7 @@ export class CompanyEntity {
         proximo_numero_rps?: number | string | null;
         proximo_numero_lote?: number | string | null;
         serie_emissao_nfse?: string;
+        percentual_tributos_simples_nacional?: number | string | null;
         cnae_fiscal?: string;
         prestacao_sus?: boolean;
         regime_especial_tributacao?: string;
@@ -295,6 +301,7 @@ export class CompanyEntity {
             proximo_numero_rps: proximo_numero_rps != null ? Number(proximo_numero_rps) : this.proximo_numero_rps,
             proximo_numero_lote: proximo_numero_lote != null ? Number(proximo_numero_lote) : this.proximo_numero_lote,
             serie_emissao_nfse: serie_emissao_nfse ?? this.serie_emissao_nfse,
+            percentual_tributos_simples_nacional: percentual_tributos_simples_nacional != null ? Number(percentual_tributos_simples_nacional) : this.percentual_tributos_simples_nacional,
             cnae_fiscal: cnae_fiscal ?? this.cnae_fiscal,
             prestacao_sus: prestacao_sus ?? this.prestacao_sus,
             regime_especial_tributacao: regime_especial_tributacao ?? this.regime_especial_tributacao,

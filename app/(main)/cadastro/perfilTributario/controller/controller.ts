@@ -1,25 +1,13 @@
 import axios from 'axios';
 import api from '@/app/services/api';
-import { TableService } from '@/app/entity/TableServiceEntity';
-import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { PerfilTributarioEntity } from '@/app/entity/perfilTributarioEntity';
 import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
 import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
-import { fetchAllTabelaServico } from '@/app/components/fetchAll/listAllTableService/controller';
-import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
-import { fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
-import {
-    normalizeEmptyValuesToNull,
-    type PerfilTributarioRecommendations,
-    type PreloadedPerfilTributarioData
-} from '../types/perfilTributario';
-import { fetchFilteredCodigoNBS, findCodigoNBS } from '@/app/components/fetchAll/listAllCodigoNBS/controller';
-import { fetchFilteredClassificacaoTributaria, findClassificacaoTributariaByCodigo } from '@/app/components/fetchAll/listAllClassficacaoTributaria/controller';
+import {normalizeEmptyValuesToNull,type PerfilTributarioRecommendations,} from '../types/perfilTributario';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 const PERFIL_TRIBUTARIO_LOG_PREFIX = '[perfilTributario]';
-
 export const listPerfilTributario = async (
     listPaginationServicos: Record<string, any>,
     listarInativos: boolean,

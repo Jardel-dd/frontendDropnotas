@@ -287,7 +287,7 @@ function SignUp() {
                         </div>
                     </div>
                      <div className='ml-2 mr-2'>
-                         <Button
+                         {/* <Button
                             type="submit"
                             label={isLoadingBtnCreated ? 'Criando conta...' : 'Criar conta'}
                             icon={isLoadingBtnCreated ? 'pi pi-spin pi-spinner' : undefined}
@@ -302,7 +302,7 @@ function SignUp() {
                                 !userConta.senha ||
                                 !confirmPassword
                             }
-                        /> 
+                        />  */}
                        <Button
                             type="button"
                             label="Clique aqui e fale com nosso time comercial para garantir uma condição especial ao solicitar seu teste."

@@ -878,6 +878,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                     <div className="scrollable-container shared-form-content">
                         <div className="custom-flex-col">
                             <SectionCard
+                                className="contrato-section-card"
                                 icon={<i className="pi pi-file-edit" />}
                                 title="Dados do Contrato"
                                 collapsible
@@ -889,6 +890,7 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                                 </SectionGrid>
                             </SectionCard>
                             <SectionCard
+                                className="contrato-section-card"
                                 icon={<i className="pi pi-link" />}
                                 title="Relações"
                                 collapsible

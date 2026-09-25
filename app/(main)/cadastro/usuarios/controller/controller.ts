@@ -4,8 +4,8 @@ import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { EnderecoEntity } from '@/app/entity/enderecoEntity';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 export const listUsuario = async (
     listPaginationUserConta: Record<string, any>,
     listarInativos: boolean,

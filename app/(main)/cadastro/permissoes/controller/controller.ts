@@ -5,8 +5,8 @@ import { SetErrorsFn } from '../types/perfilUsuario';
 import { TreeCheckboxSelectionKeys } from 'primereact/tree';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { getFormattedPermissions, permissionsMap } from './mapPerfilUser';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 export const listPerfilUser = async (
     listPaginationPerfilUser: Record<string, any>,
     listarInativos: boolean,
@@ -133,7 +133,8 @@ export const fetchPerfilUserByID = async (
                 }
                 if (isChecked) {
                     acc[key] = { checked: true };
-                    const childrenKeys = Object.keys(permissionsMap).filter(k => k.startsWith(parentKey));
+                    // O hífen impede que o grupo "1" inclua, por engano, os grupos "10" e "11".
+                    const childrenKeys = Object.keys(permissionsMap).filter((key) => key.startsWith(`${parentKey}-`));
                     const allChildrenChecked = childrenKeys.every(childKey => {
                         const perm = permissionsMap[childKey];
                         return perm !== undefined && data[perm];

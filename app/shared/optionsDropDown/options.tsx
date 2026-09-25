@@ -104,12 +104,13 @@ export const permissoes: TreeNode[] = [
     },
     {
         key: '10',
-        label: 'Nota Fiscal - (NFSE)',
+        label: 'Nota Fiscal - (NFS-e)',
         children: [
-            { key: '10-0', label: 'Cadastrar Nota Fiscal' },
-            { key: '10-1', label: 'Alterar Nota Fiscal' },
+            { key: '10-0', label: 'Emitir Nota Fiscal' },
+            { key: '10-1', label: 'Corrigir Nota Fiscal' },
             { key: '10-2', label: 'Desativar  Nota Fiscal' },
-            { key: '10-3', label: 'Pesquisar  Nota Fiscal' }
+            { key: '10-3', label: 'Pesquisar  Nota Fiscal' },
+            { key: '10-4', label: 'Cancelar  Nota Fiscal' }
         ]
     },
     {

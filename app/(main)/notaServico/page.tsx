@@ -281,6 +281,7 @@ const NotaServico: React.FC = () => {
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showExportPdfDialog, setShowExportPdfDialog] = useState(false);
+    const [showExportOptionsDialog, setShowExportOptionsDialog] = useState(false);
     const [exportFormat, setExportFormat] = useState<'PDF' | 'XML'>(getExportPdfProgressState().formato);
     const [showAuthorizedNotaDialog, setShowAuthorizedNotaDialog] = useState(false);
     const [pendingNotaServicoFeedback, setPendingNotaServicoFeedback] = useState<{
@@ -716,6 +717,10 @@ const NotaServico: React.FC = () => {
         if (!canSearchNotaServico || loadingExportPdf) return;
         setExportFormat(formato);
         setShowExportPdfDialog(true);
+    };
+    const handleSelectExportFormat = (formato: 'PDF' | 'XML') => {
+        setShowExportOptionsDialog(false);
+        handleOpenExportPdfDialog(formato);
     };
     const handleCloseExportPdfDialog = () => {
         if (loadingExportPdf) return;
@@ -1524,9 +1529,9 @@ const NotaServico: React.FC = () => {
                 {isMobile && (
                     <>
                         <div className="card styled-container-main-all-routes p-2">
-                            <div className="grid formgrid p-2 w-full" style={{ maxHeight: '74px' }}>
+                            <div className="grid formgrid p-2 w-full nota-servico-mobile-toolbar">
                                     {canSearchNotaServico && (
-                                        <div className="col-7 mb-0 lg:col-4  ">
+                                        <div className="col mb-0 nota-servico-mobile-search">
                                             <Input
                                                 label="Digite o nome Cliente / N° da NFS-e"
                                                 outlined={true}
@@ -1542,26 +1547,7 @@ const NotaServico: React.FC = () => {
                                             />
                                         </div>
                                     )}
-                                    <div className={`${canSearchNotaServico} mb-0 lg:col-3 `}>
-                                        <div className="nota-servico-mobile-buttons" style={{ position: 'relative' }}>
-                                            {canUpdateNotaServico && selectedNotas.length > 0 && (
-                                                <Button
-                                                    icon="pi pi-send"
-                                                    label={`Emitir selecionadas (${selectedNotas.length})`}
-                                                    onClick={handleEmitirNotas}
-                                                    outlined
-                                                    severity="success"
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: '-10px',
-                                                        width: '200px',
-                                                        right: '0',
-                                                        height: '28px',
-                                                        boxShadow: 'none'
-                                                    }}
-                                                />
-                                            )}
-                                        </div>
+                                    <div className="col-fixed mb-0 nota-servico-mobile-toolbar-actions">
                                         <div className="container-BTN-Filter-Created nota-servico-mobile-actions">
                                             {canSearchNotaServico && (
                                                 <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile" activeFilterCount={activeFilterCount}>
@@ -1646,35 +1632,36 @@ const NotaServico: React.FC = () => {
                                                             </div>
                                                         )}
                                                         <Button
-                                                            label=""
-                                                            icon="pi pi-file-pdf"
+                                                            icon="pi pi-download"
                                                             severity="secondary"
                                                             outlined
-                                                            tooltip="Exportar PDF"
-                                                            aria-label="Exportar PDF"
-                                                            loading={loadingExportPdf && exportFormat === 'PDF'}
+                                                            tooltip="Exportar"
+                                                            aria-label="Exportar"
+                                                            loading={loadingExportPdf}
                                                             disabled={loadingExportPdf}
-                                                            onClick={() => handleOpenExportPdfDialog('PDF')}
-                                                        />
-                                                        <Button
-                                                            icon="pi pi-code"
-                                                            severity="secondary"
-                                                            outlined
-                                                            tooltip="Exportar XML"
-                                                            aria-label="Exportar XML"
-                                                            loading={loadingExportPdf && exportFormat === 'XML'}
-                                                            disabled={loadingExportPdf}
-                                                            onClick={() => handleOpenExportPdfDialog('XML')}
+                                                            onClick={() => setShowExportOptionsDialog(true)}
                                                         />
                                                     </div>
                                                 )}
                                                 {canCreateNotaServico && <Button label="" icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />}
                                             </div>
                                         </div>
+                                        {canUpdateNotaServico && selectedNotas.length > 0 && (
+                                            <div className="nota-servico-mobile-batch-action">
+                                                <Button
+                                                    icon="pi pi-send"
+                                                    label={`Emitir selecionadas (${selectedNotas.length})`}
+                                                    onClick={handleEmitirNotas}
+                                                    outlined
+                                                    severity="success"
+                                                    style={{boxShadow:"none"}}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                             </div>
                             <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
-                            <div ref={mobileListWrapperRef} className="nota-servico-mobile-list-wrapper mt-3">
+                            <div ref={mobileListWrapperRef} className="nota-servico-mobile-list-wrapper mt-2">
                                 {canSearchNotaServico ? (
                                     <ListarNotaServico
                                         loading={loading}
@@ -2125,6 +2112,34 @@ const NotaServico: React.FC = () => {
                         }
                     </div>
                 </Dialog>
+                <Dialog
+                    header="Exportar NFS-e"
+                    visible={showExportOptionsDialog}
+                    onHide={() => setShowExportOptionsDialog(false)}
+                    draggable={false}
+                    modal
+                    style={{ width: 'min(28rem, calc(100vw - 2rem))' }}
+                >
+                    <div className="flex flex-column gap-3 pt-2">
+                        <span className="text-600">Escolha o formato do arquivo para exportação.</span>
+                        <Button
+                            label="Exportar PDF"
+                            icon="pi pi-file-pdf"
+                            severity="secondary"
+                            outlined
+                            className="w-full justify-content-start"
+                            onClick={() => handleSelectExportFormat('PDF')}
+                        />
+                        <Button
+                            label="Exportar XML"
+                            icon="pi pi-code"
+                            severity="secondary"
+                            outlined
+                            className="w-full justify-content-start"
+                            onClick={() => handleSelectExportFormat('XML')}
+                        />
+                    </div>
+                </Dialog>
                 <DialogFilter
                     header={`Confirmar exportação ${exportFormat}`}
                     visible={showExportPdfDialog}
@@ -2159,6 +2174,8 @@ const NotaServico: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                       <span className="text-600 text-sm">É necessário selecionar uma Data inicial e Data final para exportação.</span>
+
                     </div>
                 </DialogFilter>
                 <DialogFilter
