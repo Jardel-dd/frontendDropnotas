@@ -2,13 +2,13 @@ import axios from 'axios';
 import api from '@/app/services/api';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { ServiceEntity } from '@/app/entity/ServiceEntity';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { PerfilTributarioEntity } from '@/app/entity/perfilTributarioEntity';
 import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
 import { buildMobilePickerPageResult } from '@/app/shared/PageMobile/pageMobile';
 import { fetchCompanyDropdownByID } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { fetchPerfilTributarioByID } from '@/app/(main)/cadastro/perfilTributario/controller/controller';
 import { normalizeEmptyValuesToNull, type PreloadedServicoData } from '../types/servico';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 const normalizeServicoIds = (value: unknown): number[] => {
     if (!Array.isArray(value)) {

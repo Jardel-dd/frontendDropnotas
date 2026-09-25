@@ -2,9 +2,9 @@
 import axios from "axios";
 import api from "@/app/services/api";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
 import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
 import { remocaoCaractereFiltro } from "@/app/shared/removeCaracter/controller";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 export const updateVendedor = async (
     vendedorId: string,
     vendedor: VendedorEntity,

@@ -6,6 +6,7 @@ import LoadingScreen from '@/app/loading';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
+import { Dropdown } from 'primereact/dropdown';
 import { useRouter } from 'next/navigation';
 import { Divider } from 'primereact/divider';
 import { Skeleton } from 'primereact/skeleton';
@@ -321,17 +322,36 @@ export const toggleStatusOrDeleteButton = <T,>({ entity, onToggle, entityType }:
 export function CancelarNfs({ nota, msgs }: CancelarNfsActionProps) {
     const [visible, setVisible] = useState(false);
     const [motivo, setMotivo] = useState('');
+    const [codigoMotivo, setCodigoMotivo] = useState('OUTROS');
+
+    const codigosMotivo = [
+        { label: 'ERRO_EMISSAO', value: 'ERRO_EMISSAO' },
+        { label: 'SERVICO_NAO_PRESTADO', value: 'SERVICO_NAO_PRESTADO' },
+        { label: 'OUTROS', value: 'OUTROS' }
+    ];
+
+    const resetCancelamento = () => {
+        setMotivo('');
+        setCodigoMotivo('OUTROS');
+    };
+
     const handleCancelar = async () => {
         if (!nota?.id) return;
         try {
-            await api.post(`/nfse/cancelar`, { id: nota.id, motivo });
+            await api.post('/nfse/cancelar', undefined, {
+                params: {
+                    idNFSe: nota.id,
+                    motivo,
+                    codigoMotivo
+                }
+            });
             msgs.current?.show({
                 severity: 'success',
                 summary: 'Sucesso:',
                 detail: 'NFS-e cancelada com sucesso.'
             });
             setVisible(false);
-            setMotivo('');
+            resetCancelamento();
         } catch {
             msgs.current?.show({
                 severity: 'error',
@@ -344,7 +364,17 @@ export function CancelarNfs({ nota, msgs }: CancelarNfsActionProps) {
         <>
             <Button icon="pi pi-times" tooltip="Cancelar" className="p-button-text bottom-All-plus-datatableDetails" style={{ color: 'red', boxShadow: 'none' }} onClick={() => setVisible(true)} />
 
-            <Dialog header="Cancelar NFS" visible={visible} style={{ width: '60rem' }} draggable={false} modal onHide={() => setVisible(false)}>
+            <Dialog
+                header="Cancelar NFS"
+                visible={visible}
+                style={{ width: '60rem' }}
+                draggable={false}
+                modal
+                onHide={() => {
+                    setVisible(false);
+                    resetCancelamento();
+                }}
+            >
                 <div className="grid formgrid">
                     <div className="col-12 mb-1 lg:col-5">
                         <label>Nome da Empresa:</label>
@@ -365,13 +395,32 @@ export function CancelarNfs({ nota, msgs }: CancelarNfsActionProps) {
                         <label htmlFor="motivo">Motivo do Cancelamento</label>
                         <InputTextarea id="motivo" rows={4} value={motivo} onChange={(e) => setMotivo(e.target.value)} label="Motivo do Cancelamento" />
                     </div>
+                    <div className="grid">
+                        <div className="col-12 field">
+                            <label htmlFor="codigoMotivo">Código do Motivo</label>
+                            <Dropdown
+                                id="codigoMotivo"
+                                value={codigoMotivo}
+                                options={codigosMotivo}
+                                onChange={(e) => setCodigoMotivo(e.value)}
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <Divider />
-
                 <div className="flex justify-between gap-2 mt-4 w-full" style={{ padding: '0 1rem' }}>
-                    <Button label="Cancelar" className="p-button-danger" onClick={handleCancelar} disabled={!motivo.trim()} />
-                    <Button label="Voltar" className="p-button" outlined onClick={() => setVisible(false)} />
+                    <Button label="Cancelar" severity='secondary' outlined onClick={handleCancelar} disabled={!motivo.trim()} />
+                    <Button
+                        label="Voltar"
+                        severity='success'
+                        outlined
+                        onClick={() => {
+                            setVisible(false);
+                            resetCancelamento();
+                        }}
+                    />
                 </div>
             </Dialog>
         </>

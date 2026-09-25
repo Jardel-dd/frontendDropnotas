@@ -11,7 +11,7 @@ import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { PerfilUser } from '@/app/entity/PerfilUsuarioEntity';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
 import { validateEmail } from '@/app/utils/validateForms/validateEmail';
-import { validateFieldsUserConta } from '../controller/validation';
+import { getUsuarioFormErrors, validateFieldsUserConta } from '../controller/validation';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { EmpresaFormRef } from '@/app/(main)/configuracoes/empresas/types/empresa';
 import FormPermissoesCreated from '@/app/(main)/cadastro/permissoes/form/controller';
@@ -236,6 +236,12 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
         };
 
         const handleSubmit = async (event?: React.FormEvent) => {
+            event?.preventDefault();
+
+            if (!validateUsuarioForm()) {
+                return;
+            }
+
             try {
                 if (isEditMode && userContaID) {
                     await updateUsuario(userContaID, userConta, confirmPassword, selectedEmpresa, selectedPerfilUser, setErrors, msgs, router, setUserConta, setSelectedEmpresa, setSelectedPerfilUser);
@@ -330,22 +336,18 @@ export const UsuarioFormContainer = forwardRef<UsuarioFormRef, UsuarioFormProps>
             return <LoadingScreen loadingText="Carregando informações do usuário selecionado..." />;
         }
 
-        const hasSelectedEmpresa = selectedEmpresa.length > 0 || (userConta.id_empresas_acesso?.length ?? 0) > 0;
-        const hasRequiredPassword =
-            Boolean(userContaID) || Boolean(userConta.senha?.trim());
-        const hasRequiredConfirmPassword =
-            Boolean(userContaID) || Boolean(confirmPassword.trim());
+        const visibleFieldErrors = getUsuarioFormErrors(
+            userConta,
+            confirmPassword,
+            selectedPerfilUser,
+            selectedEmpresa,
+            userContaID ?? undefined
+        );
         const isDialogMode = Boolean(showBTNPGCreatedDialog || onClose || onBackClick);
         const isSubmitDisabled =
             stateDisableBtnCreatedUserConta ||
             isLoadingBtnCreated ||
-            Object.keys(errors).length > 0 ||
-            !userConta.nome?.trim() ||
-            !userConta.email?.trim() ||
-            !hasRequiredPassword ||
-            !hasRequiredConfirmPassword ||
-            !selectedPerfilUser ||
-            !hasSelectedEmpresa;
+            Object.keys(visibleFieldErrors).length > 0;
 
         return (
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>

@@ -1,9 +1,9 @@
 'use client';
 import axios from 'axios';
 import api from '@/app/services/api';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { CategoryContratosEntity } from '@/app/entity/CategoryContratEntity';
 import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 export const updateCategoriaContrato = async (
     categoriaContratoId: string,
     categoriaContrato: CategoryContratosEntity,

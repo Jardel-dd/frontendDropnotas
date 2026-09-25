@@ -94,6 +94,7 @@ const Empresas: React.FC = () => {
             proximo_numero_rps: 0,
             proximo_numero_lote: 0,
             aliquota_iss: 0,
+            percentual_tributos_simples_nacional: 0,
             cnae_fiscal: '',
             prestacao_sus: false,
             regime_especial_tributacao: '',

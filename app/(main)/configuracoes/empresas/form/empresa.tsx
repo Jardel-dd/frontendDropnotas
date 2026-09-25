@@ -116,6 +116,10 @@ export function EmpresaFields({
         'certificado_digital',
         'senha_certificado_digital'
     ]);
+    const exibePercentualTributosSimplesNacional = [
+        'SIMPLES_NACIONAL',
+        'SIMPLES_NACIONAL_EXCESSO_SUBLIMITE'
+    ].includes(empresa.codigo_regime_tributario);
     return (
         <div className="scrollable-container shared-form-content">
             <TabView className={`shared-form-tabs ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
@@ -325,6 +329,23 @@ export function EmpresaFields({
                         <div className="col-12  lg:col-3 ">
                             <CustomInputNumber value={empresa.aliquota_iss?.toString() ?? 0} onChange={onChange} label="Alíquota ISS" id="aliquota_iss"  hasError={!!errors.aliquota_iss} errorMessage={errors.aliquota_iss} topLabel="Alíquota ISS:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
                         </div>
+                        {exibePercentualTributosSimplesNacional && (
+                            <div className="col-12 lg:col-3">
+                                <CustomInputNumber
+                                    id="percentual_tributos_simples_nacional"
+                                    value={empresa.percentual_tributos_simples_nacional ?? 0}
+                                    onChange={onNumberChange}
+                                    label="Percentual Tributos Simples Nacional"
+                                    useRightButton
+                                    outlined
+                                    hasError={!!errors.percentual_tributos_simples_nacional}
+                                    errorMessage={errors.percentual_tributos_simples_nacional}
+                                    topLabel="Percentual Tributos Simples Nacional:"
+                                    showTopLabel
+                                    iconLeft={<IconPorcentagem isDarkMode={false} />}
+                                />
+                            </div>
+                        )}
                         <div className="col-12  lg:col-3 ">
                             <CustomInputNumber id="aliquota_pis" value={empresa.aliquota_pis || 0} onChange={onNumberChange} label="Alíquota PIS" useRightButton outlined hasError={!!errors.aliquota_pis} errorMessage={errors.aliquota_pis} topLabel="Alíquota PIS:" showTopLabel required iconLeft={<IconPorcentagem isDarkMode={false} />} />
                         </div>

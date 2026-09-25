@@ -6,9 +6,9 @@ import { PessoaEntity } from "@/app/entity/PessoaEntity";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
 import { ContratoEntity } from "@/app/entity/ContratoEntity";
 import { searchByCep } from "@/app/utils/searchCEP/controller";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
 import { remocaoCaractereFiltro } from "@/app/shared/removeCaracter/controller";
 import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export const listPessoa = async (
     listPaginationClientesFornecedores: Record<string, any>,

@@ -34,6 +34,7 @@ export default function CriarEmpresas() {
             proximo_numero_rps: null,
             proximo_numero_lote: null,
             aliquota_iss: null,
+            percentual_tributos_simples_nacional: 0,
             cnae_fiscal: '',
             prestacao_sus: false,
             regime_especial_tributacao: '',

@@ -3,10 +3,10 @@ import api from '@/app/services/api';
 import { getToken } from '@/app/services/token';
 import { Messages } from 'primereact/messages';
 import { NfsEntity, PrepararNfs } from '@/app/entity/NfsEntity';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { mapDateRangeToParams } from '@/app/components/calendarComponent/controller';
 import { DetalPrestadorValoresEntity } from '@/app/entity/ServiceEntity';
 import { CreatedNotaServicoResult, ExportarPdfNfsePayload, ListNotaServicoParams, NotaFiscalParams, NotaFiscalQueryParams, NotaServicoFeedback } from '../types/notaServico';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 const NOTA_SERVICO_FEEDBACK_KEY = 'notaServicoFeedback';
 const inflightNotaServicoRequests = new Map<string, Promise<any>>();
@@ -895,8 +895,13 @@ const exportarNotasServico = async (
                 onProgress?.(progress);
             }
         });
+        const contentType = response.headers['content-type'];
         const blob = new Blob([response.data], {
-            type: formato === 'pdf' ? 'application/pdf' : response.headers['content-type'] || 'application/xml'
+            type: formato === 'pdf'
+                ? 'application/pdf'
+                : typeof contentType === 'string'
+                    ? contentType
+                    : 'application/xml'
         });
         const extensao = formato === 'xml' && blob.type.includes('zip') ? 'zip' : formato;
         triggerBlobDownload(blob, `notas-servico.${extensao}`);

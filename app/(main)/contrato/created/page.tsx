@@ -1,5 +1,6 @@
 'use client';
 import 'primeicons/primeicons.css';
+import '../styles.css';
 import '@/app/styles/styledGlobal.css';
 import { useRef, useState } from 'react';
 import { Messages } from 'primereact/messages';

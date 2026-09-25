@@ -2,10 +2,10 @@ import api from '@/app/services/api';
 import { LoginResponse } from '../page';
 import { authLogin } from '../../signIn/controller/controller';
 import { searchByCNPJ } from '@/app/utils/search/searchCNPJ/controller';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { CreatedAccountEntity } from '../../../../entity/CreatedAccountEntity';
 import { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { trackLead } from '@/app/components/analytics/metaPixel';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 export const create = async (conta: CreatedAccountEntity, router: AppRouterInstance, msgs: any): Promise<LoginResponse> => {
     const requestData = {

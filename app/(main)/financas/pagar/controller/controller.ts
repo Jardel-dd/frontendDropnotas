@@ -1,8 +1,7 @@
 'use client';
 import api from '@/app/services/api';
 import { ContasPagarEntity } from '@/app/entity/contasPagarEntity';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
-
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 const buildContasPagarQuery = (
     listPaginationContasPagar: Record<string, any>,
     listarInativos: boolean,

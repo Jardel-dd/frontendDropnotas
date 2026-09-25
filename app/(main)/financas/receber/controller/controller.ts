@@ -1,8 +1,7 @@
 'use client';
-
 import api from '@/app/services/api';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { ContasReceberEntity } from '@/app/entity/contasReceberEntity';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 const buildContasReceberQuery = (
     listPaginationContasReceber: Record<string, any>,

@@ -101,12 +101,12 @@ export function ServicoVinculosFields({
                     optionValue="id"
                     optionLabel="nome"
                     initialOptionValue={servico.id_perfil_tributario ?? null}
-                    placeholder="Selecione o perfil tributario"
+                    placeholder="Selecione o perfil Tributário"
                     hasError={!!errors.id_perfil_tributario}
                     errorMessage={errors.id_perfil_tributario}
                     showTopLabel
                     required
-                    topLabel="Perfil tributario:"
+                    topLabel="Perfil Tributário:"
                     autoSelectSingle
                     autoLoadAndSelectSingle
                     loadOnMount={Boolean(servico.id_perfil_tributario)}

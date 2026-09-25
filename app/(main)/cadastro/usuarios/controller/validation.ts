@@ -2,6 +2,48 @@ import { CompanyEntity } from "@/app/entity/CompanyEntity";
 import { PerfilUser } from "@/app/entity/PerfilUsuarioEntity";
 import { UsuarioContaEntity } from "@/app/entity/UsuarioContaEntity";
 
+export const getUsuarioFormErrors = (
+    userConta: UsuarioContaEntity,
+    confirmPassword: string,
+    selectedPerfilUser: PerfilUser | null,
+    selectedEmpresa: CompanyEntity[],
+    userContaID?: string
+): { [key: string]: string } => {
+    const newErrors: { [key: string]: string } = {};
+    const isEditMode = Boolean(userContaID);
+    const hasSelectedEmpresa = Array.isArray(selectedEmpresa) && selectedEmpresa.length > 0;
+    const hasSavedEmpresaIds = Array.isArray(userConta.id_empresas_acesso) && userConta.id_empresas_acesso.length > 0;
+
+    if (!userConta.nome?.trim() || userConta.nome.trim().length < 2) {
+        newErrors.nome = 'O Nome deve ter pelo menos 2 caracteres.';
+    }
+
+    if (!userConta.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userConta.email)) {
+        newErrors.email = 'Email inválido.';
+    }
+
+    // Estes campos só estão visíveis durante o cadastro.
+    if (!isEditMode) {
+        if (!userConta.senha || userConta.senha.length < 6) {
+            newErrors.senha = 'Senha é obrigatória e deve ter pelo menos 6 caracteres.';
+        }
+
+        if (confirmPassword !== userConta.senha) {
+            newErrors.confirmPassword = 'A confirmação de senha deve ser igual à senha.';
+        }
+    }
+
+    if (!selectedPerfilUser) {
+        newErrors.selectedPerfilUser = 'Selecione um Perfil de Usuário .';
+    }
+
+    if (!hasSelectedEmpresa && !hasSavedEmpresaIds) {
+        newErrors.selectedEmpresa = 'Selecione uma Empresa.';
+    }
+
+    return newErrors;
+};
+
 export const validateFieldsUserConta = (
     userConta: UsuarioContaEntity,
     confirmPassword: string,
@@ -11,37 +53,16 @@ export const validateFieldsUserConta = (
     msgs: React.RefObject<any>,
     userContaID?: string
 ): boolean => {
-    let valid = true;
-    let errorMessages: string[] = [];
-    let newErrors: { [key: string]: string } = {};
-    const hasSelectedEmpresa = Array.isArray(selectedEmpresa) && selectedEmpresa.length > 0;
-    const hasSavedEmpresaIds = Array.isArray(userConta.id_empresas_acesso) && userConta.id_empresas_acesso.length > 0;
+    const newErrors = getUsuarioFormErrors(
+        userConta,
+        confirmPassword,
+        selectedPerfilUser,
+        selectedEmpresa,
+        userContaID
+    );
+
     msgs.current?.clear();
-
-
-    if (!userConta.nome || userConta.nome.trim().length < 2) {
-        newErrors.nome = 'O Nome deve ter pelo menos 2 caracteres.';
-        valid = false;
-    } else if (!userConta.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userConta.email)) {
-        newErrors.email = 'Email inválido.';
-        valid = false;
-    } else if (!userContaID && (!userConta.senha || userConta.senha.length < 6)) {
-        newErrors.senha = 'Senha é obrigatória e deve ter pelo menos 6 caracteres.';
-        valid = false;
-    } else if (confirmPassword !== userConta.senha) {
-        newErrors.confirmPassword = 'A confirmação de senha deve ser igual à senha.';
-        valid = false;
-    } else if (!selectedPerfilUser) {
-        newErrors.selectedPerfilUser = 'Selecione um Perfil de Usuário .';
-        valid = false;
-    } else if (!hasSelectedEmpresa && !hasSavedEmpresaIds) {
-        newErrors.selectedEmpresa = 'Selecione uma Empresa.';
-        valid = false;
-    }
     setErrors(newErrors);
-    if (errorMessages.length > 0) {
-        msgs.current?.show({ severity: 'error', summary: 'Atenção:', detail: errorMessages[0] });
-    }
 
-    return valid;
+    return Object.keys(newErrors).length === 0;
 };

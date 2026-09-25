@@ -252,6 +252,50 @@
 
 }
 
+@media (max-width: 768px) {
+    .nota-servico-mobile-toolbar {
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .nota-servico-mobile-search {
+        min-width: 0;
+    }
+
+    .nota-servico-mobile-toolbar-actions,
+    .nota-servico-mobile-toolbar-actions .nota-servico-mobile-actions {
+        width: auto;
+        flex: 0 0 auto;
+    }
+
+    .nota-servico-mobile-toolbar-actions {
+        padding-top: 1.75rem !important;
+        position: relative;
+    }
+
+    .nota-servico-mobile-toolbar-actions .nota-servico-mobile-actions {
+        height: 2.5rem;
+        margin-top: 0;
+        align-items: center;
+    }
+
+    .nota-servico-mobile-batch-action {
+        position: absolute;
+        top: -0.5rem;
+        right: 0;
+    }
+
+    .nota-servico-mobile-batch-action .p-button {
+        height: 2rem;
+        width: 12.5rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        box-shadow: none;
+    }
+}
+
 .nota-servico-list-footer {
     margin-top: auto;
     position: relative;
