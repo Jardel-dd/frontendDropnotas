@@ -77,7 +77,7 @@ const SignIn: React.FC = () => {
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="card styled-container-login-register">
                     <img className="auth-card__logo" alt="dropdown icon" src="/layout/images/logoDropNotasMain.png" />
-                    <p className="text-color-secondary mb-2 mt-3">Informe email e senha nos campos</p>
+                    <p className="text-color-secondary mb-2 mt-3">Informe E-mail e senha nos campos abaixo:</p>
                     <div className="col-12 lg:col-12 ">
                         <Input
                             id="email"
@@ -131,7 +131,7 @@ const SignIn: React.FC = () => {
                         />
                     </div>
                     <div className="text-center mt-4">
-                        Não tem uma conta? {'  '}
+                        Não possui uma conta? {'  '}
                         <Link href="/auth/signUp">
                             <span className="text-primary cursor-pointer">Criar Conta</span>
                         </Link>

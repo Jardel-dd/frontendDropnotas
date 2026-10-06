@@ -314,7 +314,7 @@ const PerfilUsuarios: React.FC = () => {
                         <div className="grid formgrid p-2">
                             <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                 <Input
-                                    label="Pesquisar Descrição"
+                                    label="Descrição"
                                     outlined={true}
                                     id="nome"
                                     useRightButton={true}
@@ -375,7 +375,7 @@ const PerfilUsuarios: React.FC = () => {
                                 <div className="grid formgrid">
                                 <div className="col-12 lg:col-3 container-input-search-all">
                                     <Input
-                                        label="Pesquisar Descrição"
+                                        label="Descrição"
                                         outlined={true}
                                         id="nome"
                                         useRightButton={true}

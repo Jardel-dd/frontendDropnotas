@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     try {
         body = (await request.json()) as MetaEventRequestBody;
     } catch {
-        return jsonNoStore({ message: 'Payload invalido para envio do evento ao Meta.' }, 400);
+        return jsonNoStore({ message: 'Payload inválido para envio do evento ao Meta.' }, 400);
     }
 
     if (!body?.event_name?.trim()) {

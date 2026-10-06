@@ -11,16 +11,16 @@ const hasMinLengthWhenFilled = (value: string | null | undefined, minLength: num
 
 const validateEnderecoPessoa = (pessoa: PessoaEntity): ErrorsMap => {
     if (!pessoa.endereco?.cep || pessoa.endereco.cep.replace(/\D/g, '').length < 8) {
-        return { cep: "Campo deve ter no minimo 8 digitos." };
+        return { cep: "Digite um Cep válido." };
     }
     if (!pessoa.endereco?.logradouro || pessoa.endereco.logradouro.length < 2) {
-        return { logradouro: 'Campo deve ter no minimo 2 caracteres.' };
+        return { logradouro: 'Digite pelo menos 2 caracteres.' };
     }
     if (!pessoa.endereco?.numero || pessoa.endereco.numero.length < 1) {
-        return { numero: "Campo deve ter no minimo 1 digito." };
+        return { numero: "Digite pelo menos 1 dígito." };
     }
     if (!pessoa.endereco?.bairro || pessoa.endereco.bairro.length < 2) {
-        return { bairro: 'Campo deve ter no minimo 2 caracteres.' };
+        return { bairro: 'Digite pelo menos 2 caracteres' };
     }
     if (!pessoa.endereco?.uf) {
         return { uf: 'Este Campo deve ser selecionado.' };
@@ -29,13 +29,13 @@ const validateEnderecoPessoa = (pessoa: PessoaEntity): ErrorsMap => {
         return { municipio: 'Este Campo deve ser selecionado.' };
     }
     if (!pessoa.endereco?.codigo_municipio || pessoa.endereco.codigo_municipio.length < 2) {
-        return { codigo_municipio: 'Campo deve ter no minimo 7 numeros.' };
+        return { codigo_municipio: 'Digite pelo menos 7 dígitos.' };
     }
     if (!pessoa.endereco?.codigo_pais || pessoa.endereco.codigo_pais.length < 2) {
-        return { codigo_pais: 'Campo deve ter no minimo 2 numeros.' };
+        return { codigo_pais: 'Digite pelo menos 2 dígitos.' };
     }
     if (!hasValidEmail(pessoa.email)) {
-        return { email: 'Email invalido. Por favor, digite um email valido.' };
+        return { email: 'E-mail inválido. Por favor, digite um email valido.' };
     }
 
     return {};
@@ -50,16 +50,16 @@ const validateCamposComunsPessoa = (
         return { contribuinte: 'Selecione um Contribuinte.' };
     }
     if (!hasMinLengthWhenFilled(pessoa.inscricao_estadual, 6)) {
-        return { inscricao_estadual: 'Campo deve ter no minimo 6 caracteres.' };
+        return { inscricao_estadual: 'Digite pelo menos 6 caracteres.' };
     }
     if (!hasMinLengthWhenFilled(pessoa.inscricao_municipal, 6)) {
-        return { inscricao_municipal: 'Campo deve ter no minimo 6 caracteres.' };
+        return { inscricao_municipal: 'Digite pelo menos 2 caracteres.' };
     }
     if (!pessoa.pessoa_cliente && !pessoa.pessoa_fornecedor) {
         return { selectedContato: 'Selecione um Cliente ou Fornecedor.' };
     }
     if (!hasValidEmail(pessoa.email)) {
-        return { email: 'Email invalido. Por favor, digite um email valido.' };
+        return { email: 'E-mail inválido. Por favor, digite um email inválido.' };
     }
     return validateEnderecoPessoa(pessoa);
 };
@@ -70,24 +70,23 @@ export const validateFieldsPessoa = (
 ) => {
     let newErrors: ErrorsMap = {};
     msgs.current?.clear();
-
     if (pessoa.tipo_pessoa === 'PESSOA_JURIDICA') {
         if (!pessoa.cnpj || pessoa.cnpj.replace(/\D/g, '').length < 14) {
-            newErrors = { cnpj: 'Campo deve ter no minimo 14 caracteres.' };
+            newErrors = { cnpj: 'Inclua um CNPJ válido.' };
         } else if (!pessoa.razao_social || pessoa.razao_social.trim().length < 2) {
-            newErrors = { razao_social: 'Campo deve ter no minimo 2 caracteres.' };
+            newErrors = { razao_social: 'Digite pelo menos 2 caracteres.' };
         } else if (!pessoa.nome_fantasia || pessoa.nome_fantasia.trim().length < 2) {
-            newErrors = { nome_fantasia: 'Campo deve ter no minimo 2 caracteres.' };
+            newErrors = { nome_fantasia: 'Digite pelo menos 2 caracteres.' };
         } else {
             newErrors = validateCamposComunsPessoa(pessoa);
         }
     } else if (pessoa.tipo_pessoa === 'PESSOA_FISICA') {
         if (!pessoa.cpf || pessoa.cpf.replace(/\D/g, '').length < 11) {
-            newErrors = { cpf: 'Campo deve ter no minimo 11 caracteres.' };
+            newErrors = { cpf: 'Inclua um CPF valído.' };
         } else if (pessoa.rg && pessoa.rg.trim().length > 0 && pessoa.rg.trim().length < 9) {
-            newErrors = { rg: 'Campo deve ter no minimo 9 caracteres.' };
+            newErrors = { rg: 'Inclua um RG valído' };
         } else if (!pessoa.razao_social || pessoa.razao_social.trim().length < 2) {
-            newErrors = { razao_social: 'Campo deve ter no minimo 2 caracteres.' };
+            newErrors = { razao_social: 'Digite pelo menos 2 caracteres.' };
         } else {
             newErrors = validateCamposComunsPessoa(pessoa);
         }

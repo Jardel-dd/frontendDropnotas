@@ -10,10 +10,10 @@ export const validateFieldsVendedor = (
     let valid = true;
     if (vendedor.tipo_pessoa === 'PESSOA_JURIDICA') {
         if (!vendedor.cnpj || vendedor.cnpj.replace(/\D/g, '').length < 14) {
-            newErrors.cnpj = 'Campo deve ter no mínimo 14 caracteres.';
+            newErrors.cnpj = 'Inclua um CNPJ valído.';
         }
         else if (!vendedor.razao_social || vendedor.razao_social.trim().length < 2) {
-            newErrors.razao_social = 'Campo deve ter no mínimo 2 caracteres.';
+            newErrors.razao_social = 'Digite pelo menos 2 caracteres.';
             valid = false;
         } 
         else if (vendedor.percentual_comissao === undefined || vendedor.percentual_comissao === null || String(vendedor.percentual_comissao).trim() === '') {
@@ -25,19 +25,19 @@ export const validateFieldsVendedor = (
                 valid = false;
         } 
         else if (!vendedor.endereco?.cep || vendedor.endereco.cep.replace(/\D/g, '').length < 8) {
-            newErrors.cep = "Campo deve ter no mínimo 8 dígitos.";
+            newErrors.cep = "Digite pelo menos 8 dígitos.";
             valid = false;
         }
         else if (!vendedor.endereco?.logradouro || vendedor.endereco.logradouro.length < 2) {
-            newErrors.logradouro = 'Campo deve ter no mínimo 2 caracteres.';
+            newErrors.logradouro = 'Digite pelo menos 2 caracteres.';
             valid = false;
         }
         else if (!vendedor.endereco?.numero || vendedor.endereco.numero.length < 1) {
-            newErrors.numero = "Campo deve ter no mínimo 1 dígito.";
+            newErrors.numero = "Digite pelo menos 1 dígito.";
             valid = false;
         }
         else if (!vendedor.endereco?.bairro || vendedor.endereco.bairro.length < 2) {
-            newErrors.bairro = 'Campo deve ter no mínimo 2 caracteres.';
+            newErrors.bairro = 'Digite pelo menos 2 caracteres.';
             valid = false;
         }
         else if (!vendedor.endereco?.uf) {
@@ -49,28 +49,28 @@ export const validateFieldsVendedor = (
             valid = false;
         }
         else if (!vendedor.endereco?.codigo_municipio || vendedor.endereco.codigo_municipio.length < 2) {
-            newErrors.codigo_municipio = 'Campo deve ter no mínimo 7 números.';
+            newErrors.codigo_municipio = 'Digite pelo menos 7 dígito.';
             valid = false;
         } else if (!vendedor.endereco?.nome_pais || vendedor.endereco.nome_pais.length < 2) {
-            newErrors.nome_pais = 'Campo deve ter no mínimo 2 números.';
+            newErrors.nome_pais = 'Campo deve ter no mínimo 2 dígito.';
             valid = false;
         }
         else if (!vendedor.endereco?.codigo_pais || vendedor.endereco.codigo_pais.length < 2) {
-            newErrors.codigo_pais = 'Campo deve ter no mínimo 2 números.';
+            newErrors.codigo_pais = 'Campo deve ter no mínimo 2 dígito.';
             valid = false;
         }
     }
     else if (vendedor.tipo_pessoa === 'PESSOA_FISICA') {
         if (!vendedor.cpf || vendedor.cpf.replace(/\D/g, '').length < 11) {
-            newErrors.cpf = 'Campo deve ter no mínimo 11 caracteres.';
+            newErrors.cpf = 'Inclua um CPF válido.';
             valid = false;
         }
         else if (!vendedor.rg || vendedor.rg.trim().length < 9) {
-            newErrors.rg = 'Campo deve ter no mínimo 9 caracteres.';
+            newErrors.rg = 'Digite pelo menos 9 caracteres.';
             valid = false;
         }
         else if (!vendedor.razao_social || vendedor.razao_social.trim().length < 2) {
-            newErrors.razao_social = 'Campo deve ter no mínimo 2 caracteres.';
+            newErrors.razao_social = 'Digite pelo menos 2 caracteres.';
             valid = false;
         }
         else if (vendedor.percentual_comissao === undefined || vendedor.percentual_comissao === null || String(vendedor.percentual_comissao).trim() === '') {
@@ -78,19 +78,19 @@ export const validateFieldsVendedor = (
             valid = false;
         }
         else if (!vendedor.endereco?.cep || vendedor.endereco.cep.replace(/\D/g, '').length < 8) {
-            newErrors.cep = "Campo deve ter no mínimo 8 dígitos.";
+            newErrors.cep = "Digite pelo menos 8 dígitos.";
             valid = false;
         }
         else if (!vendedor.endereco?.logradouro || vendedor.endereco.logradouro.length < 2) {
-            newErrors.logradouro = 'Campo deve ter no mínimo 2 caracteres.';
+            newErrors.logradouro = 'Digite pelo menos 2 caracteres.';
             valid = false;
         }
         else if (!vendedor.endereco?.numero || vendedor.endereco.numero.length < 1) {
-            newErrors.numero = "Campo deve ter no mínimo 1 dígito.";
+            newErrors.numero = "Digite pelo menos 1 dígito.";
             valid = false;
         }
         else if (!vendedor.endereco?.bairro || vendedor.endereco.bairro.length < 2) {
-            newErrors.bairro = 'Campo deve ter no mínimo 2 caracteres.';
+            newErrors.bairro = 'Digite pelo menos 2 caracteres.';
             valid = false;
         }
         else if (!vendedor.endereco?.uf) {
@@ -102,14 +102,14 @@ export const validateFieldsVendedor = (
             valid = false;
         }
         else if (!vendedor.endereco?.codigo_municipio || vendedor.endereco.codigo_municipio.length < 2) {
-            newErrors.codigo_municipio = 'Campo deve ter no mínimo 7 números.';
+            newErrors.codigo_municipio = 'Digite pelo menos 7 dígitos.';
             valid = false;
         } else if (!vendedor.endereco?.nome_pais || vendedor.endereco.nome_pais.length < 2) {
-            newErrors.nome_pais = 'Campo deve ter no mínimo 2 números.';
+            newErrors.nome_pais = 'Digite pelo menos 2 dígitos.';
             valid = false;
         }
         else if (!vendedor.endereco?.codigo_pais || vendedor.endereco.codigo_pais.length < 2) {
-            newErrors.codigo_pais = 'Campo deve ter no mínimo 2 números.';
+            newErrors.codigo_pais = 'Digite pelo menos 2 dígitos.';
             valid = false;
         }
     }

@@ -20,7 +20,7 @@ export const validateFieldsOrdemServico = (
     let newErrors: { [key: string]: string } = {};
     msgs.current?.clear();
     if (!emitirOS.descricao || emitirOS.descricao.trim().length < 2) {
-        newErrors.descricao = 'A descrição deve ter pelo menos 2 caracteres.';
+        newErrors.descricao = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else if (!selectedEmpresa || Object.keys(selectedEmpresa).length === 0) {
         newErrors.selectedEmpresa = 'Selecione a Empresa.';

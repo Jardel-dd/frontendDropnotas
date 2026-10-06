@@ -17,7 +17,7 @@ export const validateFieldsContasReceber = (
     msgs.current?.clear();
 
     if (!contasReceber.descricao || contasReceber.descricao.trim().length < 2) {
-        newErrors = { descricao: 'A descrição deve ter pelo menos 2 caracteres.' };
+        newErrors = { descricao: 'Digite pelo menos 2 caracteres.' };
     } else if (!selectedCliente && !contasReceber.id_cliente) {
         newErrors = { selectedCliente: 'Selecione o cliente.' };
     } else if (!selectedVendedor && !contasReceber.id_vendedor) {

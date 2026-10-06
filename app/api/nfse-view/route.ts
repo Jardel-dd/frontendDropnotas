@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     try {
         formData = await request.formData();
     } catch {
-        return textResponse('Dados invalidos para visualizar a nota.', 400);
+        return textResponse('Dados inválidos para visualizar a nota.', 400);
     }
 
     const notaId = String(formData.get('notaId') ?? '').trim();

@@ -11,7 +11,7 @@ export const validateFieldsCategoriaContrato = (
     let newErrors: { [key: string]: string } = {};
     msgs.current?.clear();
     if (!categoriaContrato.descricao || categoriaContrato.descricao.trim().length < 2) {
-        newErrors.descricao = 'A Descrição deve ter pelo menos 2 caracteres.';
+        newErrors.descricao = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else {
         valid = true;

@@ -178,7 +178,7 @@ export function ListarPerfilTributario(
                             />
                             {loading && (
                                 <div style={listLoadingOverlayStyle}>
-                                    <LoadingScreen loadingText="Carregando Serviços..." fullScreen={false} />
+                                    <LoadingScreen loadingText="Carregando Perfil Tributário..." fullScreen={false} />
                                 </div>
                             )}
                         </div>

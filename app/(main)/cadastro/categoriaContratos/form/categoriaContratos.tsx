@@ -15,7 +15,7 @@ export function CategoriaContratoFields({
                     <Input
                         value={categoriaContrato.descricao || ''}
                         onChange={onChange}
-                        label="Descrição da Categoria"
+                        label="Categoria"
                         id="descricao"
                         autoFocus
                         topLabel="Descrição:"

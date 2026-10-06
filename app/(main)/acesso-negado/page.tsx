@@ -12,7 +12,7 @@ const AcessoNegadoPage: React.FC = () => {
             <div className="flex flex-column gap-3">
                 <h2 className="m-0">Acesso atualizado</h2>
                 <p className="m-0">
-                    Suas permissoes foram atualizadas e esta tela nao esta mais disponivel para o seu perfil atual.
+                    Suas permissões foram atualizadas e esta tela nao esta mais disponível para o seu perfil atual.
                 </p>
                 {from ? (
                     <p className="m-0 text-color-secondary">

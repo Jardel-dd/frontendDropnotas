@@ -23,22 +23,22 @@ export const validateFieldsEmpresas = (
     msgs.current?.clear();
 
     if (!empresa.cnpj || empresa.cnpj.replace(/\D/g, '').length < 14) {
-        newErrors.cnpj = 'Campo deve ter no minimo 14 caracteres.';
+        newErrors.cnpj = 'Inclua um CNPJ válido.';
         valid = false;
     } else if (!empresa.razao_social || empresa.razao_social.trim().length < 2) {
-        newErrors.razao_social = 'Campo deve ter no minimo 2 caracteres.';
+        newErrors.razao_social = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else if (!empresa.nome_fantasia || empresa.nome_fantasia.trim().length < 2) {
-        newErrors.nome_fantasia = 'Campo deve ter no minimo 2 caracteres.';
+        newErrors.nome_fantasia = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else if (!empresa.atividade_principal || empresa.atividade_principal.trim().length < 2) {
-        newErrors.atividade_principal = 'Campo deve ter no minimo 2 caracteres.';
+        newErrors.atividade_principal = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else if (!empresa.inscricao_municipal || empresa.inscricao_municipal.length < 2) {
-        newErrors.inscricao_municipal = 'Campo deve ter no minimo 2 caracteres.';
+        newErrors.inscricao_municipal = 'Digite pelo menos 2 caracteres.';
         valid = false;
      } else if (!empresa.inscricao_municipal || empresa.inscricao_municipal.length < 2) {
-        newErrors.inscricao_municipal = 'Campo deve ter no minimo 2 caracteres.';
+        newErrors.inscricao_municipal = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else if (!empresa.codigo_regime_tributario) {
         newErrors.selectedRegime = 'Selecione o Regime Tributário.';
@@ -48,16 +48,16 @@ export const validateFieldsEmpresas = (
     newErrors.email = getEmpresaEmailError(empresa.email) || 'Informe um e-mail válido.';
     valid = false;
     } else if (!empresa.endereco?.cep || empresa.endereco.cep.replace(/\D/g, '').length < 8) {
-        newErrors.cep = 'Campo deve ter no minimo 8 digitos.';
+        newErrors.cep = 'Inclua um Cep valído';
         valid = false;
     } else if (!empresa.endereco?.logradouro || empresa.endereco.logradouro.length < 2) {
-        newErrors.logradouro = 'Campo deve ter no minimo 2 caracteres.';
+        newErrors.logradouro = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else if (!empresa.endereco?.numero || empresa.endereco.numero.length < 1) {
-        newErrors.numero = 'Campo deve ter no minimo 1 digito.';
+        newErrors.numero = 'Digite pelo menos 1 dígito.';
         valid = false;
     } else if (!empresa.endereco?.bairro || empresa.endereco.bairro.length < 2) {
-        newErrors.bairro = 'Campo deve ter no minimo 2 caracteres.';
+        newErrors.bairro = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else if (!empresa.endereco?.uf) {
         newErrors.uf = 'Este campo deve ser selecionado.';
@@ -66,10 +66,10 @@ export const validateFieldsEmpresas = (
         newErrors.municipio = 'Este campo deve ser selecionado.';
         valid = false;
     } else if (!empresa.endereco?.codigo_municipio || empresa.endereco.codigo_municipio.length < 2) {
-        newErrors.codigo_municipio = 'Campo deve ter no minimo 7 numeros.';
+        newErrors.codigo_municipio = 'Digite pelo menos 7 dígitos.';
         valid = false;
     } else if (!empresa.endereco?.codigo_pais || empresa.endereco.codigo_pais.length < 2) {
-        newErrors.codigo_pais = 'Campo deve ter no minimo 2 numeros.';
+        newErrors.codigo_pais = 'Digite pelo menos 2 dígitos.';
         valid = false;
     } else if (telefoneObrigatorio && (!empresa.telefone || empresa.telefone.replace(/\D/g, '').length < 10)) {
         newErrors.telefone = 'Inclua um número de telefone válido.';
@@ -78,60 +78,60 @@ export const validateFieldsEmpresas = (
         newErrors.selectedUserConta = 'Este campo deve ser selecionado.';
         valid = false;
     } else if (!empresa.serie_emissao_nfse || String(empresa.serie_emissao_nfse).trim().length < 1) {
-        newErrors.serie_emissao_nfse = 'Campo deve ter no minimo 1 digito.';
+        newErrors.serie_emissao_nfse = 'Digite pelo menos 1 dígito.';
         valid = false;
     } else if (!empresa.proximo_numero_rps || String(empresa.proximo_numero_rps).trim().length < 1) {
-        newErrors.proximo_numero_rps = 'Campo deve ter no minimo 1 caractere.';
+        newErrors.proximo_numero_rps = 'Digite pelo menos 1 dígito.';
         valid = false;
     } else if (!empresa.proximo_numero_lote || String(empresa.proximo_numero_lote).trim().length < 1) {
-        newErrors.proximo_numero_lote = 'Campo deve ter no minimo 1 caractere.';
+        newErrors.proximo_numero_lote = 'Digite pelo menos 1 dígito.';
         valid = false;
     } else if (!empresa.tipo_rps) {
         newErrors.tipo_rps = 'Selecione o Tipo RPS.';
         valid = false;
     } else if (empresa.aliquota_iss === null || empresa.aliquota_iss === undefined || String(empresa.aliquota_iss).trim() === '') {
-        newErrors.aliquota_iss = 'A aliquota ISS e obrigatoria.';
+        newErrors.aliquota_iss = 'A Alíquota ISS e obrigatória.';
         valid = false;
     } else if (empresa.aliquota_pis === null || empresa.aliquota_pis === undefined || String(empresa.aliquota_pis).trim() === '') {
-        newErrors.aliquota_pis = 'A aliquota PIS e obrigatoria.';
+        newErrors.aliquota_pis = 'A Alíquota PIS e obrigatória.';
         valid = false;
     } else if (empresa.aliquota_cofins === null || empresa.aliquota_cofins === undefined || String(empresa.aliquota_cofins).trim() === '') {
-        newErrors.aliquota_cofins = 'A aliquota COFINS e obrigatoria.';
+        newErrors.aliquota_cofins = 'A aliquota COFINS e obrigatória.';
         valid = false;
     } else if (
         empresa.aliquota_inss === null ||
         empresa.aliquota_inss === undefined ||
         String(empresa.aliquota_inss).trim() === ''
     ) {
-        newErrors.aliquota_inss = 'A aliquota INSS e obrigatoria.';
+        newErrors.aliquota_inss = 'A Alíquota INSS e obrigatória.';
         valid = false;
     } else if (
         empresa.aliquota_ir === null ||
         empresa.aliquota_ir === undefined ||
         String(empresa.aliquota_ir).trim() === ''
     ) {
-        newErrors.aliquota_ir = 'A aliquota IR e obrigatoria.';
+        newErrors.aliquota_ir = 'A Alíquota IR e obrigatória.';
         valid = false;
     } else if (
         empresa.aliquota_csll === null ||
         empresa.aliquota_csll === undefined ||
         String(empresa.aliquota_csll).trim() === ''
     ) {
-        newErrors.aliquota_csll = 'A aliquota CSLL e obrigatoria.';
+        newErrors.aliquota_csll = 'A Alíquota CSLL e obrigatória.';
         valid = false;
     } else if (
         empresa.aliquota_outras_retencoes === null ||
         empresa.aliquota_outras_retencoes === undefined ||
         String(empresa.aliquota_outras_retencoes).trim() === ''
     ) {
-        newErrors.aliquota_outras_retencoes = 'Outras retencoes e obrigatoria.';
+        newErrors.aliquota_outras_retencoes = 'Outras retencoes e obrigatória.';
         valid = false;
     } else if (
         empresa.aliquota_deducoes === null ||
         empresa.aliquota_deducoes === undefined ||
         String(empresa.aliquota_deducoes).trim() === ''
     ) {
-        newErrors.aliquota_deducoes = 'Deducoes e obrigatoria.';
+        newErrors.aliquota_deducoes = 'Deducoes e obrigatória.';
         valid = false;
     } else if (
         empresa.percentual_desconto_incondicionado === null ||
