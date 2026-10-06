@@ -63,7 +63,7 @@ export function ContratoInformacoesFields({
                     onChange={onChange}
                     hasError={!!errors.descricao}
                     errorMessage={errors.descricao}
-                    label="Descrição do Contrato"
+                    label="Contrato"
                     onBlur={onValidateDescricao}
                     autoFocus
                     topLabel="Descrição:"

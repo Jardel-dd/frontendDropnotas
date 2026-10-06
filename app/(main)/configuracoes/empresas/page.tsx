@@ -273,7 +273,7 @@ const Empresas: React.FC = () => {
                             <div className="grid formgrid" style={{ maxHeight: '74px' }}>
                                 <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                     <Input
-                                        label="Pesquisar CNPJ/Razão Social/Nome Fantasia"
+                                        label="CNPJ, Razão Social ou Nome Fantasia"
                                         outlined={true}
                                         id="razao_social"
                                         useRightButton={true}
@@ -333,7 +333,7 @@ const Empresas: React.FC = () => {
                                 <div className="grid formgrid"  >
                                     <div className="col-12 lg:col-3 container-input-search-all" >
                                         <Input
-                                            label="Pesquisar CNPJ/Razão Social/Nome Fantasia"
+                                            label="CNPJ, Razão Social ou Nome Fantasia"
                                             outlined={true}
                                             id="razao_social"
                                             useRightButton={true}

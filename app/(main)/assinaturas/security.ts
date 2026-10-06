@@ -195,11 +195,11 @@ export const validateCheckoutForm = ({
     }
 
     if (!customerEmail.trim() || !isValidEmail(customerEmail)) {
-        nextErrors.customerEmail = 'Informe um e-mail valido para enviar a cobranca.';
+        nextErrors.customerEmail = 'Informe um e-mail válido para enviar a cobrança.';
     }
 
     if (!(billing.documentType === 'cpf' ? isValidCpf(billing.document) : isValidCnpj(billing.document))) {
-        nextErrors.billingDocument = billing.documentType === 'cpf' ? 'Informe um CPF valido.' : 'Informe um CNPJ valido.';
+        nextErrors.billingDocument = billing.documentType === 'cpf' ? 'Informe um CPF válido.' : 'Informe um CNPJ válido.';
     }
 
     if (!billing.displayName.trim() || billing.displayName.trim().length < 3) {
@@ -207,7 +207,7 @@ export const validateCheckoutForm = ({
     }
 
     if (!isValidZipCode(billing.endereco?.cep ?? '')) {
-        nextErrors.cep = 'Informe um CEP valido com 8 digitos.';
+        nextErrors.cep = 'Informe um CEP valído com 8 dígito.';
     }
 
     if (!billing.endereco?.logradouro?.trim()) {
@@ -227,15 +227,15 @@ export const validateCheckoutForm = ({
     }
 
     if (!billing.endereco?.municipio?.trim()) {
-        nextErrors.municipio = 'Selecione o municipio.';
+        nextErrors.municipio = 'Selecione o munícipio.';
     }
 
     if (!billing.endereco?.codigo_municipio?.trim()) {
-        nextErrors.codigo_municipio = 'Informe o codigo do municipio.';
+        nextErrors.codigo_municipio = 'Informe o código do munícipio.';
     }
 
     if (!billing.endereco?.codigo_pais?.trim()) {
-        nextErrors.codigo_pais = 'Informe o codigo do pais.';
+        nextErrors.codigo_pais = 'Informe o código do pais.';
     }
 
     if (!billing.endereco?.nome_pais?.trim()) {
@@ -247,15 +247,15 @@ export const validateCheckoutForm = ({
     }
 
     if (!card.holderName.trim() || card.holderName.trim().length < 3) {
-        nextErrors.cardHolderName = 'Informe o nome impresso no cartao.';
+        nextErrors.cardHolderName = 'Informe o nome impresso no cartão.';
     }
 
     if (!luhnCheck(card.cardNumber)) {
-        nextErrors.cardNumber = 'Numero do cartao invalido.';
+        nextErrors.cardNumber = 'Número do cartao inválido.';
     }
 
     if (!isValidExpiry(card.expiry)) {
-        nextErrors.expiry = 'Validade invalida ou expirada.';
+        nextErrors.expiry = 'Validade inválido ou expirada.';
     }
 
     const cvvDigits = digitsOnly(card.cvv);
@@ -263,7 +263,7 @@ export const validateCheckoutForm = ({
     const expectedCvvLength = brand === 'amex' ? 4 : 3;
 
     if (cvvDigits.length !== expectedCvvLength) {
-        nextErrors.cvv = `Informe um codigo de seguranca com ${expectedCvvLength} digitos.`;
+        nextErrors.cvv = `Informe um código de segurança com ${expectedCvvLength} digitos.`;
     }
 
     return nextErrors;

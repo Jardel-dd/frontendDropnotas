@@ -213,7 +213,7 @@ export const ativarCategoriaContrato = async (categoriaContratoId: number, msgs:
                 className: 'messages-center',
                 severity: 'error',
                 summary: 'Atenção:',
-                detail: `Houve um erro ao tentar ativar a Categoria Contrato , tente novamente.`
+                detail: `Houve um erro ao tentar ativar a Categoria Contrato, tente novamente.`
             }
         ]);
         console.error(`Erro ao tentar ativar este a Categoria Contrato com ID ${categoriaContratoId}:`, error);

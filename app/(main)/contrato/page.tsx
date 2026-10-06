@@ -292,7 +292,7 @@ const Contratos: React.FC = () => {
                             <div className="grid formgrid" style={{ maxHeight: '74px' }}>
                                 <div className="col-8 mb-0 lg:col-6 lg:mb-0 p-0 ">
                                     <Input
-                                        label="Pesquisar Descrição/Razão Social"
+                                        label="Descrição, Razão Social"
                                         outlined={true}
                                         id="descricao"
                                         useRightButton={true}
@@ -354,7 +354,7 @@ const Contratos: React.FC = () => {
                                 <div className="grid formgrid">
                                     <div className="col-12 lg:col-3 container-input-search-all">
                                         <Input
-                                            label="Pesquisar Descrição/Razão Social"
+                                            label="Descrição, Razão Social"
                                             outlined={true}
                                             id="descricao"
                                             useRightButton={true}

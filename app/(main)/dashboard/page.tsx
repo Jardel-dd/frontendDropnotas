@@ -14,7 +14,7 @@ import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/Ap
 import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
-import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
+import { DateRangeValue, Periodo, todayRange } from '@/app/components/calendarComponent/types/types';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
 import { DateRangePicker } from '@/app/components/calendarComponent/dataRangerPicker';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
@@ -45,7 +45,6 @@ const persistSelectedCompanyId = (company: CompanyEntity | null) => {
 
     window.localStorage.removeItem(DASHBOARD_SELECTED_COMPANY_STORAGE_KEY);
 };
-
 const getStoredSelectedCompanyId = () => {
     if (typeof window === 'undefined') {
         return null;
@@ -351,6 +350,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
     const valorDescontos = relatorio?.valores.descontos ?? 0;
     const valorCancelado = relatorio?.valores.cancelados ?? 0;
 
+
     const overviewCards = [
         {
             label: 'Total de notas',
@@ -429,10 +429,11 @@ const RelatoriosNotaFiscal: React.FC = () => {
         }
     ];
     const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
-    const selectedPeriodo =
-        dateRange?.[0] && dateRange?.[1]
-            ? [dateRange[0].toDate(), dateRange[1].toDate()] as [Date, Date]
-            : null;
+   const selectedPeriodo =
+    dateRange?.[0] && dateRange?.[1]
+        ? [dateRange[0].toDate(), dateRange[1].toDate()] as [Date, Date]
+        : null;
+
     const filterOverlayContent = (
         <div className="grid formgrid nota-fiscal-filter-overlay-content">
             <div className="col-12">
@@ -527,14 +528,23 @@ const RelatoriosNotaFiscal: React.FC = () => {
                     {showDesktopToolbar && !isMobile && (
                         <div className="grid formgrid nota-fiscal-toolbar-desktop">
                             <div style={{width:"220px"}}>
-                                <DateRangePicker
-                                    value={selectedPeriodo}
-                                    initialPeriodo={[todayRange[0]!.toDate(), todayRange[1]!.toDate()]}
-                                    showTopLabel
-                                    topLabel="Filtrar por data:"
-                                    onClear={handleDateRangeClear}
-                                    onBuscar={handleDateRangeSearch}
-                                />
+                             <DateRangePicker
+    value={selectedPeriodo}
+    initialPeriodo={[todayRange[0]!.toDate(), todayRange[1]!.toDate()]}
+    showTopLabel
+    topLabel="Filtrar por data:"
+    onPeriodoChange={(periodo) => {
+        if (periodo?.[0] && periodo?.[1]) {
+            setDateRange([
+                dayjs(periodo[0]),
+                dayjs(periodo[1])
+            ]);
+        }
+    }}
+    onClear={handleDateRangeClear}
+    onBuscar={handleDateRangeSearch}
+/>
+
                             </div>
 
                             <div className="Container-Btn-Filter-Desktop nota-fiscal-filter-trigger-desktop">
@@ -555,11 +565,6 @@ const RelatoriosNotaFiscal: React.FC = () => {
                     />
                     <div className="nota-fiscal-content-wrapper">
                         <section className="nota-fiscal-section">
-                            <div className="nota-fiscal-section-header">
-                                <div>
-                                    <h2>Indicadores principais</h2>
-                                </div>
-                            </div>
                             <div className="nota-fiscal-metric-grid">
                                 {overviewCards.map((card) => (
                                     <div

@@ -313,7 +313,7 @@ function SignUp() {
                             }}
                         /> 
                         <div className="text-center ">
-                            Já tem uma conta? {'  '}
+                            Já possui uma conta? {'  '}
                             <Link href="/">
                                 <span className="text-primary cursor-pointer">Acessar conta</span>
                             </Link>

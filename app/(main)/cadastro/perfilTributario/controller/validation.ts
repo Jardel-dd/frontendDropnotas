@@ -17,13 +17,13 @@ export const getPerfilTributarioValidationErrors = (perfilTributario: PerfilTrib
     // } else if (!perfilTributario.codigo_classificacao_tributaria || perfilTributario.codigo_classificacao_tributaria.trim().length < 2) {
     //     newErrors.codigo_classificacao_tributaria = 'Este campo deve ser selecionado.';
     } else if (!perfilTributario.nome || perfilTributario.nome.trim().length < 2) {
-        newErrors.nome = 'A Nome deve ter pelo menos 2 caracteres.';
+        newErrors.nome = 'Digite pelo menos  2 caracteres.';
     } else if (!perfilTributario.iss_retido || perfilTributario.iss_retido.trim().length < 2) {
         newErrors.iss_retido = 'Campo obrigatório.';
     } else if (!perfilTributario.exigibilidade_iss || perfilTributario.exigibilidade_iss.trim().length < 2) {
         newErrors.exigibilidade_iss = 'Selecione uma Exigibilidade ISS.';
     } else if (!perfilTributario.codigo_situacao_tributaria || perfilTributario.codigo_situacao_tributaria.trim().length < 2) {
-        newErrors.codigo_situacao_tributaria = 'Este Campo deve ser selecionado.';
+        newErrors.codigo_situacao_tributaria = 'Campo obrigatório.';
     // } else if (!perfilTributario.codigo_classificacao_tributaria || perfilTributario.codigo_classificacao_tributaria.trim().length < 2) {
     //     newErrors.codigo_classificacao_tributaria = 'Este Campo deve ser selecionado.';
     } else if (!perfilTributario.codigo_nbs || perfilTributario.codigo_nbs.trim().length < 2) {

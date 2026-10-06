@@ -33,7 +33,7 @@ export const validateFieldsContrato = (
         contrato.id_clientes_contrato.some((id) => Number(id) > 0);
     msgs.current?.clear();
     if (!contrato.descricao || contrato.descricao.trim().length < 2) {
-        newErrors.descricao = 'A descrição deve ter pelo menos 2 caracteres.';
+        newErrors.descricao = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else if (!contrato.valor_servico || String(contrato.valor_servico).trim().length < 1) {
         newErrors.valor_servico = 'Digite um valor valído.';

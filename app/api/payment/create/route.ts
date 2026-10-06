@@ -92,15 +92,15 @@ export async function POST(request: Request) {
     try {
         body = (await request.json()) as Partial<CreateSubscriptionPaymentPayload>;
     } catch {
-        return jsonNoStore({ message: 'Payload invalido para criar a cobranca.' }, 400);
+        return jsonNoStore({ message: 'Payload inválido para criar a cobrança.' }, 400);
     }
 
     if (!body || typeof body !== 'object') {
-        return jsonNoStore({ message: 'Payload invalido para criar a cobranca.' }, 400);
+        return jsonNoStore({ message: 'Payload inválido para criar a cobrança.' }, 400);
     }
 
     if (body.planId !== SUBSCRIPTION_PLAN.id || Number(body.amountInCents) !== SUBSCRIPTION_PLAN.priceInCents) {
-        return jsonNoStore({ message: 'Valor ou plano invalido. Atualize a tela e tente novamente.' }, 400);
+        return jsonNoStore({ message: 'Valor ou plano inválido. Atualize a tela e tente novamente.' }, 400);
     }
 
     if (!body.customerName?.trim() || body.customerName.trim().length < 3) {

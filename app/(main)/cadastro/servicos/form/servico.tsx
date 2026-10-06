@@ -24,7 +24,7 @@ export function ServicoDescricaoFields({
                 <Input
                     value={servico.descricao || ''}
                     onChange={onChange}
-                    label="Descrição do serviço"
+                    label="Serviço"
                     id="descricao"
                     hasError={!!errors.descricao}
                     errorMessage={errors.descricao}

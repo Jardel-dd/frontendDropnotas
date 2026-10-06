@@ -51,7 +51,7 @@ export const renewToken = async (): Promise<string | null> => {
             saveRefreshToken(newRefreshToken);
             return token;
         }
-        console.error('Tokens invalido retornado');
+        console.error('Tokens inválido retornado');
         logoutUser();
         return null;
     } catch (error: any) {

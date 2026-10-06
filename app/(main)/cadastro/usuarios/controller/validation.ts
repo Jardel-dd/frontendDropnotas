@@ -15,26 +15,22 @@ export const getUsuarioFormErrors = (
     const hasSavedEmpresaIds = Array.isArray(userConta.id_empresas_acesso) && userConta.id_empresas_acesso.length > 0;
 
     if (!userConta.nome?.trim() || userConta.nome.trim().length < 2) {
-        newErrors.nome = 'O Nome deve ter pelo menos 2 caracteres.';
+        newErrors.nome = 'Digite pelo menos 2 caracteres.';
     }
-
     if (!userConta.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userConta.email)) {
         newErrors.email = 'Email inválido.';
     }
-
     // Estes campos só estão visíveis durante o cadastro.
     if (!isEditMode) {
         if (!userConta.senha || userConta.senha.length < 6) {
             newErrors.senha = 'Senha é obrigatória e deve ter pelo menos 6 caracteres.';
         }
-
         if (confirmPassword !== userConta.senha) {
             newErrors.confirmPassword = 'A confirmação de senha deve ser igual à senha.';
         }
     }
-
     if (!selectedPerfilUser) {
-        newErrors.selectedPerfilUser = 'Selecione um Perfil de Usuário .';
+        newErrors.selectedPerfilUser = 'Selecione um perfil de usuário .';
     }
 
     if (!hasSelectedEmpresa && !hasSavedEmpresaIds) {
