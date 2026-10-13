@@ -52,7 +52,7 @@ const AppMenu = () => {
                         label: 'Perfil Tributário',
                         icon: Percent,
                         to: '/cadastro/perfilTributario',
-                        visible: hasPermissionAccess(userConta, 'pessoa')
+                        visible: hasPermissionAccess(userConta, 'perfilTributario')
                     },
                     {
                         label: 'Vendedores',
@@ -131,16 +131,21 @@ const AppMenu = () => {
             {
                 label: 'Relatórios',
                 icon: ChartBar,
+                visible: hasPermissionAccess(userConta, 'relatorio'),
                 items: [
                     {
                         label: 'Serviços',
                         icon: ClipboardText,
-                        to: '/relatorios/servicos'
+                        to: '/relatorios/servicos',
+                        visible: hasPermissionAccess(userConta, 'relatorioServico')
+
                     },
                     {
                         label: 'Recebimentos',
                         icon: Wallet,
-                        to: '/relatorios/recebimentos'
+                        to: '/relatorios/recebimentos',
+                        visible: hasPermissionAccess(userConta, 'relatorioRecebimento')
+
                     }
                 ]
             },

@@ -167,7 +167,7 @@ export function ListarContasPagar({
                                     },
                                     {
                                         field: 'data_emissao',
-                                        header: 'Data de Emissao',
+                                        header: 'Emissão',
                                         body: (data) => <span>
                                             {highlightSearchTerm(
                                                 limitarText(formatDate(data.data_emissao), 5),
@@ -177,7 +177,7 @@ export function ListarContasPagar({
                                     },
                                     {
                                         field: 'data_vencimento',
-                                        header: 'Data de Vencimento',
+                                        header: 'Vencimento',
                                         body: (data) =>
                                             <span>
                                                 {highlightSearchTerm(
@@ -188,12 +188,12 @@ export function ListarContasPagar({
                                     },
                                     {
                                         field: 'data_hora_pagamento',
-                                        header: 'Data do Pagamento',
+                                        header: 'Pagamento',
                                         body: (data) => <span>{formatDate(data.data_hora_pagamento, true)}</span>
                                     },
                                     {
                                         field: 'valor_original',
-                                        header: 'Valor Original',
+                                        header: 'Valor original',
                                         body: (data) => <span>{formatCurrency(data.valor_original)}</span>
                                     },
                                     {
@@ -203,7 +203,7 @@ export function ListarContasPagar({
                                     },
                                     {
                                         field: 'valor_total',
-                                        header: 'Valor Total',
+                                        header: 'Valor total',
                                         body: (data) => <span>{formatCurrency(data.valor_total ?? data.valor_original)}</span>
                                     },
                                     {

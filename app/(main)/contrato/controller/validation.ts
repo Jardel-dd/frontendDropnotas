@@ -36,7 +36,7 @@ export const validateFieldsContrato = (
         newErrors.descricao = 'Digite pelo menos 2 caracteres.';
         valid = false;
     } else if (!contrato.valor_servico || String(contrato.valor_servico).trim().length < 1) {
-        newErrors.valor_servico = 'Digite um valor valído.';
+        newErrors.valor_servico = 'Digite um valor válido.';
         valid = false;
           } else if (!contrato.periodicidade) {
         newErrors.periodicidade = 'Selecione o periodo .';

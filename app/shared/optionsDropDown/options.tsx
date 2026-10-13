@@ -122,6 +122,25 @@ export const permissoes: TreeNode[] = [
             { key: '11-2', label: 'Desativar Integração' },
             { key: '11-3', label: 'Pesquisar Integração' }
         ]
+    },
+    {
+        key: '12',
+        label: 'Perfil Tributário',
+        children: [
+            { key: '12-0', label: 'Cadastrar Perfil Tributário' },
+            { key: '12-1', label: 'Alterar Perfil Tributário' },
+            { key: '12-2', label: 'Desativar Perfil Tributário' },
+            { key: '12-3', label: 'Pesquisar Perfil Tributário' }
+        ]
+    }
+    ,
+    {
+        key: '13',
+        label: 'Relatórios',
+        children: [
+            { key: '13-0', label: 'Acesso aos Relatórios de Serviços' },
+            { key: '13-1', label: 'Acesso aos Relatórios de Recebimentos' },
+        ]
     }
 ];
 export const tiposVisualizacaoPermissoes = [

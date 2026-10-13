@@ -12,18 +12,22 @@ import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import PieChart from '@/app/components/chartsComponent/charts';
 import { filterOptions } from '@/app/shared/optionsDropDown/options';
 import { formatCurrency } from '@/app/shared/traducaoBr/formatCurrency';
-import { fetchRelatorioRecebimentos } from '../recebimentos/controller';
 import PessoaDropdownField from '../../cadastro/pessoas/dropDown/pessoa';
 import EmpresaDropdownField from '../../configuracoes/empresas/dropDown/empresa';
 import { DateRangeValue, todayRange } from '@/app/components/calendarComponent/types/types';
+import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 const RelatoriosServicos: React.FC = () => {
+    const isMobile = useIsMobile();
+    const isDesktop = useIsDesktop();
     const [loading, setLoading] = useState(false);
+    const [visible, setVisible] = useState<boolean>(false);
+    const [relatorio, setRelatorio] = useState<any | null>(null);
+    const [filterType, setFilterType] = useState<string | null>(null);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [dateRange, setDateRange] = useState<DateRangeValue>(todayRange);
     const [selectedCompany, setSelectedCompany] = useState<CompanyEntity | null>(null);
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [relatorio, setRelatorio] = useState<any | null>(null);
-    const [dateRange, setDateRange] = useState<DateRangeValue>(todayRange);
-    const [filterType, setFilterType] = useState<string | null>(null);
     const [empresa, setEmpresa] = useState<CompanyEntity>(
         new CompanyEntity({
             id: 0,
@@ -128,6 +132,10 @@ const RelatoriosServicos: React.FC = () => {
         handleCompanyChange(null);
         handlePessoaChange(null);
     };
+    const handleSalvarFiltro = () => {
+        handleCompanyChange(empresa);
+        setVisible(false);
+    };
     useEffect(() => {
         if (!dateRange) return;
         const search = async () => {
@@ -153,124 +161,273 @@ const RelatoriosServicos: React.FC = () => {
     }, [dateRange, selectedCompany, selectedPessoa]);
     return (
         <div className="p-fluid">
-            <div className="card styled-container-main-all-routes w-full">
-                <div className="scrollable-container">
-                    {loading && <LoadingScreen loadingText={'Carregando Serviços...'} />}
-                    <div className="row flex w-full">
-                        <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-2  ">
-                            <div className="StyleDiv-row-filtro-all w-full ">
-                                <label className="filter-label">Filtrar por:</label>
-                                <div style={{ marginBottom: '3px' }}>{filterType && <Button label="Limpar filtro" outlined style={{ height: '3px' }} onClick={handleClearFilters} />}</div>
-                            </div>
-                            <div className="col-12 lg:col-3 w-full p-0">
-                                <Dropdown
-                                    value={filterType}
-                                    options={filterOptions}
-                                    onChange={(e) => {
-                                        const novoFiltro = e.value as string | null;
-                                        setFilterType(novoFiltro);
-                                        if (novoFiltro === 'EMPRESA') handlePessoaChange(null);
-                                        else if (novoFiltro === 'CLIENTES_FORNECEDORES') handleCompanyChange(null);
-                                        else {
-                                            handleCompanyChange(null);
-                                            handlePessoaChange(null);
-                                        }
-                                    }}
-                                    placeholder="Filtrar"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    label={''}
-                                />
-                            </div>
-                        </div>
-                        {(filterType === 'EMPRESA' || filterType === 'AMBOS') && (
-                            <>
-                                <div className="col-12 lg:col-3 p-3 w-2">
-                                    <EmpresaDropdownField
-                                        selectedEmpresa={selectedCompany}
-                                        onEmpresaChange={handleCompanyChange}
-                                        hasError={!!errors.selectedCompany}
-                                        errorMessage={errors.selectedCompany}
-                                        showAddButton
-                                        autoSelectSingle={true}
-                                    />
+            <div className="card styled-container-main-all-routes p-2">
+                <>
+                    {isMobile && (
+                        <>
+                            <div className='p-2'>
+                                <div className="grid formgrid" style={{ maxHeight: '74px' }}>
+                                    <div className="col-8 mb-0 lg:col-6  ">
+                                        <Dropdown
+                                            value={filterType}
+                                            options={filterOptions}
+                                            onChange={(e) => {
+                                                const novoFiltro = e.value as string | null;
+                                                setFilterType(novoFiltro);
+                                                if (novoFiltro === 'EMPRESA') handlePessoaChange(null);
+                                                else if (novoFiltro === 'CLIENTES_FORNECEDORES') handleCompanyChange(null);
+                                                else {
+                                                    handleCompanyChange(null);
+                                                    handlePessoaChange(null);
+                                                }
+                                            }}
+                                            placeholder="Filtrar"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            label={''}
+                                        />
 
+                                    </div>
+                                    <div className="col-4 mb-0 lg:col-2 p-0">
+                                        <div className="container-BTN-Filter-Created ">
+                                            <FilterOverlay onApply={handleSalvarFiltro} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile" >
+                                                <div className="col-12 lg:col-3 ">
+                                                    <EmpresaDropdownField
+                                                        selectedEmpresa={selectedCompany}
+                                                        onEmpresaChange={handleCompanyChange}
+                                                        hasError={!!errors.selectedCompany}
+                                                        errorMessage={errors.selectedCompany}
+                                                        showAddButton
+                                                        autoSelectSingle={true}
+                                                    />
+
+                                                </div>
+                                                <div className="col-12 lg:col-3">
+                                                    <PessoaDropdownField
+                                                        selectedPessoa={selectedPessoa}
+                                                        onPessoaChange={handlePessoaChange}
+                                                        hasError={!!errors.selectedPessoa}
+                                                        errorMessage={errors.selectedPessoa}
+                                                    />
+
+                                                </div>
+                                            </FilterOverlay>
+                                            {/* {permissaoEmpresa.create && (
+                                                <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
+                                            )} */}
+                                        </div>
+                                    </div>
                                 </div>
-                            </>
-                        )}
-                        {(filterType === 'CLIENTES_FORNECEDORES' || filterType === 'AMBOS') && (
-                            <>
-                                <div className="col-12 lg:col-3 w-2 mt-2">
-                                    <label htmlFor="">Cliente ou Fornecedor:</label>
-                                    <PessoaDropdownField
-                                        selectedPessoa={selectedPessoa}
-                                        onPessoaChange={handlePessoaChange}
-                                        hasError={!!errors.selectedPessoa}
-                                        errorMessage={errors.selectedPessoa}
-                                    />
+                            </div>
+                            <div className="scrollable-container">
+                                {loading && <LoadingScreen loadingText={'Carregando Serviços...'} />}
+                                <div className="row flex w-full">
+                                    <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-3  ">
+                                        <div className="StyleDiv-row-filtro-all w-full ">
+                                            <label className="filter-label">Filtrar por:</label>
+                                            <div style={{ marginBottom: '3px' }}>{filterType && <Button label="Limpar filtro" outlined style={{ height: '3px' }} onClick={handleClearFilters} />}</div>
+                                        </div>
+                                        <div className="col-12 lg:col-3 w-full p-0">
 
+                                        </div>
+                                    </div>
+                                    {(filterType === 'EMPRESA' || filterType === 'AMBOS') && (
+                                        <>
+
+                                        </>
+                                    )}
+                                    {(filterType === 'CLIENTES_FORNECEDORES' || filterType === 'AMBOS') && (
+                                        <>
+
+                                        </>
+                                    )}
                                 </div>
-                            </>
-                        )}
-                    </div>
-                    <div className="grid formgrid relatorio-cards p-3">
-                        <div className="card relatorio-card">
-                            <span className="relatorio-card-title">Valor Bruto</span>
-                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalBruto)}</strong>
-                        </div>
+                                <div className="grid formgrid relatorio-cards" style={{ padding: "0 10px" }}>
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Valor Bruto</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalBruto)}</strong>
+                                    </div>
 
-                        <div className="card relatorio-card">
-                            <span className="relatorio-card-title">Descontos</span>
-                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalDescontos)}</strong>
-                        </div>
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Descontos</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalDescontos)}</strong>
+                                    </div>
 
-                        <div className="card relatorio-card">
-                            <span className="relatorio-card-title">Valor Líquido</span>
-                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalLiquido)}</strong>
-                        </div>
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Valor Líquido</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalLiquido)}</strong>
+                                    </div>
 
-                        <div className="card relatorio-card">
-                            <span className="relatorio-card-title">Cancelados</span>
-                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalCancelados)}</strong>
-                        </div>
-                        <div className="card relatorio-card">
-                            <span className="relatorio-card-title">Não Cancelados</span>
-                            <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalNaoCancelados)}</strong>
-                        </div>
-                    </div>
-                    <div className="grid formgrid ">
-                        <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
-                            <PieChart
-                                title="Status dos Serviços"
-                                type="doughnut"
-                                labels={['Abertas', 'Emitidas', 'Concluídas', 'Canceladas']}
-                                values={[relatorio?.totalAberto || 0, relatorio?.totalEmitido || 0, relatorio?.totalConcluido || 0, relatorio?.totalCancelados || 0]}
-                                legendPosition="bottom"
-                                showPercentOnTooltip
-                                percentDecimals={0}
-                                disableAnimation
-                                colors={['#3B82F6', '#10B981', '#6366F1', '#EF4444']}
-                                hoverColors={['#60A5FA', '#34D399', '#818CF8', '#F97373']}
-                            />
-                        </div>
-                        <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
-                            <PieChart
-                                title="Origem"
-                                type="doughnut"
-                                labels={['Ordem de Serviços', 'Notas Fiscais', 'Serviços']}
-                                values={[relatorio?.totalOs || 0, relatorio?.totalNfse || 0, relatorio?.totalServicos || 0]}
-                                legendPosition="bottom"
-                                showPercentOnTooltip
-                                percentDecimals={0}
-                                disableAnimation
-                                colors={['#3B82F6', '#10B981', '#6366F1']}
-                                hoverColors={['#60A5FA', '#34D399', '#818CF8']}
-                            />
-                        </div>
-                    </div>
-                </div>
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Cancelados</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalCancelados)}</strong>
+                                    </div>
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Não Cancelados</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalNaoCancelados)}</strong>
+                                    </div>
+                                </div>
+                                <div className="grid formgrid mt-3">
+                                    <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
+                                        <PieChart
+                                            title="Status dos Serviços"
+                                            type="doughnut"
+                                            labels={['Abertas', 'Emitidas', 'Concluídas', 'Canceladas']}
+                                            values={[relatorio?.totalAberto || 0, relatorio?.totalEmitido || 0, relatorio?.totalConcluido || 0, relatorio?.totalCancelados || 0]}
+                                            legendPosition="bottom"
+                                            showPercentOnTooltip
+                                            percentDecimals={0}
+                                            disableAnimation
+                                            colors={['#3B82F6', '#10B981', '#6366F1', '#EF4444']}
+                                            hoverColors={['#60A5FA', '#34D399', '#818CF8', '#F97373']}
+                                        />
+                                    </div>
+                                    <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
+                                        <PieChart
+                                            title="Origem"
+                                            type="doughnut"
+                                            labels={['Ordem de Serviços', 'Notas Fiscais', 'Serviços']}
+                                            values={[relatorio?.totalOs || 0, relatorio?.totalNfse || 0, relatorio?.totalServicos || 0]}
+                                            legendPosition="bottom"
+                                            showPercentOnTooltip
+                                            percentDecimals={0}
+                                            disableAnimation
+                                            colors={['#3B82F6', '#10B981', '#6366F1']}
+                                            hoverColors={['#60A5FA', '#34D399', '#818CF8']}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+
+                    )}
+                    {isDesktop && (
+                        <>
+                            <div className="scrollable-container">
+                                {loading && <LoadingScreen loadingText={'Carregando Serviços...'} />}
+                                <div className="row flex w-full">
+                                    <div className="col-12 mb-1 lg:col-3 lg:mb-0 w-3  ">
+                                        <div className="StyleDiv-row-filtro-all w-full ">
+                                            <label className="filter-label">Filtrar por:</label>
+                                            <div style={{ marginBottom: '3px' }}>{filterType && <Button label="Limpar filtro" outlined style={{ height: '3px' }} onClick={handleClearFilters} />}</div>
+                                        </div>
+                                        <div className="col-12 lg:col-3 w-full p-0">
+                                            <Dropdown
+                                                value={filterType}
+                                                options={filterOptions}
+                                                onChange={(e) => {
+                                                    const novoFiltro = e.value as string | null;
+                                                    setFilterType(novoFiltro);
+                                                    if (novoFiltro === 'EMPRESA') handlePessoaChange(null);
+                                                    else if (novoFiltro === 'CLIENTES_FORNECEDORES') handleCompanyChange(null);
+                                                    else {
+                                                        handleCompanyChange(null);
+                                                        handlePessoaChange(null);
+                                                    }
+                                                }}
+                                                placeholder="Filtrar"
+                                                optionLabel="label"
+                                                optionValue="value"
+                                                label={''}
+                                            />
+                                        </div>
+                                    </div>
+                                    {(filterType === 'EMPRESA' || filterType === 'AMBOS') && (
+                                        <>
+                                            <div className="col-12 lg:col-3 w-3">
+                                                <EmpresaDropdownField
+                                                    selectedEmpresa={selectedCompany}
+                                                    onEmpresaChange={handleCompanyChange}
+                                                    hasError={!!errors.selectedCompany}
+                                                    errorMessage={errors.selectedCompany}
+                                                    showAddButton
+                                                    autoSelectSingle={true}
+                                                />
+
+                                            </div>
+                                        </>
+                                    )}
+                                    {(filterType === 'CLIENTES_FORNECEDORES' || filterType === 'AMBOS') && (
+                                        <>
+                                            <div className="col-12 lg:col-3 w-3">
+                                                <PessoaDropdownField
+                                                    selectedPessoa={selectedPessoa}
+                                                    onPessoaChange={handlePessoaChange}
+                                                    hasError={!!errors.selectedPessoa}
+                                                    errorMessage={errors.selectedPessoa}
+                                                />
+
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                                <div className="grid formgrid relatorio-cards" style={{ padding: "0 10px" }}>
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Valor Bruto</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalBruto)}</strong>
+                                    </div>
+
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Descontos</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalDescontos)}</strong>
+                                    </div>
+
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Valor Líquido</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalLiquido)}</strong>
+                                    </div>
+
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Cancelados</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalCancelados)}</strong>
+                                    </div>
+                                    <div className="card relatorio-card">
+                                        <span className="relatorio-card-title">Não Cancelados</span>
+                                        <strong className="relatorio-card-value">{formatCurrency(relatorio?.valorTotalNaoCancelados)}</strong>
+                                    </div>
+                                </div>
+                                <div className="grid formgrid mt-3">
+                                    <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
+                                        <PieChart
+                                            title="Status dos Serviços"
+                                            type="doughnut"
+                                            labels={['Abertas', 'Emitidas', 'Concluídas', 'Canceladas']}
+                                            values={[relatorio?.totalAberto || 0, relatorio?.totalEmitido || 0, relatorio?.totalConcluido || 0, relatorio?.totalCancelados || 0]}
+                                            legendPosition="bottom"
+                                            showPercentOnTooltip
+                                            percentDecimals={0}
+                                            disableAnimation
+                                            colors={['#3B82F6', '#10B981', '#6366F1', '#EF4444']}
+                                            hoverColors={['#60A5FA', '#34D399', '#818CF8', '#F97373']}
+                                        />
+                                    </div>
+                                    <div className="col-12 mb-1 lg:col-6 lg:mb-0 ">
+                                        <PieChart
+                                            title="Origem"
+                                            type="doughnut"
+                                            labels={['Ordem de Serviços', 'Notas Fiscais', 'Serviços']}
+                                            values={[relatorio?.totalOs || 0, relatorio?.totalNfse || 0, relatorio?.totalServicos || 0]}
+                                            legendPosition="bottom"
+                                            showPercentOnTooltip
+                                            percentDecimals={0}
+                                            disableAnimation
+                                            colors={['#3B82F6', '#10B981', '#6366F1']}
+                                            hoverColors={['#60A5FA', '#34D399', '#818CF8']}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )
+                    }
+                </>
             </div>
         </div>
+
     );
 };
 export default RelatoriosServicos;
+function fetchRelatorioRecebimentos(arg0: { idEmpresa: number | null; idCliente: number | null; dataInicio: string | null; dataFim: string | null; }) {
+    throw new Error('Function not implemented.');
+}
+

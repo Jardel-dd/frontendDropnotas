@@ -20,6 +20,9 @@ import { useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { ContratoFormCreated } from '@/app/(main)/contrato/form/controller';
 import { handleSearchCep } from '@/app/components/seachs/searchCep/controller';
 import { handleSearchCNPJ } from '@/app/components/seachs/searchCnpj/controller';
+import { SectionCard, SectionGrid } from '@/app/components/cardForm/SectionCard';
+import { useSectionCardFlow } from '@/app/components/cardForm/useSectionCardFlow';
+import { pessoaSectionFlowConfig } from '../pessoaUtilsExport/pessoaSectionFlowConfig';
 import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 import EnderecoForm from '@/app/components/enderecos/enderecoFormComponent/enderecoForm';
 import { validateFieldsPessoa } from '@/app/(main)/cadastro/pessoas/controller/validate';
@@ -27,83 +30,17 @@ import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn
 import VendedorDropdownField from '@/app/(main)/cadastro/vendedores/dropDown/DropdownVendedor';
 import { ContratoFormRef, PreloadedContratoData } from '@/app/(main)/contrato/types/contratos';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { fetchAllCnae, fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 import BTNPGCreatedDialog from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-dialog';
+import { buildContratoSelectionFromResumo } from '../pessoaUtilsExport/buildContratoSelectionFromResumo';
 import { createdPessoa, fetchPessoasById, updatePessoa } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { fetchAllCnae, fetchFilteredCnae, findCNAEByCodigo } from '@/app/components/fetchAll/listAllCnae/controller';
 import { FormPessoaCreatedProps, mapPessoaContatoToSelection, PessoaFormProps, PessoaFormRef } from '../types/pessoa';
 import { fetchFilteredVendedor, fetchVendedor, fetchVendedorMobilePage, listTheVendedor } from '@/app/(main)/cadastro/vendedores/controller/controller';
 import { fetchContratoByID, fetchContratoMobilePage, fetchContratosById, fetchFilteredContrato, listTheContrato } from '@/app/(main)/contrato/controller/controller';
-import { SectionCard, SectionGrid } from '@/app/components/cardForm/SectionCard';
-import { useSectionCardFlow } from '@/app/components/cardForm/useSectionCardFlow';
+import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
+import { CompanyEntity } from '@/app/entity/CompanyEntity';
+import { fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 
-const mapContatoSelectionToFlags = (selectedContato: string[]) => ({
-    pessoa_cliente: selectedContato.includes('pessoa_cliente'),
-    pessoa_fornecedor: selectedContato.includes('pessoa_fornecedor')
-});
-const buildContratoSelectionFromResumo = (contratoResumo: Partial<ContratoEntity> | null | undefined, contratoId?: number | null) => {
-    const resolvedContratoId = contratoResumo?.id ?? contratoId ?? null;
-
-    if (!resolvedContratoId) {
-        return null;
-    }
-    return new ContratoEntity({
-        id: resolvedContratoId,
-        descricao: contratoResumo?.descricao ?? '',
-        valor_servico: contratoResumo?.valor_servico ?? null,
-        periodicidade: contratoResumo?.periodicidade ?? '',
-        emitir_boleto: contratoResumo?.emitir_boleto ?? false,
-        enviar_email: contratoResumo?.enviar_email ?? false,
-        enviar_whatsapp: contratoResumo?.enviar_whatsapp ?? false,
-        id_servico: contratoResumo?.id_servico ?? null,
-        id_empresa: contratoResumo?.id_empresa ?? null,
-        id_categoria_contrato: contratoResumo?.id_categoria_contrato ?? null,
-        id_forma_pagamento: contratoResumo?.id_forma_pagamento ?? null,
-        id_clientes_contrato: contratoResumo?.id_clientes_contrato ?? [0]
-    });
-};
-
-const pessoaSectionFlowConfig = [
-    {
-        id: 'dados-cliente',
-        errorFields: [
-            'tipoPessoa',
-            'cnpj',
-            'cpf',
-            'rg',
-            'razao_social',
-            'nome_fantasia',
-            'documento_estrangeiro',
-            'pais',
-            'selectedRegime',
-            'contribuinte',
-            'inscricao_estadual',
-            'inscricao_municipal',
-            'atividade_principal',
-            'cnae_fiscal',
-            'selectedContato',
-            'email'
-        ]
-    },
-    {
-        id: 'relacoes',
-        errorFields: ['selectedContrato', 'selectedVendedor']
-    },
-    {
-        id: 'endereco',
-        errorFields: [
-            'cep',
-            'logradouro',
-            'numero',
-            'bairro',
-            'uf',
-            'municipio',
-            'codigo_municipio',
-            'codigo_pais',
-            'nome_pais',
-            'telefone'
-        ]
-    }
-];
 const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
     (
         {
@@ -160,6 +97,49 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 ativo: true
             })
         );
+        const [empresa, setEmpresa] = useState<CompanyEntity>(
+            new CompanyEntity({
+                id: 0,
+                id_usuarios_acesso: [],
+                cnpj: '',
+                razao_social: '',
+                nome_fantasia: '',
+                logo_empresa: '',
+                atividade_principal: '',
+                inscricao_estadual: '',
+                inscricao_municipal: '',
+                codigo_regime_tributario: '',
+                tipo_rps: '',
+                endereco: {} as EnderecoEntity,
+                cnaes_secundarios: ['0'],
+                certificado_digital: '',
+                data_vencimento_certificado_digital: '',
+                senha_certificado_digital: '',
+                nome_certificado_digital: '',
+                serie_emissao_nfse: '',
+                proximo_numero_rps: null,
+                proximo_numero_lote: null,
+                aliquota_iss: null,
+                percentual_tributos_simples_nacional: 0,
+                cnae_fiscal: '',
+                prestacao_sus: false,
+                regime_especial_tributacao: '',
+                incentivo_fiscal: false,
+                email: '',
+                telefone: '',
+                ativo: true,
+                aliquota_pis: 0,
+                aliquota_cofins: 0,
+                aliquota_inss: 0,
+                aliquota_ir: 0,
+                aliquota_csll: 0,
+                aliquota_outras_retencoes: 0,
+                aliquota_deducoes: 0,
+                percentual_desconto_incondicionado: 0,
+                percentual_desconto_condicionado: 0
+            })
+        );
+        const [empresasOptions, setEmpresasOptions] = useState<CompanyEntity[]>([]);
         const [reloadKeyVendedor, setReloadKeyVendedor] = useState(0);
         const [vendedorDialogKey, setVendedorDialogKey] = useState(0);
         const [contratoDialogKey, setContratoDialogKey] = useState(0);
@@ -175,10 +155,15 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
         const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
         const [selectedContrato, setSelectedContrato] = useState<ContratoEntity | null>(null);
+        const [selectedEmpresa, setSelectedEmpresa] = useState<CompanyEntity[]>([]);
         const [selectedVendedor, setSelectedVendedor] = useState<VendedorEntity | null>(null);
         const [preloadedVendedor, setPreloadedVendedor] = useState<VendedorEntity | null>(null);
         const [preloadedContrato, setPreloadedContrato] = useState<PreloadedContratoData | null>(null);
         const [stateDisableBtnCreatedClienteFornecedor, setStateDisableBtnCreatedClienteFornecedor] = useState(false);
+        const mapContatoSelectionToFlags = (selectedContato: string[]) => ({
+            pessoa_cliente: selectedContato.includes('pessoa_cliente'),
+            pessoa_fornecedor: selectedContato.includes('pessoa_fornecedor')
+        });
         const [contrato, setContrato] = useState<ContratoEntity>(
             new ContratoEntity({
                 ativo: true,
@@ -242,7 +227,6 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             shouldFetchFallback = true
         ) => {
             const contratoPreselecionado = buildContratoSelectionFromResumo(contratoResumo, contratoId);
-
             if (contratoPreselecionado) {
                 setSelectedContrato(contratoPreselecionado);
                 return;
@@ -565,6 +549,53 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setTouchedFields((prev) => ({ ...prev, cnpj: true }));
             validatePessoaForm();
         };
+        const clearError = (field: string) => {
+            setErrors((prevErrors) => {
+                const newErrors = { ...prevErrors };
+                delete newErrors[field];
+                return newErrors;
+            });
+        };
+        const handleCompanyChange = (event: MultiSelectChangeEvent) => {
+    const selected = event.value as CompanyEntity[];
+
+    console.log('===== SELEÇÃO DE EMPRESAS =====');
+    console.log('Empresas selecionadas:', selected);
+
+    const selectedIds = selected.map((company) => company.id);
+
+    console.log('IDs das empresas selecionadas:', selectedIds);
+
+    console.log('Dados enviados para handleAllChanges:', {
+        target: {
+            id: 'id_empresa',
+            value: selectedIds,
+            type: 'input'
+        }
+    });
+
+    setSelectedEmpresa(selected);
+
+    handleAllChanges({
+        target: {
+            id: 'id_empresa',
+            value: selectedIds,
+            type: 'input'
+        }
+    });
+
+    clearError('selectedEmpresa');
+};
+        // const handleCompanyChange = (event: MultiSelectChangeEvent) => {
+        //     const selected = event.value as CompanyEntity[];
+        //     const selectedIds = selected.map((company) => company.id);
+
+        //     setSelectedEmpresa(selected);
+        //     handleAllChanges({
+        //         target: { id: 'id_empresa', value: selectedIds, type: 'input' }
+        //     });
+        //     clearError('selectedEmpresa');
+        // };
         const handleSearchPessoaCnpj = async () => {
             setLoadingCnpj(true);
             try {
@@ -744,7 +775,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                     />
                                 </SectionGrid>
                             </SectionCard>
-                           
+
                             <SectionCard
                                 icon={<i className="pi pi-map-marker" />}
                                 title="Endereço"
@@ -770,7 +801,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                     />
                                 </SectionGrid>
                             </SectionCard>
-                             <SectionCard
+                            <SectionCard
                                 icon={<i className="pi pi-link" />}
                                 title="Relações"
                                 collapsible
@@ -821,9 +852,33 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                                         autoLoadAndSelectSingle
                                                     />
                                                 </div>
+
                                             </>
                                         ) : (
                                             <>
+                                                <div className="col-4 lg:col-4">
+                                                    <CustomMultiSelect
+                                                        id="selectedEmpresa"
+                                                        selectedItems={selectedEmpresa}
+                                                        onChange={handleCompanyChange}
+                                                        options={empresasOptions}
+                                                        optionLabel="razao_social"
+                                                        dataKey="id"
+                                                        placeholder="Selecione as Empresas"
+                                                        maxSelectedLabels={3}
+                                                        fetchFilteredItems={fetchFilteredEmpresa}
+                                                        fetchAllItems={listTheEmpresa}
+                                                        hasError={!!errors.selectedEmpresa}
+                                                        errorMessage={errors.selectedEmpresa}
+                                                        showChips
+                                                        autoSelectSingle
+                                                        showAddButton
+                                                        topLabel="Empresa"
+                                                        showTopLabel
+                                                        required
+                                                    />
+
+                                                </div>
                                                 <div className="col-4 lg:col-4">
                                                     <ContratoDropdownField
                                                         selectedContrato={selectedContrato}

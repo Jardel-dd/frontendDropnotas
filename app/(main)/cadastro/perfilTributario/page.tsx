@@ -59,7 +59,7 @@ function PerfilTributario() {
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
-    const { permissaoServico } = usePermissions();
+    const { permissaoPerfilTributario } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
 
@@ -302,7 +302,7 @@ function PerfilTributario() {
                                         onChange={handleCheckboxChange}
                                     />
                                 </FilterOverlay>
-                                {permissaoServico.create && (
+                                {permissaoPerfilTributario.create && (
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 )}
                             </div>
@@ -361,7 +361,7 @@ function PerfilTributario() {
                                         />
                                     </FilterOverlay>
                                 </div>
-                                {permissaoServico.create && (
+                                {permissaoPerfilTributario.create && (
                                     <div className="container-button-primary-novo">
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>

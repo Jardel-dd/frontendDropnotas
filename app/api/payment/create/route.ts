@@ -119,7 +119,7 @@ export async function POST(request: Request) {
         !body.billingDocument?.trim() ||
         !(body.billingDocumentType === 'cpf' ? isValidCpf(body.billingDocument) : isValidCnpj(body.billingDocument))
     ) {
-        return jsonNoStore({ message: body.billingDocumentType === 'cpf' ? 'Informe um CPF valído.' : 'Informe um CNPJ valído.' }, 400);
+        return jsonNoStore({ message: body.billingDocumentType === 'cpf' ? 'Informe um CPF válido.' : 'Informe um CNPJ válido.' }, 400);
     }
 
     if (!body.billingDisplayName?.trim() || body.billingDisplayName.trim().length < 3) {
@@ -130,7 +130,7 @@ export async function POST(request: Request) {
     }
 
     if (!body.billingZipCode?.trim() || digitsOnly(body.billingZipCode).length !== 8) {
-        return jsonNoStore({ message: 'Informe um CEP valído para a cobrança.' }, 400);
+        return jsonNoStore({ message: 'Informe um CEP válido para a cobrança.' }, 400);
     }
 
     if (!body.billingAddress || typeof body.billingAddress !== 'object') {

@@ -207,7 +207,7 @@ export const validateCheckoutForm = ({
     }
 
     if (!isValidZipCode(billing.endereco?.cep ?? '')) {
-        nextErrors.cep = 'Informe um CEP valído com 8 dígito.';
+        nextErrors.cep = 'Informe um CEP válido com 8 dígito.';
     }
 
     if (!billing.endereco?.logradouro?.trim()) {

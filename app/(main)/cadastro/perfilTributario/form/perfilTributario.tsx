@@ -6,12 +6,11 @@ import Dropdown from '@/app/shared/include/dropdown/dropdown';
 import { TableService } from '@/app/entity/TableServiceEntity';
 import { TableCNAEEntity } from '@/app/entity/TableCNAEEntity';
 import { TableCodigoNBSEntity } from '@/app/entity/TableCodigoNBS';
-import { PerfilTributarioFieldsProps } from '../types/perfilTributario';
 import CustomInputNumber from '@/app/shared/include/inputReal/inputReal';
 import { DropdownSearch } from '@/app/shared/include/dropdown/searchDropdownAll';
-import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
-import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import EmpresaDropdownField from '@/app/(main)/configuracoes/empresas/dropDown/empresa';
+import { TableClassificacaoTributariaEntity } from '@/app/entity/TableClassificacaoTributariaEntity';
+import { EmpresaPerfilTributarioFieldsProps, PerfilTributarioFieldsProps } from '../types/perfilTributario';
 import { PerfilTributarioRecommendationOption, PerfilTributarioRecommendations } from '../types/perfilTributario';
 import { codigoIndicadorOperacao, codigoSituacaoTributariaRegular, exigibilidadeISSServico, IndicadorDestinatario, issRetido, responsavelRetencao, situacaoTributaria } from '@/app/shared/optionsDropDown/options';
 
@@ -41,26 +40,6 @@ export function NomeFields({
         </div>
     );
 }
-
-interface EmpresaPerfilTributarioFieldsProps {
-    perfilTributario: PerfilTributarioFieldsProps['perfilTributario'];
-    errors: Record<string, string>;
-    selectedEmpresa: CompanyEntity | null;
-    selectedCodigoCNAE: TableCNAEEntity | null;
-    selectedCodigoNBS: TableCodigoNBSEntity | null;
-    selectedCodigoServico: TableService | null;
-    selectedClassificacaoTributaria: TableClassificacaoTributariaEntity | null;
-    recommendations: PerfilTributarioRecommendations | null;
-    isLoadingRecommendations: boolean;
-    recommendationsError: string | null;
-    onEmpresaChange: (empresa: CompanyEntity | null) => void;
-    onCodigoServicoChange: (service: TableService | null) => void;
-    onCodigoNBSChange: (codigoNBS: TableCodigoNBSEntity | null) => void;
-    onCodigoCNAEChange: (codigoCNAE: TableCNAEEntity | null) => void;
-    onClassificacaoTributariaChange: (classificacaoTributaria: TableClassificacaoTributariaEntity | null) => void;
-    onDropdownChange: PerfilTributarioFieldsProps['onDropdownChange'];
-}
-
 const filterRecommendedOptions = <T extends { codigo: string; descricao: string }>(
     options: T[]
 ) => async (filter: string): Promise<T[]> => {
@@ -251,7 +230,6 @@ export function EmpresaPerfilTributarioFields({
         </div>
     );
 }
-
 export function PerfilTributarioFields({
     perfilTributario,
     errors,

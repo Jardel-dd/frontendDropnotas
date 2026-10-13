@@ -49,67 +49,94 @@ export const createEmptyPerfilUser = () =>
         ativo: true,
         id: 0,
         nome: '',
+
         perfilUsuario: false,
         perfilUsuarioCadastrar: false,
         perfilUsuarioAlterar: false,
         perfilUsuarioDesativar: false,
         perfilUsuarioPesquisar: false,
+
         usuarioConta: false,
         usuarioContaCadastrar: false,
         usuarioContaAlterar: false,
         usuarioContaDesativar: false,
         usuarioContaPesquisar: false,
+
         empresa: false,
         empresaCadastrar: false,
         empresaAlterar: false,
         empresaDesativar: false,
         empresaPesquisar: false,
+
         pessoa: false,
         pessoaCadastrar: false,
         pessoaAlterar: false,
         pessoaDesativar: false,
         pessoaPesquisar: false,
+
         vendedor: false,
         vendedorCadastrar: false,
         vendedorAlterar: false,
         vendedorDesativar: false,
         vendedorPesquisar: false,
+
         servico: false,
         servicoCadastrar: false,
         servicoAlterar: false,
         servicoDesativar: false,
         servicoPesquisar: false,
+
         ordemServico: false,
         ordemServicoCadastrar: false,
         ordemServicoAlterar: false,
         ordemServicoDesativar: false,
         ordemServicoPesquisar: false,
         ordemServicoTipoVisualizacao: '',
+
         contrato: false,
         contratoCadastrar: false,
         contratoAlterar: false,
         contratoDesativar: false,
         contratoPesquisar: false,
         contratoTipoVisualizacao: '',
+
         categoriaContrato: false,
         categoriaContratoCadastrar: false,
         categoriaContratoAlterar: false,
         categoriaContratoDesativar: false,
         categoriaContratoPesquisar: false,
+
         formaPagamento: false,
         formaPagamentoCadastrar: false,
         formaPagamentoAlterar: false,
         formaPagamentoDesativar: false,
         formaPagamentoPesquisar: false,
+
         nfseCadastrar: false,
         nfseAlterar: false,
         nfseDesativar: false,
         nfsePesquisar: false,
+        nfseTipoVisualizacao: '',
+
         integracaoCadastrar: false,
         integracaoAlterar: false,
         integracaoDesativar: false,
         integracaoPesquisar: false,
-        nfseTipoVisualizacao: ''
+        
+        perfilTributario:false,
+        perfilTributarioCadastrar :false,
+        perfilTributarioAlterar: false,
+        perfilTributarioDesativar:false,
+        perfilTributarioPesquisar:false,
+
+
+        relatorio:false,
+        relatorioRecebimento:false,
+        relatorioServico:false,
+
+
+        
+
 });
 export type FormCreatedPermissoesProps = PermissoesFieldsProps | PermissoesFormProps;
 export const buildAllSelectedKeys = (): TreeCheckboxSelectionKeys => {

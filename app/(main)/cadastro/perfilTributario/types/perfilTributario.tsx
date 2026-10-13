@@ -1,19 +1,38 @@
 import { Messages } from "primereact/messages";
 import { DropdownChangeEvent } from "primereact/dropdown";
 import { ServiceEntity } from "@/app/entity/ServiceEntity";
+import { CompanyEntity } from "@/app/entity/CompanyEntity";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { TableService } from "@/app/entity/TableServiceEntity";
 import { TableCNAEEntity } from "@/app/entity/TableCNAEEntity";
 import { TableCodigoNBSEntity } from "@/app/entity/TableCodigoNBS";
 import { InputNumberValueChangeEvent } from "primereact/inputnumber";
-import { TableClassificacaoTributariaEntity } from "@/app/entity/TableClassificacaoTributariaEntity";
 import { PerfilTributarioEntity } from "@/app/entity/perfilTributarioEntity";
+import { TableClassificacaoTributariaEntity } from "@/app/entity/TableClassificacaoTributariaEntity";
 
 export interface PerfilTributarioRecommendationOption {
     codigo: string;
     descricao: string;
     codigo_cst?: string | null;
     prioridade?: number | null;
+}
+export interface EmpresaPerfilTributarioFieldsProps {
+    perfilTributario: PerfilTributarioFieldsProps['perfilTributario'];
+    errors: Record<string, string>;
+    selectedEmpresa: CompanyEntity | null;
+    selectedCodigoCNAE: TableCNAEEntity | null;
+    selectedCodigoNBS: TableCodigoNBSEntity | null;
+    selectedCodigoServico: TableService | null;
+    selectedClassificacaoTributaria: TableClassificacaoTributariaEntity | null;
+    recommendations: PerfilTributarioRecommendations | null;
+    isLoadingRecommendations: boolean;
+    recommendationsError: string | null;
+    onEmpresaChange: (empresa: CompanyEntity | null) => void;
+    onCodigoServicoChange: (service: TableService | null) => void;
+    onCodigoNBSChange: (codigoNBS: TableCodigoNBSEntity | null) => void;
+    onCodigoCNAEChange: (codigoCNAE: TableCNAEEntity | null) => void;
+    onClassificacaoTributariaChange: (classificacaoTributaria: TableClassificacaoTributariaEntity | null) => void;
+    onDropdownChange: PerfilTributarioFieldsProps['onDropdownChange'];
 }
 
 export interface PerfilTributarioRecommendationCorrelation {

@@ -101,17 +101,17 @@ export function ListarComissoes({
                                       },
                                       {
                                           field: 'data_hora_venda',
-                                          header: 'Data da Venda',
+                                          header: 'Venda',
                                           body: (data) => formatarData(data.data_hora_venda)
                                       },
                                       {
                                           field: 'data_hora_fechamento',
-                                          header: 'Data do Fechamento',
+                                          header: 'Fechamento',
                                           body: (data) => formatarData(data.data_hora_fechamento)
                                       },
                                       {
                                           field: 'valor_venda',
-                                          header: 'Valor da Venda',
+                                          header: 'Valor Venda',
                                           body: (data) => formatarMoeda(data.valor_venda)
                                       }
                                   ]

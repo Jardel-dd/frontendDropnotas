@@ -184,7 +184,6 @@
   .card :global(.p-card-body) {
     padding: 0 1rem !important;
   }
-
   .grid {
     grid-template-columns: 1fr;
   }

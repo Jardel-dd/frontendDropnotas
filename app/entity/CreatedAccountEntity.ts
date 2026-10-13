@@ -71,6 +71,16 @@ export interface PerfilUsuario {
     nfseDesativar?: boolean;
     nfsePesquisar?: boolean;
     permiteAlterarConfiguracoes?: boolean;
+
+      perfilTributario?: boolean;
+        perfilTributarioCadastrar?: boolean;
+        perfilTributarioAlterar?: boolean;
+        perfilTributarioDesativar?: boolean;
+        perfilTributarioPesquisar?: boolean;
+
+        relatorio?: boolean;
+        relatorioServico?: boolean;
+        relatorioRecebimento?: boolean;
 }
 export class CreatedAccountEntity {
     cnpj!: string;

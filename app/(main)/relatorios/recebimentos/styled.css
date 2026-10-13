@@ -93,14 +93,34 @@
   flex-direction: column;
 }
 
-
-
 .ant-picker-dropdown-range .ant-picker-presets {
   order: 2;
   width: 100%;
   margin-top: 8px;
   height: 100px
 }
+
+.filter-header{
+  display: flex;
+  align-items: center;         
+  justify-content: space-between;
+  width: 100%;
+  min-height: 20px;            
+  margin: 0;
+  padding: 0;
+}
+
+.filter-label{
+  margin: 0;
+}
+
+.btn-clear-filter.p-button{
+  padding: 0.15rem 0.5rem;    
+  line-height: 1;            
+  height: auto;               
+  min-height: unset;
+}
+
 
 .ant-picker-dropdown-range .ant-picker-presets ul {
   display: flex;
