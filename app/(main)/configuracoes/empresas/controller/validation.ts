@@ -48,7 +48,7 @@ export const validateFieldsEmpresas = (
     newErrors.email = getEmpresaEmailError(empresa.email) || 'Informe um e-mail válido.';
     valid = false;
     } else if (!empresa.endereco?.cep || empresa.endereco.cep.replace(/\D/g, '').length < 8) {
-        newErrors.cep = 'Inclua um Cep valído';
+        newErrors.cep = 'Inclua um Cep válido';
         valid = false;
     } else if (!empresa.endereco?.logradouro || empresa.endereco.logradouro.length < 2) {
         newErrors.logradouro = 'Digite pelo menos 2 caracteres.';

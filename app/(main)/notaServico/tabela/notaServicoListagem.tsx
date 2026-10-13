@@ -314,7 +314,6 @@ export function ListarNotaServico({
                                                             </span>
                                                         </div>
                                                         <div className="nota-servico-mobile-card-detail nota-servico-mobile-card-status-detail">
-                                                            <span className="nota-servico-mobile-card-label">Status</span>
                                                             <span
                                                                 className={`nota-servico-mobile-status ${StatusNota(
                                                                     nota.status_nota ?? ''

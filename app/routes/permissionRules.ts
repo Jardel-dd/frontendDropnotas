@@ -1,48 +1,10 @@
 import type { MenuModel } from '@/types';
 import type { PerfilUsuario } from '@/app/entity/CreatedAccountEntity';
 import type { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
-
-export type PermissionAction = 'view' | 'create' | 'update' | 'delete' | 'search';
-
-export type PermissionResourceKey =
-    | 'dashboard'
-    | 'perfilUsuario'
-    | 'usuarioConta'
-    | 'empresa'
-    | 'pessoa'
-    | 'vendedor'
-    | 'servico'
-    | 'ordemServico'
-    | 'contrato'
-    | 'categoriaContrato'
-    | 'formaPagamento'
-    | 'integracao'
-    | 'nfse'
-    | 'financeiro'
-    | 'configuracoes'
-    | 'is_usuario_principal';
-
-export type PermissionFlags = {
-    view: boolean;
-    create: boolean;
-    update: boolean;
-    delete: boolean;
-    search: boolean;
-};
-
-type PermissionDefinition = {
-    viewKey?: keyof PerfilUsuario;
-    fallbackViewKeys?: Array<keyof PerfilUsuario>;
-    defaultView?: boolean;
-    createKey?: keyof PerfilUsuario;
-    updateKey?: keyof PerfilUsuario;
-    deleteKey?: keyof PerfilUsuario;
-    searchKey?: keyof PerfilUsuario;
-};
+import { PermissionAction, PermissionDefinition, PermissionFlags, PermissionResourceKey } from './typesPermissoes';
 
 const permissionDefinitions: Record<PermissionResourceKey, PermissionDefinition> = {
     dashboard: {
-        viewKey: 'empresa'
     },
     perfilUsuario: {
         viewKey: 'perfilUsuario',
@@ -114,13 +76,6 @@ const permissionDefinitions: Record<PermissionResourceKey, PermissionDefinition>
         deleteKey: 'formaPagamentoDesativar',
         searchKey: 'formaPagamentoPesquisar'
     },
-    integracao: {
-        viewKey: 'integracao',
-        createKey: 'integracaoCadastrar',
-        updateKey: 'integracaoAlterar',
-        deleteKey: 'integracaoDesativar',
-        searchKey: 'integracaoPesquisar'
-    },
     nfse: {
         viewKey: 'nfse',
         createKey: 'nfseCadastrar',
@@ -128,7 +83,30 @@ const permissionDefinitions: Record<PermissionResourceKey, PermissionDefinition>
         deleteKey: 'nfseDesativar',
         searchKey: 'nfsePesquisar'
     },
-    financeiro: {
+      integracao: {
+        viewKey: 'integracao',
+        createKey: 'integracaoCadastrar',
+        updateKey: 'integracaoAlterar',
+        deleteKey: 'integracaoDesativar',
+        searchKey: 'integracaoPesquisar'
+    },
+     perfilTributario: {
+        viewKey: 'perfilTributario',
+        createKey: 'perfilTributarioCadastrar',
+        updateKey: 'perfilTributarioAlterar',
+        deleteKey: 'perfilTributarioDesativar',
+        searchKey: 'perfilTributarioPesquisar'
+    },
+     relatorio: {
+        viewKey: 'relatorio',
+    },
+      relatorioServico: {
+        viewKey: 'relatorioServico',
+    },
+       relatorioRecebimento: {
+        viewKey: 'relatorioRecebimento',
+    },
+      financeiro: {
         viewKey: 'financeiro',
         defaultView: true
     },
@@ -140,7 +118,6 @@ const permissionDefinitions: Record<PermissionResourceKey, PermissionDefinition>
         defaultView: false
     }
 };
-
 const normalizePermissionValue = (value: unknown) => {
     if (typeof value === 'boolean') {
         return value;
@@ -172,7 +149,6 @@ const normalizePermissionValue = (value: unknown) => {
 
     return false;
 };
-
 const readActionPermission = (perfilUsuario: PerfilUsuario | undefined, key?: keyof PerfilUsuario) => {
     if (!perfilUsuario || !key) {
         return false;
@@ -180,7 +156,6 @@ const readActionPermission = (perfilUsuario: PerfilUsuario | undefined, key?: ke
 
     return normalizePermissionValue(perfilUsuario[key]);
 };
-
 const readViewPermission = (perfilUsuario: PerfilUsuario | undefined, definition: PermissionDefinition) => {
     if (!perfilUsuario) {
         return false;
@@ -198,11 +173,9 @@ const readViewPermission = (perfilUsuario: PerfilUsuario | undefined, definition
 
     return definition.defaultView ?? false;
 };
-
 const readPrimaryUserPermission = (userConta: UsuarioContaEntity | null) => {
     return normalizePermissionValue(userConta?.is_usuario_principal);
 };
-
 export const getPermissionFlags = (userConta: UsuarioContaEntity | null, resource: PermissionResourceKey): PermissionFlags => {
     if (resource === 'is_usuario_principal') {
         return {
@@ -225,11 +198,9 @@ export const getPermissionFlags = (userConta: UsuarioContaEntity | null, resourc
         search: readActionPermission(perfilUsuario, definition.searchKey)
     };
 };
-
 export const hasPermissionAccess = (userConta: UsuarioContaEntity | null, resource: PermissionResourceKey, action: PermissionAction = 'view') => {
     return getPermissionFlags(userConta, resource)[action];
 };
-
 export const filterVisibleMenuItems = (items: MenuModel[]): MenuModel[] => {
     return items.flatMap((item) => {
         if (item.visible === false) {

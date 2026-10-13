@@ -453,7 +453,7 @@ export const PerfilTributarioFormContainer = forwardRef<PerfilTributarioFormRef,
             onLoadingChange?.(isLoading || isLoadingBtnCreated);
         }, [isLoading, isLoadingBtnCreated, onLoadingChange]);
         if (isLoading && initialId) {
-            return <LoadingScreen loadingText="Carregando informações do serviço selecionado..." />;
+            return <LoadingScreen loadingText="Carregando informações do Perfil Tributário selecionado..." />;
         }
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
         const isSubmitDisabledByValidation = Object.keys(getPerfilTributarioValidationErrors(perfilTributario)).length > 0;

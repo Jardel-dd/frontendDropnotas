@@ -64,7 +64,17 @@ export const permissionsMap: Record<string, BooleanKeysOf<PerfilUser>> = {
     '11-0': 'integracaoCadastrar',
     '11-1': 'integracaoAlterar',
     '11-2': 'integracaoDesativar',
-    '11-3': 'integracaoPesquisar'
+    '11-3': 'integracaoPesquisar',
+
+    '12-0': 'perfilTributarioCadastrar',
+    '12-1': 'perfilTributarioAlterar',
+    '12-2': 'perfilTributarioDesativar',
+    '12-3': 'perfilTributarioPesquisar',
+
+    '13-0': 'relatorio',
+    '13-1': 'relatorioServico',
+    '13-2': 'relatorioRecebimento',
+
 };
 export const getFormattedPermissions = (selectedKeys: TreeCheckboxSelectionKeys): Partial<PerfilUser> => {
     const permissions = Object.keys(permissionsMap).reduce<Partial<PerfilUser>>((acc, key) => {

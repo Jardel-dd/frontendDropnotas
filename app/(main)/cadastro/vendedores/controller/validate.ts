@@ -10,7 +10,7 @@ export const validateFieldsVendedor = (
     let valid = true;
     if (vendedor.tipo_pessoa === 'PESSOA_JURIDICA') {
         if (!vendedor.cnpj || vendedor.cnpj.replace(/\D/g, '').length < 14) {
-            newErrors.cnpj = 'Inclua um CNPJ valído.';
+            newErrors.cnpj = 'Inclua um CNPJ válido.';
         }
         else if (!vendedor.razao_social || vendedor.razao_social.trim().length < 2) {
             newErrors.razao_social = 'Digite pelo menos 2 caracteres.';
@@ -41,11 +41,11 @@ export const validateFieldsVendedor = (
             valid = false;
         }
         else if (!vendedor.endereco?.uf) {
-            newErrors.uf = 'Este Campo deve ser selecionado.';
+            newErrors.uf = 'Este campo deve ser selecionado.';
             valid = false;
         }
         else if (!vendedor.endereco?.municipio) {
-            newErrors.municipio = 'Este Campo deve ser selecionado.';
+            newErrors.municipio = 'Este campo deve ser selecionado.';
             valid = false;
         }
         else if (!vendedor.endereco?.codigo_municipio || vendedor.endereco.codigo_municipio.length < 2) {

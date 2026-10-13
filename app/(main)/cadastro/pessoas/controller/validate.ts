@@ -11,7 +11,7 @@ const hasMinLengthWhenFilled = (value: string | null | undefined, minLength: num
 
 const validateEnderecoPessoa = (pessoa: PessoaEntity): ErrorsMap => {
     if (!pessoa.endereco?.cep || pessoa.endereco.cep.replace(/\D/g, '').length < 8) {
-        return { cep: "Digite um Cep válido." };
+        return { cep: "Digite um cep válido." };
     }
     if (!pessoa.endereco?.logradouro || pessoa.endereco.logradouro.length < 2) {
         return { logradouro: 'Digite pelo menos 2 caracteres.' };
@@ -20,7 +20,7 @@ const validateEnderecoPessoa = (pessoa: PessoaEntity): ErrorsMap => {
         return { numero: "Digite pelo menos 1 dígito." };
     }
     if (!pessoa.endereco?.bairro || pessoa.endereco.bairro.length < 2) {
-        return { bairro: 'Digite pelo menos 2 caracteres' };
+        return { bairro: 'Digite pelo menos 2 caracteres.' };
     }
     if (!pessoa.endereco?.uf) {
         return { uf: 'Este Campo deve ser selecionado.' };
@@ -35,7 +35,7 @@ const validateEnderecoPessoa = (pessoa: PessoaEntity): ErrorsMap => {
         return { codigo_pais: 'Digite pelo menos 2 dígitos.' };
     }
     if (!hasValidEmail(pessoa.email)) {
-        return { email: 'E-mail inválido. Por favor, digite um email valido.' };
+        return { email: 'Inclua um e-mail válido.' };
     }
 
     return {};
@@ -56,10 +56,10 @@ const validateCamposComunsPessoa = (
         return { inscricao_municipal: 'Digite pelo menos 2 caracteres.' };
     }
     if (!pessoa.pessoa_cliente && !pessoa.pessoa_fornecedor) {
-        return { selectedContato: 'Selecione um Cliente ou Fornecedor.' };
+        return { selectedContato: 'Selecione o tipo do contato' };
     }
     if (!hasValidEmail(pessoa.email)) {
-        return { email: 'E-mail inválido. Por favor, digite um email inválido.' };
+        return { email: 'Inclua um e-mail válido.' };
     }
     return validateEnderecoPessoa(pessoa);
 };
@@ -82,9 +82,9 @@ export const validateFieldsPessoa = (
         }
     } else if (pessoa.tipo_pessoa === 'PESSOA_FISICA') {
         if (!pessoa.cpf || pessoa.cpf.replace(/\D/g, '').length < 11) {
-            newErrors = { cpf: 'Inclua um CPF valído.' };
+            newErrors = { cpf: 'Inclua um CPF válido.' };
         } else if (pessoa.rg && pessoa.rg.trim().length > 0 && pessoa.rg.trim().length < 9) {
-            newErrors = { rg: 'Inclua um RG valído' };
+            newErrors = { rg: 'Inclua um RG válido' };
         } else if (!pessoa.razao_social || pessoa.razao_social.trim().length < 2) {
             newErrors = { razao_social: 'Digite pelo menos 2 caracteres.' };
         } else {

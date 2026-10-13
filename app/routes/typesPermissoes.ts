@@ -1,0 +1,42 @@
+import { PerfilUsuario } from "../entity/CreatedAccountEntity";
+
+export type PermissionResourceKey =
+    | 'dashboard'
+    | 'perfilUsuario'
+    | 'usuarioConta'
+    | 'empresa'
+    | 'pessoa'
+    | 'vendedor'
+    | 'servico'
+    | 'ordemServico'
+    | 'contrato'
+    | 'categoriaContrato'
+    | 'formaPagamento'
+    | 'nfse'
+    | 'integracao'
+    | 'perfilTributario'
+    | 'relatorio'
+    | 'relatorioServico'
+    | 'relatorioRecebimento'
+    | 'financeiro'
+    | 'is_usuario_principal'
+    | 'configuracoes'
+
+export type PermissionAction = 'view' | 'create' | 'update' | 'delete' | 'search';
+
+export type PermissionFlags = {
+    view: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+    search: boolean;
+};
+export type PermissionDefinition = {
+    viewKey?: keyof PerfilUsuario;
+    fallbackViewKeys?: Array<keyof PerfilUsuario>;
+    defaultView?: boolean;
+    createKey?: keyof PerfilUsuario;
+    updateKey?: keyof PerfilUsuario;
+    deleteKey?: keyof PerfilUsuario;
+    searchKey?: keyof PerfilUsuario;
+};

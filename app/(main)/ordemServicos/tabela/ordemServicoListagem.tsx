@@ -17,7 +17,7 @@ import { DataTableComponent, editButton } from '@/app/components/dataTableCompon
 import { useRouter } from 'next/navigation';
 import { usePermissions } from '@/app/routes/permissoes';
 
-export function ListarOrdemServico({
+export function  ListarOrdemServico({
     listPaginationOrdemServico,
     loading,
     searchTerm,
@@ -146,7 +146,7 @@ export function ListarOrdemServico({
                                 columns={[
                                     {
                                         field: 'numero',
-                                        header: 'Numero',
+                                        header: 'Número',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (
@@ -167,7 +167,7 @@ export function ListarOrdemServico({
                                     },
                                     {
                                         field: 'descricao',
-                                        header: 'Descricao',
+                                        header: 'Descrição',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (
@@ -188,7 +188,7 @@ export function ListarOrdemServico({
                                     },
                                     {
                                         field: 'razao_social_cliente',
-                                        header: 'Nome Cliente',
+                                        header: 'Cliente',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (
@@ -212,7 +212,7 @@ export function ListarOrdemServico({
                                     },
                                     {
                                         field: 'razao_social_empresa',
-                                        header: 'Nome Empresa',
+                                        header: 'Empresa',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? (
@@ -236,21 +236,21 @@ export function ListarOrdemServico({
                                     },
                                     {
                                         field: 'data_hora_inicio',
-                                        header: 'Data de Inicio',
+                                        header: 'Início',
                                         body: (data) => (
                                             <span>{formatDateTime(data.data_hora_inicio)}</span>
                                         )
                                     },
                                     {
                                         field: 'data_hora_prevista',
-                                        header: 'Data Prevista',
+                                        header: 'Prevista',
                                         body: (data) => (
                                             <span>{formatDateTime(data.data_hora_prevista)}</span>
                                         )
                                     },
                                     {
                                         field: 'data_hora_conclusao',
-                                        header: 'Data de Conclusao',
+                                        header: 'Conclusão',
                                         body: (data) => (
                                             <span>{formatDateTime(data.data_hora_conclusao)}</span>
                                         )
@@ -339,9 +339,6 @@ export function ListarOrdemServico({
                                                         </span>
                                                     </div>
                                                     <div className="ordem-servico-mobile-card-detail ordem-servico-mobile-card-status-detail">
-                                                        <span className="ordem-servico-mobile-card-label">
-                                                            Status
-                                                        </span>
                                                         <span
                                                             className={`ordem-servico-mobile-status ${getStatusClassOs(ordem.status ?? '')}`}
                                                         >

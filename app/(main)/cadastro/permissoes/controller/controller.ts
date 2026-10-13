@@ -133,7 +133,6 @@ export const fetchPerfilUserByID = async (
                 }
                 if (isChecked) {
                     acc[key] = { checked: true };
-                    // O hífen impede que o grupo "1" inclua, por engano, os grupos "10" e "11".
                     const childrenKeys = Object.keys(permissionsMap).filter((key) => key.startsWith(`${parentKey}-`));
                     const allChildrenChecked = childrenKeys.every(childKey => {
                         const perm = permissionsMap[childKey];

@@ -89,7 +89,7 @@ export function ListarContratos({
                                 columns={[
                                     {
                                         field: 'nome',
-                                        header: 'Descrição do Contrato',
+                                        header: 'Descrição',
                                         body: (data) => {
                                             const isStatusInactive = data.ativo === false;
                                             return loading ? <Skeleton /> : <span className={isStatusInactive ? 'text-red-clear-custom' : ''}>{highlightSearchTerm(limitarText(data.descricao, 25), searchTerm)}</span>;

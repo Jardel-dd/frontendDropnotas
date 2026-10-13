@@ -117,7 +117,6 @@ const Empresas: React.FC = () => {
         router.push('/configuracoes/empresas/created');
         setIsCompanyCreated(true);
     };
-
     const fetchCompanyPage = async (
         pageNumber = 0,
         term = searchTerm,
@@ -139,7 +138,6 @@ const Empresas: React.FC = () => {
 
         return empresas ?? createInitialPagination(resolvedPageSize);
     };
-
     const handleListCompany = async (
         pageNumber = 0,
         currentSearchTerm = searchTerm,
@@ -171,7 +169,6 @@ const Empresas: React.FC = () => {
             }
         }
     };
-
     const refreshVisibleEmpresas = async (
         currentSearchTerm = searchTerm,
         currentListarInativos = listarInativos
@@ -202,17 +199,14 @@ const Empresas: React.FC = () => {
             setLoading(false);
         }
     };
-
     const handleDeleteEmpresa = async (id: number) => {
         await deletarEmpresa(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
         await refreshVisibleEmpresas(searchTerm, listarInativos);
     };
-
     const handleAtivarEmpresa = async (id: number) => {
         await activateEmpresa(id, msgs, safePagination, listarInativos, () => {}, searchTerm);
         await refreshVisibleEmpresas(searchTerm, listarInativos);
     };
-
     const handleLoadMoreEmpresas = async () => {
         if (loading || loadingMore || !hasMoreMobileContent(listPaginationEmpresa)) {
             return;
@@ -225,7 +219,6 @@ const Empresas: React.FC = () => {
             setLoadingMore(false);
         }
     };
-
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setEmpresa,
         field: 'razao_social',

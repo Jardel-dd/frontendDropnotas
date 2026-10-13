@@ -5,7 +5,7 @@ export const usePermissions = () => {
     const { userConta } = useUser();
 
     return {
-        permissaoPerfilTributario: getPermissionFlags(userConta, 'perfilUsuario'),
+        permissaoPerfilTributario: getPermissionFlags(userConta, 'perfilTributario'),
         permissaoPerfilUsuario: getPermissionFlags(userConta, 'perfilUsuario'),
         permissaoUsuarioConta: getPermissionFlags(userConta, 'usuarioConta'),
         permissaoEmpresa: getPermissionFlags(userConta, 'empresa'),
@@ -20,5 +20,7 @@ export const usePermissions = () => {
         permissaoNfse: getPermissionFlags(userConta, 'nfse'),
         permissaoFinanceiro: getPermissionFlags(userConta, 'financeiro'),
         permissaoConfiguracoes: getPermissionFlags(userConta, 'configuracoes'),
+        permissaoRelatorio: getPermissionFlags(userConta, 'relatorio'),
+
     };
 };
