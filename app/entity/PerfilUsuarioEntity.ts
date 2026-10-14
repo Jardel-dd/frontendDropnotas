@@ -86,6 +86,13 @@ export class PerfilUser {
     relatorioServico?: boolean;
     relatorioRecebimento?: boolean;
 
+    contaPagarCadastrar?: boolean;
+    contaPagarPesquisar?: boolean;
+    contaReceberCadastrar?: boolean;
+    contaReceberPesquisar?: boolean;
+    comissaoVisualizar?: boolean;
+    permiteAlterarConfiguracoes?: boolean;
+
 
     constructor({
         ativo,
@@ -173,7 +180,14 @@ export class PerfilUser {
 
         relatorio,
         relatorioServico,
-        relatorioRecebimento
+        relatorioRecebimento,
+
+        contaPagarCadastrar,
+        contaPagarPesquisar,
+        contaReceberCadastrar,
+        contaReceberPesquisar,
+        comissaoVisualizar,
+        permiteAlterarConfiguracoes
     }: {
         ativo?: boolean;
         id?: number;
@@ -261,6 +275,13 @@ export class PerfilUser {
          relatorio?: boolean;
         relatorioServico?: boolean;
         relatorioRecebimento?: boolean;
+
+        contaPagarCadastrar?: boolean;
+        contaPagarPesquisar?: boolean;
+        contaReceberCadastrar?: boolean;
+        contaReceberPesquisar?: boolean;
+        comissaoVisualizar?: boolean;
+        permiteAlterarConfiguracoes?: boolean;
 
 
     }) {
@@ -350,7 +371,14 @@ export class PerfilUser {
 
             relatorio,
             relatorioServico,
-            relatorioRecebimento
+            relatorioRecebimento,
+
+            contaPagarCadastrar,
+            contaPagarPesquisar,
+            contaReceberCadastrar,
+            contaReceberPesquisar,
+            comissaoVisualizar,
+            permiteAlterarConfiguracoes
         });
     }
     copyWith({
@@ -439,7 +467,14 @@ export class PerfilUser {
 
         relatorio,
         relatorioServico,
-        relatorioRecebimento
+        relatorioRecebimento,
+
+        contaPagarCadastrar,
+        contaPagarPesquisar,
+        contaReceberCadastrar,
+        contaReceberPesquisar,
+        comissaoVisualizar,
+        permiteAlterarConfiguracoes
     }: {
         ativo?: boolean;
         id?: number;
@@ -527,6 +562,13 @@ export class PerfilUser {
         relatorio?: boolean;
         relatorioServico?: boolean;
         relatorioRecebimento?: boolean;
+
+        contaPagarCadastrar?: boolean;
+        contaPagarPesquisar?: boolean;
+        contaReceberCadastrar?: boolean;
+        contaReceberPesquisar?: boolean;
+        comissaoVisualizar?: boolean;
+        permiteAlterarConfiguracoes?: boolean;
     }): PerfilUser {
         return new PerfilUser({
             ativo: ativo ?? this.ativo,
@@ -606,6 +648,12 @@ export class PerfilUser {
             relatorio: relatorio ?? this.relatorio,
             relatorioServico: relatorioServico ?? this.relatorioServico,
             relatorioRecebimento: relatorioRecebimento ?? this.relatorioRecebimento,
+            contaPagarCadastrar: contaPagarCadastrar ?? this.contaPagarCadastrar,
+            contaPagarPesquisar: contaPagarPesquisar ?? this.contaPagarPesquisar,
+            contaReceberCadastrar: contaReceberCadastrar ?? this.contaReceberCadastrar,
+            contaReceberPesquisar: contaReceberPesquisar ?? this.contaReceberPesquisar,
+            comissaoVisualizar: comissaoVisualizar ?? this.comissaoVisualizar,
+            permiteAlterarConfiguracoes: permiteAlterarConfiguracoes ?? this.permiteAlterarConfiguracoes,
         });
     }
 }

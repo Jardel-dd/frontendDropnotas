@@ -53,7 +53,7 @@ const buildSyncedUser = (nextUserData: Record<string, any>, previousUser: Usuari
 
 const PERFIL_USUARIO_BOOLEAN_KEYS = new Set([
   'empresa',
-  'financeiro',
+  'financas',
   'pessoa',
   'servico',
   'vendedor',
@@ -114,7 +114,12 @@ const PERFIL_USUARIO_BOOLEAN_KEYS = new Set([
   'nfseAlterar',
   'nfseDesativar',
   'nfsePesquisar',
-  'permiteAlterarConfiguracoes'
+  'permiteAlterarConfiguracoes',
+  'contaPagarCadastrar',
+  'contaPagarPesquisar',
+  'contaReceberCadastrar',
+  'contaReceberPesquisar',
+  'comissaoVisualizar'
 ]);
 
 const normalizePermissionFlagValue = (value: unknown) => {
@@ -386,6 +391,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // });
         const response = await api.get(`/usuario-conta/${currentUser.id}`, buildFreshAuthRequestConfig());
         const latestUserData = response.data ?? {};
+        console.log("response", response)
         // console.info('[UserContext] Resposta recebida de /usuario-conta/{id}.', {
         //   userId: currentUser.id,
         //   responseKeys: Object.keys(latestUserData),

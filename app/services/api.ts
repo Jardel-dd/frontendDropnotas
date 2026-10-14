@@ -18,6 +18,20 @@ const logRequest = (request: InternalAxiosRequestConfig) => {
         return;
     }
 };
+
+const redirectToDashboardAfterForbiddenResponse = () => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    const { pathname } = window.location;
+    const isAuthenticatedArea = pathname !== '/' && !pathname.startsWith('/auth');
+
+    if (isAuthenticatedArea && pathname !== '/dashboard') {
+        window.location.replace('/dashboard');
+    }
+};
+
 api.interceptors.request.use(async (request) => {
     logRequest(request);
     if (request.url === '/refresh-token') {
@@ -47,6 +61,11 @@ api.interceptors.response.use(
         }
 
         if (originalRequest.url === '/refresh-token') {
+            return Promise.reject(error);
+        }
+
+        if (error.response?.status === 403) {
+            redirectToDashboardAfterForbiddenResponse();
             return Promise.reject(error);
         }
 

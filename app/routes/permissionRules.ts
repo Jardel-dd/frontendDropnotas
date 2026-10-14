@@ -106,13 +106,24 @@ const permissionDefinitions: Record<PermissionResourceKey, PermissionDefinition>
        relatorioRecebimento: {
         viewKey: 'relatorioRecebimento',
     },
-      financeiro: {
-        viewKey: 'financeiro',
-        defaultView: true
+      financas: {
+        viewKey: 'financas'
+    },
+    contaPagar: {
+        viewKey: 'contaPagarPesquisar',
+        createKey: 'contaPagarCadastrar',
+        searchKey: 'contaPagarPesquisar'
+    },
+    contaReceber: {
+        viewKey: 'contaReceberPesquisar',
+        createKey: 'contaReceberCadastrar',
+        searchKey: 'contaReceberPesquisar'
+    },
+    comissao: {
+        viewKey: 'comissaoVisualizar'
     },
     configuracoes: {
-        viewKey: 'configuracoes',
-        updateKey: 'permiteAlterarConfiguracoes'
+        viewKey: 'permiteAlterarConfiguracoes'
     },
     is_usuario_principal: {
         defaultView: false
@@ -189,6 +200,16 @@ export const getPermissionFlags = (userConta: UsuarioContaEntity | null, resourc
 
     const perfilUsuario = userConta?.perfil_usuario;
     const definition = permissionDefinitions[resource];
+
+    if (!definition) {
+        return {
+            view: false,
+            create: false,
+            update: false,
+            delete: false,
+            search: false
+        };
+    }
 
     return {
         view: readViewPermission(perfilUsuario, definition),
