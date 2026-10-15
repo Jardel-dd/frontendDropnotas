@@ -109,22 +109,25 @@ const AppMenu = () => {
                 label: 'Finanças',
                 icon: Wallet,
                 to: '/financas',
-                visible: hasPermissionAccess(userConta, 'financeiro'),
+                visible: hasPermissionAccess(userConta, 'financas'),
                 items: [
                     {
                         label: 'Contas a Pagar',
                         icon: Buildings,
-                        to: '/financas/pagar'
+                        to: '/financas/pagar',
+                        visible: hasPermissionAccess(userConta, 'contaPagar')
                     },
                     {
                         label: 'Contas a Receber',
                         icon: Wallet,
-                        to: '/financas/receber'
+                        to: '/financas/receber',
+                        visible: hasPermissionAccess(userConta, 'contaReceber')
                     },
                     {
                         label: 'Comissões',
                         icon: CurrencyDollar,
-                        to: '/financas/comissoes'
+                        to: '/financas/comissoes',
+                        visible: hasPermissionAccess(userConta, 'comissao')
                     }
                 ]
             },
@@ -153,13 +156,13 @@ const AppMenu = () => {
                 label: 'Assinaturas',
                 icon: CreditCard,
                 to: '/assinaturas',
-                visible: hasPermissionAccess(userConta, 'financeiro')
+                visible: hasPermissionAccess(userConta, 'is_usuario_principal')
             },
             {
                 label: 'Configurações',
                 icon: GearSix,
                 to: '/configuracoes',
-                visible: hasPermissionAccess(userConta, 'empresa') || hasPermissionAccess(userConta, 'is_usuario_principal'),
+                visible: hasPermissionAccess(userConta, 'configuracoes') || hasPermissionAccess(userConta, 'is_usuario_principal'),
                 items: [
                     {
                         label: 'Minhas Empresas',

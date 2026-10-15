@@ -9,7 +9,7 @@ export interface PerfilUsuario {
     nfseTipoVisualizacao?: string;
     ordemServicoTipoVisualizacao?: string;
     empresa?: boolean;
-    financeiro?: boolean;
+    financas?: boolean;
     pessoa?: boolean;
     servico?: boolean;
     vendedor?: boolean;
@@ -81,6 +81,14 @@ export interface PerfilUsuario {
         relatorio?: boolean;
         relatorioServico?: boolean;
         relatorioRecebimento?: boolean;
+
+        contaPagarCadastrar?: boolean;
+        contaPagarPesquisar?: boolean;
+        contaReceberCadastrar?: boolean;
+        contaReceberPesquisar?: boolean;
+        comissaoVisualizar?: boolean;
+
+
 }
 export class CreatedAccountEntity {
     cnpj!: string;

@@ -134,6 +134,13 @@ export const createEmptyPerfilUser = () =>
         relatorioRecebimento:false,
         relatorioServico:false,
 
+        contaPagarCadastrar: false,
+        contaPagarPesquisar: false,
+        contaReceberCadastrar: false,
+        contaReceberPesquisar: false,
+        comissaoVisualizar: false,
+        permiteAlterarConfiguracoes: false,
+
 
         
 

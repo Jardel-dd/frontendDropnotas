@@ -79,7 +79,6 @@ export const permissoes: TreeNode[] = [
             { key: '7-1', label: 'Alterar contratos' },
             { key: '7-2', label: 'Desativar contratos' },
             { key: '7-3', label: 'Pesquisar contratos' },
-            { key: '7-4', label: 'Tipo visualização' }
         ]
     },
     {
@@ -140,6 +139,36 @@ export const permissoes: TreeNode[] = [
         children: [
             { key: '13-0', label: 'Acesso aos Relatórios de Serviços' },
             { key: '13-1', label: 'Acesso aos Relatórios de Recebimentos' },
+        ]
+    },
+    {
+        key: '14',
+        label: 'Contas a Pagar',
+        children: [
+            { key: '14-0', label: 'Visualizar contas a pagar' },
+            { key: '14-1', label: 'Criar contas a pagar' }
+        ]
+    },
+    {
+        key: '15',
+        label: 'Contas a Receber',
+        children: [
+            { key: '15-0', label: 'Visualizar contas a receber' },
+            { key: '15-1', label: 'Criar contas a receber' }
+        ]
+    },
+    {
+        key: '16',
+        label: 'Comissões',
+        children: [
+            { key: '16-0', label: 'Visualizar comissões' }
+        ]
+    },
+    {
+        key: '17',
+        label: 'Configurações',
+        children: [
+            { key: '17-0', label: 'Acesso ao menu configurações' }
         ]
     }
 ];

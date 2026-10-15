@@ -18,7 +18,10 @@ export const usePermissions = () => {
         permissaoFormaPagamento: getPermissionFlags(userConta, 'formaPagamento'),
         permissaoIntegracao: getPermissionFlags(userConta, 'integracao'),
         permissaoNfse: getPermissionFlags(userConta, 'nfse'),
-        permissaoFinanceiro: getPermissionFlags(userConta, 'financeiro'),
+        permissaoFinanceiro: getPermissionFlags(userConta, 'financas'),
+        permissaoContaPagar: getPermissionFlags(userConta, 'contaPagar'),
+        permissaoContaReceber: getPermissionFlags(userConta, 'contaReceber'),
+        permissaoComissao: getPermissionFlags(userConta, 'comissao'),
         permissaoConfiguracoes: getPermissionFlags(userConta, 'configuracoes'),
         permissaoRelatorio: getPermissionFlags(userConta, 'relatorio'),
 

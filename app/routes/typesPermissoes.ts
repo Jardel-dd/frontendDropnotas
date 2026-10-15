@@ -18,7 +18,10 @@ export type PermissionResourceKey =
     | 'relatorio'
     | 'relatorioServico'
     | 'relatorioRecebimento'
-    | 'financeiro'
+    | 'financas'
+    | 'contaPagar'
+    | 'contaReceber'
+    | 'comissao'
     | 'is_usuario_principal'
     | 'configuracoes'
 
