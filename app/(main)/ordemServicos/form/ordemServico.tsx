@@ -82,13 +82,13 @@ export function OrdemServicoInformacoesFields({
             </div>
             <div className="grid formgrid w-full">
                 <div className="col-12 lg:col-4 ">
-                    <DatePicker value={emitirOS.data_hora_inicio ?? null} onChange={(date) => onDateChange('data_hora_inicio', date)} showTopLabel topLabel="Data Início" />
+                    <DatePicker value={emitirOS.data_hora_inicio ?? null} onChange={(date) => onDateChange('data_hora_inicio', date)} showTopLabel topLabel="Data Início:" />
                 </div>
                 <div className="col-12 lg:col-4 ">
-                    <DatePicker value={emitirOS.data_hora_prevista ?? null} onChange={(date) => onDateChange('data_hora_prevista', date)} showTopLabel topLabel="Data Prevista" />
+                    <DatePicker value={emitirOS.data_hora_prevista ?? null} onChange={(date) => onDateChange('data_hora_prevista', date)} showTopLabel topLabel="Data Prevista:" />
                 </div>
                 <div className="col-12 lg:col-4 ">
-                    <DatePicker value={emitirOS.data_hora_conclusao ?? null} onChange={(date) => onDateChange('data_hora_conclusao', date)} showTopLabel topLabel="Data Conclusão" />
+                    <DatePicker value={emitirOS.data_hora_conclusao ?? null} onChange={(date) => onDateChange('data_hora_conclusao', date)} showTopLabel topLabel="Data Conclusão:" />
                 </div>
             </div>
             <div className="grid formgrid w-full">

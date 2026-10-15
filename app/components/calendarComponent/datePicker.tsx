@@ -34,7 +34,6 @@ export function DatePicker({
                     dateFormat="dd/mm/yy"
                     showTime
                     hourFormat="24"
-                    showIcon
                     className="single-date-picker-calendar"
                     inputClassName={`single-date-picker-input ${isDarkMode ? 'single-date-picker-input-dark' : 'single-date-picker-input-light'}`}
                     inputStyle={{

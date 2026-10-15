@@ -1,7 +1,6 @@
 import { PerfilUsuario } from "../entity/CreatedAccountEntity";
 
 export type PermissionResourceKey =
-    | 'dashboard'
     | 'perfilUsuario'
     | 'usuarioConta'
     | 'empresa'
@@ -24,6 +23,7 @@ export type PermissionResourceKey =
     | 'comissao'
     | 'is_usuario_principal'
     | 'configuracoes'
+    | 'permiteAlterarConfiguracoes'
 
 export type PermissionAction = 'view' | 'create' | 'update' | 'delete' | 'search';
 

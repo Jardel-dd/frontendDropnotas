@@ -43,7 +43,7 @@ function Dropdown({
                     {topRightElement}
                 </div>
             )}
-            <div className="w-full">
+            <div>
                 <PrimeDropdown
                     id={id}
                     value={value}

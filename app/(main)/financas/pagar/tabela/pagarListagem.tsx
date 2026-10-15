@@ -1,9 +1,11 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
-import LoadingScreen from '@/app/loading';
+import LoadingScreen from '../../ListLoadingScreen';
 import { useRouter } from 'next/navigation';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Skeleton } from 'primereact/skeleton';
+import { Button } from 'primereact/button';
+import '../../mobileListCards.css';
 import { Dispatch, SetStateAction, useContext } from 'react';
 import { limitarText } from '@/app/utils/limitTextDataCompany';
 import { LayoutContext } from '@/layout/context/layoutcontext';
@@ -80,59 +82,56 @@ export function ListarContasPagar({
             ) : (
                 <>
                     {isMobile && (
-                        <div>
-                            <DataTableComponent
-                                value={listPaginationContasPagar?.content as ContasPagarEntity[]}
-                                loading={loading}
-                                totalRecords={listPaginationContasPagar?.totalElements ?? 0}
-                                expandedRows={false}
-                                setExpandedRows={() => { }}
-                                rowExpansionTemplate={() => null}
-                                expandButtonTemplate={() => null}
-                                isDarkMode={isDarkMode}
-                                searchTerm={searchTerm}
-                                showExpandButton={false}
-                                columns={[
-                                    {
-                                        field: 'Descrição',
-                                        header: 'Descrição',
-                                        body: (data) =>
-                                            loading ? (
-                                                <Skeleton />
-                                            ) : (
-                                                <span>{highlightSearchTerm(limitarText(data.descricao, 25), searchTerm)}</span>
-                                            )
-                                    },
-                                    {
-                                        field: 'nome_fornecedor',
-                                        header: 'Nome',
-                                        body: (data) =>
-                                            loading ? (
-                                                <Skeleton />
-                                            ) : (
-                                                <span>{highlightSearchTerm(limitarText(data.nome_fornecedor, 25), searchTerm)}</span>
-                                            )
-                                    },
-                                    {
-                                        field: 'valor_total',
-                                        header: 'Valor',
-                                        body: (data) => <span>{formatCurrency(data.valor_total ?? data.valor_original)}</span>
-                                    },
-                                    {
-                                        field: 'situacao',
-                                        header: 'Status',
-                                        body: (data) => (
-                                            <span className={`px-3 py-1 rounded-2xl text-sm font-medium inline-block ${StatusNota(data.situacao ?? '')}`}>
-                                                {data.situacao ?? '-'}
-                                            </span>
-                                        )
-                                    }
-                                ]}
-                                listarInativos={listarInativos}
-                                mobileLoadMoreVisible={mobileLoadMoreVisible}
-                                mobileLoadMoreLoading={mobileLoadMoreLoading}
-                                onMobileLoadMore={onMobileLoadMore}
-                            />
+                        <div className="finance-mobile-list">
+                            {(listPaginationContasPagar?.content ?? []).length === 0 ? (
+                                <div className="finance-mobile-empty">Nenhum resultado encontrado na pesquisa</div>
+                            ) : (
+                                (listPaginationContasPagar.content as ContasPagarEntity[]).map((conta: any) => (
+                                    <div key={conta.id} className="finance-mobile-card">
+                                        <div className="finance-mobile-card-top">
+                                            <div className="finance-mobile-card-summary">
+                                                <div className="finance-mobile-card-detail">
+                                                    <span className="finance-mobile-card-label">Descrição</span>
+                                                    <span className="finance-mobile-card-value finance-mobile-card-text" title={conta.descricao}>
+                                                        {highlightSearchTerm(conta.descricao, searchTerm)}
+                                                    </span>
+                                                </div>
+                                                <div className="finance-mobile-card-detail">
+                                                    <span className="finance-mobile-card-label">Valor</span>
+                                                    <span className="finance-mobile-card-value">{formatCurrency(conta.valor_total ?? conta.valor_original)}</span>
+                                                </div>
+                                                <span className={`finance-mobile-status ${StatusNota(conta.situacao ?? '')}`}>
+                                                    {conta.situacao ?? '-'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="finance-mobile-card-body">
+                                            <div className="finance-mobile-card-detail">
+                                                <span className="finance-mobile-card-label">Fornecedor</span>
+                                                <span className="finance-mobile-card-text" title={conta.nome_fornecedor}>
+                                                    {highlightSearchTerm(conta.nome_fornecedor, searchTerm)}
+                                                </span>
+                                            </div>
+                                            <div className="finance-mobile-card-detail">
+                                                <span className="finance-mobile-card-label">Vencimento</span>
+                                                <span className="finance-mobile-card-meta-value">{formatDate(conta.data_vencimento)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                            {mobileLoadMoreVisible && onMobileLoadMore && (
+                                <div className="finance-mobile-load-more">
+                                    <Button
+                                        type="button"
+                                        outlined
+                                        label={mobileLoadMoreLoading ? 'Carregando...' : 'Carregar mais'}
+                                        loading={mobileLoadMoreLoading}
+                                        disabled={mobileLoadMoreLoading}
+                                        onClick={() => void onMobileLoadMore()}
+                                    />
+                                </div>
+                            )}
                         </div>
                     )}
                     {isDesktop && (

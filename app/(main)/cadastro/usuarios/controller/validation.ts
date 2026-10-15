@@ -37,7 +37,9 @@ export const getUsuarioFormErrors = (
         newErrors.selectedEmpresa = 'Selecione uma Empresa.';
     }
 
-    return newErrors;
+    const firstError = Object.entries(newErrors)[0];
+
+    return firstError ? { [firstError[0]]: firstError[1] } : {};
 };
 
 export const validateFieldsUserConta = (

@@ -162,13 +162,13 @@ const AppMenu = () => {
                 label: 'Configurações',
                 icon: GearSix,
                 to: '/configuracoes',
-                visible: hasPermissionAccess(userConta, 'configuracoes') || hasPermissionAccess(userConta, 'is_usuario_principal'),
+                visible: hasPermissionAccess(userConta, 'permiteAlterarConfiguracoes') || hasPermissionAccess(userConta, 'is_usuario_principal'),
                 items: [
                     {
                         label: 'Minhas Empresas',
                         icon: Buildings,
                         to: '/configuracoes/empresas',
-                        visible: hasPermissionAccess(userConta, 'empresa')
+                        visible: hasPermissionAccess(userConta, 'permiteAlterarConfiguracoes')
                     },
                     {
                         label: 'Temas',

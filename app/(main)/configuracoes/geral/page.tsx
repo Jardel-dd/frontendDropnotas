@@ -6,9 +6,10 @@ import LoadingScreen from '@/app/loading';
 import { Divider } from 'primereact/divider';
 import { PrimeReactContext } from 'primereact/api';
 import { LayoutContext } from '@/layout/context/layoutcontext';
-import { useContext, useEffect, useCallback, useState } from 'react';
+import { useContext, useEffect, useCallback, useRef, useState } from 'react';
 import BTNPGCreatedAll from '@/app/components/buttonsComponent/btnCreatedAll/btn-created-all';
 import { updateStoredUserThemePreferences } from '@/app/utils/themePreferences';
+import { Messages } from '@/app/components/messages/GlobalMessages';
 
 const AppConfig = () => {
     const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
@@ -17,6 +18,7 @@ const AppConfig = () => {
     const [isThemeChanging, setIsThemeChanging] = useState(false);
     const [loadingBtnSaveLayout, setLoadingBtnSaveLayout] = useState(false);
     const [selectedComponentTheme, setSelectedComponentTheme] = useState(layoutConfig.componentTheme);
+    const msgs = useRef<Messages | null>(null);
 
     const componentThemes = [
         { name: 'indigo', color: '#3F51B5' },
@@ -118,6 +120,14 @@ const AppConfig = () => {
 
             console.log('[Configuracoes/Geral] Resposta do backend:', response.status, response.data);
 
+            if (response.status === 204) {
+                msgs.current?.show({
+                    severity: 'success',
+                    summary: 'Sucesso:',
+                    detail: 'Tema salvo com sucesso.'
+                });
+            }
+
             updateStoredUserThemePreferences({
                 componentTheme: selectedComponentTheme
             });
@@ -146,6 +156,7 @@ const AppConfig = () => {
 
     return (
         <>
+            <Messages ref={msgs} className="custom-messages" />
             {isLoading && <LoadingScreen loadingText="Carregando cor do tema..." overlayOpacity={1} />}
             <div className="card styled-container-main-all-routes">
                     <div className="mb-4 lg:mb-0 custom-container">

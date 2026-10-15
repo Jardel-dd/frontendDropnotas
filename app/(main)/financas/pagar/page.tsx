@@ -156,7 +156,7 @@ const ContasPagar: React.FC = () => {
                                     showTopLabel
                                 />
                             </div>
-                           <div className="col-4 mb-0 lg:col-3 lg:mb-0 p-1 ">
+                           <div className="col-4 mb-0 lg:col-3 lg:mb-0 ">
                                 <div className="container-BTN-Filter-Created">
                                     <FilterOverlay 
                                     onClear={handleClearFilters} 

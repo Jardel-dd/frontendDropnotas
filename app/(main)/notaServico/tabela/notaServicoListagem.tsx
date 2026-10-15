@@ -221,7 +221,7 @@ export function ListarNotaServico({
                             },
                             {
                                 field: 'data_emissao',
-                                header: 'Data de Emissão ',
+                                header: 'Emissão ',
                                 body: (data) => {
                                     const dataEmissao = formatarDataEmissao(data.data_emissao);
 

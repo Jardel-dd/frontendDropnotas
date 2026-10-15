@@ -1,6 +1,6 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
-import LoadingScreen from '@/app/loading';
+import LoadingScreen from '../../ListLoadingScreen';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { ComissaoEntity } from '@/app/entity/comissoesEntity';
 import { LayoutContext } from '@/layout/context/layoutcontext';
