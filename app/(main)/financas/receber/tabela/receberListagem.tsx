@@ -1,9 +1,11 @@
 'use client';
 import '@/app/styles/styledGlobal.css';
-import LoadingScreen from '@/app/loading';
+import LoadingScreen from '../../ListLoadingScreen';
 import { useRouter } from 'next/navigation';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import { Skeleton } from 'primereact/skeleton';
+import { Button } from 'primereact/button';
+import '../../mobileListCards.css';
 import { Dispatch, SetStateAction, useContext } from 'react';
 import { LayoutContext } from '@/layout/context/layoutcontext';
 import { ContasReceberEntity } from '@/app/entity/contasReceberEntity';
@@ -84,75 +86,62 @@ export function ListarContasReceber({
             ) : (
                 <>
                     {isMobile && (
-                        <div>
-                            <DataTableComponent
-                                value={listPaginationContasReceber?.content as ContasReceberEntity[]}
-                                loading={loading}
-                                totalRecords={listPaginationContasReceber?.totalElements ?? 0}
-                                expandedRows={false}
-                                setExpandedRows={() => { }}
-                                rowExpansionTemplate={() => null}
-                                expandButtonTemplate={() => null}
-                                isDarkMode={isDarkMode}
-                                searchTerm={searchTerm}
-                                showExpandButton={false}
-                                columns={[
-                                    {
-                                        field: 'Descrição',
-                                        header: 'Descrição',
-                                        body: (data) =>
-                                            loading ? (
-                                                <Skeleton />
-                                            ) : (
-                                                <span className="table-cell-truncate" title={data.descricao}>
-                                                    {highlightSearchTerm(data.descricao, searchTerm)}
+                        <div className="finance-mobile-list">
+                            {(listPaginationContasReceber?.content ?? []).length === 0 ? (
+                                <div className="finance-mobile-empty">Nenhum resultado encontrado na pesquisa</div>
+                            ) : (
+                                (listPaginationContasReceber.content as ContasReceberEntity[]).map((conta: any) => (
+                                    <div key={conta.id} className="finance-mobile-card">
+                                        <div className="finance-mobile-card-top">
+                                            <div className="finance-mobile-card-summary">
+                                                <div className="finance-mobile-card-detail">
+                                                    <span className="finance-mobile-card-label">Descrição</span>
+                                                    <span className="finance-mobile-card-value finance-mobile-card-text" title={conta.descricao}>
+                                                        {highlightSearchTerm(conta.descricao, searchTerm)}
+                                                    </span>
+                                                </div>
+                                                <div className="finance-mobile-card-detail">
+                                                    <span className="finance-mobile-card-label">Valor</span>
+                                                    <span className="finance-mobile-card-value">{formatCurrency(conta.valor_total ?? conta.valor_original)}</span>
+                                                </div>
+                                                <span className={`finance-mobile-status ${StatusNota(conta.situacao ?? '')}`}>
+                                                    {conta.situacao ?? '-'}
                                                 </span>
-                                            )
-                                    },
-                                    {
-                                        field: 'nome_cliente',
-                                        header: 'Cliente',
-                                        body: (data) =>
-                                            loading ? (
-                                                <Skeleton />
-                                            ) : (
-                                                <span className="table-cell-truncate" title={data.nome_cliente}>
-                                                    {highlightSearchTerm(data.nome_cliente, searchTerm)}
+                                            </div>
+                                        </div>
+                                        <div className="finance-mobile-card-body">
+                                            <div className="finance-mobile-card-detail">
+                                                <span className="finance-mobile-card-label">Cliente</span>
+                                                <span className="finance-mobile-card-text" title={conta.nome_cliente}>
+                                                    {highlightSearchTerm(conta.nome_cliente, searchTerm)}
                                                 </span>
-                                            )
-                                    },
-                                    {
-                                        field: 'nome_vendedor',
-                                        header: 'Vendedor',
-                                        body: (data) =>
-                                            loading ? (
-                                                <Skeleton />
-                                            ) : (
-                                                <span className="table-cell-truncate" title={data.nome_vendedor}>
-                                                    {highlightSearchTerm(data.nome_vendedor, searchTerm)}
+                                            </div>
+                                            <div className="finance-mobile-card-detail">
+                                                <span className="finance-mobile-card-label">Vendedor</span>
+                                                <span className="finance-mobile-card-text" title={conta.nome_vendedor}>
+                                                    {highlightSearchTerm(conta.nome_vendedor, searchTerm)}
                                                 </span>
-                                            )
-                                    },
-                                    {
-                                        field: 'valor_total',
-                                        header: 'Valor',
-                                        body: (data) => <span>{formatCurrency(data.valor_total ?? data.valor_original)}</span>
-                                    },
-                                    {
-                                        field: 'situacao',
-                                        header: 'Status',
-                                        body: (data) => (
-                                            <span className={`px-3 py-1 rounded-2xl text-sm font-medium inline-block ${StatusNota(data.situacao ?? '')}`}>
-                                                {data.situacao ?? '-'}
-                                            </span>
-                                        )
-                                    }
-                                ]}
-                                listarInativos={listarInativos}
-                                mobileLoadMoreVisible={mobileLoadMoreVisible}
-                                mobileLoadMoreLoading={mobileLoadMoreLoading}
-                                onMobileLoadMore={onMobileLoadMore}
-                            />
+                                            </div>
+                                            <div className="finance-mobile-card-detail">
+                                                <span className="finance-mobile-card-label">Vencimento</span>
+                                                <span className="finance-mobile-card-meta-value">{formatDate(conta.data_vencimento)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                            {mobileLoadMoreVisible && onMobileLoadMore && (
+                                <div className="finance-mobile-load-more">
+                                    <Button
+                                        type="button"
+                                        outlined
+                                        label={mobileLoadMoreLoading ? 'Carregando...' : 'Carregar mais'}
+                                        loading={mobileLoadMoreLoading}
+                                        disabled={mobileLoadMoreLoading}
+                                        onClick={() => void onMobileLoadMore()}
+                                    />
+                                </div>
+                            )}
                         </div>
                     )}
                     {isDesktop && (

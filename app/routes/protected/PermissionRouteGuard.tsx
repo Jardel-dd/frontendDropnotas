@@ -5,7 +5,7 @@ import LoadingScreen from '@/app/loading';
 import { useUser } from '@/app/routes/protected/UserContext';
 import { hasPermissionAccess } from '@/app/routes/permissionRules';
 import type { PermissionAction, PermissionResourceKey } from '@/app/routes/typesPermissoes';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 interface PermissionRouteGuardProps {
     children: React.ReactNode;
@@ -52,12 +52,16 @@ const findProtectedRoute = (pathname: string) => {
 const PermissionRouteGuard: React.FC<PermissionRouteGuardProps> = ({ children }) => {
     const { userConta, isInitializing } = useUser();
     const pathname = usePathname() ?? '';
+    const searchParams = useSearchParams();
     const router = useRouter();
     const protectedRoute = findProtectedRoute(pathname);
     const isCreateRoute = Boolean(protectedRoute && pathname.startsWith(`${protectedRoute.path}/created`));
+    const isEditRoute = isCreateRoute && Boolean(searchParams.get('id'));
     const hasPermissionsForRoute = protectedRoute?.permissions.every((permission, index) => {
         const isLastPermission = index === protectedRoute.permissions.length - 1;
-        const action = isCreateRoute && isLastPermission ? 'create' : permission.action ?? 'view';
+        const action: PermissionAction = isCreateRoute && isLastPermission
+            ? (isEditRoute ? 'update' : 'create')
+            : permission.action ?? 'view';
 
         return hasPermissionAccess(userConta, permission.resource, action);
     });

@@ -4,8 +4,7 @@ import type { UsuarioContaEntity } from '@/app/entity/UsuarioContaEntity';
 import { PermissionAction, PermissionDefinition, PermissionFlags, PermissionResourceKey } from './typesPermissoes';
 
 const permissionDefinitions: Record<PermissionResourceKey, PermissionDefinition> = {
-    dashboard: {
-    },
+
     perfilUsuario: {
         viewKey: 'perfilUsuario',
         createKey: 'perfilUsuarioCadastrar',
@@ -123,6 +122,9 @@ const permissionDefinitions: Record<PermissionResourceKey, PermissionDefinition>
         viewKey: 'comissaoVisualizar'
     },
     configuracoes: {
+        viewKey: 'permiteAlterarConfiguracoes'
+    },
+    permiteAlterarConfiguracoes: {
         viewKey: 'permiteAlterarConfiguracoes'
     },
     is_usuario_principal: {

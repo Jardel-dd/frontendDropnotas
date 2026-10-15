@@ -3,6 +3,9 @@ import { JwtPayload, jwtDecode } from 'jwt-decode';
 import { logoutUser } from '../(full-page)/auth/logout/logoutRefreshToken';
 import { readStoredAuthValue, writeStoredAuthValue } from './authStorage';
 
+const TOKEN_REFRESH_LEEWAY_MS = 30_000;
+let refreshTokenPromise: Promise<string | null> | null = null;
+
 export const getToken = async (): Promise<string | null> => {
     const token = readStoredAuthValue('token');
     if (!token) {
@@ -29,11 +32,14 @@ export const getTokenDecoded = (): JwtPayload | null => {
         return null;
     }
 };
-const isExpired = (exp: number) => {
-  const now = Date.now() / 1000;
-  return exp < now;
+const isExpired = (exp?: number) => {
+  if (!exp) {
+    return true;
+  }
+
+  return exp * 1000 <= Date.now() + TOKEN_REFRESH_LEEWAY_MS;
 };
-export const renewToken = async (): Promise<string | null> => {
+const performTokenRenewal = async (): Promise<string | null> => {
     try {
         console.log('Refresh tok');
         const refreshToken = getRefreshToken();
@@ -61,6 +67,19 @@ export const renewToken = async (): Promise<string | null> => {
             logoutUser();
         }
         return null;
+    }
+};
+export const renewToken = async (): Promise<string | null> => {
+    if (refreshTokenPromise) {
+        return refreshTokenPromise;
+    }
+
+    refreshTokenPromise = performTokenRenewal();
+
+    try {
+        return await refreshTokenPromise;
+    } finally {
+        refreshTokenPromise = null;
     }
 };
 export const saveToken = (token: string) => {

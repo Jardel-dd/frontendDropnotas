@@ -36,6 +36,7 @@
 }
 .single-date-picker-calendar .p-datepicker-trigger .pi {
     font-size: 1rem;
+
 }
 .single-date-picker-input::placeholder {
     color: #6b7280;
@@ -48,13 +49,20 @@
     background: transparent !important;
     border: none !important;
     box-shadow: none;
+
+
+    
 }
 .p-calendar .p-datepicker-trigger .pi {
     color: inherit !important;
+
+
 }
 .p-calendar .p-inputtext {
     height: var(--form-control-height);
     font-size: 0.95rem;
+    background-color: red;
+
 }
 .periodo-calendar-panel {
     max-width: 520px;

@@ -3,7 +3,7 @@ import { TreeNode } from 'primereact/treenode';
 export const permissoes: TreeNode[] = [
     {
         key: '0',
-        label: 'Perfil de Usuário',
+        label: 'Perfil de usuário',
         children: [
             { key: '0-0', label: 'Cadastrar perfil de usuário' },
             { key: '0-1', label: 'Alterar perfil de usuários' },
@@ -13,7 +13,7 @@ export const permissoes: TreeNode[] = [
     },
     {
         key: '1',
-        label: 'Conta de Usuário',
+        label: 'Conta de usuário',
         children: [
             { key: '1-0', label: 'Alterar conta dos usuários' },
             { key: '1-1', label: 'Cadastrar conta dos usuários' },
@@ -103,33 +103,33 @@ export const permissoes: TreeNode[] = [
     },
     {
         key: '10',
-        label: 'Nota Fiscal - (NFS-e)',
+        label: 'Nota fiscal - (NFS-e)',
         children: [
-            { key: '10-0', label: 'Emitir Nota Fiscal' },
-            { key: '10-1', label: 'Corrigir Nota Fiscal' },
-            { key: '10-2', label: 'Desativar  Nota Fiscal' },
-            { key: '10-3', label: 'Pesquisar  Nota Fiscal' },
-            { key: '10-4', label: 'Cancelar  Nota Fiscal' }
+            { key: '10-0', label: 'Emitir nota fiscal' },
+            { key: '10-1', label: 'Corrigir nota fiscal' },
+            { key: '10-2', label: 'Desativar nota fiscal' },
+            { key: '10-3', label: 'Pesquisar nota fiscal' },
+            { key: '10-4', label: 'Cancelar nota fiscal' }
         ]
     },
     {
         key: '11',
         label: 'Integração',
         children: [
-            { key: '11-0', label: 'Cadastrar Integração' },
-            { key: '11-1', label: 'Alterar Integração' },
-            { key: '11-2', label: 'Desativar Integração' },
-            { key: '11-3', label: 'Pesquisar Integração' }
+            { key: '11-0', label: 'Cadastrar integração' },
+            { key: '11-1', label: 'Alterar integração' },
+            { key: '11-2', label: 'Desativar integração' },
+            { key: '11-3', label: 'Pesquisar integração' }
         ]
     },
     {
         key: '12',
-        label: 'Perfil Tributário',
+        label: 'Perfil tributário',
         children: [
-            { key: '12-0', label: 'Cadastrar Perfil Tributário' },
-            { key: '12-1', label: 'Alterar Perfil Tributário' },
-            { key: '12-2', label: 'Desativar Perfil Tributário' },
-            { key: '12-3', label: 'Pesquisar Perfil Tributário' }
+            { key: '12-0', label: 'Cadastrar perfil tributário' },
+            { key: '12-1', label: 'Alterar perfil tributário' },
+            { key: '12-2', label: 'Desativar perfil tributário' },
+            { key: '12-3', label: 'Pesquisar perfil tributário' }
         ]
     }
     ,
@@ -137,13 +137,13 @@ export const permissoes: TreeNode[] = [
         key: '13',
         label: 'Relatórios',
         children: [
-            { key: '13-0', label: 'Acesso aos Relatórios de Serviços' },
-            { key: '13-1', label: 'Acesso aos Relatórios de Recebimentos' },
+            { key: '13-0', label: 'Acesso aos relatórios de serviços' },
+            { key: '13-1', label: 'Acesso aos relatórios de recebimentos' },
         ]
     },
     {
         key: '14',
-        label: 'Contas a Pagar',
+        label: 'Contas a pagar',
         children: [
             { key: '14-0', label: 'Visualizar contas a pagar' },
             { key: '14-1', label: 'Criar contas a pagar' }
@@ -151,7 +151,7 @@ export const permissoes: TreeNode[] = [
     },
     {
         key: '15',
-        label: 'Contas a Receber',
+        label: 'Contas a receber',
         children: [
             { key: '15-0', label: 'Visualizar contas a receber' },
             { key: '15-1', label: 'Criar contas a receber' }

@@ -121,6 +121,7 @@ textarea.p-inputtextarea {
 .p-calendar .p-datepicker-trigger {
     width: var(--form-control-height) !important;
     min-width: var(--form-control-height) !important;
+   
     height: var(--form-control-height) !important;
 }
 
