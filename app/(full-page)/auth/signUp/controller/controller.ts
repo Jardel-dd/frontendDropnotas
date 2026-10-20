@@ -22,7 +22,6 @@ export const create = async (conta: CreatedAccountEntity, router: AppRouterInsta
 
     try {
         await api.post('/conta-cliente', requestData);
-        console.log('requestData:', requestData);
 
         trackLead();
 
@@ -130,7 +129,6 @@ export const handleSearchCNPJCreated = async <T extends CreatedAccountEntity>(
                     });
                 }
 
-                console.log('Novo estado da empresa:', newState);
                 return newState;
             });
         }

@@ -9,8 +9,6 @@ export const validateFormCreatedAccount = (
   let valid = true;
   const newErrors: { [key: string]: string } = {};
   msgs.current?.clear();
-  console.log(' conta:', conta);
-  console.log(' confirmPassword:', confirmPassword);
   if (!conta.cnpj || conta.cnpj.trim().replace(/\D/g, '').length < 14) {
     newErrors.cnpj = 'CNPJ deve ter 14 dígitos.';
     valid = false;

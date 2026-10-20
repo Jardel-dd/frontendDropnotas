@@ -300,11 +300,44 @@ const buildFreshAuthRequestConfig = () => ({
   }
 });
 
+const isPrimaryUser = (userData: UsuarioContaEntity | null) => {
+  return normalizePermissionFlagValue(userData?.is_usuario_principal) === true;
+};
+
+const getPrimaryAccountId = (userData: UsuarioContaEntity) => {
+  const userRecord = userData as Record<string, any>;
+
+  return userData.id_conta_cliente ?? userRecord.conta_cliente_id ?? userData.id;
+};
+
+const extractPrimaryAccountUser = (accountData: Record<string, any>, currentUser: UsuarioContaEntity) => {
+  const nestedUser = accountData.usuario_conta ?? accountData.usuarioConta ?? accountData.dadosUsuario;
+  const primaryUserData = nestedUser && typeof nestedUser === 'object' ? nestedUser : {};
+
+  return {
+    ...currentUser,
+    ...primaryUserData,
+    // O endpoint de conta-cliente pode nao devolver este campo, mas a conta logada continua principal.
+    is_usuario_principal: true,
+    // O id do contexto representa o usuario autenticado, nao o id da conta-cliente.
+    id: primaryUserData.id ?? currentUser.id,
+    id_conta_cliente: accountData.id ?? currentUser.id_conta_cliente ?? currentUser.id
+  };
+};
+
 const resolveLatestPerfilUsuario = async (latestUserData: Record<string, any>, currentUser: UsuarioContaEntity | null) => {
   const embeddedPerfilUsuario = extractEmbeddedPerfilUsuario(latestUserData) as ({ id?: number } & Record<string, any>) | undefined;
   const currentPerfilUsuario = normalizePerfilUsuarioShape(
     currentUser?.perfil_usuario as ({ id?: number } & Record<string, any>) | undefined
   ) as ({ id?: number } & Record<string, any>) | undefined;
+
+  if (isPrimaryUser(currentUser)) {
+    return {
+      perfil_usuario: currentPerfilUsuario,
+      source: 'conta-cliente.principal-default-permissions',
+      perfilId: null
+    };
+  }
 
   const perfilId =
     latestUserData?.id_perfil_usuario ??
@@ -389,9 +422,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // console.info('[UserContext] Iniciando refresh do usuario logado.', {
         //   userId: currentUser.id
         // });
-        const response = await api.get(`/usuario-conta/${currentUser.id}`, buildFreshAuthRequestConfig());
-        const latestUserData = response.data ?? {};
-        console.log("response", response)
+        const primaryUser = isPrimaryUser(currentUser);
+        const endpoint = primaryUser
+          ? `/conta-cliente/${getPrimaryAccountId(currentUser)}`
+          : `/usuario-conta/${currentUser.id}`;
+        const response = await api.get(endpoint, buildFreshAuthRequestConfig());
+        const latestUserData = primaryUser
+          ? extractPrimaryAccountUser(response.data ?? {}, currentUser)
+          : response.data ?? {};
         // console.info('[UserContext] Resposta recebida de /usuario-conta/{id}.', {
         //   userId: currentUser.id,
         //   responseKeys: Object.keys(latestUserData),

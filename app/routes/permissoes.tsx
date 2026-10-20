@@ -24,6 +24,8 @@ export const usePermissions = () => {
         permissaoComissao: getPermissionFlags(userConta, 'comissao'),
         permissaoConfiguracoes: getPermissionFlags(userConta, 'configuracoes'),
         permissaoRelatorio: getPermissionFlags(userConta, 'relatorio'),
+        is_usuario_principal: getPermissionFlags(userConta, 'is_usuario_principal'),
+
 
     };
 };

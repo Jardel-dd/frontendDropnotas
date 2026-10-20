@@ -295,18 +295,22 @@ export const toggleStatusOrDeleteButton = <T,>({ entity, onToggle, entityType }:
               icon: 'pi pi-trash',
               style: 'p-button-danger',
               tooltip: `Desativar ${entityType}`,
-              message: `Tem certeza que deseja <strong style="color:red">&nbsp;Desativar&nbsp;</strong> este ${entityType}?`
           }
         : {
               icon: 'pi pi-refresh',
               style: 'p-button-success',
               tooltip: `Ativar ${entityType}`,
-              message: `Tem certeza que deseja <strong style="color:#3DBF98">&nbsp;Ativar&nbsp;</strong> este ${entityType}?`
           };
 
     const handleConfirm = () => {
         confirmDialog({
-            message: <span dangerouslySetInnerHTML={{ __html: style.message }} />,
+            message: (
+                <span>
+                    Tem certeza que deseja{' '}
+                    <strong style={{ color: entity.ativo ? 'red' : '#3DBF98' }}>&nbsp;{entity.ativo ? 'Desativar' : 'Ativar'}&nbsp;</strong>{' '}
+                    este {entityType}?
+                </span>
+            ),
             header: 'Confirmação',
             icon: 'pi pi-exclamation-triangle',
             acceptLabel: 'Sim',

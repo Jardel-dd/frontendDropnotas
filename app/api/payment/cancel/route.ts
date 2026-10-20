@@ -11,6 +11,10 @@ const jsonNoStore = (body: unknown, status = 200) =>
     });
 
 export async function POST(request: Request) {
+    if (process.env.NODE_ENV === 'production') {
+        return jsonNoStore({ message: 'A cobranca de assinatura ainda nao esta integrada a um provedor de pagamentos.' }, 503);
+    }
+
     let body: Partial<CancelSubscriptionPaymentPayload> | null = null;
 
     try {

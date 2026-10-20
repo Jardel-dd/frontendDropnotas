@@ -18,7 +18,6 @@ export const getToken = async (): Promise<string | null> => {
     if (!isExpired(payload.exp as number)) {
         return token;
     }
-    console.log('Token expirado, renovando...',token);
     return await renewToken();
 };
 export const getTokenDecoded = (): JwtPayload | null => {
@@ -41,7 +40,6 @@ const isExpired = (exp?: number) => {
 };
 const performTokenRenewal = async (): Promise<string | null> => {
     try {
-        console.log('Refresh tok');
         const refreshToken = getRefreshToken();
         if (!refreshToken) {
             console.error('Refresh tok não encontradp.');
@@ -85,17 +83,15 @@ export const renewToken = async (): Promise<string | null> => {
 export const saveToken = (token: string) => {
     if (token && token !== 'token') {
         writeStoredAuthValue('token', token);
-        console.log('Token armazenado com sucesso:', token);
     } else {
-        console.error('Tentativa de salvar um token falhou:', token);
+        console.error('Tentativa de salvar um token falhou.');
     }
 };
 export const saveRefreshToken = (refreshToken: string) => {
     if (refreshToken && refreshToken !== 'refreshToken') {
         writeStoredAuthValue('refreshToken', refreshToken);
-        console.log('Refresh token armazenado com sucesso:', refreshToken);
     } else {
-        console.error('Tentativa de salvar um refresh token falhou', refreshToken);
+        console.error('Tentativa de salvar um refresh token falhou.');
     }
 };
 export const getRefreshToken = (): string | null => {

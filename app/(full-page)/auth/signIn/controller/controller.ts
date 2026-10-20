@@ -11,11 +11,6 @@ export const authLogin = async (userConta: UsuarioContaEntity, msgs: React.RefOb
             email: userConta.email.trim(),
             senha: userConta.senha.trim()
         });
-        console.log('[signIn] Resposta completa do login:', response);
-        console.log('[signIn] Payload de sucesso do backend:', response.data);
-        if (typeof window !== 'undefined') {
-            window.sessionStorage.setItem('lastSuccessfulLoginResponse', JSON.stringify(response.data ?? {}));
-        }
         const { token, refreshToken, dadosUsuario, perfil_usuario } = response.data ?? {};
         saveToken(token);
         saveRefreshToken(refreshToken);

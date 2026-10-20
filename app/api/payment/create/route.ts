@@ -87,6 +87,10 @@ const isValidCardToken = (payload: CreateSubscriptionPaymentPayload['card']) => 
 };
 
 export async function POST(request: Request) {
+    if (process.env.NODE_ENV === 'production') {
+        return jsonNoStore({ message: 'A cobranca de assinatura ainda nao esta integrada a um provedor de pagamentos.' }, 503);
+    }
+
     let body: Partial<CreateSubscriptionPaymentPayload> | null = null;
 
     try {

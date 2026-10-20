@@ -40,7 +40,7 @@ const protectedRoutes: ProtectedRoute[] = [
     { path: '/contrato', permissions: [{ resource: 'contrato' }] },
     { path: '/ordemServicos', permissions: [{ resource: 'ordemServico' }] },
     { path: '/notaServico', permissions: [{ resource: 'nfse' }] },
-    { path: '/assinaturas', permissions: [{ resource: 'is_usuario_principal' }] },
+    { path: '/assinaturas', permissions: [] },
     { path: '/financas', permissions: [{ resource: 'financas' }] },
     { path: '/configuracoes', permissions: [{ resource: 'configuracoes' }], allowPrimaryUser: true }
 ];
@@ -57,23 +57,49 @@ const PermissionRouteGuard: React.FC<PermissionRouteGuardProps> = ({ children })
     const protectedRoute = findProtectedRoute(pathname);
     const isCreateRoute = Boolean(protectedRoute && pathname.startsWith(`${protectedRoute.path}/created`));
     const isEditRoute = isCreateRoute && Boolean(searchParams.get('id'));
-    const hasPermissionsForRoute = protectedRoute?.permissions.every((permission, index) => {
+    const isPrimaryUser = hasPermissionAccess(userConta, 'is_usuario_principal');
+    const permissionChecks = protectedRoute?.permissions.map((permission, index) => {
         const isLastPermission = index === protectedRoute.permissions.length - 1;
         const action: PermissionAction = isCreateRoute && isLastPermission
             ? (isEditRoute ? 'update' : 'create')
             : permission.action ?? 'view';
 
-        return hasPermissionAccess(userConta, permission.resource, action);
+        return {
+            resource: permission.resource,
+            action,
+            granted: hasPermissionAccess(userConta, permission.resource, action)
+        };
     });
-    const hasRouteAccess = !protectedRoute || hasPermissionsForRoute || (
-        protectedRoute.allowPrimaryUser && hasPermissionAccess(userConta, 'is_usuario_principal')
-    );
+    const hasPermissionsForRoute = permissionChecks?.every(({ granted }) => granted);
+    const hasRouteAccess = !protectedRoute || isPrimaryUser || Boolean(hasPermissionsForRoute);
 
     useEffect(() => {
-        if (!isInitializing && !hasRouteAccess) {
+        if (isInitializing || !protectedRoute) {
+            return;
+        }
+
+        if (isPrimaryUser) {
+            console.info('[PermissionRouteGuard] Acesso liberado para usuario principal.', {
+                pathname,
+                route: protectedRoute.path,
+                isCreateRoute,
+                isEditRoute,
+                permissionChecks
+            });
+            return;
+        }
+
+        if (!hasRouteAccess) {
+            console.warn('[PermissionRouteGuard] Acesso negado; redirecionando para o dashboard.', {
+                pathname,
+                route: protectedRoute.path,
+                isCreateRoute,
+                isEditRoute,
+                permissionChecks
+            });
             router.replace('/dashboard');
         }
-    }, [hasRouteAccess, isInitializing, router]);
+    }, [hasRouteAccess, isCreateRoute, isEditRoute, isInitializing, isPrimaryUser, pathname, permissionChecks, protectedRoute, router]);
 
     if (isInitializing) {
         return <LoadingScreen loadingText="Atualizando permissoes de acesso..." overlayOpacity={1} />;
