@@ -155,14 +155,13 @@ const AppMenu = () => {
             {
                 label: 'Assinaturas',
                 icon: CreditCard,
-                to: '/assinaturas',
-                visible: hasPermissionAccess(userConta, 'is_usuario_principal')
+                to: '/assinaturas'
             },
             {
                 label: 'Configurações',
                 icon: GearSix,
                 to: '/configuracoes',
-                visible: hasPermissionAccess(userConta, 'permiteAlterarConfiguracoes') || hasPermissionAccess(userConta, 'is_usuario_principal'),
+                visible: hasPermissionAccess(userConta, 'permiteAlterarConfiguracoes'),
                 items: [
                     {
                         label: 'Minhas Empresas',

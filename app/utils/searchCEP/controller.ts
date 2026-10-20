@@ -7,7 +7,7 @@ export const searchByCep = async (_cep: string, msgs: React.RefObject<Messages>)
         const token = localStorage.getItem('token');
         const response = await api.get(`endereco/cep/${cep}`,
             { headers: { Authorization: `Bearer ${token}` } });
-        console.log(response); return response.data;
+        return response.data;
     } catch (error) {
         if (msgs.current) { msgs.current.show({ severity: 'error', summary: 'Atenção:', detail: 'Cep não encontrado, verifique ou inclua o endereço manualmente!' }); }
     }

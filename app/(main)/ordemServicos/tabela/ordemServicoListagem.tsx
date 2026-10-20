@@ -81,12 +81,9 @@ export function  ListarOrdemServico({
         const handleConfirm = () => {
             confirmDialog({
                 message: (
-                    <span
-                        dangerouslySetInnerHTML={{
-                            __html:
-                                'Tem certeza que deseja <strong style="color:red">&nbsp;Excluir&nbsp;</strong> esta Ordem de Servico?'
-                        }}
-                    />
+                    <span>
+                        Tem certeza que deseja <strong style={{ color: 'red' }}>&nbsp;Excluir&nbsp;</strong> esta Ordem de Servico?
+                    </span>
                 ),
                 header: 'Confirmacao',
                 icon: 'pi pi-exclamation-triangle',

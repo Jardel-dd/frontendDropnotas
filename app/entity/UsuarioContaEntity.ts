@@ -4,6 +4,7 @@ export class UsuarioContaEntity {
     id!: number;
     foto_perfil?: string;
     is_usuario_principal?:boolean
+    id_conta_cliente?: number;
     nome!: string;
     email!: string;
     senha!: string;
@@ -18,6 +19,7 @@ export class UsuarioContaEntity {
         nome,
         email,
         is_usuario_principal,
+        id_conta_cliente,
         senha,
         id_empresas_acesso,
         perfil_usuario,
@@ -33,6 +35,7 @@ export class UsuarioContaEntity {
         id_empresas_acesso?: number[];
         esquema_cor?:string;
         is_usuario_principal?:boolean;
+        id_conta_cliente?: number;
         tema_componente?:string;
         perfil_usuario?: PerfilUsuario;
     }) {
@@ -47,7 +50,8 @@ export class UsuarioContaEntity {
             perfil_usuario,
             tema_componente,
             esquema_cor,
-            is_usuario_principal
+            is_usuario_principal,
+            id_conta_cliente
         });
     }
     copyWith({
@@ -61,7 +65,8 @@ export class UsuarioContaEntity {
         perfil_usuario,
         tema_componente,
         esquema_cor,
-        is_usuario_principal
+        is_usuario_principal,
+        id_conta_cliente
     }: {
         ativo?: boolean;
         id?: number;
@@ -74,6 +79,7 @@ export class UsuarioContaEntity {
         esquema_cor?:string;
         perfil_usuario?: PerfilUsuario;
         is_usuario_principal?:boolean;
+        id_conta_cliente?: number;
     }): UsuarioContaEntity {
         return new UsuarioContaEntity({
             ativo: ativo ?? this.ativo,
@@ -83,6 +89,7 @@ export class UsuarioContaEntity {
             email: email ?? this.email,
             senha: senha ?? this.senha,
             is_usuario_principal: is_usuario_principal ?? this.is_usuario_principal,
+            id_conta_cliente: id_conta_cliente ?? this.id_conta_cliente,
             id_empresas_acesso: id_empresas_acesso ?? this.id_empresas_acesso,
             tema_componente: tema_componente ?? this.tema_componente,
             esquema_cor: esquema_cor ?? this.esquema_cor,

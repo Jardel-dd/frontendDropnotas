@@ -190,6 +190,16 @@ const readPrimaryUserPermission = (userConta: UsuarioContaEntity | null) => {
     return normalizePermissionValue(userConta?.is_usuario_principal);
 };
 export const getPermissionFlags = (userConta: UsuarioContaEntity | null, resource: PermissionResourceKey): PermissionFlags => {
+    if (readPrimaryUserPermission(userConta)) {
+        return {
+            view: true,
+            create: true,
+            update: true,
+            delete: true,
+            search: true
+        };
+    }
+
     if (resource === 'is_usuario_principal') {
         return {
             view: readPrimaryUserPermission(userConta),

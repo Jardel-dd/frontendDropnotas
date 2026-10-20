@@ -6,43 +6,55 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & {
     _retry?: boolean;
 };
 
+const SENSITIVE_REQUEST_FIELD = /authorization|token|senha|password|secret|api[-_]?key|cookie/i;
+
+const sanitizeRequestLogValue = (value: unknown): unknown => {
+    if (Array.isArray(value)) {
+        return value.map(sanitizeRequestLogValue);
+    }
+
+    if (value && typeof value === 'object') {
+        return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>((sanitized, [key, item]) => {
+            sanitized[key] = SENSITIVE_REQUEST_FIELD.test(key) ? '[oculto]' : sanitizeRequestLogValue(item);
+            return sanitized;
+        }, {});
+    }
+
+    return value;
+};
+
 const api = axios.create({
     baseURL: BACKEND_BASE_URL,
     headers: {
         'Content-Type': 'application/json'
     }
 });
-const logRequest = (request: InternalAxiosRequestConfig) => {
-    if (request.url) {
-        console.log('', request.url);
-        return;
-    }
-};
 
-const redirectToDashboardAfterForbiddenResponse = () => {
-    if (typeof window === 'undefined') {
+const logApiRequest = (request: InternalAxiosRequestConfig) => {
+    if (process.env.NODE_ENV !== 'development') {
         return;
     }
 
-    const { pathname } = window.location;
-    const isAuthenticatedArea = pathname !== '/' && !pathname.startsWith('/auth');
-
-    if (isAuthenticatedArea && pathname !== '/dashboard') {
-        window.location.replace('/dashboard');
-    }
+    console.info('[Req env', {
+        method: request.method?.toUpperCase(),
+        endpoint: request.url,
+        params: sanitizeRequestLogValue(request.params),
+        body: sanitizeRequestLogValue(request.data)
+    });
 };
 
 api.interceptors.request.use(async (request) => {
-    logRequest(request);
     if (request.url === '/refresh-token') {
+        logApiRequest(request);
         return request;
     }
-    const token = await getToken();
-    console.log(' Token do usuário:', token);
 
+    const token = await getToken();
     if (token) {
         request.headers.Authorization = `Bearer ${token}`;
     }
+
+    logApiRequest(request);
 
     return request;
 });
@@ -65,7 +77,12 @@ api.interceptors.response.use(
         }
 
         if (error.response?.status === 403) {
-            redirectToDashboardAfterForbiddenResponse();
+            console.warn('[api] Requisicao recusada pelo backend (403). Mantendo a pagina atual para diagnostico.', {
+                method: originalRequest.method?.toUpperCase(),
+                url: originalRequest.url,
+                pathname: typeof window === 'undefined' ? undefined : window.location.pathname,
+                status: error.response.status
+            });
             return Promise.reject(error);
         }
 

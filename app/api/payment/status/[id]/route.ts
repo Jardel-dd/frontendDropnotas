@@ -11,8 +11,13 @@ const jsonNoStore = (body: unknown, status = 200) =>
         }
     });
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
-    const paymentId = params.id?.trim();
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (process.env.NODE_ENV === 'production') {
+        return jsonNoStore({ message: 'A cobranca de assinatura ainda nao esta integrada a um provedor de pagamentos.' }, 503);
+    }
+
+    const { id } = await params;
+    const paymentId = id?.trim();
 
     if (!paymentId) {
         return jsonNoStore({ message: 'Identificador da cobranca nao informado.' }, 400);
