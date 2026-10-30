@@ -47,8 +47,10 @@ export function ListarNotaServico({
     const canCancelNota = permissaoNfse.delete;
     const canSelectPendingNota = permissaoNfse.update;
     const notas = listPaginationNotaServico?.content || [];
+    const isPendingNota = (nota: NfsEntity) =>
+        nota.status_nota?.trim().toUpperCase() === 'PENDENTE';
     const selectableNotas = notas.filter(
-        (nota: NfsEntity) => canSelectPendingNota && nota.status_nota === 'PENDENTE'
+        (nota: NfsEntity) => canSelectPendingNota && isPendingNota(nota)
     );
     const allSelectableRowsSelected =
         selectableNotas.length > 0 &&
@@ -87,7 +89,7 @@ export function ListarNotaServico({
     };
 
     const toggleNotaSelection = (nota: NfsEntity, checked: boolean) => {
-        if (!canSelectPendingNota || nota.status_nota !== 'PENDENTE') return;
+        if (!canSelectPendingNota || !isPendingNota(nota)) return;
 
         if (checked) {
             if (!selectedNotas.some((selectedNota) => selectedNota.id === nota.id)) {
@@ -159,7 +161,7 @@ export function ListarNotaServico({
                         data={notas}
                         selected={selectedNotas}
                         onSelectionChange={setSelectedNotas}
-                        isRowSelectable={(nota) => canSelectPendingNota && nota.status_nota === 'PENDENTE'}
+                        isRowSelectable={(nota) => canSelectPendingNota && isPendingNota(nota)}
                         dataKey="id"
                         loading={loading}
                         isDarkMode={isDarkMode}
@@ -288,7 +290,7 @@ export function ListarNotaServico({
                                     </div>
                                 ) : (
                                     notas.map((nota: NfsEntity) => {
-                                        const isSelectable = canSelectPendingNota && nota.status_nota === 'PENDENTE';
+                                        const isSelectable = canSelectPendingNota && isPendingNota(nota);
                                         const isSelected = selectedNotas.some((selectedNota) => selectedNota.id === nota.id);
 
                                         return (

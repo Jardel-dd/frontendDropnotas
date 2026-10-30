@@ -150,6 +150,12 @@ export const DateRangePicker = ({
                     readOnlyInput
                     placeholder="Data inicio - Data final"
                     showIcon
+                    icon={
+                        <i
+                            className="pi pi-calendar"
+                            style={{ color: isDarkMode ? '#E4E6E0' : '#A3AAB4' }}
+                        />
+                    }
                     panelClassName={`periodo-calendar-panel ${isDarkMode ? 'periodo-calendar-panel-dark' : 'periodo-calendar-panel-light'}`}
                     footerTemplate={footerTemplate}
                 />

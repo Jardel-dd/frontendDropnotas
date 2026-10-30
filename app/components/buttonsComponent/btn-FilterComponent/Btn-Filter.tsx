@@ -18,6 +18,7 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
     buttonLabel = 'Filtros',
     buttonIcon = 'pi pi-filter',
     buttonClassName = '',
+    showMobileButtonLabel = false,
     activeFilterCount = 0
 }) => {
     const op = useRef<OverlayPanel>(null);
@@ -48,9 +49,10 @@ export const FilterOverlay: React.FC<FilterOverlayProps> = ({
                     <div className="filter-overlay-trigger">
                         <Button
                             type="button"
-                            label={undefined}
+                            label={showMobileButtonLabel ? buttonLabel : undefined}
                             icon={buttonIcon}
                             outlined
+                            className={buttonClassName}
                             onClick={toggle}
                             style={{ boxShadow: "none",height: "40px" }}
                         />

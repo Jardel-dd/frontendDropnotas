@@ -73,6 +73,8 @@ export interface ServicoFieldsProps {
     onNumberChange: (event: InputNumberValueChangeEvent) => void;
     onPerfilTributarioChange: (perfilTributario: PerfilTributarioEntity | null) => void;
     onCompanyChange: (event: any) => void;
+    onAddPerfilTributario?: () => void;
+    onAddEmpresa?: () => void;
     onDescriptionBlur: () => void;
     fetchAllPerfilTributario: (...args: any[]) => any;
     fetchFilteredPerfilTributario: (...args: any[]) => any;

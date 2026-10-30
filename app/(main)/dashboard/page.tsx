@@ -122,9 +122,9 @@ const visibleItems = items.filter((item) => item.value > 0);
                                 }
                             },
                             datalabels: {
-                                color: labelColor,
+                                color: '#ffffff',
                                 anchor: 'end',
-                                align: 'end',
+                                align: 'start',
                                 offset: 8,
                                 clamp: true,
                                 font: {
@@ -175,6 +175,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [relatorio, setRelatorio] = useState<NotaFiscalResumo | null>(null);
     const [dateRange, setDateRange] = useState<DateRangeValue>(todayRange);
+    const [draftDateRange, setDraftDateRange] = useState<DateRangeValue>(todayRange);
     const [selectedCompany, setSelectedCompany] = useState<CompanyEntity | null>(null);
     const [selectedPessoa, setSelectedPessoa] = useState<PessoaEntity | null>(null);
     const [selectedServico, setSelectedServico] = useState<ServiceEntity | null>(null);
@@ -270,12 +271,14 @@ const RelatoriosNotaFiscal: React.FC = () => {
 
     const handleClearFilters = () => {
         const nextFilters: ReportFilters = {
-            dateRange,
+            dateRange: EMPTY_DATE_RANGE,
             selectedCompany: null,
             selectedPessoa: null,
             selectedServico: null
         };
 
+        setDateRange(EMPTY_DATE_RANGE);
+        setDraftDateRange(EMPTY_DATE_RANGE);
         setSelectedCompany(null);
         setSelectedPessoa(null);
         setSelectedServico(null);
@@ -329,6 +332,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
         const nextDateRange: DateRangeValue = [dayjs(inicio), dayjs(fim)];
 
         setDateRange(nextDateRange);
+        setDraftDateRange(nextDateRange);
         void search({
             dateRange: nextDateRange,
             selectedCompany,
@@ -338,12 +342,22 @@ const RelatoriosNotaFiscal: React.FC = () => {
     };
     const handleDateRangeClear = () => {
         setDateRange(EMPTY_DATE_RANGE);
+        setDraftDateRange(EMPTY_DATE_RANGE);
         void search({
             dateRange: EMPTY_DATE_RANGE,
             selectedCompany,
             selectedPessoa,
             selectedServico
         });
+    };
+    const handlePeriodoChange = (periodo: Periodo) => {
+        // Preserve the first selected date while the user chooses the end date.
+        // Without this, the controlled Calendar receives the previous range again
+        // after the first click and cannot complete a custom range.
+        setDraftDateRange([
+            periodo?.[0] ? dayjs(periodo[0]) : null,
+            periodo?.[1] ? dayjs(periodo[1]) : null
+        ]);
     };
     const totalNotas = relatorio?.totalNotas ?? 0;
     const valorTotal = relatorio?.valores.valorTotal ?? 0;
@@ -411,7 +425,17 @@ const RelatoriosNotaFiscal: React.FC = () => {
             color: '#e11d48'
         }
     ];
+    const selectedPeriodLabel = dateRange[0] && dateRange[1]
+        ? dateRange[0].isSame(dateRange[1], 'day')
+            ? dateRange[0].format('DD/MM/YYYY')
+            : `${dateRange[0].format('DD/MM/YYYY')} até ${dateRange[1].format('DD/MM/YYYY')}`
+        : null;
     const appliedFilterItems = [
+        {
+            label: 'Período',
+            value: selectedPeriodLabel,
+            onRemove: handleDateRangeClear
+        },
         {
             label: 'Empresa',
             value: selectedCompany?.razao_social ?? null,
@@ -429,9 +453,11 @@ const RelatoriosNotaFiscal: React.FC = () => {
         }
     ];
     const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
-   const selectedPeriodo =
-    dateRange?.[0] && dateRange?.[1]
-        ? [dateRange[0].toDate(), dateRange[1].toDate()] as [Date, Date]
+    const selectedPeriodo: Periodo = draftDateRange?.[0]
+        ? [
+            draftDateRange[0].toDate(),
+            ...(draftDateRange[1] ? [draftDateRange[1].toDate()] : [])
+        ]
         : null;
 
     const filterOverlayContent = (
@@ -486,7 +512,6 @@ const RelatoriosNotaFiscal: React.FC = () => {
     return (
         <div className="p-fluid">
             <Messages ref={msgs} className="custom-messages" />
-
             <div className="card styled-container-main-all-routes w-full nota-fiscal-card-shell">
                 {loading && (
                     <div className="nota-fiscal-loading-overlay">
@@ -507,6 +532,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
                                     initialPeriodo={[todayRange[0]!.toDate(), todayRange[1]!.toDate()]}
                                     showTopLabel
                                     topLabel="Filtrar por data:"
+                                    onPeriodoChange={handlePeriodoChange}
                                     onClear={handleDateRangeClear}
                                     onBuscar={handleDateRangeSearch}
                                 />
@@ -533,14 +559,7 @@ const RelatoriosNotaFiscal: React.FC = () => {
     initialPeriodo={[todayRange[0]!.toDate(), todayRange[1]!.toDate()]}
     showTopLabel
     topLabel="Filtrar por data:"
-    onPeriodoChange={(periodo) => {
-        if (periodo?.[0] && periodo?.[1]) {
-            setDateRange([
-                dayjs(periodo[0]),
-                dayjs(periodo[1])
-            ]);
-        }
-    }}
+    onPeriodoChange={handlePeriodoChange}
     onClear={handleDateRangeClear}
     onBuscar={handleDateRangeSearch}
 />

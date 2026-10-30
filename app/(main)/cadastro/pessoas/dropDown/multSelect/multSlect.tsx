@@ -1,4 +1,5 @@
 import { Mandatory } from '@/app/shared/mandatory/InputMandatory';
+import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { MultiSelect as PrimeMultiSelect, MultiSelectChangeEvent } from 'primereact/multiselect';
 
 interface Option {
@@ -43,6 +44,8 @@ export default function MultiSelect({
     disabled = false,
     className = 'w-full'
 }: MultiSelectProps) {
+    const { isDarkMode } = useTheme();
+
     return (
         <div className="field">
             <div
@@ -71,6 +74,11 @@ export default function MultiSelect({
                 display="chip"
                 disabled={disabled}
                 className={`${className} ${hasError ? 'p-invalid' : ''}`}
+                style={{
+                    backgroundColor: isDarkMode ? '#293B51' : '#FFFFFF',
+                    borderColor: isDarkMode ? '#3E4F62' : '#CED4DA',
+                    color: isDarkMode ? '#FFFFFF' : '#495057'
+                }}
             />
 
             <div

@@ -65,6 +65,7 @@ export const DataTableComponent = <T extends Identifiable>({
     const shouldShowActionsColumn =
         showActionsColumn ?? Boolean(editButtonTemplate || toggleStatusOrDeleteButtonTemplate || extraActionsTemplate);
     const useMobileBodyScroll = isMobile && mobileBodyScroll;
+    const tableScrollHeight = isMobile ? 'calc(100dvh - 13rem)' : 'flex';
     const rowCount = Array.isArray(value) ? value.length : 0;
 
     useEffect(() => {
@@ -163,13 +164,13 @@ export const DataTableComponent = <T extends Identifiable>({
     return (
         <div
             ref={tableContainerRef}
-            className={`mt-1 datatable-component-shell${useMobileBodyScroll ? ' datatable-mobile-fixed-layout' : ''}`}
+            className={`mt-1 datatable-component-shell datatable-fixed-layout${useMobileBodyScroll ? ' datatable-mobile-fixed-layout' : ''}`}
         >
             <Messages ref={msgs} className="custom-messages" />
             <DataTable
                 value={value}
                 scrollable
-                scrollHeight={useMobileBodyScroll ? 'flex' : undefined}
+                scrollHeight={tableScrollHeight}
                 expandedRows={expandedRows === false ? undefined : expandedRows}
                 onRowToggle={(e: DataTableRowToggleEvent) => {
                     if (Array.isArray(e.data)) {
@@ -179,8 +180,8 @@ export const DataTableComponent = <T extends Identifiable>({
                     }
                 }}
                 rowExpansionTemplate={rowExpansionTemplate}
-                className={`p-datatable-row-expansion${useMobileBodyScroll ? ' datatable-mobile-fixed-header' : ''}`}
-                style={useMobileBodyScroll ? { height: '100%' } : undefined}
+                className={`p-datatable-row-expansion datatable-fixed-header${useMobileBodyScroll ? ' datatable-mobile-fixed-header' : ''}`}
+                style={{ height: '100%' }}
                 emptyMessage="Nenhum resultado encontrado na pesquisa"
                 totalRecords={totalRecords}
             >

@@ -17,16 +17,20 @@ import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
+import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
 
 const ContasPagar: React.FC = () => {
     const router = useRouter();
     const isMobile = useIsMobile();
     const pageSize = usePageSize();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const { isDarkMode } = useTheme();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [contasPagar, setContasPagar] = useState<ContasPagarEntity>(
@@ -45,7 +49,7 @@ const ContasPagar: React.FC = () => {
         content: [],
         pageable: {
             pageNumber: 0,
-            pageSize: pageSize,
+            pageSize: resolvedPageSize,
             sort: {
                 empty: true,
                 unsorted: true,
@@ -69,23 +73,27 @@ const ContasPagar: React.FC = () => {
     const handleNavigate = () => {
         router.push('/financas/pagar/created');
     };
-    const handleListContasPagar = async (pageNumber?: number, _searchTerm?: string, listarInativos = false, ) => {
-        setLoading(true);
+    const handleListContasPagar = async (pageNumber = 0, _searchTerm = searchTerm, inactive = listarInativos, append = false) => {
+        if (!append) setLoading(true);
         try {
             const contasPagarResponse = await listContasPagar(
                 {
                     ...listPaginationContasPagar,
                     pageable: {
                         ...listPaginationContasPagar.pageable,
-                        pageNumber: pageNumber ?? listPaginationContasPagar.pageable.pageNumber,
-                        pageSize: pageSize
+                        pageNumber,
+                        pageSize: resolvedPageSize
                     }
                 },
-                listarInativos,
-                setLoading,
-                _searchTerm ?? searchTerm
+                inactive,
+                append ? () => {} : setLoading,
+                _searchTerm
             );
-            setListPaginationContasPagar(contasPagarResponse);
+            setListPaginationContasPagar((current) =>
+                isMobile && append
+                    ? mergePaginatedContent(current, contasPagarResponse, pageNumber)
+                    : contasPagarResponse
+            );
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
@@ -94,7 +102,7 @@ const ContasPagar: React.FC = () => {
                 life: 3000
             });
         } finally {
-            setLoading(false);
+            if (!append) setLoading(false);
         }
     };
     const { debouncedSearch, searchNow } = useGenericSearch({
@@ -112,6 +120,21 @@ const ContasPagar: React.FC = () => {
             }
         }));
         handleListContasPagar(selectedPage, searchTerm, listarInativos);
+    };
+    const handleLoadMoreContasPagar = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationContasPagar)) return;
+
+        setLoadingMore(true);
+        try {
+            await handleListContasPagar(
+                (listPaginationContasPagar.pageable?.pageNumber ?? 0) + 1,
+                searchTerm,
+                listarInativos,
+                true
+            );
+        } finally {
+            setLoadingMore(false);
+        }
     };
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         const newValue = e.checked ?? false;
@@ -154,6 +177,7 @@ const ContasPagar: React.FC = () => {
                                     onClickSearch={() => searchNow(searchTerm)}
                                     topLabel="Descrição:"
                                     showTopLabel
+                                    noValidationSpace={true}
                                 />
                             </div>
                            <div className="col-4 mb-0 lg:col-3 lg:mb-0 ">
@@ -164,17 +188,20 @@ const ContasPagar: React.FC = () => {
                                     buttonClassName="height-2-8rem-ml-1rem-mobile"
                                      >
                                         <div className="col-12 lg:col-12 mt-3">
-                                            <Checkbox inputId="listarInativos" onChange={handleCheckboxChange} checked={listarInativos} />
-                                            <label htmlFor="listarInativos" className="ml-2">
-                                                Listar Desativadas
-                                            </label>
+                                            <CheckBoxField
+                                                                                        inputId="listarInativos"
+                                                                                        label="Listar Desativadas"
+                                                                                        checked={listarInativos}
+                                                                                        onChange={handleCheckboxChange}
+                                                                                    />
+                                           
                                         </div>
                                     </FilterOverlay>
                                     <Button icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div className="finance-mobile-list-wrapper" style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarContasPagar
                                 loading={loading}
                                 searchTerm={searchTerm}
@@ -182,18 +209,10 @@ const ContasPagar: React.FC = () => {
                                 listarInativos={listarInativos}
                                 setListPaginationContasPagar={setListPaginationContasPagar}
                                 listPaginationContasPagar={listPaginationContasPagar}
+                                mobileLoadMoreVisible={hasMoreMobileContent(listPaginationContasPagar)}
+                                mobileLoadMoreLoading={loadingMore}
+                                onMobileLoadMore={handleLoadMoreContasPagar}
                             />
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <div className="custom-paginator">
-                                <CustomPaginator
-                                    first={listPaginationContasPagar.pageable.pageNumber * listPaginationContasPagar.pageable.pageSize}
-                                    rows={pageSize}
-                                    totalRecords={listPaginationContasPagar.totalElements}
-                                    onPageChange={onPageChange}
-                                    isMobile
-                                />
-                            </div>
                         </div>
                     </div>
                 </>
@@ -221,7 +240,15 @@ const ContasPagar: React.FC = () => {
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
                                         <FilterOverlay onClear={handleClearFilters} onApply={handleApplyFilters} buttonClassName="Btn-Filter-Desktop">
-                                            <h1></h1>
+                                            <div className="col-12 lg:col-12 ">
+                                            <CheckBoxField
+                                                                                        inputId="listarInativos"
+                                                                                        label="Listar Desativadas"
+                                                                                        checked={listarInativos}
+                                                                                        onChange={handleCheckboxChange}
+                                                                                    />
+                                           
+                                        </div>
                                         </FilterOverlay>
                                     </div>
                                     <div className="container-button-primary-novo">

@@ -169,7 +169,7 @@ export function ListarContasPagar({
                                         header: 'Emissão',
                                         body: (data) => <span>
                                             {highlightSearchTerm(
-                                                limitarText(formatDate(data.data_emissao), 5),
+                                                limitarText(formatDate(data.data_emissao), 10),
                                                 searchTerm
                                             )}
                                         </span>
@@ -188,7 +188,13 @@ export function ListarContasPagar({
                                     {
                                         field: 'data_hora_pagamento',
                                         header: 'Pagamento',
-                                        body: (data) => <span>{formatDate(data.data_hora_pagamento, true)}</span>
+                                        body: (data) =>
+                                            <span>
+                                                {highlightSearchTerm(
+                                                    limitarText(formatDate(data.data_hora_pagamento), 10),
+                                                    searchTerm
+                                                )}
+                                            </span>
                                     },
                                     {
                                         field: 'valor_original',

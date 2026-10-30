@@ -189,6 +189,24 @@
   min-height: 320px;
 }
 
+.nota-fiscal-card-shell .periodo-calendar-shell-dark .p-datepicker-trigger,
+.nota-fiscal-card-shell .periodo-calendar-shell-dark .p-datepicker-trigger svg {
+  color: #E4E6E0 !important;
+}
+
+.nota-fiscal-card-shell .periodo-calendar-shell-dark .p-datepicker-trigger svg path {
+  fill: #E4E6E0 !important;
+}
+
+.nota-fiscal-card-shell .periodo-calendar-shell-light .p-datepicker-trigger,
+.nota-fiscal-card-shell .periodo-calendar-shell-light .p-datepicker-trigger svg {
+  color: #EFF3F8 !important;
+}
+
+.nota-fiscal-card-shell .periodo-calendar-shell-light .p-datepicker-trigger svg path {
+  fill: #EFF3F8 !important;
+}
+
 .nota-fiscal-empty-state {
   width: 100%;
   min-height: 280px;

@@ -18,6 +18,6 @@ export default function PessoaPage() {
                 initialId={pessoaId}
                 showBTNPGCreatedAll
             />
-        </div>
+            </div>
     );
 }

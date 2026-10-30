@@ -285,6 +285,7 @@ function PerfilTributario() {
                                 onClickSearch={() => searchNow(searchTerm)}
                                 topLabel="Pesquisar:"
                                 showTopLabel
+                                noValidationSpace={true}
                             />
                         </div>
                         <div className="col-4 mb-0 lg:col-3 lg:mb-0 ">

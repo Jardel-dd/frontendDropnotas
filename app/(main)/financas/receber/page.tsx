@@ -17,16 +17,19 @@ import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
 
 const ContasReceber: React.FC = () => {
     const router = useRouter();
     const isMobile = useIsMobile();
     const pageSize = usePageSize();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const { isDarkMode } = useTheme();
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [contasReceber, setContasReceber] = useState<ContasReceberEntity>(
@@ -46,7 +49,7 @@ const ContasReceber: React.FC = () => {
         content: [],
         pageable: {
             pageNumber: 0,
-            pageSize: pageSize,
+            pageSize: resolvedPageSize,
             sort: {
                 empty: true,
                 unsorted: true,
@@ -70,23 +73,27 @@ const ContasReceber: React.FC = () => {
     const handleNavigate = () => {
         router.push('/financas/receber/created');
     };
-    const handleListContasReceber = async (pageNumber?: number, _searchTerm?: string, listarInativos = false, ) => {
-        setLoading(true);
+    const handleListContasReceber = async (pageNumber = 0, _searchTerm = searchTerm, inactive = listarInativos, append = false) => {
+        if (!append) setLoading(true);
         try {
             const contasReceber = await listContasReceber(
                 {
                     ...listPaginationContasReceber,
                     pageable: {
                         ...listPaginationContasReceber.pageable,
-                        pageNumber: pageNumber ?? listPaginationContasReceber.pageable.pageNumber,
-                        pageSize: pageSize
+                        pageNumber,
+                        pageSize: resolvedPageSize
                     }
                 },
-                listarInativos,
-                setLoading,
-                _searchTerm ?? searchTerm
+                inactive,
+                append ? () => {} : setLoading,
+                _searchTerm
             );
-            setListPaginationContasReceber(contasReceber);
+            setListPaginationContasReceber((current) =>
+                isMobile && append
+                    ? mergePaginatedContent(current, contasReceber, pageNumber)
+                    : contasReceber
+            );
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
@@ -95,7 +102,7 @@ const ContasReceber: React.FC = () => {
                 life: 3000
             });
         } finally {
-            setLoading(false);
+            if (!append) setLoading(false);
         }
     };
     const { debouncedSearch, searchNow } = useGenericSearch({
@@ -113,6 +120,21 @@ const ContasReceber: React.FC = () => {
             }
         }));
         handleListContasReceber(selectedPage, searchTerm, listarInativos);
+    };
+    const handleLoadMoreContasReceber = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationContasReceber)) return;
+
+        setLoadingMore(true);
+        try {
+            await handleListContasReceber(
+                (listPaginationContasReceber.pageable?.pageNumber ?? 0) + 1,
+                searchTerm,
+                listarInativos,
+                true
+            );
+        } finally {
+            setLoadingMore(false);
+        }
     };
     const handleCheckboxChange = (e: CheckboxChangeEvent) => {
         const newValue = e.checked ?? false;
@@ -155,6 +177,7 @@ const ContasReceber: React.FC = () => {
                                     onClickSearch={() => searchNow(searchTerm)}
                                     topLabel="Descrição:"
                                     showTopLabel
+                                    noValidationSpace={true}
                                 />
                             </div>
                            <div className="col-4 mb-0 lg:col-3 lg:mb-0">
@@ -175,7 +198,7 @@ const ContasReceber: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div className="finance-mobile-list-wrapper" style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarContasReceber
                                 loading={loading}
                                 searchTerm={searchTerm}
@@ -183,19 +206,10 @@ const ContasReceber: React.FC = () => {
                                 listarInativos={listarInativos}
                                 setListPaginationContasReceber={setListPaginationContasReceber}
                                 listPaginationContasReceber={listPaginationContasReceber}
+                                mobileLoadMoreVisible={hasMoreMobileContent(listPaginationContasReceber)}
+                                mobileLoadMoreLoading={loadingMore}
+                                onMobileLoadMore={handleLoadMoreContasReceber}
                             />
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <div className="custom-paginator">
-                                <CustomPaginator
-                                    first={listPaginationContasReceber.pageable.pageNumber * listPaginationContasReceber.pageable.pageSize}
-                                    rows={pageSize}
-                                    totalRecords={listPaginationContasReceber.totalElements}
-                                    onPageChange={onPageChange}
-                                    isMobile
-                                    
-                                />
-                            </div>
                         </div>
                     </div>
                 </>

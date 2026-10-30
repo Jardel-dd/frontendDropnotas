@@ -770,7 +770,7 @@ export const downloadPdfNota = async (
         msgs.current?.show({
             severity: 'error',
             summary: 'Atenção:',
-            detail: 'Erro ao baixar PDF da Nota Fiscal. Tente novamente em instantes. Caso o problema persista, entre em contato com o suporte.',
+            detail: 'Erro ao baixar PDF da Nota Fiscal. Tente novamente em instantes. Caso persista, entre em contato com o suporte.',
             life: 5000
         });
     }
@@ -819,11 +819,10 @@ export const downloadArquivosNota = async (
         const blob = new Blob([response.data], { type: 'application/zip' });
         triggerBlobDownload(blob, fileName);
     } catch (error) {
-        console.error('Erro ao baixar ZIP da NFS-e:', error);
         msgs.current?.show({
             severity: 'error',
             summary: '',
-            detail: 'Erro ao baixar os arquivos PDF e XML da Nota Fiscal. Tente novamente em instantes.',
+            detail: 'Erro ao baixar os arquivos PDF ou XML da Nota Fiscal. Tente novamente em instantes.',
             life: 5000
         });
     }

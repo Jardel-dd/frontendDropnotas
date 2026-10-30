@@ -548,8 +548,9 @@ const OrdemServicos: React.FC = () => {
                                             value={searchTerm}
                                             loading={loading}
                                             onClickSearch={() => searchNow(searchTerm)}
-                                            topLabel="Pesquise:"
+                                            topLabel="Pesquisar:"
                                             showTopLabel
+                                            noValidationSpace={true}
                                         />
                                     </div>
                             <div className="col-4 mb-0 lg:col-2 p-0 ">
@@ -638,6 +639,7 @@ const OrdemServicos: React.FC = () => {
                         </div>
                         <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} />
                         <div
+                            className="ordem-servico-mobile-list-wrapper mt-2"
                             style={{
                                 display: 'flex',
                                 flex: '1 1 auto',
