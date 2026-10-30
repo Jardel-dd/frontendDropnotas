@@ -334,7 +334,6 @@ export function PessoaFields({
                     errorMessage={errors.cnae_fiscal}
                     topLabel="CNAE Fiscal"
                     showTopLabel
-                    required={pessoa.tipo_pessoa !== 'PESSOA_FISICA'}
                 />
             </div>
             <div className="col-12 lg:col-4 ">

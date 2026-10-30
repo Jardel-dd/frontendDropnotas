@@ -157,7 +157,7 @@ export const deletarPessoa = async (
                 life: 3000,
                 severity: 'success',
                 summary: 'Sucesso:',
-                detail: 'Cliente ou Fornecedor excluÃ­do com sucesso.'
+                detail: 'Cliente ou Fornecedor excluido com sucesso.'
             },
         ]);
     } catch (error) {

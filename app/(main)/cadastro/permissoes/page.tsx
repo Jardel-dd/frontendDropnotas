@@ -325,6 +325,7 @@ const PerfilUsuarios: React.FC = () => {
                                     onClickSearch={() => searchNow(searchTerm)}
                                     topLabel="Pesquisar:"
                                     showTopLabel
+                                    noValidationSpace={true}
                                 />
                             </div>
                             <div className="col-4 mb-0 lg:col-2">

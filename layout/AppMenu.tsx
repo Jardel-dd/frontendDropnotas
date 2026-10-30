@@ -15,6 +15,7 @@ import {
     LockKey,
     Palette,
     Percent,
+    Question,
     Receipt,
     User,
     UsersThree,
@@ -175,6 +176,11 @@ const AppMenu = () => {
                         to: '/configuracoes/geral'
                     }
                 ]
+            },
+            {
+                label: 'Ajuda e Tutoriais',
+                icon: Question,
+                to: '/tutoriais'
             }
         ]);
     }, [userConta]);

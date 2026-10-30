@@ -17,6 +17,10 @@ import { ServicoDescricaoFields, ServicoFields, ServicoVinculosFields } from './
 import { createServico, fetchServiceFormDataByID, updateServico } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { createEmptyServico, FormCreatedServicoProps, ServiceFormProps, ServiceFormRef, servicoSectionFlowConfig } from '../types/servico';
 import { PerfilTributarioEntity } from '@/app/entity/perfilTributarioEntity';
+import { FormCreatedPerfilTributario } from '@/app/(main)/cadastro/perfilTributario/form/controller';
+import { createEmptyPerfilTributario } from '@/app/(main)/cadastro/perfilTributario/types/perfilTributario';
+import FormEmpresaCreated from '@/app/(main)/configuracoes/empresas/form/controller';
+import DialogFilter from '@/app/components/dialogs/dialogFilterComponents/dialogFilter';
 
 export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>(
     ({ initialId, preloadedServico, msgs, onServicoChange, onErrorsChange, redirectAfterSave, onClose, onSaved, onLoadingChange, showBTNPGCreatedDialog, showBTNPGCreatedAll, onBackClick }, ref) => {
@@ -33,6 +37,12 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
         const [stateDisableBtnCreatedService, setStateDisableBtnCreatedService] = useState(false);
         const [selectedPerfilTributario, setSelectedPerfilTributario] = useState<PerfilTributarioEntity | null>(null);
         const [selectedEmpresas, setSelectedEmpresas] = useState<CompanyEntity[]>([]);
+        const [showModalPerfilTributario, setShowModalPerfilTributario] = useState(false);
+        const [showModalEmpresa, setShowModalEmpresa] = useState(false);
+        const [isPerfilTributarioDialogLoading, setIsPerfilTributarioDialogLoading] = useState(false);
+        const [isEmpresaDialogLoading, setIsEmpresaDialogLoading] = useState(false);
+        const [perfilTributarioDialogKey, setPerfilTributarioDialogKey] = useState(0);
+        const [empresaDialogKey, setEmpresaDialogKey] = useState(0);
         const {
             isSectionExpanded,
             toggleSection,
@@ -120,6 +130,53 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                 ...prev,
                 id_empresas: true
             }));
+        };
+
+        const openCreatePerfilTributarioDialog = () => {
+            setIsPerfilTributarioDialogLoading(true);
+            setPerfilTributarioDialogKey((current) => current + 1);
+            setShowModalPerfilTributario(true);
+        };
+
+        const closePerfilTributarioDialog = () => {
+            setShowModalPerfilTributario(false);
+            setIsPerfilTributarioDialogLoading(false);
+        };
+
+        const handlePerfilTributarioSaved = async (created: PerfilTributarioEntity) => {
+            handlePerfilTributarioChange(created);
+            closePerfilTributarioDialog();
+        };
+
+        const openCreateEmpresaDialog = () => {
+            setIsEmpresaDialogLoading(true);
+            setEmpresaDialogKey((current) => current + 1);
+            setShowModalEmpresa(true);
+        };
+
+        const closeEmpresaDialog = () => {
+            setShowModalEmpresa(false);
+            setIsEmpresaDialogLoading(false);
+        };
+
+        const handleEmpresaSaved = async (created: CompanyEntity) => {
+            const empresasAtualizadas = [
+                ...selectedEmpresas.filter((empresa) => empresa.id !== created.id),
+                created
+            ];
+
+            setSelectedEmpresas(empresasAtualizadas);
+            setServico((current) => current.copyWith({
+                id_empresas: empresasAtualizadas
+                    .map((empresa) => Number(empresa.id))
+                    .filter((empresaId) => Number.isFinite(empresaId) && empresaId > 0)
+            }));
+            setErrors((previous) => {
+                const updated = { ...previous };
+                delete updated.id_empresas;
+                return updated;
+            });
+            closeEmpresaDialog();
         };
 
         const handleNumberChange = (event: InputNumberValueChangeEvent) => {
@@ -223,12 +280,15 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
             onNumberChange: handleNumberChange,
             onPerfilTributarioChange: handlePerfilTributarioChange,
             onCompanyChange: handleCompanyChange,
+            onAddPerfilTributario: openCreatePerfilTributarioDialog,
+            onAddEmpresa: openCreateEmpresaDialog,
             onDescriptionBlur: handleDescriptionBlur,
             fetchAllPerfilTributario,
             fetchFilteredPerfilTributario
         };
 
         return (
+            <>
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>
                 <Messages ref={msgs} className="custom-messages" />
                 <div className="scrollable-container shared-form-content">
@@ -279,6 +339,45 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                     )}
                 </div>
             </div>
+            <DialogFilter
+                header="Adicionar Perfil Tributário"
+                visible={showModalPerfilTributario}
+                onHide={closePerfilTributarioDialog}
+                loading={isPerfilTributarioDialogLoading}
+                loadingText="Abrindo cadastro de Perfil Tributário..."
+            >
+                <FormCreatedPerfilTributario
+                    key={perfilTributarioDialogKey}
+                    msgs={msgs}
+                    perfilTributario={createEmptyPerfilTributario()}
+                    redirectAfterSave={false}
+                    onSaved={handlePerfilTributarioSaved}
+                    onLoadingChange={setIsPerfilTributarioDialogLoading}
+                    onClose={closePerfilTributarioDialog}
+                    showBTNPGCreatedDialog
+                    onBackClick={closePerfilTributarioDialog}
+                />
+            </DialogFilter>
+            <DialogFilter
+                header="Adicionar Empresa"
+                visible={showModalEmpresa}
+                onHide={closeEmpresaDialog}
+                loading={isEmpresaDialogLoading}
+                loadingText="Abrindo cadastro de Empresa..."
+            >
+                <FormEmpresaCreated
+                    key={empresaDialogKey}
+                    msgs={msgs}
+                    empresa={{}}
+                    redirectAfterSave={false}
+                    onSaved={handleEmpresaSaved}
+                    onLoadingChange={setIsEmpresaDialogLoading}
+                    onClose={closeEmpresaDialog}
+                    showBTNPGCreatedDialog
+                    onBackClick={closeEmpresaDialog}
+                />
+            </DialogFilter>
+            </>
         );
     }
 );

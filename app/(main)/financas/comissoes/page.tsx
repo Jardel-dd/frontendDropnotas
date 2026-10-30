@@ -23,16 +23,19 @@ import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/re
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
 import { DateRangePicker} from '@/app/components/calendarComponent/dataRangerPicker';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
+import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
 
 const Comissoes: React.FC = () => {
     const router = useRouter();
     const isMobile = useIsMobile();
     const pageSize = usePageSize();
     const isDesktop = useIsDesktop();
+    const resolvedPageSize = isMobile ? MOBILE_LOAD_MORE_PAGE_SIZE : pageSize;
     const toast = useRef<Toast>(null);
     const msgs = useRef<Messages | null>(null);
     const hasLoadedInitialList = useRef(false);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [listarInativos, setListarInativos] = useState<boolean>(false);
     const [selectedComissoes, setSelectedComissoes] = useState<ComissaoEntity[]>([]);
@@ -61,7 +64,7 @@ const Comissoes: React.FC = () => {
         content: [],
         pageable: {
             pageNumber: 0,
-            pageSize: pageSize,
+            pageSize: resolvedPageSize,
             sort: {
                 empty: true,
                 unsorted: true,
@@ -113,9 +116,10 @@ const Comissoes: React.FC = () => {
         pageNumber?: number,
         _searchTerm?: string,
         listarInativosParam = listarInativos,
-        filters: ListComissoesFilters = buildCurrentFilters()
+        filters: ListComissoesFilters = buildCurrentFilters(),
+        append = false
     ) => {
-        setLoading(true);
+        if (!append) setLoading(true);
         try {
             const comissoesResponse = await listComissoes(
                 {
@@ -123,15 +127,19 @@ const Comissoes: React.FC = () => {
                     pageable: {
                         ...listPaginationComissoes.pageable,
                         pageNumber: pageNumber ?? listPaginationComissoes.pageable.pageNumber,
-                        pageSize: pageSize
+                        pageSize: resolvedPageSize
                     }
                 },
                 listarInativosParam,
-                setLoading,
+                append ? () => {} : setLoading,
                 _searchTerm ?? searchTerm,
                 filters
             );
-            setListPaginationComissoes(comissoesResponse);
+            setListPaginationComissoes((current) =>
+                isMobile && append
+                    ? mergePaginatedContent(current, comissoesResponse, pageNumber ?? 0)
+                    : comissoesResponse
+            );
         } catch (error) {
             toast.current?.show({
                 severity: 'error',
@@ -140,9 +148,9 @@ const Comissoes: React.FC = () => {
                 life: 3000
             });
         } finally {
-            setLoading(false);
+            if (!append) setLoading(false);
         }
-    }, [buildCurrentFilters, listPaginationComissoes, listarInativos, pageSize, searchTerm]);
+    }, [buildCurrentFilters, isMobile, listPaginationComissoes, listarInativos, resolvedPageSize, searchTerm]);
     const { debouncedSearch, searchNow } = useGenericSearch({
         setter: setComissoes,
         field: 'valor_comissao',
@@ -158,6 +166,22 @@ const Comissoes: React.FC = () => {
             }
         }));
         handleListComissoes(selectedPage, searchTerm, listarInativos, buildCurrentFilters());
+    };
+    const handleLoadMoreComissoes = async () => {
+        if (loading || loadingMore || !hasMoreMobileContent(listPaginationComissoes)) return;
+
+        setLoadingMore(true);
+        try {
+            await handleListComissoes(
+                (listPaginationComissoes.pageable?.pageNumber ?? 0) + 1,
+                searchTerm,
+                listarInativos,
+                buildCurrentFilters(),
+                true
+            );
+        } finally {
+            setLoadingMore(false);
+        }
     };
     const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
@@ -260,6 +284,7 @@ const Comissoes: React.FC = () => {
                                     onClickSearch={() => searchNow(searchTerm)}
                                     topLabel="Descrição:"
                                     showTopLabel
+                                    noValidationSpace={true}
                                 />
                             </div>
                            <div className="col-4 mb-0 lg:col-3 lg:mb-0">
@@ -311,7 +336,7 @@ const Comissoes: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div className="finance-mobile-list-wrapper" style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             {selectedComissoesPendentes.length > 0 && (
                                 <div className="flex justify-content-end mb-3">
                                     <Button
@@ -332,18 +357,10 @@ const Comissoes: React.FC = () => {
                                 listPaginationComissoes={listPaginationComissoes}
                                 selectedComissoes={selectedComissoes}
                                 setSelectedComissoes={setSelectedComissoes}
+                                mobileLoadMoreVisible={hasMoreMobileContent(listPaginationComissoes)}
+                                mobileLoadMoreLoading={loadingMore}
+                                onMobileLoadMore={handleLoadMoreComissoes}
                             />
-                        </div>
-                        <div style={{ marginTop: 'auto' }}>
-                            <div className="custom-paginator">
-                                <CustomPaginator
-                                    first={listPaginationComissoes.pageable.pageNumber * listPaginationComissoes.pageable.pageSize}
-                                    rows={pageSize}
-                                    totalRecords={listPaginationComissoes.totalElements}
-                                    onPageChange={onPageChange}
-                                    isMobile
-                                />
-                            </div>
                         </div>
                     </div>
                 </>

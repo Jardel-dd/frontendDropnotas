@@ -128,7 +128,7 @@ const DialogFilter: React.FC<BaseDialogProps> = ({
             resizable={false}
             breakpoints={breakpoints}
             contentStyle={contentStyle}
-            style={{ width, height, padding: 0, margin: 0, ...style, zIndex:"9" }}
+            style={{ width, height, padding: 0, margin: 0, ...style, zIndex:"9", }}
         >
             <div style={{ position: 'relative', minHeight: loading ? '320px' : undefined }}>
                 <div style={{ visibility: loading ? 'hidden' : 'visible' }}>

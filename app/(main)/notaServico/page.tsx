@@ -278,6 +278,7 @@ const NotaServico: React.FC = () => {
     const [exportPdfProgressValue, setExportPdfProgressValue] = useState(getExportPdfProgressState().progressValue);
     const [exportPdfProgressIndeterminate, setExportPdfProgressIndeterminate] = useState(getExportPdfProgressState().indeterminate);
     const [loadingMore, setLoadingMore] = useState(false);
+    const [isEmittingNotas, setIsEmittingNotas] = useState(false);
     const [selectedNotas, setSelectedNotas] = useState<NfsEntity[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showExportPdfDialog, setShowExportPdfDialog] = useState(false);
@@ -675,27 +676,38 @@ const NotaServico: React.FC = () => {
         clearPreparaNfsDialog();
         setShowDialogPreparaNfs(true);
     };
+    const navigateToNotaServicoListAfterFeedback = async () => {
+        await new Promise<void>((resolve) => window.setTimeout(resolve, 2500));
+        router.replace('/notaServico');
+        router.refresh();
+    };
     const handleEmitirNotas = async () => {
-        if (!canUpdateNotaServico || selectedNotas.length === 0) return;
+        if (!canUpdateNotaServico || selectedNotas.length === 0 || isEmittingNotas) return;
         const notaReferencias = selectedNotas
             .filter((nota) => nota.status_nota?.trim().toUpperCase() === 'PENDENTE')
             .map((nota) => nota.referencia?.trim())
             .filter((referencia): referencia is string => Boolean(referencia));
         if (notaReferencias.length === 0) return;
+
+        setIsEmittingNotas(true);
         try {
             await api.post('/nfse/emitir-lote', { referencias: notaReferencias });
             msgs.current?.show({
                 severity: 'success',
                 summary: 'Sucesso:',
-                detail: `Foram enviadas ${notaReferencias.length} nota${notaReferencias.length > 1 ? 's' : ''} para emissão.`
+                detail: `Foram enviadas ${notaReferencias.length} nota${notaReferencias.length > 1 ? 's' : ''} para emissão.`,
+                life: 2500
             });
-             router.push('/notaServico');
+            setSelectedNotas([]);
+            await navigateToNotaServicoListAfterFeedback();
         } catch (error) {
             msgs.current?.show({
                 severity: 'error',
                 summary: 'Atenção:',
                 detail: 'Falha ao emitir notas pendentes.'
             });
+        } finally {
+            setIsEmittingNotas(false);
         }
     };
     const handleSelectedNotasChange = (notas: NfsEntity[]) => {
@@ -1542,15 +1554,17 @@ const NotaServico: React.FC = () => {
                                                 value={searchTerm}
                                                 loading={loading}
                                                 onClickSearch={() => searchNow(searchTerm)}
-                                                topLabel="Pesquise:"
+                                                topLabel="Pesquisar:"
                                                 showTopLabel
+                                                noValidationSpace={true}
+
                                             />
                                         </div>
                                     )}
                                     <div className="col-fixed mb-0 nota-servico-mobile-toolbar-actions">
                                         <div className="container-BTN-Filter-Created nota-servico-mobile-actions">
                                             {canSearchNotaServico && (
-                                                <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters} buttonClassName="height-2-8rem-ml-1rem-mobile" activeFilterCount={activeFilterCount}>
+                                                <FilterOverlay onOpen={syncDraftFilters} onApply={handleApplyFilters} onClear={handleClearFilters}  showMobileButtonLabel  activeFilterCount={activeFilterCount}>
                                                     <div className="col-12 lg:col-12 ">
                                                         <DateRangePicker
                                                             showTopLabel
@@ -1643,7 +1657,7 @@ const NotaServico: React.FC = () => {
                                                         />
                                                     </div>
                                                 )}
-                                                {canCreateNotaServico && <Button label="" icon="pi pi-plus" className="ml-1rem" onClick={handleNavigate} />}
+                                                {canCreateNotaServico && <Button icon="pi pi-plus"  onClick={handleNavigate} />}
                                             </div>
                                         </div>
                                         {canUpdateNotaServico && selectedNotas.length > 0 && (
@@ -1652,6 +1666,8 @@ const NotaServico: React.FC = () => {
                                                     icon="pi pi-send"
                                                     label={`Emitir selecionadas (${selectedNotas.length})`}
                                                     onClick={handleEmitirNotas}
+                                                    loading={isEmittingNotas}
+                                                    disabled={isEmittingNotas}
                                                     outlined
                                                     severity="success"
                                                     style={{boxShadow:"none"}}
@@ -1699,7 +1715,7 @@ const NotaServico: React.FC = () => {
                                                 value={searchTerm}
                                                 loading={loading}
                                                 onClickSearch={() => searchNow(searchTerm)}
-                                                topLabel="Pesquise:"
+                                                topLabel="Pesquisar:"
                                                 showTopLabel
                                             />
                                         </div>
@@ -1785,7 +1801,16 @@ const NotaServico: React.FC = () => {
                                     )}
                                     <div className="container-button-primary-novo">
                                         <div className="p-2">
-                                            {canUpdateNotaServico && selectedNotas.length > 0 && <Button label={`Emitir ${selectedNotas.length} Nota${selectedNotas.length > 1 ? 's' : ''}`} icon="pi pi-send" onClick={handleEmitirNotas} outlined />}
+                                            {canUpdateNotaServico && selectedNotas.length > 0 && (
+                                                <Button
+                                                    label={`Emitir ${selectedNotas.length} Nota${selectedNotas.length > 1 ? 's' : ''}`}
+                                                    icon="pi pi-send"
+                                                    onClick={handleEmitirNotas}
+                                                    loading={isEmittingNotas}
+                                                    disabled={isEmittingNotas}
+                                                    outlined
+                                                />
+                                            )}
                                         </div>
                                         {canSearchNotaServico && (
                                             <div className="p-2 nota-servico-export-action gap-2">
@@ -2206,6 +2231,7 @@ const NotaServico: React.FC = () => {
                     header={editingPessoaId ? 'Editar Cliente ou Fornecedor' : 'Adicionar Cliente ou Fornecedor'}
                     visible={showModalPessoa}
                     onHide={closePessoaDialog}
+                    className="nota-servico-pessoa-dialog"
                     loading={isPessoaDialogLoading}
                     loadingText={editingPessoaId ? 'Carregando informações do Cliente ou Fornecedor...' : 'Abrindo cadastro de Cliente ou Fornecedor...'}
                 >

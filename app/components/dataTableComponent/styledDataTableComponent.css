@@ -40,6 +40,31 @@
     min-height: clamp(24rem, 60vh, 40rem);
 }
 
+.datatable-fixed-layout {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.datatable-fixed-header.p-datatable {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.datatable-fixed-header .p-datatable-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.datatable-fixed-header .p-datatable-thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
 .datatable-component-loading-overlay {
     position: absolute;
     inset: 0;

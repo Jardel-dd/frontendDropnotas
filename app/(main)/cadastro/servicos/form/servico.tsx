@@ -86,6 +86,8 @@ export function ServicoVinculosFields({
     selectedEmpresas,
     onPerfilTributarioChange,
     onCompanyChange,
+    onAddPerfilTributario,
+    onAddEmpresa,
     fetchAllPerfilTributario,
     fetchFilteredPerfilTributario
 }: ServicoFieldsProps) {
@@ -111,6 +113,8 @@ export function ServicoVinculosFields({
                     autoLoadAndSelectSingle
                     loadOnMount={Boolean(servico.id_perfil_tributario)}
                     reloadAllOnShow
+                    showAddButton
+                    onAddClick={onAddPerfilTributario}
                 />
             </div>
             <div className="col-12 lg:col-6">
@@ -132,6 +136,8 @@ export function ServicoVinculosFields({
                     showTopLabel
                     topLabel="Empresas:"
                     required
+                    showAddButton
+                    onAddClick={onAddEmpresa}
                 />
             </div>
         </div>

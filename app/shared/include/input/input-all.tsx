@@ -38,6 +38,7 @@ type InputProps = {
     topLabel?: string | ReactNode;
     required?: boolean;
     min?: number;
+    noValidationSpace?: boolean;
 };
 function Input({
     value,
@@ -68,7 +69,8 @@ function Input({
     showTopLabel,
     topLabel,
     required,
-    min
+    min,
+    noValidationSpace = false,
 }: InputProps) {
     const { layoutConfig } = useContext(LayoutContext);
     const [isLoading, setIsLoading] = useState(false);
@@ -90,7 +92,14 @@ function Input({
         }
     };
     return (
-        <div className="p-field" style={{ width: '100%', height:'85px', maxHeight:"85px"}}>
+        <div
+    className="p-field"
+    style={{
+        width: '100%',
+        height: noValidationSpace ? 'auto' : '85px',
+        maxHeight: noValidationSpace ? 'none' : '85px',
+    }}
+>
             {showTopLabel && topLabel && (
                 <div style={{ height: 'var(--form-label-height)', display:"flex", alignItems:"center" }}>
                     <label className="filter-label">
@@ -148,8 +157,21 @@ function Input({
                     />
                 )}
             </div>
-            <div style={{ height: 'var(--form-feedback-height)', display: 'flex', alignItems: 'flex-end' }}>{errorMessage && <small className="p-error block">{errorMessage}</small>}</div>
-        </div>
+{!noValidationSpace && (
+    <div
+        style={{
+            height: 'var(--form-feedback-height)',
+            display: 'flex',
+            alignItems: 'flex-end',
+        }}
+    >
+        {errorMessage && (
+            <small className="p-error block">
+                {errorMessage}
+            </small>
+        )}
+    </div>
+)}        </div>
     );
 }
 export default Input;

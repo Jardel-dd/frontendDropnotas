@@ -8,6 +8,7 @@
 .filter-overlay-trigger {
     position: relative;
     display: inline-flex;
+
 }
 
 .filter-overlay-trigger__badge {

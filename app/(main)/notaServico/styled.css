@@ -39,6 +39,7 @@
 .date-range-input-wrapper {
   position: relative;
   width: 100%;
+
 }
 
 .date-range-input {
@@ -217,6 +218,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
 }
 
 .nota-servico-export-progress {
@@ -272,6 +274,7 @@
     .nota-servico-mobile-toolbar-actions {
         padding-top: 1.75rem !important;
         position: relative;
+
     }
 
     .nota-servico-mobile-toolbar-actions .nota-servico-mobile-actions {
@@ -300,6 +303,7 @@
     margin-top: auto;
     position: relative;
     min-height: 3.25rem;
+
 }
 
 .nota-servico-list-footer-paginator {
@@ -616,6 +620,7 @@
 
   .nota-servico-preparar-dialog.nota-servico-preparar-dialog--keyboard-open .p-dialog-content {
     max-height: calc(100dvh - 9.5rem);
+
   }
 
   .nota-servico-preparar-dialog .p-dialog-header {
@@ -636,6 +641,9 @@
 .nota-servico-page-shell {
     min-height: 0;
     position: relative;
+
+    
+
 }
 
 .nota-servico-feedback-mask {
@@ -690,5 +698,109 @@
 
 .nota-servico-page-shell > .card.styled-container-main-all-routes > .applied-filters-summary + div {
     min-height: 0;
+}
+
+/* Cadastro rápido de cliente/fornecedor: o diálogo acompanha o conteúdo curto. */
+.nota-servico-pessoa-dialog.p-dialog {
+    height: fit-content !important;
+    max-height: calc(100dvh - 2rem);
+}
+
+.nota-servico-pessoa-dialog .p-dialog-content {
+    flex: 0 1 auto;
+    height: auto !important;
+    overflow: hidden;
+}
+
+.nota-servico-pessoa-dialog .shared-form-dialog-layout {
+    height: auto;
+    max-height: none;
+}
+
+.nota-servico-pessoa-dialog .scrollable-container.shared-form-content {
+    flex: 0 1 auto;
+    max-height: calc(100dvh - 10rem);
+}
+
+.nota-servico-pessoa-dialog .StyleContainer-btn-Created {
+    height: auto;
+    min-height: 0;
+}
+
+@media (max-width: 768px) {
+    .nota-servico-mobile-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+        position: relative;
+    }
+
+    .nota-servico-mobile-search {
+        width: 100%;
+    }
+
+    .nota-servico-mobile-toolbar-actions,
+    .nota-servico-mobile-toolbar-actions .nota-servico-mobile-actions {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .nota-servico-mobile-toolbar-actions {
+        padding-top: 0 !important;
+        position: static !important;
+    }
+
+    .nota-servico-mobile-toolbar-actions .nota-servico-mobile-actions {
+        display: flex;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+
+    .nota-servico-mobile-actions > div:not(.nota-servico-mobile-buttons),
+    .nota-servico-mobile-buttons {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .nota-servico-mobile-buttons {
+        display: flex;
+        gap: 0.6rem;
+        width: auto;
+    }
+
+    .nota-servico-mobile-buttons > .p-button,
+    .nota-servico-mobile-buttons .nota-servico-export-action,
+    .nota-servico-mobile-buttons .nota-servico-export-action .p-button,
+    .nota-servico-mobile-actions .filter-overlay-trigger,
+    .nota-servico-mobile-actions .filter-overlay-trigger .p-button {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 3rem !important;
+    }
+
+    .nota-servico-mobile-buttons .nota-servico-export-action {
+        display: flex;
+        flex: 1 1 0;
+    }
+
+    .nota-servico-mobile-buttons > .p-button {
+        flex: 1 1 0;
+    }
+
+    .nota-servico-mobile-batch-action {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 2;
+        margin: 0;
+    }
+
+    .nota-servico-mobile-batch-action .p-button {
+        width: auto;
+        height: 1.55rem;
+        padding: 0.2rem 0.45rem;
+        font-size: 0.58rem;
+        white-space: nowrap;
+    }
 }
 

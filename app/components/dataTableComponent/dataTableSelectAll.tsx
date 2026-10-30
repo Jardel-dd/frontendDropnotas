@@ -99,20 +99,29 @@ export function DataTableSelectable<T extends NfsEntity>({
 }: DataTableSelectableProps<T>) {
     const isMobile = useIsMobile();
     const isDesktop = useIsDesktop();
+    const getRowKey = (rowData: T) => String(rowData[dataKey] ?? "");
+    const isSelected = (rowData: T) =>
+        selected.some((selectedRow) => getRowKey(selectedRow) === getRowKey(rowData));
+    // O DataTable mantém os templates das células em cache. A chave faz as linhas
+    // receberem novamente o estado controlado dos checkboxes após uma seleção em lote.
+    const selectionRenderKey = selected
+        .map(getRowKey)
+        .sort()
+        .join('|');
     const selectableRows = data.filter(isRowSelectable);
     const allSelectableRowsSelected =
         selectableRows.length > 0 &&
-        selectableRows.every((n) => selected.some((s) => s.id === n.id));
+        selectableRows.every(isSelected);
 
     const toggleSelection = (rowData: T, checked: boolean) => {
         if (!isRowSelectable(rowData)) return;
 
         if (checked) {
-            if (!selected.some((n) => n.id === rowData.id)) {
+            if (!isSelected(rowData)) {
                 onSelectionChange([...selected, rowData]);
             }
         } else {
-            onSelectionChange(selected.filter((n) => n.id !== rowData.id));
+            onSelectionChange(selected.filter((selectedRow) => getRowKey(selectedRow) !== getRowKey(rowData)));
         }
     };
 
@@ -121,13 +130,13 @@ export function DataTableSelectable<T extends NfsEntity>({
 
         if (allSelectableRowsSelected) {
             const updatedSelection = selected.filter(
-                (s) => !selectableRows.some((n) => n.id === s.id)
+                (selectedRow) => !selectableRows.some((rowData) => getRowKey(rowData) === getRowKey(selectedRow))
             );
             onSelectionChange(updatedSelection);
         } else {
             const updatedSelection = [
                 ...selected.filter(
-                    (s) => !selectableRows.some((n) => n.id === s.id)
+                    (selectedRow) => !selectableRows.some((rowData) => getRowKey(rowData) === getRowKey(selectedRow))
                 ),
                 ...selectableRows,
             ];
@@ -138,6 +147,7 @@ export function DataTableSelectable<T extends NfsEntity>({
     return (
         <div className={`datatable-selectable-shell${loading ? " datatable-selectable-shell-loading" : ""}`}>
             <DataTable
+                key={`selection-${selectionRenderKey}`}
                 value={data}
                 dataKey={dataKey as string}
                 tableStyle={{ width: "100%", minWidth }}
@@ -172,7 +182,7 @@ export function DataTableSelectable<T extends NfsEntity>({
                             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                                 {isRowSelectable(rowData) && (
                                     <Checkbox
-                                        checked={selected.some((n) => n.id === rowData.id)}
+                                        checked={isSelected(rowData)}
                                         onChange={(e) => toggleSelection(rowData, e.checked!)}
                                     />
                                 )}
@@ -195,7 +205,7 @@ export function DataTableSelectable<T extends NfsEntity>({
                             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                                 {isRowSelectable(rowData) && (
                                     <Checkbox
-                                        checked={selected.some((n) => n.id === rowData.id)}
+                                        checked={isSelected(rowData)}
                                         onChange={(e) => toggleSelection(rowData, e.checked!)}
                                     />
                                 )}
