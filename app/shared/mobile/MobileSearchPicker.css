@@ -19,6 +19,25 @@
   border-color: #fca5a5;
 }
 
+.mobile-search-picker-dark .mobile-search-picker-trigger,
+.mobile-search-picker-dialog.mobile-search-picker-dark .mobile-search-picker-option,
+.mobile-search-picker-dialog.mobile-search-picker-dark .mobile-search-picker-empty {
+  background: #293b51;
+  border-color: #3e4f62;
+  color: #e3e6e8;
+}
+
+.mobile-search-picker-dark .mobile-search-picker-trigger-text--placeholder,
+.mobile-search-picker-dialog.mobile-search-picker-dark .mobile-search-picker-option-title,
+.mobile-search-picker-dialog.mobile-search-picker-dark .mobile-search-picker-option-subtitle {
+  color: #e3e6e8;
+}
+
+.mobile-search-picker-dialog.mobile-search-picker-dark .mobile-search-picker-option--active {
+  background: color-mix(in srgb, var(--primary-color) 12%, #293b51);
+  border-color: var(--primary-color);
+}
+
 .mobile-search-picker-trigger-button {
   flex: 1;
   min-width: 0;

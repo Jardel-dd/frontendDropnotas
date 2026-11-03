@@ -1545,7 +1545,7 @@ const NotaServico: React.FC = () => {
                                     {canSearchNotaServico && (
                                         <div className="col mb-0 nota-servico-mobile-search">
                                             <Input
-                                                label="Digite o nome Cliente / N° da NFS-e"
+                                                label="Nome do cliente / N° da NFS-e"
                                                 outlined={true}
                                                 id="razao_social_cliente"
                                                 useRightButton={true}

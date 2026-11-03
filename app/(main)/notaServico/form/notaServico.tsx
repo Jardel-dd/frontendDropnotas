@@ -47,13 +47,10 @@ const parseCompetenciaDate = (competencia?: string | null) => {
         return null;
     }
 
-    const [year, month, day] = competencia.split('T')[0].split('-').map(Number);
-
-    if (!year || !month || !day) {
-        return null;
-    }
-
-    const parsedDate = new Date(year, month - 1, day);
+    const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(competencia);
+    const parsedDate = isDateOnly
+        ? new Date(`${competencia}T00:00:00`)
+        : new Date(competencia);
 
     return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
 };
@@ -217,10 +214,20 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
                 : 'Emitindo NFS-e...'
     );
     const [loadingCep, setLoadingCep] = useState(false);
-    const [gerarNfse, setGerarNfse] = useState<NfsEntity>(notaServico instanceof NfsEntity ? notaServico : createEmptyNfse());
+    const [gerarNfse, setGerarNfse] = useState<NfsEntity>(() => {
+        const initialNfse = notaServico instanceof NfsEntity ? notaServico : createEmptyNfse();
+
+        return initialNfse.competencia
+            ? initialNfse
+            : initialNfse.copyWith({ competencia: new Date().toISOString() });
+    });
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [isValidationActive, setIsValidationActive] = useState(false);
-    const [dateRange, setDateRange] = useState<Date[] | null>([new Date(), new Date()]);
+    const [dateRange, setDateRange] = useState<Date[] | null>(() => {
+        const competenciaDate = parseCompetenciaDate(gerarNfse.competencia);
+
+        return [competenciaDate ?? new Date()];
+    });
     const [mensagemRetornoCorrecao, setMensagemRetornoCorrecao] = useState<string | null>(null);
     const [isBaseCalculoDirty, setIsBaseCalculoDirty] = useState(() => hasManualBaseCalculoValue(notaServico));
 
@@ -382,7 +389,7 @@ const NotaServicoFormContainer = forwardRef<NotaServicoFormRef, NotaServicoFormP
     const handleDateChange = (date: Date | null) => {
         setDateRange(date ? [date] : null);
         if (!date) return;
-        const formatted = date.toISOString().split('T')[0];
+        const formatted = date.toISOString();
         setGerarNfse((prev) => prev.copyWith({ competencia: formatted }));
         setErrors((prev) => {
             const next = { ...prev };

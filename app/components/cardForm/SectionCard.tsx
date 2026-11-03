@@ -2,6 +2,7 @@
 
 import { CSSProperties, ReactNode } from "react";
 import { Card } from "primereact/card";
+import { useTheme } from "@/app/components/isDarkMode/isDarkMode";
 import styles from "./SectionCard.module.css";
 
 interface SectionCardProps {
@@ -25,6 +26,7 @@ export function SectionCard({
   onToggle,
   disabled = false
 }: SectionCardProps) {
+  const { isDarkMode } = useTheme();
   const isExpanded = !disabled && expanded;
   const headerMain = (
     <div className={styles.headerMain}>
@@ -58,7 +60,7 @@ export function SectionCard({
 
   return (
     <Card
-      className={`${styles.card} ${className} ${collapsible ? styles.cardCollapsible : ""} ${disabled ? styles.cardDisabled : ""} ${isExpanded ? styles.cardExpanded : styles.cardCollapsed}`}
+      className={`${styles.card} ${isDarkMode ? styles.cardDark : ""} ${className} ${collapsible ? styles.cardCollapsible : ""} ${disabled ? styles.cardDisabled : ""} ${isExpanded ? styles.cardExpanded : styles.cardCollapsed}`}
       header={header}
       pt={{ body: { style: { padding: 0 } }, content: { style: { padding: 0 } } }}
     >

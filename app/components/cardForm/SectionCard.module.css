@@ -23,6 +23,11 @@
   box-shadow: var(--section-card-shadow) !important;
 }
 
+.cardDark:global(.p-card) {
+  --section-card-bg: #293b51;
+  background: #293b51 !important;
+}
+
 .cardCollapsed:global(.p-card) {
   height: 60px;
 }
@@ -167,13 +172,19 @@
 :global(.dark) .card,
 :global(.p-dark) .card,
 :global([data-theme="dark"]) .card {
-  --section-card-bg: linear-gradient(180deg, rgba(52, 73, 102, 0.42) 0%, rgba(43, 63, 90, 0.48) 100%);
+  --section-card-bg: #293b51;
   --section-card-border: rgba(148, 163, 184, 0.16);
   --section-card-text: var(--text-color, var(--p-text-color, #e5eef8));
   --section-card-icon-bg: rgba(16, 185, 129, 0.14);
   --section-card-icon-color: #8ee3c1;
   --section-card-chevron-color: rgba(229, 238, 248, 0.72);
   --section-card-shadow: 0 8px 20px rgba(3, 8, 20, 0.18);
+}
+
+:global(.dark) .card:global(.p-card),
+:global(.p-dark) .card:global(.p-card),
+:global([data-theme="dark"]) .card:global(.p-card) {
+  background: #293b51 !important;
 }
 
 :global(.dark) .iconWrap,
