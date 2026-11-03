@@ -5,6 +5,8 @@ import { buildPessoaPayload } from "../types/pessoa";
 import { PessoaEntity } from "@/app/entity/PessoaEntity";
 import { VendedorEntity } from "@/app/entity/VendedorEntity";
 import { ContratoEntity } from "@/app/entity/ContratoEntity";
+import { CompanyEntity } from "@/app/entity/CompanyEntity";
+import { fetchCompanyDropdownByID } from "@/app/(main)/configuracoes/empresas/controller/controller";
 import { searchByCep } from "@/app/utils/searchCEP/controller";
 import { remocaoCaractereFiltro } from "@/app/shared/removeCaracter/controller";
 import { buildMobilePickerPageResult } from "@/app/shared/PageMobile/pageMobile";
@@ -307,7 +309,22 @@ export const fetchPessoasById = async (pessoaId: string) => {
     try {
         const { data: dataPessoa } = await api.get(`/pessoa/${pessoaId}`);
         console.log('APIeditar pessoa:', dataPessoa);
-        const pessoaInstanciada = new PessoaEntity(dataPessoa);
+        const empresaIds = Array.from(
+            new Set(
+                (Array.isArray(dataPessoa?.id_empresas)
+                    ? dataPessoa.id_empresas
+                    : Array.isArray(dataPessoa?.empresas)
+                        ? dataPessoa.empresas.map((empresa: any) => empresa?.id)
+                        : []
+                )
+                    .map((id: unknown) => Number(id))
+                    .filter((id: number) => Number.isFinite(id) && id > 0)
+            )
+        );
+        const pessoaInstanciada = new PessoaEntity({
+            ...dataPessoa,
+            id_empresas: empresaIds
+        });
         const vendedorResumo = dataPessoa?.vendedor_padrao ?? dataPessoa?.vendedor ?? null;
         const contratoResumo = dataPessoa?.contrato ?? null;
         const selectedVendedor: VendedorEntity | null = vendedorResumo
@@ -332,11 +349,18 @@ export const fetchPessoasById = async (pessoaId: string) => {
                 id_clientes_contrato: contratoResumo.id_clientes_contrato ?? [0]
             })
             : null;
+        const selectedEmpresas = await Promise.all(
+            empresaIds.map(async (empresaId) => {
+                const empresa = await fetchCompanyDropdownByID(String(empresaId));
+                return empresa ? new CompanyEntity(empresa) : null;
+            })
+        );
 
         return {
             dataPessoa: pessoaInstanciada,
             selectedVendedor,
             selectedContrato,
+            selectedEmpresas: selectedEmpresas.filter((empresa): empresa is CompanyEntity => empresa !== null),
         };
     } catch (error) {
         console.error(" Erro ao buscar cliente/fornecedor:", error);

@@ -129,7 +129,7 @@ export const SUBSCRIPTION_PLAN: SubscriptionPlanConfig = {
     name: 'Plano Teste',
     priceInCents: 9990,
     billingLabel: 'mensal',
-    description: 'Plano recorrente com emissão, operacao financeira e suporte contínuo.'
+    description: 'Plano recorrente com emissão, operação financeira e suporte contínuo.'
 };
 export const SUBSCRIPTION_METHOD_META: Record<SubscriptionPaymentMethod, SubscriptionMethodMeta> = {
     pix: {
@@ -142,7 +142,7 @@ export const SUBSCRIPTION_METHOD_META: Record<SubscriptionPaymentMethod, Subscri
         label: 'Boleto',
         shortLabel: 'Boleto',
         accentClass: 'is-boleto',
-        helperText: 'Emite linha digitavel e mantem o pagamento pendente ate a compensacao.'
+        helperText: 'Emite linha digitavel e mantem o pagamento pendente ate a compensação.'
     },
     credit_card: {
         label: 'Cartao de credito',
@@ -160,12 +160,12 @@ export const SUBSCRIPTION_STATUS_META: Record<SubscriptionPaymentStatus, Subscri
     },
     pending: {
         label: 'Pendente',
-        description: 'Cobranca gerada. Aguarde a confirmação do provedor.',
+        description: 'Cobrança gerada. Aguarde a confirmação do provedor.',
         severity: 'warning'
     },
     canceled: {
         label: 'Cancelado',
-        description: 'Sem cobranca ativa no momento.',
+        description: 'Sem cobrança ativa no momento.',
         severity: 'danger'
     }
 };

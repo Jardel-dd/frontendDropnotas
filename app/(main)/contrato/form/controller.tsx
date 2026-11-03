@@ -532,7 +532,8 @@ const ContratoFormContainer = forwardRef<ContratoFormRef, ContratoFormProps>(
                 setPreloadedPessoa({
                     dataPessoa: pessoaPrecarregada.dataPessoa,
                     selectedVendedor: pessoaPrecarregada.selectedVendedor ?? null,
-                    selectedContrato: pessoaPrecarregada.selectedContrato ?? null
+                    selectedContrato: pessoaPrecarregada.selectedContrato ?? null,
+                    selectedEmpresas: pessoaPrecarregada.selectedEmpresas ?? []
                 });
                 setEditingPessoaId(pessoaId);
                 setPessoaDialogKey((current) => current + 1);

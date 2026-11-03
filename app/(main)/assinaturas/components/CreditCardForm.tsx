@@ -39,11 +39,10 @@ export default function CreditCardForm({ value, errors, onChange, disabled = fal
     const detectedBrand = detectCardBrand(value.cardNumber);
 
     return (
-        <div className="subscription-card-form">
+        <div className="subscription-card-form ">
             <div className="subscription-card-form-header">
                 <div>
                     <h3>Cartao de credito</h3>
-                    <p>Os dados do cartao permanecem apenas nesta sessao e sao tokenizados antes do envio.</p>
                 </div>
                 <span className="subscription-card-brand-pill">
                     <CreditCard size={18} />
@@ -54,7 +53,7 @@ export default function CreditCardForm({ value, errors, onChange, disabled = fal
             <div className="grid formgrid">
                 <div className="col-12">
                     <label className="subscription-field-label" htmlFor="card-holder-name">
-                        Nome impresso no cartao
+                        Nome no cartão
                     </label>
                     <InputText
                         id="card-holder-name"
@@ -62,15 +61,15 @@ export default function CreditCardForm({ value, errors, onChange, disabled = fal
                         onChange={(event) => onChange('holderName', event.target.value)}
                         disabled={disabled}
                         className={errors.cardHolderName ? 'p-invalid' : ''}
-                        placeholder="Como aparece no cartao"
+                        placeholder="Como está no cartão"
                         autoComplete="cc-name"
                     />
                     {renderError(errors.cardHolderName)}
                 </div>
 
-                <div className="col-12">
+                <div className="col-12 mt-2">
                     <label className="subscription-field-label" htmlFor="card-number">
-                        Numero do cartao
+                        Número do cartão
                     </label>
                     <InputText
                         id="card-number"
@@ -85,7 +84,7 @@ export default function CreditCardForm({ value, errors, onChange, disabled = fal
                     {renderError(errors.cardNumber)}
                 </div>
 
-                <div className="col-6">
+                <div className="col-6 mt-2">
                     <label className="subscription-field-label" htmlFor="card-expiry">
                         Validade
                     </label>
@@ -102,9 +101,9 @@ export default function CreditCardForm({ value, errors, onChange, disabled = fal
                     {renderError(errors.expiry)}
                 </div>
 
-                <div className="col-6">
+                <div className="col-6 mt-2">
                     <label className="subscription-field-label" htmlFor="card-cvv">
-                        Codigo de seguranca
+                        Codígo de Segurança
                     </label>
                     <InputText
                         id="card-cvv"

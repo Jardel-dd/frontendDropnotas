@@ -40,6 +40,8 @@ import { fetchContratoByID, fetchContratoMobilePage, fetchContratosById, fetchFi
 import CustomMultiSelect from '@/app/shared/include/multSelect/Input';
 import { CompanyEntity } from '@/app/entity/CompanyEntity';
 import { fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
+import { FormEmpresaCreated } from '@/app/(main)/configuracoes/empresas/form/controller';
+import { EmpresaFormRef } from '@/app/(main)/configuracoes/empresas/types/empresa';
 
 const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
     (
@@ -72,6 +74,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const [loadingCep, setLoadingCep] = useState(false);
         const [loadingCnpj, setLoadingCnpj] = useState(false);
         const formContratoRef = useRef<ContratoFormRef>(null);
+        const formEmpresaRef = useRef<EmpresaFormRef>(null);
         const [error, setError] = useState<string | null>(null);
         const [vendedor, setVendedor] = useState<VendedorEntity>(
             new VendedorEntity({
@@ -143,13 +146,17 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const [reloadKeyVendedor, setReloadKeyVendedor] = useState(0);
         const [vendedorDialogKey, setVendedorDialogKey] = useState(0);
         const [contratoDialogKey, setContratoDialogKey] = useState(0);
+        const [empresaDialogKey, setEmpresaDialogKey] = useState(0);
         const [errors, setErrors] = useState<Record<string, string>>({});
         const [showModalVendedor, setShowModalVendedor] = useState(false);
         const [showModalContrato, setShowModalContrato] = useState(false);
+        const [showModalEmpresa, setShowModalEmpresa] = useState(false);
         const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
         const [isVendedorDialogLoading, setIsVendedorDialogLoading] = useState(true);
         const [isContratoDialogLoading, setIsContratoDialogLoading] = useState(true);
+        const [isEmpresaDialogLoading, setIsEmpresaDialogLoading] = useState(true);
         const [reloadKeyContratoDropdown, setReloadKeyContratoDropdown] = useState(0);
+        const [reloadKeyEmpresaDropdown, setReloadKeyEmpresaDropdown] = useState(0);
         const [editingVendedorId, setEditingVendedorId] = useState<string | null>(null);
         const [editingContratoId, setEditingContratoId] = useState<string | null>(null);
         const [selectedCNAE, setSelectedCNAE] = useState<TableCNAEEntity | null>(null);
@@ -203,6 +210,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 contribuinte: '',
                 endereco: {} as EnderecoEntity,
                 arquivo_contrato: '',
+                id_empresas: [],
                 id_vendedor_padrao: null,
                 ativo: true,
                 pais: ''
@@ -398,6 +406,17 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
             setContratoDialogKey((current) => current + 1);
             setShowModalContrato(true);
         };
+        const openCreateEmpresaDialog = () => {
+            setIsEmpresaDialogLoading(true);
+            setEmpresaDialogKey((current) => current + 1);
+            setShowModalEmpresa(true);
+        };
+        const closeEmpresaDialog = () => {
+            setShowModalEmpresa(false);
+            window.setTimeout(() => {
+                setIsEmpresaDialogLoading(false);
+            }, 200);
+        };
         const openEditContratoDialog = async (contratoSelecionado: ContratoEntity | null) => {
             const contratoId =
                 contratoSelecionado?.id ??
@@ -493,6 +512,24 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                 closeContratoDialog();
             }
         };
+        const handleEmpresaSaved = (created: CompanyEntity) => {
+            const empresasAtualizadas = [
+                ...selectedEmpresa.filter((empresaSelecionada) => empresaSelecionada.id !== created.id),
+                created
+            ];
+
+            setSelectedEmpresa(empresasAtualizadas);
+            handleAllChanges({
+                target: {
+                    id: 'id_empresas',
+                    value: empresasAtualizadas.map((empresaSelecionada) => empresaSelecionada.id),
+                    type: 'input'
+                }
+            });
+            clearError('selectedEmpresa');
+            setReloadKeyEmpresaDropdown((current) => current + 1);
+            closeEmpresaDialog();
+        };
         const handleVendedorChange = (vendedorSelecionado: VendedorEntity | null) => {
             setSelectedVendedor(vendedorSelecionado);
             handleAllChanges({
@@ -568,7 +605,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
 
     console.log('Dados enviados para handleAllChanges:', {
         target: {
-            id: 'id_empresa',
+            id: 'id_empresas',
             value: selectedIds,
             type: 'input'
         }
@@ -578,7 +615,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
 
     handleAllChanges({
         target: {
-            id: 'id_empresa',
+            id: 'id_empresas',
             value: selectedIds,
             type: 'input'
         }
@@ -624,9 +661,14 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
         const listagemPessoaID = useCallback(async (currentPessoaId: string) => {
             try {
                 setIsLoading(true);
-                const { dataPessoa, selectedContrato: selectedContratoPrecarregado } = await fetchPessoasById(currentPessoaId);
+                const {
+                    dataPessoa,
+                    selectedContrato: selectedContratoPrecarregado,
+                    selectedEmpresas: selectedEmpresasPrecarregadas
+                } = await fetchPessoasById(currentPessoaId);
                 const pessoaEntity = new PessoaEntity(dataPessoa);
                 setPessoa(pessoaEntity);
+                setSelectedEmpresa(selectedEmpresasPrecarregadas);
                 await resolveSelectedContrato(
                     dataPessoa.id_contrato ?? null,
                     selectedContratoPrecarregado ?? (dataPessoa as PessoaEntity & { contrato?: Partial<ContratoEntity> }).contrato ?? null,
@@ -670,6 +712,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
 
                     setPessoa(pessoaPrecarregada);
                     setSelectedContrato(contratoPrecarregado);
+                    setSelectedEmpresa(preloadedPessoa.selectedEmpresas ?? []);
                     setSelectedCNAE(
                         preloadedPessoa.dataPessoa.cnae_fiscal
                             ? new TableCNAEEntity({
@@ -812,6 +855,30 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                     <div className='grid formgrid p-0'>
                                         {isMobile ? (
                                             <>
+                                            <div className="col-4 lg:col-4 w-full">
+                                                    <CustomMultiSelect
+                                                        key={reloadKeyEmpresaDropdown}
+                                                        id="selectedEmpresa"
+                                                        selectedItems={selectedEmpresa}
+                                                        onChange={handleCompanyChange}
+                                                        options={empresasOptions}
+                                                        optionLabel="razao_social"
+                                                        dataKey="id"
+                                                        placeholder="Selecione as Empresas"
+                                                        maxSelectedLabels={3}
+                                                        fetchFilteredItems={fetchFilteredEmpresa}
+                                                        fetchAllItems={listTheEmpresa}
+                                                        hasError={!!errors.selectedEmpresa}
+                                                        errorMessage={errors.selectedEmpresa}
+                                                        showChips
+                                                        autoSelectSingle
+                                                        showAddButton
+                                                        onAddClick={openCreateEmpresaDialog}
+                                                        topLabel="Empresa"
+                                                        showTopLabel
+                                                        required
+                                                    />
+                                                </div>
                                                 <div className="col-4 lg:col-4 w-full">
                                                     <MobileSearchPicker<ContratoEntity>
                                                         selectedItem={selectedContrato}
@@ -852,12 +919,12 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                                         autoLoadAndSelectSingle
                                                     />
                                                 </div>
-
                                             </>
                                         ) : (
                                             <>
                                                 <div className="col-4 lg:col-4">
                                                     <CustomMultiSelect
+                                                        key={reloadKeyEmpresaDropdown}
                                                         id="selectedEmpresa"
                                                         selectedItems={selectedEmpresa}
                                                         onChange={handleCompanyChange}
@@ -873,6 +940,7 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                                                         showChips
                                                         autoSelectSingle
                                                         showAddButton
+                                                        onAddClick={openCreateEmpresaDialog}
                                                         topLabel="Empresa"
                                                         showTopLabel
                                                         required
@@ -981,6 +1049,27 @@ const PessoaFormContainer = forwardRef<PessoaFormRef, PessoaFormProps>(
                         onClose={closeContratoDialog}
                         showBTNPGCreatedDialog
                         onBackClick={closeContratoDialog}
+                    />
+                </DialogFilter>
+                <DialogFilter
+                    header="Adicionar Empresa"
+                    visible={showModalEmpresa}
+                    onHide={closeEmpresaDialog}
+                    loading={isEmpresaDialogLoading}
+                    loadingText="Abrindo cadastro de Empresa..."
+                >
+                    <FormEmpresaCreated
+                        key={empresaDialogKey}
+                        msgs={msgs}
+                        ref={formEmpresaRef}
+                        empresa={empresa}
+                        setEmpresa={setEmpresa}
+                        redirectAfterSave={false}
+                        onSaved={handleEmpresaSaved}
+                        onLoadingChange={setIsEmpresaDialogLoading}
+                        onClose={closeEmpresaDialog}
+                        showBTNPGCreatedDialog
+                        onBackClick={closeEmpresaDialog}
                     />
                 </DialogFilter>
             </>

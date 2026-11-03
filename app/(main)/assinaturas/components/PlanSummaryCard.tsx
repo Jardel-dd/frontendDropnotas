@@ -52,14 +52,14 @@ export default function PlanSummaryCard({ status, payment, isPolling }: Props) {
                     <Lightning size={18} />
                     <div>
                         <small>Forma escolhida</small>
-                        <strong>{methodMeta?.shortLabel ?? 'Ainda nao definida'}</strong>
+                        <strong>{methodMeta?.shortLabel ?? 'Ainda não definida'}</strong>
                     </div>
                 </div>
                 <div className="subscription-summary-item">
                     <ShieldCheck size={18} />
                     <div>
                         <small>Vencimento</small>
-                        <strong>{payment ? formatDate(payment.dueDate) : 'Gere a cobranca para visualizar'}</strong>
+                        <strong>{payment ? formatDate(payment.dueDate) : 'Gere a cobrança para visualizar'}</strong>
                     </div>
                 </div>
             </div>
