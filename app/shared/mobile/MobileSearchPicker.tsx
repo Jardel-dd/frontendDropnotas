@@ -6,6 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { useIsMobile } from '@/app/components/responsiveCelular/responsive';
+import { useTheme } from '@/app/components/isDarkMode/isDarkMode';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { Mandatory } from '../mandatory/InputMandatory';
 
@@ -91,6 +92,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
     autoLoadAndSelectSingle = false
 }: MobileSearchPickerProps<T>) {
     const isMobile = useIsMobile();
+    const { isDarkMode } = useTheme();
     const [visible, setVisible] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [appliedSearchTerm, setAppliedSearchTerm] = useState('');
@@ -372,7 +374,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
 
     return (
         <>
-            <div className="mobile-search-picker-field">
+            <div className={`mobile-search-picker-field${isDarkMode ? ' mobile-search-picker-dark' : ''}`}>
                 <div style={{ height: 'var(--form-label-height)', display: 'flex', alignItems: 'center' }}>
                     {showTopLabel && topLabel ? (
                         <label className="filter-label">
@@ -431,7 +433,7 @@ export default function MobileSearchPicker<T extends Record<string, any>>({
             <Dialog
                 header={dialogTitle}
                 visible={visible}
-                className="mobile-search-picker-dialog"
+                className={`mobile-search-picker-dialog${isDarkMode ? ' mobile-search-picker-dark' : ''}`}
                 contentClassName="mobile-search-picker-dialog-content"
                 breakpoints={{ '960px': '95vw' }}
                 style={{ width: isMobile ? '95vw' : '32rem', maxWidth: '95vw' }}
