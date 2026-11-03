@@ -74,6 +74,7 @@ export interface PreloadedPessoaData {
     dataPessoa: PessoaEntity;
     selectedVendedor: VendedorEntity | null;
     selectedContrato: ContratoEntity | null;
+    selectedEmpresas?: import('@/app/entity/CompanyEntity').CompanyEntity[];
 }
 export const mapPessoaContatoToSelection = (pessoa: Pick<PessoaEntity, 'pessoa_cliente' | 'pessoa_fornecedor'>): string[] => {
     const selectedContato: string[] = [];
@@ -101,4 +102,11 @@ export const buildPessoaPayload = (pessoa: PessoaEntity) => ({
     cnae_fiscal: nullableString(pessoa.cnae_fiscal),
     inscricao_estadual: nullableString(pessoa.inscricao_estadual),
     inscricao_municipal: nullableString(pessoa.inscricao_municipal),
+    id_empresas: Array.from(
+        new Set(
+            (pessoa.id_empresas ?? [])
+                .map((id) => Number(id))
+                .filter((id) => Number.isFinite(id) && id > 0)
+        )
+    ),
 });

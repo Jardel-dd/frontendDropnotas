@@ -15,6 +15,12 @@
     padding: 1rem 0 2rem;
 }
 
+.subscription-page > .styled-container-main-all-routes {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 .subscription-shell {
     display: flex;
     flex-direction: column;
@@ -287,7 +293,7 @@
     padding: 1rem;
     border-radius: 20px;
     border: 1px solid rgba(148, 163, 184, 0.18);
-    background: var(--subscription-surface-strong);
+    background: var(--surface-card);
     text-align: left;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
@@ -347,8 +353,16 @@
     margin-top: 1rem;
     padding: 1rem;
     border-radius: 22px;
-    background: linear-gradient(180deg, var(--subscription-surface-soft), var(--subscription-surface-strong));
+    background: var(--surface-card);
     border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.subscription-card-form .subscription-field-label {
+    display: block;
+}
+
+.subscription-card-form .p-inputtext {
+    width: 100%;
 }
 
 .subscription-card-form-header {
@@ -454,7 +468,7 @@
     gap: 0.65rem;
     padding: 0.95rem;
     border-radius: 18px;
-    background: var(--subscription-surface-soft);
+    background: var(--surface-card);
     border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
@@ -701,5 +715,9 @@
 
     .subscription-price-block strong {
         font-size: 1.9rem;
+    }
+
+    .subscription-card-form .col-6 {
+        width: 100%;
     }
 }

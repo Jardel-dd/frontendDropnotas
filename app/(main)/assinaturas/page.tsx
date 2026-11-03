@@ -453,26 +453,22 @@ export default function AssinaturasPage() {
                             ) : (
                                 <div className="subscription-gated-panel">
                                     <strong>Formas de pagamento bloqueadas até concluir os dados de cobrança</strong>
-                                    <p>Preencha CPF ou CNPJ, {billingForm.documentType === 'cpf' ? 'nome completo' : 'razão social'} e CEP para continuar.</p>
+                                    <p>Preencha os campos obrigatórios nos dados de cobrança, para gerar a fatura.</p>
                                 </div>
                             )}
 
                             <div className="subscription-action-bar">
-                                <div className="subscription-action-copy">
-                                    <strong>Seguranca aplicada</strong>
-                                    <p>O valor e o plano sao validados no servidor mock e o cartao nunca e enviado em texto puro.</p>
-                                </div>
-
                                 <div className="subscription-action-buttons">
                                     {!isChargeLocked && activePayment?.status === 'canceled' && (
                                         <Button type="button" label="Limpar status" text onClick={handleResetSimulation} />
                                     )}
                                     <Button
                                         type="button"
+                                        disabled={true}
                                         label={createPaymentMutation.isPending ? 'Gerando cobranca...' : 'Gerar cobranca'}
                                         onClick={handleCreateCharge}
                                         loading={createPaymentMutation.isPending}
-                                        disabled={isChargeLocked || !billingReady}
+                                        // disabled={isChargeLocked || !billingReady}
                                     />
                                 </div>
                             </div>

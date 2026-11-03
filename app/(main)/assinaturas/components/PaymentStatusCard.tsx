@@ -93,12 +93,12 @@ export default function PaymentStatusCard({ payment, isPolling, isRefreshing, is
                 <div className="subscription-card-title-row">
                     <div>
                         <span className="subscription-eyebrow">Status do pagamento</span>
-                        <h2>Nenhuma cobranca gerada</h2>
+                        <h2>Nenhuma cobrança gerada</h2>
                     </div>
                     <Receipt size={24} />
                 </div>
 
-                <Message severity="warn" text="Escolha uma forma de pagamento e gere a cobranca para acompanhar o status da assinatura." />
+                <Message severity="warn" text="Escolha uma forma de pagamento e gere a cobrança para acompanhar o status da assinatura." />
             </div>
         );
     }

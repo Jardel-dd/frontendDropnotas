@@ -73,6 +73,7 @@ export class PessoaEntity {
     // telefone?: string;
     endereco!: EnderecoEntity;
     arquivo_contrato?: string;
+    id_empresas?: number[];
     id_vendedor_padrao?: number | null;
     ativo?: boolean;
     pais?: string;
@@ -99,6 +100,7 @@ export class PessoaEntity {
         // telefone,
         endereco,
         arquivo_contrato,
+        id_empresas,
         id_vendedor_padrao,
         ativo,
         pais
@@ -124,6 +126,7 @@ export class PessoaEntity {
         // telefone?: string;
         endereco: EnderecoEntity;
         arquivo_contrato?: string;
+        id_empresas?: number[];
         id_contrato?: number | null;
         id_vendedor_padrao?: number | null;
         ativo?: boolean;
@@ -152,6 +155,7 @@ export class PessoaEntity {
             // telefone,
             endereco,
             arquivo_contrato,
+            id_empresas,
             id_vendedor_padrao,
             ativo,
             pais
@@ -180,6 +184,7 @@ export class PessoaEntity {
         // telefone,
         endereco,
         arquivo_contrato,
+        id_empresas,
         id_vendedor_padrao,
         ativo,
         pais
@@ -205,6 +210,7 @@ export class PessoaEntity {
         // telefone?: string;
         endereco?: EnderecoEntity;
         arquivo_contrato?: string;
+        id_empresas?: number[];
         id_contrato?: number | null;
         id_vendedor_padrao?: number | null;
         ativo?: boolean;
@@ -239,6 +245,7 @@ export class PessoaEntity {
             // telefone: telefone ?? this.telefone,
             endereco: endereco ?? this.endereco,
             arquivo_contrato: arquivo_contrato ?? this.arquivo_contrato,
+            id_empresas: id_empresas ?? this.id_empresas,
             id_vendedor_padrao: id_vendedor_padrao !== undefined ? id_vendedor_padrao : this.id_vendedor_padrao,
             ativo: ativo ?? this.ativo,
             pais: pais ?? this.pais,
