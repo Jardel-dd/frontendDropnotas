@@ -16,6 +16,7 @@ import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 import { useGenericSearch } from '@/app/services/debounceSearch/controller';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 import CustomPaginator from '@/app/components/paginator/customPaginator';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
 import CheckBoxField from '@/app/components/CheckBoxField/checkBoxField';
@@ -154,6 +155,18 @@ const ContasPagar: React.FC = () => {
         const firstPage = 0;
         handleListContasPagar(firstPage, searchTerm, listarInativos);
     };
+    const handleRemoveInactiveFilter = () => {
+        setListarInativos(false);
+        handleListContasPagar(0, searchTerm, false);
+    };
+    const appliedFilterItems = [
+        {
+            label: 'Status',
+            value: listarInativos ? 'Desativadas' : null,
+            onRemove: handleRemoveInactiveFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
     useEffect(() => {
         handleListContasPagar();
     }, []);
@@ -185,6 +198,7 @@ const ContasPagar: React.FC = () => {
                                     <FilterOverlay 
                                     onClear={handleClearFilters} 
                                     onApply={handleApplyFilters}
+                                    activeFilterCount={activeFilterCount}
                                     buttonClassName="height-2-8rem-ml-1rem-mobile"
                                      >
                                         <div className="col-12 lg:col-12 mt-3">
@@ -201,6 +215,7 @@ const ContasPagar: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                        <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} className="mb-2" />
                         <div className="finance-mobile-list-wrapper" style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             <ListarContasPagar
                                 loading={loading}
@@ -239,7 +254,7 @@ const ContasPagar: React.FC = () => {
                                         />
                                     </div>
                                     <div className="Container-Btn-Filter-Desktop">
-                                        <FilterOverlay onClear={handleClearFilters} onApply={handleApplyFilters} buttonClassName="Btn-Filter-Desktop">
+                                        <FilterOverlay onClear={handleClearFilters} onApply={handleApplyFilters} buttonClassName="Btn-Filter-Desktop" activeFilterCount={activeFilterCount}>
                                             <div className="col-12 lg:col-12 ">
                                             <CheckBoxField
                                                                                         inputId="listarInativos"
@@ -255,6 +270,7 @@ const ContasPagar: React.FC = () => {
                                         <Button icon="pi pi-plus" label="Novo" onClick={handleNavigate} className="p-button-primary-novo" />
                                     </div>
                                 </div>
+                                <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} className="mb-2" />
                                 <div >
                                     <ListarContasPagar
                                         loading={loading}

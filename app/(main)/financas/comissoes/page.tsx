@@ -21,6 +21,7 @@ import { DropDownFilterTipoOrigem } from '@/app/shared/optionsDropDown/options';
 import VendedorDropdownField from '../../cadastro/vendedores/dropDown/DropdownVendedor';
 import { useIsDesktop, useIsMobile } from '@/app/components/responsiveCelular/responsive';
 import { FilterOverlay } from '@/app/components/buttonsComponent/btn-FilterComponent/Btn-Filter';
+import { AppliedFiltersSummary } from '@/app/components/appliedFiltersSummary/AppliedFiltersSummary';
 import { DateRangePicker} from '@/app/components/calendarComponent/dataRangerPicker';
 import { DateRangeValue } from '@/app/components/calendarComponent/types/types';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
@@ -207,6 +208,7 @@ const Comissoes: React.FC = () => {
     const handleDateRangeClear = () => {
         const clearedRange: DateRangeValue = [null, null];
         setDateRange(clearedRange);
+        setDateRangePickerKey((prev) => prev + 1);
         handleListComissoes(0, searchTerm, listarInativos, buildCurrentFilters({}, clearedRange));
     };
     const handleClearFilters = () => {
@@ -228,6 +230,44 @@ const Comissoes: React.FC = () => {
         const firstPage = 0;
         handleListComissoes(firstPage, searchTerm, listarInativos, buildCurrentFilters());
     };
+    const handleRemoveTipoOrigemFilter = () => {
+        setSelectedTipoOrigem('');
+        handleListComissoes(0, searchTerm, listarInativos, buildCurrentFilters({ tipo_origem: null }));
+    };
+    const handleRemoveVendedorFilter = () => {
+        setSelectedVendedor(null);
+        handleListComissoes(0, searchTerm, listarInativos, buildCurrentFilters({ id_vendedor: null }));
+    };
+    const handleRemoveComissaoFechadaFilter = () => {
+        setFiltrarComissaoFechada(false);
+        handleListComissoes(0, searchTerm, listarInativos, buildCurrentFilters({ comissao_fechada: null }));
+    };
+    const hasSelectedDateRange = Boolean(dateRange[0] && dateRange[1]);
+    const appliedFilterItems = [
+        {
+            label: 'Período',
+            value: hasSelectedDateRange ? `${dateRange[0]!.format('DD/MM/YYYY')} - ${dateRange[1]!.format('DD/MM/YYYY')}` : null,
+            onRemove: handleDateRangeClear
+        },
+        {
+            label: 'Origem',
+            value: selectedTipoOrigem
+                ? DropDownFilterTipoOrigem.find((option) => option.value === selectedTipoOrigem)?.label ?? selectedTipoOrigem
+                : null,
+            onRemove: handleRemoveTipoOrigemFilter
+        },
+        {
+            label: 'Vendedor',
+            value: selectedVendedor?.razao_social ?? null,
+            onRemove: handleRemoveVendedorFilter
+        },
+        {
+            label: 'Comissões fechadas',
+            value: filtrarComissaoFechada ? 'Sim' : null,
+            onRemove: handleRemoveComissaoFechadaFilter
+        }
+    ];
+    const activeFilterCount = appliedFilterItems.filter((item) => item.value).length;
     const handleAprovarComissoes = useCallback(async () => {
         if (selectedComissoesPendentes.length === 0) return;
 
@@ -291,7 +331,8 @@ const Comissoes: React.FC = () => {
                                 <div className="container-BTN-Filter-Created">
                                     <FilterOverlay
                                         onClear={handleClearFilters}
-                                        onApply={handleApplyFilters}>
+                                        onApply={handleApplyFilters}
+                                        activeFilterCount={activeFilterCount}>
                                           <div className="col-12 lg:col-4 w-full p-0">
                                             <DateRangePicker
                                                 key={`mobile-${dateRangePickerKey}`}
@@ -336,6 +377,7 @@ const Comissoes: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                        <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} className="mb-2" />
                         <div className="finance-mobile-list-wrapper" style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, flexDirection: 'column' }}>
                             {selectedComissoesPendentes.length > 0 && (
                                 <div className="flex justify-content-end mb-3">
@@ -401,7 +443,7 @@ const Comissoes: React.FC = () => {
                                             onClear={handleClearFilters}
                                             onApply={handleApplyFilters}
                                             buttonClassName="ml-1rem"
-                                            
+                                            activeFilterCount={activeFilterCount}
                                         >
                                             <Dropdown
                                                 id="selectedTipoOrigem"
@@ -436,6 +478,7 @@ const Comissoes: React.FC = () => {
                                     </div>
 
                                 </div>
+                                <AppliedFiltersSummary items={appliedFilterItems} onClear={handleClearFilters} className="mb-2" />
                                 <div >
                                     {selectedComissoesPendentes.length > 0 && (
                                         <div className="flex justify-content-end mb-3">
