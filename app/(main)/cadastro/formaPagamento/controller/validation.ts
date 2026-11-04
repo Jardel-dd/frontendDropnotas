@@ -18,7 +18,7 @@ export const validateFieldsFormaPagamento = (
     } else if (!formaPagamento.tipo_taxa) {
         newErrors.tipo_taxa = 'Inclua um tipo de taxa.';
         valid = false;
-    } else if (!formaPagamento.valor_taxa || formaPagamento.descricao.trim().length < 1) {
+    } else if (formaPagamento.valor_taxa === null || formaPagamento.valor_taxa === undefined || Number.isNaN(Number(formaPagamento.valor_taxa))) {
         newErrors.valor_taxa = 'Digite um valor.';
         valid = false;
     } else {

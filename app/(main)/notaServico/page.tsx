@@ -513,7 +513,7 @@ const NotaServico: React.FC = () => {
                 return;
             }
 
-            console.error('[notaServico] Nao foi possivel calcular o resumo total filtrado.', error);
+            console.error(' Não foi possivel calcular o resumo total filtrado.', error);
             setNotaServicoSummary(buildNotaServicoSummary(firstPageData));
         }
     }, [fetchAggregatedNotaServicoSummary]);
