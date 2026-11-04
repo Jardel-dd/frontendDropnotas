@@ -44,35 +44,18 @@ const AppMenu = () => {
                         visible: hasPermissionAccess(userConta, 'pessoa')
                     },
                     {
-                        label: 'Serviços',
-                        icon: Wrench,
-                        to: '/cadastro/servicos',
-                        visible: hasPermissionAccess(userConta, 'servico')
-                    },
-                     {
                         label: 'Perfil Tributário',
                         icon: Percent,
                         to: '/cadastro/perfilTributario',
                         visible: hasPermissionAccess(userConta, 'perfilTributario')
                     },
                     {
-                        label: 'Vendedores',
-                        icon: User,
-                        to: '/cadastro/vendedores',
-                        visible: hasPermissionAccess(userConta, 'vendedor')
+                        label: 'Serviços',
+                        icon: Wrench,
+                        to: '/cadastro/servicos',
+                        visible: hasPermissionAccess(userConta, 'servico')
                     },
-                    {
-                        label: 'Usuários',
-                        icon: UsersThree,
-                        to: '/cadastro/usuarios',
-                        visible: hasPermissionAccess(userConta, 'usuarioConta')
-                    },
-                    {
-                        label: 'Permissões',
-                        icon: LockKey,
-                        to: '/cadastro/permissoes',
-                        visible: hasPermissionAccess(userConta, 'perfilUsuario')
-                    },
+                    
                     {
                         label: 'Forma de Pagamento',
                         icon: CurrencyDollar,
@@ -84,7 +67,25 @@ const AppMenu = () => {
                         icon: Folders,
                         to: '/cadastro/categoriaContratos',
                         visible: hasPermissionAccess(userConta, 'categoriaContrato')
-                    }
+                    },
+                    {
+                        label: 'Permissões',
+                        icon: LockKey,
+                        to: '/cadastro/permissoes',
+                        visible: hasPermissionAccess(userConta, 'perfilUsuario')
+                    },
+                    {
+                        label: 'Usuários',
+                        icon: UsersThree,
+                        to: '/cadastro/usuarios',
+                        visible: hasPermissionAccess(userConta, 'usuarioConta')
+                    },
+                    {
+                        label: 'Vendedores',
+                        icon: User,
+                        to: '/cadastro/vendedores',
+                        visible: hasPermissionAccess(userConta, 'vendedor')
+                    },
                 ]
             },
             {

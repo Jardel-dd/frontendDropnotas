@@ -74,7 +74,7 @@ export function OrdemServicoInformacoesFields({
                         id="servicos.quantidade"
                         type="number"
                         showTopLabel
-                        topLabel="Quantidade de Serviços:"
+                        topLabel="Qt de Serviços:"
                         hasError={!!errors['servicos.quantidade']}
                         errorMessage={errors['servicos.quantidade']}
                     />
@@ -118,7 +118,7 @@ export function OrdemServicoInformacoesFields({
                             }
                         />
                         <label htmlFor="orcar" className="switchLabel">
-                            Orcar
+                            Orçar
                         </label>
                     </div>
                 </div>
