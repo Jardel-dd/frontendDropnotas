@@ -40,7 +40,6 @@ export default function BillingDataForm({
         <div className="card">
             <div className="subscription-section-header">
                 <h3>Dados de cobrança</h3>
-                <p>Defina quem será cobrado e complete o endereço usando a mesma base de CEP e localização do sistema.</p>
             </div>
 
             <div className="subscription-toggle-group" role="tablist" aria-label="Tipo de documento">

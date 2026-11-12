@@ -63,8 +63,8 @@ import {
 } from './controller/exportPdfProgress';
 import { MOBILE_LOAD_MORE_PAGE_SIZE, hasMoreMobileContent, mergePaginatedContent } from '@/app/components/paginator/mobileLoadMore';
 import { buildEmptyNotaServicoPagination, createEmptyPessoa, formatAuthorizedNotaDateTime, formatAuthorizedNotaValue } from './types/notaServico';
-import { fetchFilteredPessoa, fetchPessoaMobilePage, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
-import { fetchFilteredService, fetchServiceFormDataByID, fetchServicesByID, listTheService } from '@/app/(main)/cadastro/servicos/controller/controller';
+import { fetchFilteredPessoa, fetchPessoasById, listThePessoas } from '@/app/(main)/cadastro/pessoas/controller/controller';
+import { fetchServiceFormDataByID, fetchServicesByID } from '@/app/(main)/cadastro/servicos/controller/controller';
 import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { mapDateRangeToResumoParams } from '../dashboard/types/types';
 import { fetchRelatorioNotaFiscalResumo } from '../dashboard/controller/controller';
@@ -114,6 +114,25 @@ type NotaServicoFiltersState = {
 type NotaServicoSummaryState = {
     totalValueDisplay: string;
     issuedCountDisplay: string;
+};
+
+const getApiCollection = <T,>(data: unknown): T[] => {
+    if (Array.isArray(data)) return data as T[];
+
+    const payload = data as { content?: unknown; data?: { content?: unknown } } | null;
+    if (Array.isArray(payload?.content)) return payload.content as T[];
+    if (Array.isArray(payload?.data?.content)) return payload.data.content as T[];
+
+    return [];
+};
+
+const filterLocalCollection = <T extends Record<string, any>>(items: T[], term: string, fields: (keyof T)[]) => {
+    const normalizedTerm = term.trim().toLocaleLowerCase();
+    if (!normalizedTerm) return items;
+
+    return items.filter((item) =>
+        fields.some((field) => String(item[field] ?? '').toLocaleLowerCase().includes(normalizedTerm))
+    );
 };
 
 const getNestedValue = (source: Record<string, any> | null | undefined, path: string) =>
@@ -250,6 +269,9 @@ const NotaServico: React.FC = () => {
     const redirectFeedbackMaskTimeoutRef = useRef<number | null>(null);
     const activeSummarySignatureRef = useRef('');
     const notaServicoSummaryRequestIdRef = useRef(0);
+    const pessoasPorEmpresaRef = useRef(new Map<number, PessoaEntity[]>());
+    const servicosPorEmpresaRef = useRef(new Map<number, ServiceEntity[]>());
+    const prepararOptionsRequestCountRef = useRef(0);
     const activeFiltersRef = useRef<NotaServicoFiltersState>({
         dateRange: [null, null],
         selectedEmpresa: null,
@@ -318,6 +340,8 @@ const NotaServico: React.FC = () => {
     const [preloadedEmpresa, setPreloadedEmpresa] = useState<PreloadedEmpresaData | null>(null);
     const [editingEmpresaId, setEditingEmpresaId] = useState<string | null>(null);
     const [selectedServicoDialog, setSelectedServicoDialog] = useState<ServiceEntity | null>(null);
+    const [isLoadingPrepararOptions, setIsLoadingPrepararOptions] = useState(false);
+    const [prepararOptionsError, setPrepararOptionsError] = useState<string | null>(null);
     const [preloadedServico, setPreloadedServico] = useState<PreloadedServicoData | null>(null);
     const [editingServicoId, setEditingServicoId] = useState<string | null>(null);
     const [draftSelectedVendedor, setDraftSelectedVendedor] = useState<VendedorEntity | null>(null);
@@ -640,17 +664,66 @@ const NotaServico: React.FC = () => {
 
         return buildMobilePickerPageResult<CompanyEntity>(response.data);
     }, []);
-    const fetchServicoMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
-        const response = await api.get('/servico', {
-            params: {
-                page,
-                size,
-                termo: termo || undefined
-            }
-        });
+    const fetchPessoasDaEmpresaSelecionada = useCallback(async () => {
+        const empresaId = selectedEmpresaDialog?.id;
+        if (!empresaId) return [];
 
-        return buildMobilePickerPageResult<ServiceEntity>(response.data);
-    }, []);
+        const cached = pessoasPorEmpresaRef.current.get(empresaId);
+        if (cached) return cached;
+
+        prepararOptionsRequestCountRef.current += 1;
+        setIsLoadingPrepararOptions(true);
+        setPrepararOptionsError(null);
+        try {
+            const response = await api.get('/pessoa', { params: { id_empresa: empresaId } });
+            const pessoas = getApiCollection<PessoaEntity>(response.data);
+            pessoasPorEmpresaRef.current.set(empresaId, pessoas);
+            console.log('[notaServico] Clientes e fornecedores carregados para a empresa:', { empresaId, pessoas });
+            return pessoas;
+        } catch (error: any) {
+            const detail = error?.response?.data?.message ?? 'Não foi possível carregar os clientes e fornecedores da empresa selecionada.';
+            console.error('[notaServico] Erro ao carregar clientes e fornecedores por empresa:', { empresaId, response: error?.response?.data, error });
+            setPrepararOptionsError(detail);
+            return [];
+        } finally {
+            prepararOptionsRequestCountRef.current = Math.max(0, prepararOptionsRequestCountRef.current - 1);
+            setIsLoadingPrepararOptions(prepararOptionsRequestCountRef.current > 0);
+        }
+    }, [selectedEmpresaDialog?.id]);
+    const fetchServicosDaEmpresaSelecionada = useCallback(async () => {
+        const empresaId = selectedEmpresaDialog?.id;
+        if (!empresaId) return [];
+
+        const cached = servicosPorEmpresaRef.current.get(empresaId);
+        if (cached) return cached;
+
+        prepararOptionsRequestCountRef.current += 1;
+        setIsLoadingPrepararOptions(true);
+        setPrepararOptionsError(null);
+        try {
+            const response = await api.get('/servico', { params: { id_empresa: empresaId } });
+            const servicos = getApiCollection<ServiceEntity>(response.data);
+            servicosPorEmpresaRef.current.set(empresaId, servicos);
+            console.log('[notaServico] Serviços carregados para a empresa:', { empresaId, servicos });
+            return servicos;
+        } catch (error: any) {
+            const detail = error?.response?.data?.message ?? 'Não foi possível carregar os serviços da empresa selecionada.';
+            console.error('[notaServico] Erro ao carregar serviços por empresa:', { empresaId, response: error?.response?.data, error });
+            setPrepararOptionsError(detail);
+            return [];
+        } finally {
+            prepararOptionsRequestCountRef.current = Math.max(0, prepararOptionsRequestCountRef.current - 1);
+            setIsLoadingPrepararOptions(prepararOptionsRequestCountRef.current > 0);
+        }
+    }, [selectedEmpresaDialog?.id]);
+    const fetchPessoasDaEmpresaFiltradas = useCallback(async (term: string) => {
+        const pessoas = await fetchPessoasDaEmpresaSelecionada();
+        return filterLocalCollection(pessoas, term, ['razao_social', 'nome_fantasia', 'cpf', 'cnpj']);
+    }, [fetchPessoasDaEmpresaSelecionada]);
+    const fetchServicosDaEmpresaFiltrados = useCallback(async (term: string) => {
+        const servicos = await fetchServicosDaEmpresaSelecionada();
+        return filterLocalCollection(servicos, term, ['descricao', 'codigo', 'item_lista_servico']);
+    }, [fetchServicosDaEmpresaSelecionada]);
     const clearPreparaNfsDialog = () => {
         setSelectedEmpresaDialog(null);
         setSelectedPessoaDialog(null);
@@ -663,6 +736,7 @@ const NotaServico: React.FC = () => {
             })
         );
         setErrors({});
+        setPrepararOptionsError(null);
     };
     const handleClosePreparaNfsDialog = () => {
         setShowDialogPreparaNfs(false);
@@ -960,8 +1034,21 @@ const NotaServico: React.FC = () => {
         setDraftSelectedPessoa(pessoa);
     };
     const handleEmpresaChangeDialog = (empresa: CompanyEntity | null) => {
+        if (empresa?.id === selectedEmpresaDialog?.id) return;
+
         setSelectedEmpresaDialog(empresa);
-        handlePrepararNfsChange('id_empresa', empresa?.id ?? 0);
+        setSelectedPessoaDialog(null);
+        setSelectedServicoDialog(null);
+        setPrepararOptionsError(null);
+        setPrepararNfs(new PrepararNfs({
+            id_empresa: empresa?.id ?? 0,
+            id_cliente: 0,
+            id_servico: 0
+        }));
+        setErrors((current) => {
+            const { selectedCliente, selectedServico, ...remainingErrors } = current;
+            return remainingErrors;
+        });
     };
     const handleServicoChangeDialog = (servico: ServiceEntity | null) => {
         setSelectedServicoDialog(servico);
@@ -2050,7 +2137,11 @@ const NotaServico: React.FC = () => {
                                         onEditClick={openEditPessoaDialog}
                                         hasError={!!errors.selectedCliente}
                                         errorMessage={errors.selectedCliente}
-                                        autoLoadAndSelectSingle={showDialogPreparaNfs}
+                                        autoLoadAndSelectSingle={showDialogPreparaNfs && Boolean(selectedEmpresaDialog)}
+                                        fetchAllItems={fetchPessoasDaEmpresaSelecionada}
+                                        fetchFilteredItems={fetchPessoasDaEmpresaFiltradas}
+                                        fetchItemByValue={async (id) => (await fetchPessoasDaEmpresaSelecionada()).find((pessoa) => String(pessoa.id) === String(id)) ?? null}
+                                        disabled={!selectedEmpresaDialog || isLoadingPrepararOptions}
                                     />
                                 </div>
                                 <div className="col-12 lg:col-12">
@@ -2064,9 +2155,15 @@ const NotaServico: React.FC = () => {
                                         onEditClick={openEditServicoDialog}
                                         hasError={!!errors.selectedServico}
                                         errorMessage={errors.selectedServico}
-                                        autoLoadAndSelectSingle={showDialogPreparaNfs}
+                                        autoLoadAndSelectSingle={showDialogPreparaNfs && Boolean(selectedEmpresaDialog)}
+                                        fetchAllItems={fetchServicosDaEmpresaSelecionada}
+                                        fetchFilteredItems={fetchServicosDaEmpresaFiltrados}
+                                        fetchItemByValue={async (id) => (await fetchServicosDaEmpresaSelecionada()).find((servico) => String(servico.id) === String(id)) ?? null}
+                                        disabled={!selectedEmpresaDialog || isLoadingPrepararOptions}
                                     />
                                 </div>
+                                {isLoadingPrepararOptions && <small className="text-color-secondary">Carregando opções da empresa...</small>}
+                                {prepararOptionsError && <small className="p-error block">{prepararOptionsError}</small>}
                             </>
                         }
                         {isMobile &&
@@ -2096,9 +2193,8 @@ const NotaServico: React.FC = () => {
                                     <MobileSearchPicker<PessoaEntity>
                                         selectedItem={selectedPessoaDialog}
                                         onItemChange={handlePessoaChangeDialog}
-                                        fetchAllItems={listThePessoas}
-                                        fetchFilteredItems={fetchFilteredPessoa}
-                                        fetchItemsPage={fetchPessoaMobilePage}
+                                        fetchAllItems={fetchPessoasDaEmpresaSelecionada}
+                                        fetchFilteredItems={fetchPessoasDaEmpresaFiltradas}
                                         loadMoreRows={20}
                                         optionLabel="razao_social"
                                         optionValue="id"
@@ -2110,16 +2206,17 @@ const NotaServico: React.FC = () => {
                                         onAddClick={openCreatePessoaDialog}
                                         onEditClick={openEditPessoaDialog}
                                         dialogPosition={isMobileKeyboardOpen ? 'top' : undefined}
-                                        autoLoadAndSelectSingle
+                                        autoLoadAndSelectSingle={Boolean(selectedEmpresaDialog)}
+                                        loadingMessage={isLoadingPrepararOptions ? 'Carregando clientes e fornecedores...' : undefined}
+                                        emptyMessage={selectedEmpresaDialog ? 'Nenhum cliente ou fornecedor encontrado para esta empresa.' : 'Selecione uma empresa primeiro.'}
                                     />
                                 </div>
                                 <div>
                                     <MobileSearchPicker<ServiceEntity>
                                         selectedItem={selectedServicoDialog}
                                         onItemChange={handleServicoChangeDialog}
-                                        fetchAllItems={listTheService}
-                                        fetchFilteredItems={fetchFilteredService}
-                                        fetchItemsPage={fetchServicoMobilePage}
+                                        fetchAllItems={fetchServicosDaEmpresaSelecionada}
+                                        fetchFilteredItems={fetchServicosDaEmpresaFiltrados}
                                         optionValue="id"
                                         loadMoreRows={20}
                                         topLabel="Cliente ou Fornecedor:"
@@ -2130,10 +2227,14 @@ const NotaServico: React.FC = () => {
                                         onAddClick={openCreateServicoDialog}
                                         onEditClick={openEditServicoDialog}
                                         dialogPosition={isMobileKeyboardOpen ? 'top' : undefined}
-                                        autoLoadAndSelectSingle
+                                        autoLoadAndSelectSingle={Boolean(selectedEmpresaDialog)}
+                                        loadingMessage={isLoadingPrepararOptions ? 'Carregando serviços...' : undefined}
+                                        emptyMessage={selectedEmpresaDialog ? 'Nenhum serviço encontrado para esta empresa.' : 'Selecione uma empresa primeiro.'}
                                         optionLabel={'descricao'}
                                     />
                                 </div>
+                                {isLoadingPrepararOptions && <small className="text-color-secondary">Carregando opções da empresa...</small>}
+                                {prepararOptionsError && <small className="p-error block">{prepararOptionsError}</small>}
                             </>
                         }
                     </div>

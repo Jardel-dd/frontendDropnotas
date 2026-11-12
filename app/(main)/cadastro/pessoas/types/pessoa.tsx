@@ -69,6 +69,10 @@ export interface PessoaDropdownFieldProps {
     autoSelectSingle?: boolean;
     showAddButton?: boolean;
     autoLoadAndSelectSingle?: boolean;
+    fetchAllItems?: () => Promise<PessoaEntity[]>;
+    fetchFilteredItems?: (filter: string) => Promise<PessoaEntity[]>;
+    fetchItemByValue?: (value: string | number) => Promise<PessoaEntity | null>;
+    disabled?: boolean;
 }
 export interface PreloadedPessoaData {
     dataPessoa: PessoaEntity;
