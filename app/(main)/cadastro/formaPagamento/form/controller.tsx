@@ -170,7 +170,7 @@ export const FormaPagamentoFormContainer = forwardRef<FormaPagamentoFormRef, For
 
         const isDialogMode = Boolean(showBTNPGCreatedDialog);
         const isSubmitDisabled =
-            stateDisableBtnCreatedFormaPagamento || isLoadingBtnCreated || Object.keys(errors).length > 0 || !formaPagamento.descricao?.trim() || !formaPagamento.tipo_forma_pagamento || !formaPagamento.tipo_taxa || !formaPagamento.valor_taxa;
+            stateDisableBtnCreatedFormaPagamento || isLoadingBtnCreated || Object.keys(errors).length > 0 || !formaPagamento.descricao?.trim() || !formaPagamento.tipo_forma_pagamento || !formaPagamento.tipo_taxa || formaPagamento.valor_taxa === null || formaPagamento.valor_taxa === undefined || Number.isNaN(Number(formaPagamento.valor_taxa));
 
         return (
             <div className={`shared-form-layout ${isDialogMode ? 'shared-form-dialog-layout' : 'shared-form-page-layout'}`}>

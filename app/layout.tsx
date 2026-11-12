@@ -23,7 +23,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <link rel="icon" href="/layout/images/logoDrm.png" />
                 <link id="theme-link" href={getThemeHref(initialThemePreferences.colorScheme, initialThemePreferences.componentTheme)} rel="stylesheet" suppressHydrationWarning />
             </head>
-            <body style={{ overflow: 'hidden' }}>
+            <body style={{ overflow: 'hidden' }} suppressHydrationWarning>
                 <AppProviders>{children}</AppProviders>
             </body>
             

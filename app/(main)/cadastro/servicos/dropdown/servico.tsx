@@ -26,7 +26,9 @@ export default function ServicoDropdownField({
     useCachedAllItems = false,
     fetchAllItems = listTheService,
     fetchFilteredItems = fetchFilteredService,
-    autoLoadAndSelectSingle = true
+    fetchItemByValue,
+    autoLoadAndSelectSingle = true,
+    disabled = false
 }: ServicoDropdownFieldProps) {
     const queryClient = useQueryClient();
     const serviceDropdownQueryKey = useMemo(
@@ -66,7 +68,7 @@ export default function ServicoDropdownField({
             onItemChange={onServiceChange}
             fetchAllItems={resolveAllItems}
             fetchFilteredItems={fetchFilteredItems}
-            fetchItemByValue={resolveItemByValue}
+            fetchItemByValue={fetchItemByValue ?? resolveItemByValue}
             optionLabel="descricao"
             optionValue="id"
             initialOptionValue={selectedServiceId ?? null}
@@ -83,6 +85,7 @@ export default function ServicoDropdownField({
             required={required}
             autoLoadAndSelectSingle={autoLoadAndSelectSingle}
             reloadAllOnShow={useCachedAllItems}
+            disabled={disabled}
         />
     );
 }

@@ -5,6 +5,8 @@ import './style.css';
 import '@/app/styles/styledGlobal.css';
 import LoadingScreen from '@/app/loading';
 import { Button } from 'primereact/button';
+import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
+import { Dialog } from 'primereact/dialog';
 import { useRouter } from 'next/navigation';
 import { Messages } from '@/app/components/messages/GlobalMessages';
 import IconVisible from '@/app/shared/IconVisible';
@@ -16,6 +18,7 @@ import { validateFormCreatedAccount } from './controller/validateForm';
 import { InputMaskDrop } from '@/app/shared/include/inputMask/input';
 import { create, handleSearchCNPJCreated } from './controller/controller';
 import { CreatedAccountEntity } from '../../../entity/CreatedAccountEntity';
+import { TermsAndPrivacyContent } from './termsContent';
 
 export type LoginResponse = {
     token: string;
@@ -49,6 +52,8 @@ function SignUp() {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isLoadingBtnCreated, setIsLoadingBtnCreated] = useState(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+    const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
+    const [isTermsDialogVisible, setIsTermsDialogVisible] = useState(false);
 
     const handleSearchCnpj = async (cnpjValue?: string) => {
         const cnpjNumeros = (cnpjValue ?? userConta.cnpj ?? '').replace(/\D/g, '');
@@ -99,11 +104,45 @@ function SignUp() {
         setIsConfirmPasswordVisible((prev) => !prev);
     };
 
+    const handleTermsChange = (event: CheckboxChangeEvent) => {
+        if (event.checked) {
+            setIsTermsDialogVisible(true);
+            return;
+        }
+
+        setHasAcceptedTerms(false);
+    };
+
+    const handleCancelTerms = () => {
+        setHasAcceptedTerms(false);
+        setIsTermsDialogVisible(false);
+    };
+
+    const handleAcceptTerms = () => {
+        setHasAcceptedTerms(true);
+        setIsTermsDialogVisible(false);
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         msgs.current?.clear();
 
         if (isLoadingBtnCreated) {
+            return;
+        }
+
+        const isFormValid = validateFormCreatedAccount(userConta, confirmPassword, setErrors, msgs);
+        if (!isFormValid) {
+            return;
+        }
+
+        if (!hasAcceptedTerms) {
+            msgs.current?.show({
+                severity: 'warn',
+                summary: 'Aceite necessário',
+                detail: 'Leia e aceite os Termos de Uso e a Política de Privacidade para criar sua conta.',
+                life: 5000
+            });
             return;
         }
 
@@ -145,6 +184,13 @@ function SignUp() {
             buscarCnpj();
         }
     }, [userConta.cnpj, cnpjBuscado]);
+
+    const termsDialogFooter = (
+        <div className="terms-dialog__footer">
+            <Button type="button" label="Li e aceito" icon="pi pi-check" onClick={handleAcceptTerms} />
+            <Button type="button" label="Cancelar" severity="secondary" outlined onClick={handleCancelTerms} />
+        </div>
+    );
 
     return (
         <>
@@ -286,7 +332,29 @@ function SignUp() {
                             </div>
                         </div>
                     </div>
-                     <div className='ml-2 mr-2'>
+                    <div className="sign-up-card__footer">
+                        <div className="terms-consent">
+                            <Checkbox
+                                inputId="terms-consent"
+                                checked={hasAcceptedTerms}
+                                onChange={handleTermsChange}
+                            />
+                            <label htmlFor="terms-consent">
+                                Li e aceito os{' '}
+                                <button
+                                    type="button"
+                                    className="terms-consent__link"
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        setIsTermsDialogVisible(true);
+                                    }}
+                                >
+                                    Termos de Uso e a Política de Privacidade
+                                </button>
+                                .
+                            </label>
+                        </div>
                           <Button
                             type="submit"
                             label={isLoadingBtnCreated ? 'Criando conta...' : 'Criar conta'}
@@ -300,9 +368,10 @@ function SignUp() {
                                 !userConta.nome ||
                                 !userConta.email ||
                                 !userConta.senha ||
-                                !confirmPassword
+                                !confirmPassword ||
+                                !hasAcceptedTerms
                             }
-                        /> 
+                        />
                        {/* <Button
                             type="button"
                             label="Clique aqui e fale com nosso time comercial para garantir uma condição especial ao solicitar seu teste."
@@ -318,9 +387,21 @@ function SignUp() {
                                 <span className="text-primary cursor-pointer">Acessar conta</span>
                             </Link>
                         </div>
-                    </div> 
+                    </div>
                 </div>
             </div>
+            <Dialog
+                header="Termos de Uso e Política de Privacidade"
+                visible={isTermsDialogVisible}
+                onHide={handleCancelTerms}
+                footer={termsDialogFooter}
+                modal
+                draggable={false}
+                className="terms-dialog"
+                breakpoints={{ '960px': '92vw', '640px': '96vw' }}
+            >
+                <TermsAndPrivacyContent />
+            </Dialog>
             </form>
         </>
     );

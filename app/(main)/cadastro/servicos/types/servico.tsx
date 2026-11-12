@@ -99,8 +99,10 @@ export interface ServicoDropdownFieldProps {
     loadOnMount?: boolean;
     fetchAllItems?: () => Promise<ServiceEntity[]>;
     fetchFilteredItems?: (filter: string) => Promise<ServiceEntity[]>;
+    fetchItemByValue?: (value: string | number) => Promise<ServiceEntity | null>;
     useCachedAllItems?: boolean;
     autoLoadAndSelectSingle?: boolean;
+    disabled?: boolean;
 }
 
 export interface PreloadedServicoData {

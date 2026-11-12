@@ -22,18 +22,22 @@ type PendingDownloadTarget = {
 
 const logNfseEmissionBackendError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
-        console.error('[notaServico] Falha do backend ao emitir NFS-e:', {
+        console.groupCollapsed('[notaServico] Erro ao emitir NFS-e (backend)');
+        console.error('Detalhes da requisição:', {
             status: error.response?.status,
             statusText: error.response?.statusText,
             method: error.config?.method?.toUpperCase(),
             url: error.config?.url,
-            response: error.response?.data,
-            message: error.message
+            message: error.message,
+            code: error.code
         });
+        console.error('Resposta recebida do backend:', error.response?.data);
+        console.error('Erro original:', error);
+        console.groupEnd();
         return;
     }
 
-    console.error('[notaServico] Falha inesperada ao emitir NFS-e:', error);
+    console.error('[notaServico] Erro inesperado ao emitir NFS-e:', error);
 };
 
 
@@ -664,13 +668,12 @@ export const createdNotaServico = async (nfs: NfsEntity, msgs: any, router: AppR
                 })
             }
         };
-        console.log(' enviado para emitir NFS-e:', { nfse: dataNfse });
         const response = await api.post('/nfse', { nfse: dataNfse });
-        console.log('retorno:', response.data);
+        console.log('[notaServico] Resposta ao emitir NFS-e:', response.data);
         const statusNota = extractNotaServicoStatus(response.data);
         const notaAutorizada = statusNota === 'AUTORIZADA' ? extractNotaServicoPayload(response.data) : null;
         if (statusNota === 'REJEITADA') {
-            console.error('[notaServico] NFS-e rejeitada pelo backend:', response.data);
+            console.error('[notaServico] NFS-e rejeitada pelo backend. Resposta:', response.data);
         }
         if (statusNota === 'REJEITADA' && redirectAfterSave) {
             persistNotaServicoFeedback({

@@ -306,7 +306,7 @@ export const ServicoFormContainer = forwardRef<ServiceFormRef, ServiceFormProps>
                         </SectionCard>
                         <SectionCard
                             icon={<i className="pi pi-link" />}
-                            title="Vínculos"
+                            title="Relações"
                             collapsible
                             expanded={isSectionExpanded('vinculos')}
                             onToggle={() => toggleSection('vinculos')}

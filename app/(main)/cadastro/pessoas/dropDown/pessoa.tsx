@@ -19,7 +19,11 @@ export default function PessoaDropdownField({
     autoSelectSingle = false,
     showAddButton = false,
     onAddClick,
-    autoLoadAndSelectSingle = true
+    autoLoadAndSelectSingle = true,
+    fetchAllItems = listThePessoas,
+    fetchFilteredItems = fetchFilteredPessoa,
+    fetchItemByValue,
+    disabled = false
 }: PessoaDropdownFieldProps & { required?: boolean }) {
 
     return (
@@ -28,12 +32,13 @@ export default function PessoaDropdownField({
             key={reloadKey}
             selectedItem={selectedPessoa}
             onItemChange={onPessoaChange}
-            fetchAllItems={listThePessoas}
-            fetchFilteredItems={fetchFilteredPessoa}
-            fetchItemByValue={async (value) => {
+            fetchAllItems={fetchAllItems}
+            fetchFilteredItems={fetchFilteredItems}
+            fetchItemByValue={fetchItemByValue ?? (async (value) => {
                 const response = await fetchPessoasById(String(value));
                 return response.dataPessoa ?? null;
-            }}
+            })}
+            disabled={disabled}
             optionLabel="razao_social"
             optionValue="id"
             initialOptionValue={selectedPessoaId ?? null}
