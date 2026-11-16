@@ -290,7 +290,7 @@ export const defaultExpandButtonTemplate = <T extends Identifiable>(rowData: T, 
         />
     );
 };
-export const toggleStatusOrDeleteButton = <T,>({ entity, onToggle, entityType }: ToggleButtonProps<T>) => {
+export const toggleStatusOrDeleteButton = <T,>({ entity, onToggle, entityType, deactivateWarning }: ToggleButtonProps<T>) => {
     const style = entity.ativo
         ? {
               icon: 'pi pi-trash',
@@ -306,17 +306,25 @@ export const toggleStatusOrDeleteButton = <T,>({ entity, onToggle, entityType }:
     const handleConfirm = () => {
         confirmDialog({
             message: (
-                <span>
-                    Tem certeza que deseja{' '}
-                    <strong style={{ color: entity.ativo ? 'red' : '#3DBF98' }}>&nbsp;{entity.ativo ? 'Desativar' : 'Ativar'}&nbsp;</strong>{' '}
-                    este {entityType}?
-                </span>
+                <div className={entity.ativo && deactivateWarning ? 'contract-deactivate-confirm-content' : undefined}>
+                    <div>
+                        Tem certeza que deseja{' '}
+                        <strong style={{ color: entity.ativo ? 'red' : '#3DBF98' }}>&nbsp;{entity.ativo ? 'Desativar' : 'Ativar'}&nbsp;</strong>{' '}
+                         {entityType}?
+                    </div>
+                    {entity.ativo && deactivateWarning && (
+                        <div className="contract-deactivate-confirm-warning">
+                            <i className="pi pi-info-circle" aria-hidden="true" />
+                            <span>{deactivateWarning}</span>
+                        </div>
+                    )}
+                </div>
             ),
             header: 'Confirmação',
             icon: 'pi pi-exclamation-triangle',
             acceptLabel: 'Sim',
             rejectLabel: 'Não',
-            className: 'custom-confirm-buttons',
+            className: entity.ativo && deactivateWarning ? 'custom-confirm-buttons contract-deactivate-confirm-dialog' : 'custom-confirm-buttons',
             acceptClassName: 'btn-sim',
             rejectClassName: 'p-button-outlined btn-nao',
             accept: async () => await onToggle(entity)

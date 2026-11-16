@@ -6,6 +6,46 @@
 
 }
 
+.p-dialog.contract-deactivate-confirm-dialog {
+    width: min(36rem, calc(100vw - 2rem));
+}
+
+.contract-deactivate-confirm-dialog .p-confirm-dialog-message {
+    flex: 1;
+    min-width: 0;
+}
+
+.contract-deactivate-confirm-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    color: inherit;
+    line-height: 1.45;
+}
+
+.contract-deactivate-confirm-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid #f5c26b;
+    border-radius: 0.5rem;
+    background: #fff8e8;
+    color: #76510c;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.contract-deactivate-confirm-warning .pi {
+    flex: 0 0 auto;
+    margin-top: 0.1rem;
+    color: #b7791f;
+}
+
+.contract-deactivate-confirm-dialog .p-dialog-footer .p-button {
+    min-width: 5.5rem;
+}
+
 .table-cell-truncate {
     display: block;
     width: 100%;
@@ -132,6 +172,23 @@
 }
 
 @media (max-width: 768px) {
+    .p-dialog.contract-deactivate-confirm-dialog {
+        width: calc(100vw - 1.5rem);
+    }
+
+    .contract-deactivate-confirm-dialog .p-dialog-content {
+        padding: 1rem;
+    }
+
+    .contract-deactivate-confirm-dialog .p-dialog-footer {
+        padding: 0 1rem 1rem;
+    }
+
+    .contract-deactivate-confirm-warning {
+        padding: 0.7rem;
+        font-size: 0.85rem;
+    }
+
     .table-cell-truncate {
         max-width: min(44vw, 220px);
     }

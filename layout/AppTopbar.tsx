@@ -76,7 +76,7 @@ const AppTopbar = forwardRef<AppTopbarRef>(() => {
                             >
                                 <img
                                     alt="avatar"
-                                    src={userConta?.foto_perfil|| "/layout/images/perfilUser.webp"}
+                                    src={userConta?.foto_perfil || "/layout/images/perfil-user-placeholder.svg"}
                                     style={{
                                         height: '3rem',
                                         width: '3rem',
@@ -103,7 +103,7 @@ const AppTopbar = forwardRef<AppTopbarRef>(() => {
                                 >
                                     <img
                                         alt="avatar"
-                                        src={userConta?.foto_perfil || "/layout/images/perfilUser.webp"}
+                                        src={userConta?.foto_perfil || "/layout/images/perfil-user-placeholder.svg"}
                                         style={{
                                             height: '4rem',
                                             width: '4rem',
