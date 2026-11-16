@@ -668,7 +668,9 @@ export const createdNotaServico = async (nfs: NfsEntity, msgs: any, router: AppR
                 })
             }
         };
-        const response = await api.post('/nfse', { nfse: dataNfse });
+        const requestPayload = { nfse: dataNfse };
+        console.log('[notaServico] Payload enviado para emissão de NFS-e (/nfse):\n' + JSON.stringify(requestPayload, null, 2));
+        const response = await api.post('/nfse', requestPayload);
         console.log('[notaServico] Resposta ao emitir NFS-e:', response.data);
         const statusNota = extractNotaServicoStatus(response.data);
         const notaAutorizada = statusNota === 'AUTORIZADA' ? extractNotaServicoPayload(response.data) : null;

@@ -82,7 +82,8 @@ export function ListarContratos({
                                     toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
-                                        entityType: ''
+                                        entityType: 'Contrato',
+                                        deactivateWarning: 'Ao efetuar a exclusão deste contrato as notas PENDENTES vinculadas ao mesmo serão Descartadas.'
                                     }) : undefined
                                 }
                                 showExpandButton={false}
@@ -126,7 +127,8 @@ export function ListarContratos({
                                     toggleStatusOrDeleteButton({
                                         entity: rowData,
                                         onToggle: changeStatusActivateandDelete,
-                                        entityType: ''
+                                        entityType: 'Contrato',
+                                        deactivateWarning: 'Ao efetuar a exclusão deste contrato as notas PENDENTES vinculadas ao mesmo serão Descartadas.'
                                     }) : undefined
                                 }
                                 showExpandButton={false}

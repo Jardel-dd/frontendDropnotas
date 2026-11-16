@@ -44,6 +44,7 @@ export interface ToggleButtonProps<T> {
     entity: T & { ativo: boolean };
     onToggle: (entity: T) => Promise<void>;
     entityType: string;
+    deactivateWarning?: React.ReactNode;
 }
 export const highlightSearchTerm = (text: any, searchTerm: string) => {
     if (!searchTerm) return text;

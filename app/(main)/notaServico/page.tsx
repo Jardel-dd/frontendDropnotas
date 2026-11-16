@@ -126,15 +126,6 @@ const getApiCollection = <T,>(data: unknown): T[] => {
     return [];
 };
 
-const filterLocalCollection = <T extends Record<string, any>>(items: T[], term: string, fields: (keyof T)[]) => {
-    const normalizedTerm = term.trim().toLocaleLowerCase();
-    if (!normalizedTerm) return items;
-
-    return items.filter((item) =>
-        fields.some((field) => String(item[field] ?? '').toLocaleLowerCase().includes(normalizedTerm))
-    );
-};
-
 const getNestedValue = (source: Record<string, any> | null | undefined, path: string) =>
     path.split('.').reduce<any>((currentValue, key) => currentValue?.[key], source);
 
@@ -675,6 +666,10 @@ const NotaServico: React.FC = () => {
         setIsLoadingPrepararOptions(true);
         setPrepararOptionsError(null);
         try {
+            console.log('[notaServico] Requisição de clientes e fornecedores:', {
+                endpoint: '/pessoa',
+                params: { id_empresa: empresaId }
+            });
             const response = await api.get('/pessoa', { params: { id_empresa: empresaId } });
             const pessoas = getApiCollection<PessoaEntity>(response.data);
             pessoasPorEmpresaRef.current.set(empresaId, pessoas);
@@ -701,6 +696,10 @@ const NotaServico: React.FC = () => {
         setIsLoadingPrepararOptions(true);
         setPrepararOptionsError(null);
         try {
+            console.log('[notaServico] Requisição de serviços:', {
+                endpoint: '/servico',
+                params: { id_empresa: empresaId }
+            });
             const response = await api.get('/servico', { params: { id_empresa: empresaId } });
             const servicos = getApiCollection<ServiceEntity>(response.data);
             servicosPorEmpresaRef.current.set(empresaId, servicos);
@@ -717,13 +716,71 @@ const NotaServico: React.FC = () => {
         }
     }, [selectedEmpresaDialog?.id]);
     const fetchPessoasDaEmpresaFiltradas = useCallback(async (term: string) => {
-        const pessoas = await fetchPessoasDaEmpresaSelecionada();
-        return filterLocalCollection(pessoas, term, ['razao_social', 'nome_fantasia', 'cpf', 'cnpj']);
-    }, [fetchPessoasDaEmpresaSelecionada]);
+        const empresaId = selectedEmpresaDialog?.id;
+        const termo = term.trim();
+        if (!empresaId || !termo) return [];
+
+        prepararOptionsRequestCountRef.current += 1;
+        setIsLoadingPrepararOptions(true);
+        setPrepararOptionsError(null);
+        try {
+            const params = { id_empresa: empresaId, termo };
+            console.log('[notaServico] Busca de clientes e fornecedores no endpoint:', {
+                endpoint: '/pessoa',
+                params
+            });
+            const response = await api.get('/pessoa', { params });
+            const pessoas = getApiCollection<PessoaEntity>(response.data);
+            console.log('[notaServico] Resultado da busca de clientes e fornecedores:', {
+                termoDigitado: termo,
+                idEmpresa: empresaId,
+                totalEncontrado: pessoas.length,
+                resultados: pessoas.map(({ id, razao_social, nome_fantasia, cpf, cnpj }) => ({ id, razao_social, nome_fantasia, cpf, cnpj }))
+            });
+            return pessoas;
+        } catch (error: any) {
+            const detail = error?.response?.data?.message ?? 'Nao foi possivel pesquisar os clientes e fornecedores da empresa selecionada.';
+            console.error('[notaServico] Erro ao pesquisar clientes e fornecedores por empresa:', { empresaId, termo, response: error?.response?.data, error });
+            setPrepararOptionsError(detail);
+            return [];
+        } finally {
+            prepararOptionsRequestCountRef.current = Math.max(0, prepararOptionsRequestCountRef.current - 1);
+            setIsLoadingPrepararOptions(prepararOptionsRequestCountRef.current > 0);
+        }
+    }, [selectedEmpresaDialog?.id]);
     const fetchServicosDaEmpresaFiltrados = useCallback(async (term: string) => {
-        const servicos = await fetchServicosDaEmpresaSelecionada();
-        return filterLocalCollection(servicos, term, ['descricao', 'codigo', 'item_lista_servico']);
-    }, [fetchServicosDaEmpresaSelecionada]);
+        const empresaId = selectedEmpresaDialog?.id;
+        const termo = term.trim();
+        if (!empresaId || !termo) return [];
+
+        prepararOptionsRequestCountRef.current += 1;
+        setIsLoadingPrepararOptions(true);
+        setPrepararOptionsError(null);
+        try {
+            const params = { id_empresa: empresaId, termo };
+            console.log('[notaServico] Busca de servicos no endpoint:', {
+                endpoint: '/servico',
+                params
+            });
+            const response = await api.get('/servico', { params });
+            const servicos = getApiCollection<ServiceEntity>(response.data);
+            console.log('[notaServico] Resultado da busca de servicos:', {
+                termoDigitado: termo,
+                idEmpresa: empresaId,
+                totalEncontrado: servicos.length,
+                resultados: servicos.map(({ id, descricao, codigo, item_lista_servico }) => ({ id, descricao, codigo, item_lista_servico }))
+            });
+            return servicos;
+        } catch (error: any) {
+            const detail = error?.response?.data?.message ?? 'Nao foi possivel pesquisar os servicos da empresa selecionada.';
+            console.error('[notaServico] Erro ao pesquisar servicos por empresa:', { empresaId, termo, response: error?.response?.data, error });
+            setPrepararOptionsError(detail);
+            return [];
+        } finally {
+            prepararOptionsRequestCountRef.current = Math.max(0, prepararOptionsRequestCountRef.current - 1);
+            setIsLoadingPrepararOptions(prepararOptionsRequestCountRef.current > 0);
+        }
+    }, [selectedEmpresaDialog?.id]);
     const clearPreparaNfsDialog = () => {
         setSelectedEmpresaDialog(null);
         setSelectedPessoaDialog(null);
@@ -1039,6 +1096,8 @@ const NotaServico: React.FC = () => {
         setSelectedEmpresaDialog(empresa);
         setSelectedPessoaDialog(null);
         setSelectedServicoDialog(null);
+        setReloadKeyPessoa((current) => current + 1);
+        setReloadKeyServico((current) => current + 1);
         setPrepararOptionsError(null);
         setPrepararNfs(new PrepararNfs({
             id_empresa: empresa?.id ?? 0,
@@ -2191,6 +2250,7 @@ const NotaServico: React.FC = () => {
                                 </div>
                                 <div>
                                     <MobileSearchPicker<PessoaEntity>
+                                        key={`preparar-pessoa-${selectedEmpresaDialog?.id ?? 'sem-empresa'}`}
                                         selectedItem={selectedPessoaDialog}
                                         onItemChange={handlePessoaChangeDialog}
                                         fetchAllItems={fetchPessoasDaEmpresaSelecionada}
@@ -2213,13 +2273,14 @@ const NotaServico: React.FC = () => {
                                 </div>
                                 <div>
                                     <MobileSearchPicker<ServiceEntity>
+                                        key={`preparar-servico-${selectedEmpresaDialog?.id ?? 'sem-empresa'}`}
                                         selectedItem={selectedServicoDialog}
                                         onItemChange={handleServicoChangeDialog}
                                         fetchAllItems={fetchServicosDaEmpresaSelecionada}
                                         fetchFilteredItems={fetchServicosDaEmpresaFiltrados}
                                         optionValue="id"
                                         loadMoreRows={20}
-                                        topLabel="Cliente ou Fornecedor:"
+                                        topLabel="Serviço:"
                                         placeholder="Selecione o Serviço"
                                         dialogTitle="Selecionar o Serviço"
                                         hasError={!!errors.selectedServico}
