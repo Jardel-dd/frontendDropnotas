@@ -19,7 +19,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
-                <title>DropNotas</title>
+                <title>Sistema de Gestão e Emissão de NFS-e | DropNotas</title>
+                <meta
+                    name="description"
+                    content="Sistema de gestão de NFS-e: organize clientes, serviços, financeiro e emita NFS-e em um só lugar."
+                />
                 <link rel="icon" href="/layout/images/logoDrm.png" />
                 <link id="theme-link" href={getThemeHref(initialThemePreferences.colorScheme, initialThemePreferences.componentTheme)} rel="stylesheet" suppressHydrationWarning />
             </head>

@@ -249,6 +249,14 @@ height: 66px;
     display: flex;
     flex-direction: column;
     height: calc(100vh - 4.375rem - 2.8rem);
+    /*
+     * `vh` can retain the height from before the virtual keyboard opened on
+     * mobile Safari. Keep it as the fallback, but use the dynamic viewport
+     * whenever it is available so the card returns to its real height after
+     * the keyboard is dismissed.
+     */
+    height: calc(100dvh - 4.375rem - 2.8rem);
+    min-height: 0;
     padding: 0.5rem;
 }
 
@@ -408,6 +416,8 @@ height: 66px;
     .shared-form-dialog-layout {
         height: min(74vh, calc(100vh - 6rem));
         max-height: min(74vh, calc(100vh - 6rem));
+        height: min(74dvh, calc(100dvh - 6rem));
+        max-height: min(74dvh, calc(100dvh - 6rem));
     }
 }
 
@@ -452,6 +462,8 @@ height: 66px;
 .shared-form-dialog-layout {
     height: min(78vh, calc(100vh - 8rem));
     max-height: min(78vh, calc(100vh - 8rem));
+    height: min(78dvh, calc(100dvh - 8rem));
+    max-height: min(78dvh, calc(100dvh - 8rem));
 }
 
 .scrollable-container.shared-form-content {

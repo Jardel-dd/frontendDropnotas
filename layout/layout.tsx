@@ -16,6 +16,7 @@ const Layout = (props: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState, setLayoutConfig, isSlim, isSlimPlus, isHorizontal, isDesktop, isSidebarActive } = useContext(LayoutContext);
     const topbarRef = useRef<AppTopbarRef>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
     const searchParams = useSearchParams();
     let timeout: NodeJS.Timeout | null = null;
@@ -124,6 +125,93 @@ const Layout = (props: ChildContainerProps) => {
         onRouteChange();
     }, [pathname, searchParams]);
 
+    useEffect(() => {
+        const visualViewport = window.visualViewport;
+
+        if (!visualViewport) {
+            return;
+        }
+
+        const keyboardThreshold = 120;
+        let largestViewportHeight = visualViewport.height;
+        let keyboardIsOpen = false;
+        let restoreTimeout: number | null = null;
+        let savedScrollPosition: { contentTop: number; pageX: number; pageY: number } | null = null;
+
+        const isTextInput = (element: EventTarget | null): element is HTMLElement => {
+            if (!(element instanceof HTMLElement)) {
+                return false;
+            }
+
+            return element.matches('input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, [contenteditable="true"]');
+        };
+
+        const saveScrollPosition = (event: FocusEvent) => {
+            if (keyboardIsOpen || !isTextInput(event.target)) {
+                return;
+            }
+
+            largestViewportHeight = visualViewport.height;
+            savedScrollPosition = {
+                contentTop: contentRef.current?.scrollTop ?? 0,
+                pageX: window.scrollX,
+                pageY: window.scrollY
+            };
+        };
+
+        const restoreScrollPosition = () => {
+            if (!savedScrollPosition) {
+                return;
+            }
+
+            const { contentTop, pageX, pageY } = savedScrollPosition;
+            const restore = () => {
+                contentRef.current?.scrollTo({ top: contentTop });
+                window.scrollTo({ left: pageX, top: pageY });
+            };
+
+            // Safari completes the keyboard-close animation after the resize
+            // event. Applying the original position twice avoids retaining the
+            // browser's automatic focus scroll.
+            window.requestAnimationFrame(restore);
+            restoreTimeout = window.setTimeout(restore, 180);
+        };
+
+        const updateKeyboardState = () => {
+            const keyboardHeight = largestViewportHeight - visualViewport.height;
+            const shouldTreatAsKeyboard = keyboardHeight > keyboardThreshold && isTextInput(document.activeElement);
+
+            if (!keyboardIsOpen && shouldTreatAsKeyboard) {
+                keyboardIsOpen = true;
+                return;
+            }
+
+            if (keyboardIsOpen && keyboardHeight <= keyboardThreshold) {
+                keyboardIsOpen = false;
+                restoreScrollPosition();
+                savedScrollPosition = null;
+            }
+
+            if (!keyboardIsOpen) {
+                largestViewportHeight = Math.max(largestViewportHeight, visualViewport.height);
+            }
+        };
+
+        document.addEventListener('focusin', saveScrollPosition);
+        visualViewport.addEventListener('resize', updateKeyboardState);
+        visualViewport.addEventListener('scroll', updateKeyboardState);
+
+        return () => {
+            document.removeEventListener('focusin', saveScrollPosition);
+            visualViewport.removeEventListener('resize', updateKeyboardState);
+            visualViewport.removeEventListener('scroll', updateKeyboardState);
+
+            if (restoreTimeout) {
+                window.clearTimeout(restoreTimeout);
+            }
+        };
+    }, []);
+
     useUnmountEffect(() => {
         unbindMenuOutsideClickListener();
     });
@@ -152,7 +240,7 @@ const Layout = (props: ChildContainerProps) => {
                         <AppSidebar />
                     </div>
                     <div className="layout-content-wrapper">
-                        <div className="layout-content">
+                        <div ref={contentRef} className="layout-content">
                             <div className="layout-content-inner">
                                 <PermissionRouteGuard>{props.children}</PermissionRouteGuard>
                             </div>

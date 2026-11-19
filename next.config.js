@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   // Permite abrir o servidor de desenvolvimento por um dispositivo na rede local.
-  allowedDevOrigins: ['192.168.18.4'],
+  allowedDevOrigins: ['192.168.18.4', '192.168.18.97'],
   // Remove o painel/indicador de problemas exibido apenas pelo Next.js em desenvolvimento.
   devIndicators: false,
   agentRules: false,
