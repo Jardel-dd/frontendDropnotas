@@ -19,7 +19,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
-                <title>Sistema de Gestão e Emissão de NFS-e | DropNotas</title>
+                <title>DropNotas</title>
                 <meta
                     name="description"
                     content="Sistema de gestão de NFS-e: organize clientes, serviços, financeiro e emita NFS-e em um só lugar."

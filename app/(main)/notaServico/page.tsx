@@ -68,6 +68,7 @@ import { fetchServiceFormDataByID, fetchServicesByID } from '@/app/(main)/cadast
 import { fetchCompanyDropdownByID, fetchCompanyFormDataByID, fetchFilteredEmpresa, listTheEmpresa } from '@/app/(main)/configuracoes/empresas/controller/controller';
 import { mapDateRangeToResumoParams } from '../dashboard/types/types';
 import { fetchRelatorioNotaFiscalResumo } from '../dashboard/controller/controller';
+import { remocaoCaractereFiltro } from '@/app/shared/removeCaracter/controller';
 
 const NOTA_SERVICO_EMPRESA_STORAGE_KEY = 'notaServico.selectedEmpresaId';
 const NOTA_SERVICO_REDIRECT_FEEDBACK_MASK_HIDE_DELAY_MS = 120;
@@ -125,6 +126,8 @@ const getApiCollection = <T,>(data: unknown): T[] => {
 
     return [];
 };
+
+const normalizePrepararNfsSearchTerm = (term: string) => remocaoCaractereFiltro(term.trim());
 
 const getNestedValue = (source: Record<string, any> | null | undefined, path: string) =>
     path.split('.').reduce<any>((currentValue, key) => currentValue?.[key], source);
@@ -645,11 +648,12 @@ const NotaServico: React.FC = () => {
         );
     };
     const fetchEmpresaMobilePage = useCallback(async ({ searchTerm: termo, page, size }: { searchTerm: string; page: number; size: number }) => {
+        const termoNormalizado = normalizePrepararNfsSearchTerm(termo);
         const response = await api.get('/empresa', {
             params: {
                 page,
                 size,
-                termo: termo || undefined
+                termo: termoNormalizado || undefined
             }
         });
 
@@ -717,7 +721,7 @@ const NotaServico: React.FC = () => {
     }, [selectedEmpresaDialog?.id]);
     const fetchPessoasDaEmpresaFiltradas = useCallback(async (term: string) => {
         const empresaId = selectedEmpresaDialog?.id;
-        const termo = term.trim();
+        const termo = normalizePrepararNfsSearchTerm(term);
         if (!empresaId || !termo) return [];
 
         prepararOptionsRequestCountRef.current += 1;
@@ -732,7 +736,8 @@ const NotaServico: React.FC = () => {
             const response = await api.get('/pessoa', { params });
             const pessoas = getApiCollection<PessoaEntity>(response.data);
             console.log('[notaServico] Resultado da busca de clientes e fornecedores:', {
-                termoDigitado: termo,
+                termoDigitado: term,
+                termoEnviado: termo,
                 idEmpresa: empresaId,
                 totalEncontrado: pessoas.length,
                 resultados: pessoas.map(({ id, razao_social, nome_fantasia, cpf, cnpj }) => ({ id, razao_social, nome_fantasia, cpf, cnpj }))
@@ -750,7 +755,7 @@ const NotaServico: React.FC = () => {
     }, [selectedEmpresaDialog?.id]);
     const fetchServicosDaEmpresaFiltrados = useCallback(async (term: string) => {
         const empresaId = selectedEmpresaDialog?.id;
-        const termo = term.trim();
+        const termo = normalizePrepararNfsSearchTerm(term);
         if (!empresaId || !termo) return [];
 
         prepararOptionsRequestCountRef.current += 1;
@@ -765,7 +770,8 @@ const NotaServico: React.FC = () => {
             const response = await api.get('/servico', { params });
             const servicos = getApiCollection<ServiceEntity>(response.data);
             console.log('[notaServico] Resultado da busca de servicos:', {
-                termoDigitado: termo,
+                termoDigitado: term,
+                termoEnviado: termo,
                 idEmpresa: empresaId,
                 totalEncontrado: servicos.length,
                 resultados: servicos.map(({ id, descricao, codigo, item_lista_servico }) => ({ id, descricao, codigo, item_lista_servico }))
