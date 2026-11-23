@@ -9,6 +9,10 @@ const hasValidEmail = (email?: string) => {
 const hasMinLengthWhenFilled = (value: string | null | undefined, minLength: number) =>
     !value?.trim() || value.trim().length >= minLength;
 
+const hasSelectedEmpresa = (pessoa: PessoaEntity) =>
+    Array.isArray(pessoa.id_empresas) &&
+    pessoa.id_empresas.some((id) => Number.isFinite(Number(id)) && Number(id) > 0);
+
 const validateEnderecoPessoa = (pessoa: PessoaEntity): ErrorsMap => {
     if (!pessoa.endereco?.cep || pessoa.endereco.cep.replace(/\D/g, '').length < 8) {
         return { cep: "Digite um cep válido." };
@@ -100,6 +104,10 @@ export const validateFieldsPessoa = (
         } else if (!pessoa.pais || pessoa.pais.trim().length < 2) {
             newErrors = { pais: 'Campo e obrigatorio.' };
         }
+    }
+
+    if (Object.keys(newErrors).length === 0 && !hasSelectedEmpresa(pessoa)) {
+        newErrors = { selectedEmpresa: 'Selecione pelo menos uma empresa.' };
     }
 
     if (Object.keys(newErrors).length > 0) {

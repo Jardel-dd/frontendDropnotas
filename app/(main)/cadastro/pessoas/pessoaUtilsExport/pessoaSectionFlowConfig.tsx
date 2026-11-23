@@ -22,7 +22,7 @@ export const pessoaSectionFlowConfig = [
     },
     {
         id: 'relacoes',
-        errorFields: ['selectedContrato', 'selectedVendedor']
+        errorFields: ['selectedEmpresa', 'selectedContrato', 'selectedVendedor']
     },
     {
         id: 'endereco',
