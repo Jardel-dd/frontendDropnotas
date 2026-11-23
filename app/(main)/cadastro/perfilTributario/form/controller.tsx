@@ -466,7 +466,8 @@ export const PerfilTributarioFormContainer = forwardRef<PerfilTributarioFormRef,
             perfilTributario.codigo_cnae &&
             perfilTributario.item_lista_servico &&
             perfilTributario.codigo_nbs &&
-            perfilTributario.codigo_indicador_operacao
+            perfilTributario.codigo_indicador_operacao &&
+            perfilTributario.codigo_classificacao_tributaria
         );
             
         const perfilTributarioFieldsProps = {

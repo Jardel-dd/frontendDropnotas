@@ -208,6 +208,7 @@ export function EmpresaPerfilTributarioFields({
                     reloadAllOnShow
                     topLabel="Classificação Tributária:"
                     showTopLabel
+                    required
                 />
             </div>
             {isLoadingRecommendations && (

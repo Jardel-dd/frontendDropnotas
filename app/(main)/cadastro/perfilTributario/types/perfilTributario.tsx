@@ -190,7 +190,8 @@ export const perfilTributarioSectionFlowConfig = [
             'codigo_cnae',
             'item_lista_servico',
             'codigo_nbs',
-            'codigo_indicador_operacao'
+            'codigo_indicador_operacao',
+            'codigo_classificacao_tributaria'
         ]
     },
     {
