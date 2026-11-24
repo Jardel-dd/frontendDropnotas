@@ -487,6 +487,10 @@
   padding: 0;
 }
 
+.nota-servico-preparar-dialog-status {
+  min-height: 1.25rem;
+}
+
 .nota-servico-preparar-dialog-body .p-field,
 .nota-servico-preparar-dialog-body .p-inputgroup,
 .nota-servico-preparar-dialog-body .w-full,

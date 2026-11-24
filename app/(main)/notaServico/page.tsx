@@ -2227,8 +2227,10 @@ const NotaServico: React.FC = () => {
                                         disabled={!selectedEmpresaDialog || isLoadingPrepararOptions}
                                     />
                                 </div>
-                                {isLoadingPrepararOptions && <small className="text-color-secondary">Carregando opções da empresa...</small>}
-                                {prepararOptionsError && <small className="p-error block">{prepararOptionsError}</small>}
+                                <div className="nota-servico-preparar-dialog-status" aria-live="polite">
+                                    {isLoadingPrepararOptions && <small className="text-color-secondary">Carregando opções da empresa...</small>}
+                                    {prepararOptionsError && <small className="p-error block">{prepararOptionsError}</small>}
+                                </div>
                             </>
                         }
                         {isMobile &&
@@ -2300,8 +2302,10 @@ const NotaServico: React.FC = () => {
                                         optionLabel={'descricao'}
                                     />
                                 </div>
-                                {isLoadingPrepararOptions && <small className="text-color-secondary">Carregando opções da empresa...</small>}
-                                {prepararOptionsError && <small className="p-error block">{prepararOptionsError}</small>}
+                                <div className="nota-servico-preparar-dialog-status" aria-live="polite">
+                                    {isLoadingPrepararOptions && <small className="text-color-secondary">Carregando opções da empresa...</small>}
+                                    {prepararOptionsError && <small className="p-error block">{prepararOptionsError}</small>}
+                                </div>
                             </>
                         }
                     </div>

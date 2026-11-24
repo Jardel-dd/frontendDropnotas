@@ -35,7 +35,7 @@ const logApiRequest = (request: InternalAxiosRequestConfig) => {
         return;
     }
 
-    console.info('[Req env', {
+    console.info('Request', {
         method: request.method?.toUpperCase(),
         endpoint: request.url,
         params: sanitizeRequestLogValue(request.params),

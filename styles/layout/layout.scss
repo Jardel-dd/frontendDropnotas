@@ -1,14 +1,16 @@
-$scale: 14px !default;
-$breakpoint: 992px !default;
-@import './_fonts';
-@import './theme/_themes';
-@import './_main';
-@import './_sidebar';
-@import './_topbar';
-@import './_breadcrumb';
-@import './_footer';
-@import './_content';
-@import './_responsive';
-@import './_typography';
-@import './_utils';
-@import './_config';
+@use './variables' with (
+  $scale: 14px,
+  $breakpoint: 992px
+);
+@use './fonts';
+@use './theme/themes';
+@use './main';
+@use './sidebar';
+@use './topbar';
+@use './breadcrumb';
+@use './footer';
+@use './content';
+@use './responsive';
+@use './typography';
+@use './utils';
+@use './config';

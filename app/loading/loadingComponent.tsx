@@ -40,8 +40,10 @@ function LoadingScreenComponent({
 
     const { RiveComponent } = useRive({
         src: loadingLogoDropDesk,
-        animations: 'loading-grey',
-        autoplay: true
+        autoplay: false,
+        onRiveReady: (rive) => {
+            rive.play('loading-grey');
+        }
     });
 
     React.useEffect(() => {
