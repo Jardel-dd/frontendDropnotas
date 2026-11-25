@@ -338,9 +338,9 @@ export function CancelarNfs({ nota, msgs }: CancelarNfsActionProps) {
     const [codigoMotivo, setCodigoMotivo] = useState('OUTROS');
 
     const codigosMotivo = [
-        { label: 'ERRO_EMISSAO', value: 'ERRO_EMISSAO' },
-        { label: 'SERVICO_NAO_PRESTADO', value: 'SERVICO_NAO_PRESTADO' },
-        { label: 'OUTROS', value: 'OUTROS' }
+        { label: 'Erro na emissão', value: 'ERRO_EMISSAO' },
+        { label: 'Serviço não prestado', value: 'SERVICO_NAO_PRESTADO' },
+        { label: 'Outros', value: 'OUTROS' }
     ];
 
     const resetCancelamento = () => {
@@ -378,7 +378,7 @@ export function CancelarNfs({ nota, msgs }: CancelarNfsActionProps) {
             <Button icon="pi pi-times" tooltip="Cancelar" className="p-button-text bottom-All-plus-datatableDetails" style={{ color: 'red', boxShadow: 'none' }} onClick={() => setVisible(true)} />
 
             <Dialog
-                header="Cancelar NFS"
+                header="Cancelar NFS-e"
                 visible={visible}
                 style={{ width: '60rem' }}
                 draggable={false}

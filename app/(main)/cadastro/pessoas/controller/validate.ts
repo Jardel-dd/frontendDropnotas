@@ -73,7 +73,6 @@ export const validateFieldsPessoa = (
     msgs: React.RefObject<any>
 ) => {
     let newErrors: ErrorsMap = {};
-    msgs.current?.clear();
     if (pessoa.tipo_pessoa === 'PESSOA_JURIDICA') {
         if (!pessoa.cnpj || pessoa.cnpj.replace(/\D/g, '').length < 14) {
             newErrors = { cnpj: 'Inclua um CNPJ válido.' };

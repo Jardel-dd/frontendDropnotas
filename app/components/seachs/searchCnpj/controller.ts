@@ -196,20 +196,40 @@ const getBackendErrorMessage = (error: any): string | null => {
   return null;
 };
 
+const getSearchErrorMessage = (error: any, fallbackMessage: string, errorField: string) => {
+  const backendMessage = getBackendErrorMessage(error);
+  const normalizedBackendMessage = backendMessage
+    ?.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+  if (
+    errorField === 'cnpj' &&
+    normalizedBackendMessage?.includes('parametro') &&
+    normalizedBackendMessage.includes('cnpj') &&
+    normalizedBackendMessage.includes('validacao')
+  ) {
+    return 'CNPJ inválido. Confira os 14 dígitos informados e tente novamente.';
+  }
+
+  return backendMessage || fallbackMessage;
+};
+
 const handleSearchError = (
   error: any,
   setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>,
   msgs: any,
   fallbackMessage: string,
-  errorField = 'error'
+  errorField = 'error',
+  life?: number
 ) => {
-  const detailMessage = getBackendErrorMessage(error) || fallbackMessage;
+  const detailMessage = getSearchErrorMessage(error, fallbackMessage, errorField);
 
   if (msgs?.current?.show) {
     msgs.current.show({
       severity: 'error',
-      summary: 'Atenção:',
       detail: detailMessage,
+      life,
     });
   }
 
@@ -261,7 +281,8 @@ export const handleSearchCNPJ = async <
       setErrors,
       msgs,
       'CNPJ não encontrado. Verifique ou inclua manualmente os dados da empresa.',
-      'cnpj'
+      'cnpj',
+      3000
     );
   }
 

@@ -20,8 +20,6 @@ export const validateFieldsEmpresas = (
     const newErrors: { [key: string]: string } = {};
     const hasSelectedUserConta = !!selectedUserConta;
     const hasSavedUserContaIds = Array.isArray(empresa.id_usuarios_acesso) && empresa.id_usuarios_acesso.some((id) => Number(id) > 0);
-    msgs.current?.clear();
-
     if (!empresa.cnpj || empresa.cnpj.replace(/\D/g, '').length < 14) {
         newErrors.cnpj = 'Inclua um CNPJ válido.';
         valid = false;

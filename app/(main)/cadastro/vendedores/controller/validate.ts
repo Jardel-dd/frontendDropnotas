@@ -6,7 +6,6 @@ export const validateFieldsVendedor = (
     msgs: React.RefObject<any>,
 ) => {
     const newErrors: { [key: string]: string } = {};
-    msgs.current?.clear();
     let valid = true;
     if (vendedor.tipo_pessoa === 'PESSOA_JURIDICA') {
         if (!vendedor.cnpj || vendedor.cnpj.replace(/\D/g, '').length < 14) {
